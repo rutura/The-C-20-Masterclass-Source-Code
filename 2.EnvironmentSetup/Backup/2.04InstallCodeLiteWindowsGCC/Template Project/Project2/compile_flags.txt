@@ -1,0 +1,10 @@
+-Ic:\mingw64\include\c++\10.2.0
+-Ic:\mingw64\include\c++\10.2.0\x86_64-w64-mingw32
+-Ic:\mingw64\include\c++\10.2.0\backward
+-Ic:\mingw64\lib\gcc\x86_64-w64-mingw32\10.2.0\include
+-Ic:\mingw64\include
+-Ic:\mingw64\lib\gcc\x86_64-w64-mingw32\10.2.0\include-fixed
+-Ic:\mingw64\x86_64-w64-mingw32\include
+-I"E:\OnlineCourses\9.CppMasterClass\CourseCode\2.EnvironmentSetup\2.04InstallCodeLiteWindowsGCC\Template Project\Project2"
+-target
+x86_64-pc-windows-gnu

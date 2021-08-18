@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Session Name="E:\OnlineCourses\9.CppMasterClass\CourseCode\2.EnvironmentSetup\2.04InstallCodeLiteWindowsGCC\Template Project\Template Project.workspace">
+  <int Value="0" Name="m_selectedTab"/>
+  <wxString Value="E:\OnlineCourses\9.CppMasterClass\CourseCode\2.EnvironmentSetup\2.04InstallCodeLiteWindowsGCC\Template Project\Template Project.workspace" Name="m_workspaceName"/>
+  <TabInfoArray Name="TabInfoArray"/>
+  <SerializedObject Name="m_breakpoints">
+    <long Value="0" Name="Count"/>
+  </SerializedObject>
+  <wxString Value="*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc;*.plist;*.txt" Name="m_findInFilesMask"/>
+</Session>
