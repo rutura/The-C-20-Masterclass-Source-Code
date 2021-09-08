@@ -10,16 +10,16 @@ class BoxContainer
 {
 	static_assert(std::is_default_constructible_v<T>,"Types stored in BoxContainer must have a default constructor");
 	
-	friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
+	//friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
 	
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
 public:
-	BoxContainer<T>(size_t capacity = DEFAULT_CAPACITY);
-	BoxContainer<T>(const BoxContainer<T>& source);
-	~BoxContainer<T>();
+	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+	BoxContainer(const BoxContainer<T>& source);
+	~BoxContainer();
 	
-	/*
+	
 	friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
 	{
 		out << "BoxContainer : [ size :  " << operand.m_size
@@ -32,7 +32,7 @@ public:
 		
 		return out;
 	}
-	*/
+	
 	
 	
 
@@ -83,6 +83,7 @@ inline std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operan
 
 
 // definition
+/*
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
 {
@@ -96,6 +97,7 @@ std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
     
     return out;
 }
+*/
 
 
 //Definitions moved into here

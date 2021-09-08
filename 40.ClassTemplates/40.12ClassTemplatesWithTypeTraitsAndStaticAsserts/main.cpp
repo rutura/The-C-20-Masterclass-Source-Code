@@ -7,8 +7,8 @@ class Point{
 	    static_assert(std::is_arithmetic_v<T>,
         "Coordinates of Point can only be numbers.");
 public : 
-	Point<T>() = default;
-	Point<T>(T x, T y)  
+	Point() = default;
+	Point(T x, T y)  
 	: m_x(x), m_y(y)
 	{
 	}
@@ -45,8 +45,6 @@ int main(){
 	std::cout << "point_box : " << point_box << std::endl;
 
 
-
-   
 
     return 0;
 }

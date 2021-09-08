@@ -12,10 +12,10 @@ class BoxContainer
 	static const size_t EXPAND_STEPS = 5;
 	
 public:
-	BoxContainer<T,V>(size_t capacity = DEFAULT_CAPACITY);
+	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
 
-	BoxContainer<T,V>(const BoxContainer<T,V>& source);
-	~BoxContainer<T,V>();
+	BoxContainer(const BoxContainer& source);
+	~BoxContainer();
 
 	// Helper getter methods
 	size_t size( ) const { return m_size; }

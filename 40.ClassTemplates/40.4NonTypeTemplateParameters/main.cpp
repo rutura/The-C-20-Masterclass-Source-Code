@@ -25,9 +25,10 @@ int main(){
     /*
 	BoxContainer<int,5> int_box1; // One instance
 	BoxContainer<int,10> int_box2; // Another instance
-    */
+	*/
+   
 
-	Point<int,44> point1(10,20); // Works
+	 Point<int,44> point1(10,20); // Works
     //Point<double,33.1> point2(11.22,22.33);// Compiler error : double not a valid
 											// non type template parameter : only integral types
 											//that can represent sizes or ranges allowed.

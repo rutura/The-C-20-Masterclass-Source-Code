@@ -5,23 +5,23 @@
 #include <concepts>
 
 
-
+/*
 template <typename T>
 requires std::is_default_constructible_v<T>
 class BoxContainer
 {
 	//static_assert(std::is_default_constructible_v<T>,"Types stored in BoxContainer must have a default constructor");
 	
-	friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
+	//friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
 	
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
 public:
-	BoxContainer<T>(size_t capacity = DEFAULT_CAPACITY);
-	BoxContainer<T>(const BoxContainer<T>& source);
-	~BoxContainer<T>();
+	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+	BoxContainer(const BoxContainer<T>& source);
+	~BoxContainer();
 	
-	/*
+	
 	friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
 	{
 		out << "BoxContainer : [ size :  " << operand.m_size
@@ -34,7 +34,7 @@ public:
 		
 		return out;
 	}
-	*/
+	
 	
 	
 
@@ -65,6 +65,8 @@ private :
 //Free operators
 template <typename T>
 BoxContainer<T> operator +(const BoxContainer<T>& left, const BoxContainer<T>& right);
+*/
+
 
 /*
 template < typename T>
@@ -85,6 +87,7 @@ inline std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operan
 
 
 // definition
+/*
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
 {
@@ -98,10 +101,11 @@ std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
     
     return out;
 }
+*/
 
 
 //Definitions moved into here
-
+/*
 template <typename T>
 BoxContainer<T>::BoxContainer(size_t capacity)
 {
@@ -242,11 +246,11 @@ void BoxContainer<T>::operator =(const BoxContainer<T>& source){
 	// Check for self-assignment:
 	if (this == &source)
             return;
-/*
+
 	// If the capacities are different, set up a new internal array
 	//that matches source, because we want object we are assigning to 
 	//to match source as much as possible.
-	*/
+
 	if (m_capacity != source.m_capacity)
 	{ 
 	    new_items = new T[source.m_capacity];
@@ -263,7 +267,7 @@ void BoxContainer<T>::operator =(const BoxContainer<T>& source){
 	m_size = source.m_size;
 }
 
-
+*/
 //Definitions moved in the header
 
 #endif // BOX_CONTAINER_H

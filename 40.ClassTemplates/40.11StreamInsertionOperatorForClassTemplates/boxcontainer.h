@@ -17,9 +17,9 @@ class BoxContainer
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
 public:
-	BoxContainer<T>(size_t capacity = DEFAULT_CAPACITY);
-	BoxContainer<T>(const BoxContainer<T>& source);
-	~BoxContainer<T>();
+	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+	BoxContainer(const BoxContainer<T>& source);
+	~BoxContainer();
 	
 	friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
 	{

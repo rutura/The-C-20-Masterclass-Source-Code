@@ -3,17 +3,20 @@
 #include <concepts>
 #include "boxcontainer.h"
 
+
+
+/*
 template <typename T>
 requires std::is_arithmetic_v<T>
 class Point{
 
-		/*
-	    static_assert(std::is_arithmetic_v<T>,
-        "Coordinates of Point can only be numbers.");
-		*/
+		
+	    //static_assert(std::is_arithmetic_v<T>,
+        //"Coordinates of Point can only be numbers.");
+		
 public : 
-	Point<T>() = default;
-	Point<T>(T x, T y)  
+	Point() = default;
+	Point(T x, T y)  
 	: m_x(x), m_y(y)
 	{
 	}
@@ -26,11 +29,11 @@ private :
 	T m_x;
 	T m_y;
 };
-
-
+*/
 
 int main(){
 
+	
 	Point<int> point_int(10,20);
 	std::cout << "point_int : " << point_int << std::endl;
 	
@@ -45,6 +48,7 @@ int main(){
 	point_box.add(Point<int>(40,50));
 	
 	std::cout << "point_box : " << point_box << std::endl;
+
 
     return 0;
 }

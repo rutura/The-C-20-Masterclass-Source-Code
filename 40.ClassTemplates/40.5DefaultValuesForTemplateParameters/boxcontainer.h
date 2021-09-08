@@ -10,9 +10,9 @@ class BoxContainer
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
 public:
-	BoxContainer<T,maximum>(size_t capacity = DEFAULT_CAPACITY);
-	BoxContainer<T,maximum>(const BoxContainer<T,maximum>& source);
-	~BoxContainer<T,maximum>();
+	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+	BoxContainer(const BoxContainer& source);
+	~BoxContainer();
 
 	// Helper getter methods
 	size_t size( ) const { return m_size; }
