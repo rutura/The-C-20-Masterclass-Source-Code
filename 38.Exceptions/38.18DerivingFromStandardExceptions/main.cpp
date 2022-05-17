@@ -1,14 +1,20 @@
 #include <iostream>
 #include <exception>
+#include <cstring>
 
 class DivideByZeroException : public std::exception {
 public :   
     DivideByZeroException(int a, int b) noexcept : std::exception(),m_a(a),m_b(b){}
 	
      virtual const char* what() const noexcept override {
+         /*
+         //Some compilers will give a warning that we're returning the address of a local string
+         //link : https://www.udemy.com/instructor/communication/qa/17488954/detail/?course=2987082
          return (std::string("Divide by zero detected , dividing ") +
             std::to_string(m_a) + std::string(" by ") +
                 std::to_string(m_b)).c_str();
+                */
+               return"divide by zero detected, dividing ";
      }
      
      int get_a() const{
@@ -51,6 +57,7 @@ int main(){
                 " by "<<  d_z->get_b() << std::endl;
         }
         */
+       
        std::cout << ex.what() << std::endl;
 		
     }
