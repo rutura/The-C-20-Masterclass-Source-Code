@@ -1,0 +1,45 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "Build with GCC",
+			"command": "/usr/bin/g++-10",
+			"args": [
+				"-g",
+				"-std=c++20",
+				"${workspaceFolder}/*.cpp",
+				"-o",
+				"${fileDirname}/rooster"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: /usr/bin/g++-10"
+		},
+		{
+			"type": "cppbuild",
+			"label": "Build with Clang",
+			"command": "/usr/bin/clang++-12",
+			"args": [
+				"-g",
+				"-std=c++20",
+				"${workspaceFolder}/*.cpp",
+				"-o",
+				"${fileDirname}/rooster"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: /usr/bin/clang++-12"
+		}
+	]
+}
