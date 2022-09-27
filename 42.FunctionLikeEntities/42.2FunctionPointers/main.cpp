@@ -10,8 +10,8 @@ int main(){
     //double (*f_ptr) (double, double)  = &add;
     //double(*f_ptr) (double,double) = add;
 
-    //double(*f_ptr) (double,double) = {&add};
-    //double(*f_ptr) (double,double) = {add};
+    //double(*f_ptr) (double,double) {&add};
+    //double(*f_ptr) (double,double){add};
 
     //auto f_ptr = &add;
     //auto f_ptr = add;
