@@ -1,6 +1,9 @@
 #include <iostream>
 #include "dog.h"
 
+void fun(Dog dog){
+    dog.print_info();
+}
 
 int main(){
 
@@ -16,13 +19,16 @@ int main(){
     */
 
    //Pointer to non const
-   //Dog * dog_ptr = &dog1;
+   Dog * dog_ptr = (Dog *)&dog1;
+   dog_ptr->set_name("Milou");
+   dog_ptr->print_info();
 
+   fun(dog1);
    //Non const reference
    //Dog& dog_ref = dog1;
 
    //Pointer to const
-   const Dog* const_dog_ptr = &dog1;
+   //const Dog* const_dog_ptr = &dog1;
    //const_dog_ptr->set_name("Milou"); // Expect
    //const_dog_ptr->get_name();
 

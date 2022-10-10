@@ -9,6 +9,9 @@ struct Cat
 {
     public : 
         std::string m_name;
+    
+    private:
+        std::string m_breed;
 };
 
 

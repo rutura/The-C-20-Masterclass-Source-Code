@@ -69,7 +69,7 @@ int main(){
     */
 
    //Changing the view window : SHRINKING
-   /*
+   
     const char * c_string1 { "The animals have left the region" };
     std::string_view sv10{c_string1};
     
@@ -87,7 +87,7 @@ int main(){
     
     //Changing the view doesn't change the viewed string : 
     std::cout << "Original sv10 viewed string : " << c_string1 << std::endl;
-    */
+    
 
 
    //String_view shouldn't outlive whatever it is viewing
@@ -146,6 +146,10 @@ int main(){
     std::cout << "The back character is : " << sv16.back() << std::endl;
     std::cout << "Substring : " << sv16.substr(0,22) << std::endl;
 
+    const char *ptr = "Hello World";
+    std::cout << ptr << std::endl;
+
+    ptr[1] = 'T';
 
     return 0;
 }

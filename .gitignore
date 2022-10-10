@@ -5,3 +5,5 @@
 *.pdb
 *.obj
 *.ilk
+*.sln
+*.vcxproj*

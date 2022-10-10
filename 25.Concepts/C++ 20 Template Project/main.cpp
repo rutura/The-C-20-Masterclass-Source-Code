@@ -1,11 +1,18 @@
 #include <iostream>
+#include <concepts>
+using namespace std;
 
-consteval int get_value(){
-    return 3;
+template<typename T>
+requires <std::integral T>
+T maximum(T a, T b) {
+    return a > b ? a : b;
 }
 
+
 int main(){
-    constexpr int value = get_value();
-    std::cout << "value : " << value << std::endl;
+    int a{ 10 };
+    int b{ 20 };
+    auto max = maximum(a, b);
+    cout << "Maximum:: " << max << endl;
     return 0;
 }
