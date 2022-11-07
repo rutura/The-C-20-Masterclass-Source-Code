@@ -4,13 +4,22 @@
 #include <iostream>
 
 
+//Forward declare friends : These forward declarations are needed for successful compilation on 
+//all major compilers : GCC,Clang,MSVC.
+template <typename T> class BoxContainer;
+template <typename T> std::ostream& operator<<( std::ostream&, const BoxContainer<T>& );
+
 
 template <typename T>
 class BoxContainer
 {
 	//Good explanation on templates and friends : 
 	//		: https://isocpp.org/wiki/faq/templates#template-friends
+	
+	//The problem
 	//friend std::ostream& operator<< (std::ostream&, const BoxContainer<T>&);
+
+	//Either of these solutions will need the friend function template predeclared. More info in the shared isocpp link.
 	//friend std::ostream& operator<< <> (std::ostream&, const BoxContainer<T>&);
 	//friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
 	
