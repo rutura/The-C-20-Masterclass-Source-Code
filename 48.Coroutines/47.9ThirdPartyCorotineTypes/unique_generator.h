@@ -19,6 +19,7 @@ namespace std {
 
 #include <iterator>
 #include <memory>
+#include <utility>
 
 #ifndef INCLUDED_CORO_MANUAL_LIFETIME_H
 #define INCLUDED_CORO_MANUAL_LIFETIME_H
