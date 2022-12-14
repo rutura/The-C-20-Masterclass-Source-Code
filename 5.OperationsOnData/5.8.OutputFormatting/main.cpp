@@ -59,10 +59,7 @@ int main(){
     
     std::cout << std::endl;
     std::cout << "Formatted table with variables: " << std::endl;
-    
     int col_width{14};
-    
-    
     std::cout << std::setw(col_width) <<  "Lastname"  << std::setw(col_width) << "Firstname" << std::setw(col_width/2) << "Age" << std::endl;
     std::cout << std::setw(col_width) << "Daniel"  << std::setw(col_width) << "Gray" << std::setw(col_width/2) << "25" << std::endl;
     std::cout << std::setw(col_width) << "Stanley" << std::setw(col_width)  << "Woods" << std::setw(col_width/2) <<  "33" << std::endl;
