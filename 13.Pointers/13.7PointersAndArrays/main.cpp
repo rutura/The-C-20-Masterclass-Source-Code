@@ -32,7 +32,7 @@ int main(){
     std::cout << "p_score : " << p_score << std::endl;// Pointer	
 
 	//std::size() doesn't work for raw pointers
-	std::cout << "size : " << std::size(scores) << std::endl;
+	std::cout << "size : " << std::size_t(scores) << std::endl;
 	//std::cout << "size : " << std::size(p_score) << std::endl; // Compiler error.
    
     return 0;
