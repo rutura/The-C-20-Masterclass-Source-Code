@@ -27,7 +27,9 @@ public:
 	void set_data (int data) {
 		*p_data = data;
 	}
-	~Point() = default;
+	~Point() {
+		delete p_data;
+	}
 
 private: 
 	double length() const;   // Function to calculate distance from the point(0,0)
