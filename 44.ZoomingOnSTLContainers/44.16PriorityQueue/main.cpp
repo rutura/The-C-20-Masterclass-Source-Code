@@ -54,7 +54,7 @@ void print_priority_queue(std::priority_queue<T,Container,Compare> p_queue){
 template<typename T,
                     typename Container = std::vector<T>,
                     typename Compare = std::less<typename Container::value_type>>  
-void clear_queue(std::priority_queue<T,Container,Compare> p_queue){ 
+void clear_queue(std::priority_queue<T,Container,Compare>& p_queue){ 
     
     std::cout << "Clearing priority queue of size : " << p_queue.size() << std::endl;
     while(!p_queue.empty()){
