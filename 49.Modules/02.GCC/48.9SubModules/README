@@ -1,0 +1,7 @@
+Compilation: 
+    . Commands: 
+        1. g++ -fmodules-ts -x c++-system-header iostream
+        2. g++ -fmodules-ts -c -x c++ .\add_sub.ixx
+        3. g++ -fmodules-ts -c -x c++ .\mult_div.ixx
+        4. g++ -fmodules-ts -c -x c++ .\math.ixx
+        5. g++ -fmodules-ts main.cpp math.o add_sub.o mult_div.o -o rooster.exe

@@ -1,0 +1,10 @@
+Compilation: 
+    . We are compiling manually wth GCC and we have to compile the dependencies before we use them. That's why we have to compile the math.ixx file first and then compile the main.cpp file.
+
+    . First compile the module interface file into an object file. The output file will be named after the module interface file, but with the extension .o instead of .ixx. The -c option tells the compiler to stop after the compilation step, and not to invoke the linker. The -x option tells the compiler that the input file is a C++ source file, even though the file name ends in .ixx. We use ixx to stay consistent with what we did with the toolset from Microsoft.
+
+        . Command:   g++ -fmodules-ts -c -x c++ .\math.ixx
+
+    . Compile the main file and link it with the object file. The -fmodules-ts option tells the compiler to use the C++ Modules TS. The -o option specifies the name of the output file. 
+
+        . Command:  g++ -fmodules-ts main.cpp math.o -o rooster.exe

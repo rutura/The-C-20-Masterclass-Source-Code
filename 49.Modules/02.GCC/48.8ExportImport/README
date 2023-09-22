@@ -1,0 +1,15 @@
+Compilation: 
+
+    . Experimenting with export import.
+    . It is used in the print.ixx file.
+    . The code differs a bit from what we used in the videos with the msvc compiler. I avoided using the 
+        string header because it triggered weird odr issues with the GCC compiler.
+
+    . Commands: 
+        1. g++ -fmodules-ts -x c++-system-header iostream
+        2. g++ -fmodules-ts -x c++-system-header vector
+        2. g++ -fmodules-ts -c -x c++ .\math.ixx
+        3. g++ -fmodules-ts -c -x c++ .\print.ixx
+        4. g++ -fmodules-ts -c math_impl.cpp
+        5. g++ -fmodules-ts -c print_impl.cpp
+        6. g++ -fmodules-ts main.cpp math.o print.o math_impl.o print_impl.o -o rooster.exe
