@@ -1,0 +1,5 @@
+Compilation: 
+    . Clang is still an issue to get working: 
+        . Resources : 
+            . https://clang.llvm.org/docs/StandardCPlusPlusModules.html
+            . https://www.zverovich.net/2023/04/10/cxx20-modules-in-clang.html

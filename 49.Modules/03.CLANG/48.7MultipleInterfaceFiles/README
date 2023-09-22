@@ -1,0 +1,13 @@
+Compilation: 
+
+    . The string import was giving me errors so I had to remove it from the print.ixx file. The focus
+        is on using code from multiple interface and implementation files. The string issue could be resolved
+        later.
+
+    . Commands: 
+        1. g++ -fmodules-ts -x c++-system-header iostream
+        2. g++ -fmodules-ts -c -x c++ .\math.ixx
+        3. g++ -fmodules-ts -c -x c++ .\print.ixx
+        4. g++ -fmodules-ts -c math_impl.cpp
+        5. g++ -fmodules-ts -c print_impl.cpp
+        6. g++ -fmodules-ts main.cpp math.o print.o math_impl.o print_impl.o -o rooster.exe
