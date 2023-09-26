@@ -1,7 +1,31 @@
 Compilation: 
-    . Commands: 
-        1. g++ -fmodules-ts -x c++-system-header iostream
-        2. g++ -fmodules-ts -c -x c++ .\add_sub.ixx
-        3. g++ -fmodules-ts -c -x c++ .\mult_div.ixx
-        4. g++ -fmodules-ts -c -x c++ .\math.ixx
-        5. g++ -fmodules-ts main.cpp math.o add_sub.o mult_div.o -o rooster.exe
+
+        . PROBLEM: 
+            . Importing header units didn't work with clang for me, if I try to import both iostream and 
+                string like we did for this example with other compilers. The issue seems documented 
+                here: https://github.com/llvm/llvm-project/issues/58540
+            . Reverting to good old includes in the global module for this example with clang.
+
+            . Get rid of the <vector> header unit in explaining the export import thing.
+			
+			. Getting the error here: https://discourse.llvm.org/t/clang-17-complains-about-reading-module-implicitly-and-advices-to-specify-the-dependencies-explicitly/72228
+				Find a way around it.
+        . Commands: 
+
+            //Compile the interface into pcm and the implementation into an object file
+                . clang++ -std=c++20 -x c++-module add_sub.ixx --precompile -o math.add_sub.pcm
+                . clang++ -std=c++20 -x c++-module mult_div.ixx --precompile -o math.mult_div.pcm
+                . clang++ -std=c++20 -x c++-module math.ixx -fprebuilt-module-path=. --precompile -o math.pcm
+
+            //Generate the object of the entry point file
+                . clang++ -std=c++20 main.cpp -fprebuilt-module-path=. -c -o main.o
+
+            //Generate the object file from the pcm files you generated. Be mindful of the dependencies
+                . clang++ -std=c++20 math.add_sub.pcm -c -o math.add_sub.o
+                . clang++ -std=c++20 math.mult_div.pcm -c -o math.mult_div.o
+                . clang++ -std=c++20 math.pcm -c -o math.o
+
+
+            //Pull everything together.
+                . clang++ main.o math.o math.add_sub.o math.mult_div.o -o rooster
+               

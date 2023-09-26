@@ -1,7 +1,7 @@
 module;
 
 export module print;
-export import <vector>;
+export import my_vector;
 
 export{
 	void greet();

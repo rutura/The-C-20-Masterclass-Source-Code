@@ -1,10 +1,23 @@
 Compilation: 
 
-    . To be able to import standard headers like iostream and string, we need to build a module interface unit for each of them. Thats what the commands #1 and #2 do. After that, we just build the module interface unit for math.ixx and compile it to an object file. Finally, we link the object file with the main.cpp file to get the executable.
+        . PROBLEM: 
+            . Importing header units didn't work with clang for me, if I try to import both iostream and 
+                string like we did for this example with other compilers. The issue seems documented 
+                here: https://github.com/llvm/llvm-project/issues/58540
+            . Reverting to good old includes in the global module for this example with clang.
+        . Commands: 
 
-    . Commands: 
-        1. g++ -fmodules-ts -x c++-system-header string
-        2. g++ -fmodules-ts -x c++-system-header iostream
-        3. g++ -fmodules-ts -c -x c++ .\math.ixx
-        4. g++ -fmodules-ts -c math_impl.cpp
-        5. g++ -fmodules-ts main.cpp math.o math_impl.o -o rooster.exe
+            //Compile the interface into pcm and the implementation into an object file
+                . clang++ -std=c++20 -x c++-module math.ixx --precompile -o math_stuff.pcm
+                . clang++ -std=c++20 math_impl.cpp -fmodule-file=math_stuff=math_stuff.pcm -c -o math_impl.o
+
+            //Generate the object of the entry point file
+                . clang++ -std=c++20 main.cpp -fprebuilt-module-path=. -c -o main.o
+
+            //Generate the object file from the pcm files you generated. Be mindful of the dependencies
+                . clang++ -std=c++20 math_stuff.pcm -c -o math_stuff.o
+
+
+            //Pull everything together.
+                . clang++ main.o math_stuff.o  math_impl.o -o rooster
+               

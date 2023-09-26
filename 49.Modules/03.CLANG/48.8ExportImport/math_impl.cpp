@@ -1,5 +1,5 @@
 module;
-
+#include <iostream>
 module math_stuff;
 
 //Preamble

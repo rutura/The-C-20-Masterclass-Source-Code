@@ -1,7 +1,30 @@
 Compilation: 
-    . Commands: 
-        1. g++ -fmodules-ts -x c++-system-header iostream
-        2. g++ -fmodules-ts -c -x c++ .\add_partition.ixx
-        3. g++ -fmodules-ts -c -x c++ .\mult_partition.ixx
-        4. g++ -fmodules-ts -c -x c++ .\math.ixx
-        5. g++ -fmodules-ts main.cpp math.o add_partition.o mult_partition.o -o rooster.exe
+
+        . PROBLEM: 
+            . Importing header units didn't work with clang for me, if I try to import both iostream and 
+                string like we did for this example with other compilers. The issue seems documented 
+                here: https://github.com/llvm/llvm-project/issues/58540
+            . Reverting to good old includes in the global module for this example with clang.
+
+            . Get rid of the <vector> header unit in explaining the export import thing.
+        . Commands: 
+
+
+            //Compile the interface into pcm and the implementation into an object file
+            //ATTENTION: The naming of the object files is important to clang <module>-<partition>.pcm
+                . clang++ -std=c++20 -x c++-module add_partition.ixx --precompile -o math-addition.pcm
+                . clang++ -std=c++20 -x c++-module mult_partition.ixx --precompile -o math-multiplication.pcm
+                . clang++ -std=c++20 -x c++-module math.ixx -fprebuilt-module-path=. --precompile -o math.pcm
+
+            //Generate the object of the entry point file
+                . clang++ -std=c++20 main.cpp -fprebuilt-module-path=. -c -o main.o
+
+            //Generate the object file from the pcm files you generated. Be mindful of the dependencies
+                . clang++ -std=c++20 math-addition.pcm -c -o math-addition.o
+                . clang++ -std=c++20 math-multiplication.pcm -c -o math-multiplication.o
+                . clang++ -std=c++20 math.pcm -c -o math.o
+
+
+            //Pull everything together.
+                . clang++ main.o math.o math-addition.o math-multiplication.o -o rooster
+               

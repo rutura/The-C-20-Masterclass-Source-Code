@@ -1,13 +1,13 @@
 module;
 // Global module fragment
 #include <cstring> // C function includes must show up here
-//#include <iostream> // Non c function includes can also be imported
-//#include <string>
+#include <iostream> // Non c function includes can also be imported
+#include <string>
 
 export module math_stuff; // Module declaration
 //Module preamble
-import <iostream>; // Can't import C-function related headers
-import <string>;
+// import <iostream>; // Can't import C-function related headers
+// import <string>;
 
 //Module purview
 export{
@@ -53,10 +53,3 @@ void print_name_length(const char* c_str_name) {
 
 //Point constructor
 Point::Point(double x, double y) : m_x(x), m_y(y) {};
-
-
-
-
-
-
-
