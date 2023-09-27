@@ -1,4 +1,4 @@
-#include <iostream>
+import <iostream>;
 import math_stuff;
 
 int main()
@@ -10,4 +10,3 @@ int main()
 
     print_name_length("John");
 }
-

@@ -1,12 +1,17 @@
-Compilation: 
+. Block expoort.
 
-        . PROBLEM: 
-            . Importing header units didn't work with clang for me, if I try to import both iostream and 
-                string like we did for this example with other compilers. The issue seems documented 
-                here: https://github.com/llvm/llvm-project/issues/58540
-            . Reverting to good old includes in the global module for this example with clang.
-        . Commands: 
 
-            . clang++ -std=c++20 -stdlib=libc++ -x c++-module math.ixx --precompile -o math_stuff.pcm
-            . clang++ -std=c++20 -stdlib=libc++ main.cpp -fprebuilt-module-path=. math_stuff.pcm -o rooster
-               
+. Compilation: 
+	//Generate the header unit for iostream
+		. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+	//Build the interface file into a pcm file, giving it the location of the header unit for iostream
+		. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
+
+	//Generate the object file for the entry point (main) file
+		. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+
+	//Generate the object file for the module file
+		. clang++ -std=c++20 -stdlib=libc++ math_stuff.pcm -c -o math_stuff.o
+
+	//Link everything together to generate the rooster binary.
+		. clang++ -std=c++20 -stdlib=libc++ main.o math_stuff.o -o rooster

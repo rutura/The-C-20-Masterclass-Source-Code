@@ -1,4 +1,4 @@
-#include <iostream>
+import <iostream>;
 import math;
 
 int main()

@@ -1,8 +1,9 @@
 module;
 #include <cstring> // C function includes must show up here
-#include <iostream>
 #include <string>
 module math_stuff;
+
+import <iostream>;
 
 //Preamble
 

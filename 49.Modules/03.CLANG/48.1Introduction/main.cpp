@@ -1,4 +1,3 @@
-#include <iostream>
 import my_math_module;
 
 int main()

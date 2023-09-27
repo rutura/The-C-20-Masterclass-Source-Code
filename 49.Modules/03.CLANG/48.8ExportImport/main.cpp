@@ -1,19 +1,13 @@
-#include <iostream>
-import math_stuff;
-import print;
+import <iostream>;
+import Line;
 
 int main()
 {
-    auto result = add(10, 20);
-    std::cout << "result : " << result << std::endl;
+    Point p1{ 1, 2 };
+    Point p2{ 3, 4 };
 
-    greet();
+    Line line{ p1, p2 };
 
-    print_name_length("John");
-
-    Point point1(22, 44);
-    std::cout << "point1 : " << point1 << std::endl;
-
-    do_what_vectors_do();
-
+    std::cout << "p1 [" << p1.x() << "," << p1.y() << "]\n";
+    std::cout << "p2 [" << p2.x() << "," << p2.y() << "]\n";
 }

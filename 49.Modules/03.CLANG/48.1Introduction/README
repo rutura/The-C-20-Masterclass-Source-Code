@@ -19,15 +19,23 @@ Compilation:
             . ACTION: Attach to the container in VS Code and have fun.
 
         . Important: 
-            . Clang seems to expect that the name of the generated PCM file be the same as the exported
+            . Clang seems to expect that the name of the generated PCM file be the same as the exported module.
+				. Keep this in mind. Luckily it supports flags that allow us to keep naming our interface files
+					with the .ixx extension. The flag is -x c++-module. See example below.
 
 
-        . Run the code: 
-            . clang++ -std=c++20 Hello.cppm --precompile -o Hello.pcm
-            . clang++ -std=c++20 use.cpp -fprebuilt-module-path=. Hello.pcm -o Hello.out
+		. Compilation: 
+			//Generate the header unit for iostream
+				. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+			//Build the interface file into a pcm file, giving it the location of the header unit for iostream
+				. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o my_math_module.pcm
 
+			//Generate the object file for the entry point (main) file
+				. clang++ -std=c++20 -stdlib=libc++ main.cpp -fprebuilt-module-path=. -c -o main.o
 
-        . Run the code: 
-            . clang++ -std=c++20 -x c++-module math.ixx --precompile -o my_math_module.pcm
-            . clang++ -std=c++20 main.cpp -fprebuilt-module-path=. my_math_module.pcm -o rooster
+			//Generate the object file for the module file
+				. clang++ -std=c++20 -stdlib=libc++ my_math_module.pcm -c -o my_math_module.o
+
+			//Link everything together to generate the rooster binary.
+				. clang++ -std=c++20 -stdlib=libc++ main.o my_math_module.o -o rooster
                

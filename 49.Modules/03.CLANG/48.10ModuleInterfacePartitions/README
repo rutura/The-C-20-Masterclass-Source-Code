@@ -12,19 +12,21 @@ Compilation:
 
             //Compile the interface into pcm and the implementation into an object file
             //ATTENTION: The naming of the object files is important to clang <module>-<partition>.pcm
-                . clang++ -std=c++20 -x c++-module add_partition.ixx --precompile -o math-addition.pcm
-                . clang++ -std=c++20 -x c++-module mult_partition.ixx --precompile -o math-multiplication.pcm
-                . clang++ -std=c++20 -x c++-module math.ixx -fprebuilt-module-path=. --precompile -o math.pcm
+
+                . clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+                . clang++ -std=c++20 -stdlib=libc++ -x c++-module add_partition.ixx --precompile -o math-addition.pcm
+                . clang++ -std=c++20 -stdlib=libc++ -x c++-module mult_partition.ixx --precompile -o math-multiplication.pcm
+                . clang++ -std=c++20 -stdlib=libc++ -x c++-module math.ixx -fprebuilt-module-path=. --precompile -o math.pcm
 
             //Generate the object of the entry point file
-                . clang++ -std=c++20 main.cpp -fprebuilt-module-path=. -c -o main.o
+                . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp  -fprebuilt-module-path=. -c -o main.o
 
             //Generate the object file from the pcm files you generated. Be mindful of the dependencies
-                . clang++ -std=c++20 math-addition.pcm -c -o math-addition.o
-                . clang++ -std=c++20 math-multiplication.pcm -c -o math-multiplication.o
-                . clang++ -std=c++20 math.pcm -c -o math.o
+                . clang++ -std=c++20 -stdlib=libc++ math-addition.pcm -c -o math-addition.o
+                . clang++ -std=c++20 -stdlib=libc++ math-multiplication.pcm -c -o math-multiplication.o
+                . clang++ -std=c++20 -stdlib=libc++ math.pcm -c -o math.o
 
 
             //Pull everything together.
-                . clang++ main.o math.o math-addition.o math-multiplication.o -o rooster
+                . clang++ -std=c++20 -stdlib=libc++ main.o math.o math-addition.o math-multiplication.o -o rooster
                
