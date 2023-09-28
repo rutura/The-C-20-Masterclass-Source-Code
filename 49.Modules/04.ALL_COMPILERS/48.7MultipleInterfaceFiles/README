@@ -28,7 +28,7 @@
 			. g++ -fmodules-ts -c print_impl.cpp
 			. g++ -fmodules-ts main.cpp math.o print.o math_impl.o print_impl.o -o rooster.exe
 			
-        . Commands: 
+        . Clang(18) 
 
                 . clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
                 . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm

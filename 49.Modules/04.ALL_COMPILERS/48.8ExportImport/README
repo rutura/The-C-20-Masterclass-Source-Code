@@ -1,0 +1,33 @@
+	. Export import.
+	
+	. Project files
+		. point.ixx
+		. line.ixx
+		. main.cpp
+		
+	. Compilation on 3 major compilers
+	
+		. Visual C++ (Windows)
+			. Create a console project and rename the file containing main to main.cpp
+			. Set the standard to C++20
+			. Right click on the solution name in Project Explorer and select add> Module
+			. Add a module file named line.ixx and put in the code
+			. Add a module file named point.ixx and put in the code
+			. Put the code in the main.cpp file
+			. Build and run the project.
+			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
+			
+		. GCC(13.2.0)
+			. g++ -fmodules-ts -x c++-system-header iostream
+			. g++ -fmodules-ts -c -x c++ point.ixx
+			. g++ -fmodules-ts -c -x c++ line.ixx
+			. g++ -fmodules-ts main.cpp point.o line.o -o rooster.exe
+
+		. Clang(18)
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-module point.ixx --precompile -o Point.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-module line.ixx -fmodule-file=Point=Point.pcm --precompile -o Line.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 -stdlib=libc++ Point.pcm -c -o Point.o
+			. clang++ -std=c++20 -stdlib=libc++ Line.pcm -c -o Line.o
+			. clang++ -std=c++20 -stdlib=libc++ main.o Point.o Line.o -o rooster

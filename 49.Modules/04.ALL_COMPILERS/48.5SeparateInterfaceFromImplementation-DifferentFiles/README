@@ -25,7 +25,6 @@
 		
 		
         . Clang(18)
-
             . clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
             . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
             . clang++ -std=c++20 -stdlib=libc++ math_impl.cpp -fmodule-file=math_stuff=math_stuff.pcm -fmodule-file=iostream.pcm -c -o math_impl.o
