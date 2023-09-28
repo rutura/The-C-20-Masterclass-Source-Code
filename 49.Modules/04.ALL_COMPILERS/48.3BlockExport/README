@@ -1,17 +1,27 @@
-. Block expoort.
-
-
-. Compilation: 
-	//Generate the header unit for iostream
-		. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
-	//Build the interface file into a pcm file, giving it the location of the header unit for iostream
-		. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
-
-	//Generate the object file for the entry point (main) file
-		. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
-
-	//Generate the object file for the module file
-		. clang++ -std=c++20 -stdlib=libc++ math_stuff.pcm -c -o math_stuff.o
-
-	//Link everything together to generate the rooster binary.
-		. clang++ -std=c++20 -stdlib=libc++ main.o math_stuff.o -o rooster
+	. Exploring block export with c++20 modules
+	
+	. Project files
+		. math.ixx
+		. main.cpp
+		
+	. Compilation on 3 major compilers
+	
+		. Visual C++ (Windows)
+			. Create a console project
+			. Set the standard to C++20
+			. Right click on the solution name in Project Explorer and select add> Module
+			. Add a module file named math.ixx and put in the code
+			. Put the code in the main.cpp file
+			. Build and run the project.
+			
+		. GCC(13.2.0)
+			. g++ -fmodules-ts -x c++-system-header iostream
+			. g++ -fmodules-ts -c -x c++ math.ixx
+			. g++ -fmodules-ts main.cpp math.o -o rooster.exe
+			
+		. Clang(18)
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 -stdlib=libc++ math_stuff.pcm -c -o math_stuff.o
+			. clang++ -std=c++20 -stdlib=libc++ main.o math_stuff.o -o rooster
