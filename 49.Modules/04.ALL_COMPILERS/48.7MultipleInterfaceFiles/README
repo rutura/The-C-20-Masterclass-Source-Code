@@ -19,6 +19,8 @@
 			. Add a new cpp file named print_impl.cpp and put in the code.
 			. Put the code in the main.cpp file
 			. Build and run the project.
+			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
+
 			
 		. GCC(13.2.0)
 		    . g++ -fmodules-ts -x c++-system-header iostream

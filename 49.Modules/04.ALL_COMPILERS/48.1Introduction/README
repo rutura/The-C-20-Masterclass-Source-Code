@@ -12,6 +12,8 @@
 			. Add a module file named math.ixx and put in the code
 			. Put the code in the main.cpp file
 			. Build and run the project.
+			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
+
 			
 			
 		. GCC(13.2.0)
