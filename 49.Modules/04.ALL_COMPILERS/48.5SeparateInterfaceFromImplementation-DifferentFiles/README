@@ -1,0 +1,24 @@
+Compilation: 
+
+        . PROBLEM: 
+            . Importing header units didn't work with clang for me, if I try to import both iostream and 
+                string like we did for this example with other compilers. The issue seems documented 
+                here: https://github.com/llvm/llvm-project/issues/58540
+            . Reverting to good old includes in the global module for this example with clang.
+        . Commands: 
+
+            //Compile the interface into pcm and the implementation into an object file
+                . clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+                . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
+                . clang++ -std=c++20 -stdlib=libc++ math_impl.cpp -fmodule-file=math_stuff=math_stuff.pcm -fmodule-file=iostream.pcm -c -o math_impl.o
+
+            //Generate the object of the entry point file
+                . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+
+            //Generate the object file from the pcm files you generated. Be mindful of the dependencies
+                . clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm math_stuff.pcm -c -o math_stuff.o
+
+
+            //Pull everything together.
+                . clang++ -std=c++20 -stdlib=libc++ main.o math_stuff.o  math_impl.o -o rooster
+               
