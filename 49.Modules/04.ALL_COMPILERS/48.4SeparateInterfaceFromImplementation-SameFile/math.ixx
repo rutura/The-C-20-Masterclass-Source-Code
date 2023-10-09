@@ -9,11 +9,8 @@ import <iostream>;
 
 //Module purview
 export{
-
 	double add(double a, double b);
-
 	void greet(const std::string& name);
-
 	void print_name_length(const char* c_str_name);
 
 	class Point {

@@ -7,16 +7,17 @@ Compilation:
 				. https://www.albertogramaglia.com/modern-cpp-modules-theory/
 				. https://www.albertogramaglia.com/modern-cpp-modules-practice/
 
-        . Resolved to using clang 18 with the documentation here: https://clang.llvm.org/docs/StandardCPlusPlusModules.html
+        . Resolved to using clang 18 with the documentation here:
+			. https://clang.llvm.org/docs/StandardCPlusPlusModules.html
 
         . I got the docker container from here: https://hub.docker.com/r/teeks99/clang-ubuntu/tags
 
-        . Commands : 
-
+        . Flow : 
+			. ACTION: Install the docker engine on your system
             . PULL: docker pull teeks99/clang-ubuntu:18
             . ACTION: Change to the D:/Sandbox folder on your windows machine.
             . RUN: docker container run --name clanghank -it -v ${PWD}:/home/gakwaya teeks99/clang-ubuntu:18
-            . ACTION: Attach to the container in VS Code and have fun.
+            . ACTION: Attach to the container to a terminal and have fun.
 
         . Important: 
             . Clang seems to expect that the name of the generated PCM file be the same as the exported module.

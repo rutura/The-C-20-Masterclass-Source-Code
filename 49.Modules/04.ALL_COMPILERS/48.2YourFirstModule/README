@@ -13,12 +13,18 @@
 			. Put the code in the main.cpp file
 			. Build and run the project.
 			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
-
 			
 		. GCC(13.2.0)
 			. g++ -fmodules-ts -x c++-system-header iostream
 			. g++ -fmodules-ts -c -x c++ math.ixx
 			. g++ -fmodules-ts main.cpp math.o -o rooster.exe
+
+		. Clang(16) Windows Winlibs - Use command prompt
+			. clang++ -std=c++20 -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 math_stuff.pcm -c -o math_stuff.o
+			. clang++ -std=c++20 main.o math_stuff.o -o rooster
 
 		. Clang(18)
 			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm

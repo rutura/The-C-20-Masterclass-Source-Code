@@ -22,6 +22,15 @@
 			. g++ -fmodules-ts -c -x c++ point.ixx
 			. g++ -fmodules-ts -c -x c++ line.ixx
 			. g++ -fmodules-ts main.cpp point.o line.o -o rooster.exe
+			
+		. Clang(16) - Windows - Winlibs - Use the terminal
+			. clang++ -std=c++20 -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -x c++-module point.ixx --precompile -o Point.pcm
+			. clang++ -std=c++20 -x c++-module line.ixx -fmodule-file=Point=Point.pcm --precompile -o Line.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 Point.pcm -c -o Point.o
+			. clang++ -std=c++20 Line.pcm -c -o Line.o
+			. clang++ -std=c++20 main.o Point.o Line.o -o rooster
 
 		. Clang(18)
 			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm

@@ -7,7 +7,6 @@ export module math_stuff; // Module declaration
 //Module preamble
 import <iostream>;
 
-
 //Module purview
 export{
 
@@ -21,8 +20,6 @@ export{
 		dest.append(name);
 		std::cout << dest << std::endl;
 	}
-
-
 }
 
 export void print_name_length(const char* c_str_name) {

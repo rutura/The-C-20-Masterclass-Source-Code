@@ -24,6 +24,14 @@
 			. g++ -fmodules-ts -c -x c++ math.ixx
 			. g++ -fmodules-ts -c math_impl.cpp
 			. g++ -fmodules-ts main.cpp math.o math_impl.o -o rooster.exe
+			
+		. Clang(16) - Windows - Use command prompt
+            . clang++ -std=c++20 -x c++-system-header iostream --precompile -o iostream.pcm
+            . clang++ -std=c++20 -fmodule-file=iostream.pcm -x c++-module math.ixx --precompile -o math_stuff.pcm
+            . clang++ -std=c++20 math_impl.cpp -fmodule-file=math_stuff=math_stuff.pcm -fmodule-file=iostream.pcm -c -o math_impl.o
+            . clang++ -std=c++20 -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+            . clang++ -std=c++20 -fmodule-file=iostream.pcm math_stuff.pcm -c -o math_stuff.o
+            . clang++ -std=c++20 main.o math_stuff.o  math_impl.o -o rooster
 		
 		
         . Clang(18)
