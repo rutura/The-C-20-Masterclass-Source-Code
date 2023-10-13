@@ -1,0 +1,49 @@
+	. Your first module with a few more features
+	. Project files
+		. math.ixx
+		. main.cpp
+
+	. Notes: 
+		. One has to do the research to get the exact steps to follow to build with a specific IDE or compiler.
+		. The steps and commands below are a result of my research and testing.
+		. The information for Visual C++ is from Microsoft's documentation. It was relatively easy to find.
+		. The information for the GCC compiler is scattered across the internet. I had to do a lot of digging to find it.
+		. For Clang. I digested the information shared in their Standard C++ Modules documenation (https://clang.llvm.org/docs/StandardCPlusPlusModules.html) and repurposed it to compile the projects in this chapter.
+		. The instructions for each compiler are shared below.
+		
+	. Compilation steps on 3 major compilers:
+	
+		. Visual C++ (Windows)
+			. NOTE: concepts, vector and algorithm can be imported.
+					with the latest version of Visual C++.
+			. Create a console project
+			. Set the standard to C++20
+			. Right click on the solution name in Project Explorer and select add> Module
+			. Add a module file named boxcontainer.ixx and put in the code
+			. Put the code in the main.cpp file
+			. Build and run the project.
+			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
+
+			
+		. GCC(13.2.0)
+			. NOTE: With GCC, mporting <iostream> in the math.ixx file is resulting in errors.
+				    For gcc, we'll just stick to old #include in both files.
+			. g++ -std=c++20 -fmodules-ts -x c++-system-header iostream
+			. g++ -std=c++20 -fmodules-ts -c -x c++ math.ixx
+			. g++ -std=c++20 -fmodules-ts main.cpp math.o -o rooster.exe
+			
+		. Clang(16) - Windows - Winlibs - Use the terminal. Not powershell.
+			. NOTE: <random> is throwing weird errors. Reverting to to including it.
+			. clang++ -std=c++20 -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm  -x c++-module math.ixx --precompile -o math.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 math.pcm -c -o math.o
+			. clang++ -std=c++20 main.o math.o -o rooster
+
+		. Clang(18)
+			. NOTE: <random> is throwing weird errors. Reverting to to including it.
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm  -x c++-module math.ixx --precompile -o math.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 -stdlib=libc++ math.pcm -c -o math.o
+			. clang++ -std=c++20 -stdlib=libc++ main.o math.o -o rooster
