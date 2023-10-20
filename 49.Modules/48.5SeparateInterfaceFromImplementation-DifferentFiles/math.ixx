@@ -2,10 +2,10 @@ module;
 // Global module fragment
 
 #include <string>
+#include <iostream>
 
 export module math_stuff; // Module declaration
 //Module preamble
-import <iostream>;
 
 //Module purview
 export{

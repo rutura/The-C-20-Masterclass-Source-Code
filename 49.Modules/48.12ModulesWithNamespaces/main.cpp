@@ -4,7 +4,7 @@
     . If you export something from a namespace, the namespace is exported. But not everything inside it. A good example is the add function in our module.
 */
 
-import <iostream>;
+#include <iostream>
 import math;
 
 int main()

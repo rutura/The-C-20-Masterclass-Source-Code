@@ -1,9 +1,7 @@
 module;
 #include <random>
+#include <iostream>
 export module math;
-
-import <iostream>;
-
 
 namespace math {
 	//A class to represent a Point in 2D space with x and y coordinates together with getters and setters

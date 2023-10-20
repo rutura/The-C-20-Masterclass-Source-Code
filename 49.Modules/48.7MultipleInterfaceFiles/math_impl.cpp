@@ -1,9 +1,8 @@
 module;
-
+#include <iostream>
 module math_stuff;
 
 //Preamble
-import <iostream>;
 import print;
 
 //Implementations

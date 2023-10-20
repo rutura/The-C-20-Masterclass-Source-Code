@@ -1,8 +1,10 @@
 module;
 
+#include <iostream>
+#include <cmath>
+
 export module math;
-import <iostream>;
-import <cmath>;
+
 
 //A class representing Point in the 2d space with x and y coordinates.
 

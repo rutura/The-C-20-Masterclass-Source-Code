@@ -3,7 +3,7 @@
     . It doesn't work with g++ (yet??)
     . The example code compiles fine with clang 18
 */
-import <iostream>;
+#include <iostream>
 import math;
 
 int main()

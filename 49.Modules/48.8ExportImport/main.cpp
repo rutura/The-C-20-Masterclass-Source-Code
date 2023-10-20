@@ -1,4 +1,4 @@
-import <iostream>;
+#include <iostream>
 import Line;
 
 int main()

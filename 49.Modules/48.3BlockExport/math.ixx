@@ -2,10 +2,10 @@ module;
 // Global module fragment
 #include <cstring> // C function includes must show up here
 #include <string>
+#include <iostream>
 
 export module math_stuff; // Module declaration
 //Module preamble
-import <iostream>;
 
 //Module purview
 export{

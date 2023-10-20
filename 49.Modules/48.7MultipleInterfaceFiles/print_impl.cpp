@@ -1,10 +1,8 @@
 module;
 #include <cstring> // C function includes must show up here
 #include <string>
+#include <iostream>
 module print;
-
-import <iostream>;
-
 
 //Implementations
 void greet() {

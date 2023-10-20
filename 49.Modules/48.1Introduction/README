@@ -10,6 +10,23 @@
 		. The information for the GCC compiler is scattered across the internet. I had to do a lot of digging to find it.
 		. For Clang. I digested the information shared in their Standard C++ Modules documenation (https://clang.llvm.org/docs/StandardCPlusPlusModules.html) and repurposed it to compile the projects in this chapter.
 		. The instructions for each compiler are shared below.
+
+	. CMake: 
+		. Can't use header units yet. Reverting to good old includes in the GMF
+		. I have access to clang 16 and latest msvc. GCC 14 will support this but can't 
+			go through the trouble to build it yet.
+		. Commands to build the project with clang: 
+			. mkdir build
+			. cd build
+			. cmake -GNinja -DCMAKE_CXX_COMPILER=clang++ ..
+			. cmake --build .
+
+		. Commands to build the project with msvc: 
+			. mkdir build
+			. cd build
+			. cmake -DCMAKE_CXX_COMPILER=cl ..
+			. cmake --build .
+		
 		
 	. Compilation on of this project on 3 major compilers:
 		. Visual C++ (Windows)
