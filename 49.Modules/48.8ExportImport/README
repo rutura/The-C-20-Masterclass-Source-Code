@@ -1,0 +1,50 @@
+	. Export import.
+	
+	. Project files
+		. point.ixx
+		. line.ixx
+		. main.cpp
+
+	. Notes: 
+		. One has to do the research to get the exact steps to follow to build with a specific IDE or compiler.
+		. The steps and commands below are a result of my research and testing.
+		. The information for Visual C++ is from Microsoft's documentation. It was relatively easy to find.
+		. The information for the GCC compiler is scattered across the internet. I had to do a lot of digging to find it.
+		. For Clang. I digested the information shared in their Standard C++ Modules documenation (https://clang.llvm.org/docs/StandardCPlusPlusModules.html) and repurposed it to compile the projects in this chapter.
+		. The instructions for each compiler are shared below.
+		
+	. Compilation steps on 3 major compilers:
+	
+		. Visual C++ (Windows)
+			. Create a console project and rename the file containing main to main.cpp
+			. Set the standard to C++20
+			. Right click on the solution name in Project Explorer and select add> Module
+			. Add a module file named line.ixx and put in the code
+			. Add a module file named point.ixx and put in the code
+			. Put the code in the main.cpp file
+			. Build and run the project.
+			. If <iostream> can't be processed go to properties> C/C++> General and toggle `Scan Sources for Module Dependencies` to true.
+			
+		. GCC(13.2.0)
+			. g++ -fmodules-ts -x c++-system-header iostream
+			. g++ -fmodules-ts -c -x c++ point.ixx
+			. g++ -fmodules-ts -c -x c++ line.ixx
+			. g++ -fmodules-ts main.cpp point.o line.o -o rooster.exe
+			
+		. Clang(16) - Windows - Winlibs - Use the terminal
+			. clang++ -std=c++20 -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -x c++-module point.ixx --precompile -o Point.pcm
+			. clang++ -std=c++20 -x c++-module line.ixx -fmodule-file=Point=Point.pcm --precompile -o Line.pcm
+			. clang++ -std=c++20 -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 Point.pcm -c -o Point.o
+			. clang++ -std=c++20 Line.pcm -c -o Line.o
+			. clang++ -std=c++20 main.o Point.o Line.o -o rooster
+
+		. Clang(18)
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-system-header iostream --precompile -o iostream.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-module point.ixx --precompile -o Point.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -x c++-module line.ixx -fmodule-file=Point=Point.pcm --precompile -o Line.pcm
+			. clang++ -std=c++20 -stdlib=libc++ -fmodule-file=iostream.pcm main.cpp -fprebuilt-module-path=. -c -o main.o
+			. clang++ -std=c++20 -stdlib=libc++ Point.pcm -c -o Point.o
+			. clang++ -std=c++20 -stdlib=libc++ Line.pcm -c -o Line.o
+			. clang++ -std=c++20 -stdlib=libc++ main.o Point.o Line.o -o rooster
