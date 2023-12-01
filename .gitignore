@@ -5,3 +5,4 @@
 *.pdb
 *.obj
 *.ilk
+build/*
