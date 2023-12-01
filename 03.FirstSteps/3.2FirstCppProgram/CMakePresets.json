@@ -138,6 +138,12 @@
       "inherits": "debug"
     },
     {
+      "name": "linux-release",
+      "displayName": "Release",
+      "configurePreset": "linux",
+      "inherits": "release"
+    },
+    {
       "name": "macos-debug",
       "displayName": "Debug",
       "configurePreset": "macos",
