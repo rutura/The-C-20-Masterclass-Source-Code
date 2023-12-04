@@ -41,7 +41,6 @@ test-report.xml
 # IDEs (no support implied)
 .cache
 .devcontainer
-.vscode
 .vs
 .metadata
 *.psess

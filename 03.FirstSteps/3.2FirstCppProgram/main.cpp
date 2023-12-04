@@ -11,6 +11,7 @@
 
 //This brings in the iostream library
 #include <iostream>
+#include <fmt/format.h>
 
 /*
     This is a block comment that englobes multiple
@@ -32,6 +33,7 @@ int main(){
     std::cout << "Number2" << std::endl;
     std::cout << "Number3" << std::endl;
     print_number(5);
+    
 
     //Compile time error- Introduce a syntax error.
    std::cout << "Hello Word!" << std::endl;
