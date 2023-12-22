@@ -1,6 +1,6 @@
 #include <fmt/core.h>
 
 int main() {
-  auto value = 72;
+  auto value = 73;
   fmt::print("The answer is {}.", value);
 }
