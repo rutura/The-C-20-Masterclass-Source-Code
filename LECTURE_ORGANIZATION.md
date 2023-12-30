@@ -56,13 +56,13 @@
       11. Challenge: SFML Window.
           * Use the code here: https://github.com/SFML/cmake-sfml-project/blob/master/src/main.cpp 
 
-5. Modern C++ Formatting: std::format
+5. Modern C++ Formatting: std::format [ADJUSTED]
       1. Overview
       2. Challenge
 
 
 
-6. Literals, constants and compile time programming. Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
+6. Literals, constants and compile time programming. [ADJUSTED] Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
     1. Literals
     2. Constants
     3. constexpr
@@ -74,7 +74,7 @@
     8. constexpr variables
     9. Challenge - FIGURE OUT
 
-7.  Flow control
+7.  Flow control [ADJUSTED]
     1.  if, switch and ternary operator
         - If statements
            - If blocks and scope
@@ -103,7 +103,7 @@
          - Also cover multi dimensional arrays of characters
       6. Challenge: may be yamlcpp?  
 
-9. Pointers: Reserved for low level usage
+9. Pointers: Reserved for low level usage [ADJUSTED]
       1. Pointer basics
          - declaring and using pointers
          - pointer to char
@@ -129,7 +129,7 @@
       4. References with range based for loops
       5. Challenge : Banking application?
 
-11. Character manipulation and strings
+11. Character manipulation and strings [ADJUSTED]
       1. C style strings
       2. std::string
           - All the nuances you covered in previous version of the course
@@ -139,7 +139,7 @@
       6. string_view
       7. Challenge: Banking application??
 
-12. Functions
+12. Functions [ADJUSTED]
       1. Function declaration and definition
       2. Function calling (value, pointer and reference parameters)
       3. Function parameters and arguments
@@ -157,7 +157,7 @@
       15. Challenge: SQLite database?? 
       16. Challenge: CMake Functions and Macros?? 
 
-13. Function templates
+13. Function templates [RE-ENGINEER]
       1.  [Reorganize the content of this chapter - Marius]
       2. Trying out function templates
       3. Template type deduction and explicit arguments
@@ -174,14 +174,14 @@
       14. Named template parameters for lambdas
       15. Type traits.
 
-14. C++ 20 Concepts
+14. C++ 20 Concepts [RE-ENGINEER]
       1. Using concepts
       2. Building your own concepts
       3. Zooming in on the requires clause
       4. Combining concepts (|| and &&)
       5. Concepts and auto
 
-15. Namespaces
+15. Namespaces [RE-ENGINEER]
       1. Introduction
       2. Creating Namespaces
       3. Use Points like a gentleman
@@ -209,7 +209,7 @@
       10. Forward declarations
       11. Summary
 
-17. OOP with classes: Custom types
+17. OOP with classes: Custom types [ADJUSTED]
       1. Intro to classes
          - Content previously in the classes section 
       2. Classes, objects and const
@@ -218,7 +218,7 @@
       5. Static members
       6. Enums and type aliases
 
-18. Smart Pointers
+18. Smart Pointers [ADJUSTED]
       1. Introduction
       2. Unique pointers
       3. Unique pointers as function parameters and return values
@@ -232,7 +232,7 @@
       11. Smart Pointers conventional wisdom
       12. Summary
 
-19. Operator overloading
+19. Operator overloading [ADJUSTED]
       1. Introduction
       2. Addition Operator as Member
       3. Addition Operator as Non-Member
@@ -256,7 +256,7 @@
       21. Functors
       22. Summary
 
-20. Logical operators and the C++ 20 spaceship operator
+20. Logical operators and the C++ 20 spaceship operator [ADJUST]
       1. Introduction
       2. All Logical Operators
       3. Rel Ops Namespace
@@ -275,7 +275,7 @@
       16. Summing up on comparisons in C++ 20
       17. Summary
 
-21. Inheritance
+21. Inheritance [ADJUST]
       1. Introduction
       2. First try on Inheritance
       3. Protected members
@@ -292,7 +292,7 @@
       14. Reused Symbols in Inheritance
       15. Summary
 
-22. Polymorphism
+22. Polymorphism [ADJUST]
       1. Introduction
       2. Static Binding with Inheritance
       3. Static binding : Throwing you off!
@@ -315,7 +315,7 @@
       20. Pure virtual functions and abstract classes
       21. Abstract Classes as Interfaces
 
-23. Exception handling
+23. Exception handling [ADJUST]
       1. Introduction
       2. Try and Catch Blocks and scope
       3. The need for exceptions
@@ -335,7 +335,7 @@
       17. Throwing Standard Exceptions
       18. Subclassing Standard Exceptions
 
-24. BoxContainer: A case study
+24. BoxContainer: A case study [ADJUST]
       1. Introduction
       2. Constructing and destructing
       3. Adding and Expanding
@@ -345,7 +345,7 @@
       7. Storing In Different Types
       8. Summary
 
-25. Class templates
+25. Class templates [ADJUST]
       1. Introduction
       2. Your First Class Template
       3. Instances Of Class templates
@@ -363,7 +363,7 @@
       15. Concepts Example #1
       16. Concepts Example #2
      
-26. Move semantics
+26. Move semantics [ADJUST]
       1. Introduction
       2. Lvalues and Rvalues
       3. Rvalue references
@@ -375,7 +375,7 @@
       9. Passing by rvalue reference
       10. Summary
 
-27. Function like entities
+27. Function like entities [ADJUST]
       1. Introduction
       2. Function Pointers
       3. Callback Functions
@@ -392,7 +392,7 @@
       14. Capturing the this pointer
       15. std::function
 
-28. STL, Containers and Iterators
+28. STL, Containers and Iterators [ADJUST]
       1. Introduction
       2. std::vector
       3. std::array
@@ -404,7 +404,7 @@
       9. std::begin and std::end
       10. Summary
 
-29. Zooming in on STL containers
+29. Zooming in on STL containers [ADJUST]
       1. Introduction
       2. Sequence Containers : Deque
       3. Sequence Containers : Forward list
@@ -422,7 +422,7 @@
       15. Container Adaptors: Queue
       16. Container Adaptors : Priority queue
 
-30. STL Algorithms
+30. STL Algorithms [ADJUST]
       1. Introduction
       2. All of
       3. for_each
@@ -433,7 +433,7 @@
       8. Transform
       9. Summary
 
-31.  C++ 20 Ranges and Range Algorithms
+31.  C++ 20 Ranges and Range Algorithms [ADJUST]
 
       1. Introduction
       2. Range Algorithms
@@ -444,7 +444,7 @@
       7. Range Factories
       8. Summary
 
-32.   Building custom iterators for your containers
+32.   Building custom iterators for your containers [ADJUST]
       1. Introduction
       2. Iterator Powers
       3. Custom Iterator Theory
@@ -459,7 +459,7 @@
       12. Wrapping Iterators From Other Containers
       13. Summary
 
-33.   C++ 20 Coroutines
+33.   C++ 20 Coroutines [ADJUST]
       1. Introduction
       2. Coroutine workflow
       3. Coroutine keywords
@@ -471,7 +471,7 @@
       9. Third Party Generator Type
       10. Summary
     
-34.   C++ 20 Modules
+34.   C++ 20 Modules [ADJUST]
 
       1. Introduction
       2. Your First Module
