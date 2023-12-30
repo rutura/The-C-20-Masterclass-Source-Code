@@ -60,8 +60,6 @@
       1. Overview
       2. Challenge
 
-
-
 6. Literals, constants and compile time programming. [ADJUSTED] Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
     1. Literals
     2. Constants
@@ -91,7 +89,7 @@
         - Infinite loops
     3. Challenge: SFML Window. Add something to use loops
 
-8.  Arrays: Reserved for low level usage
+8.  Arrays: Reserved for low level usage [ADJUSTED]
       1. Arrays
          - declaration and initialization
          - size of arrays
