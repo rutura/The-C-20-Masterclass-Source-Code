@@ -293,25 +293,199 @@
       15. Summary
 
 22. Polymorphism
+      1. Introduction
+      2. Static Binding with Inheritance
+      3. Static binding : Throwing you off!
+      4. Dynamic binding with virtual functions
+      5. Size of polymorphic objects and slicing
+      6. Polymorphic objects stored in collections (array)
+      7. Override
+      8. Overloading, overriding and function hiding
+      9. Inheritance and Polymorphism at different levels
+      10. Inheritance and polymorphism with static members
+      11. Final
+      12. Final and Override are not keywords
+      13. Polymorphic functions and access specifiers
+      14. Non polymorphic functions and access specifiers
+      15. Virtual functions with default arguments
+      16. Virtual Destructors
+      17. Dynamic casts
+      18. Polymorphic Functions and Destructors
+      19. typeid() operator
+      20. Pure virtual functions and abstract classes
+      21. Abstract Classes as Interfaces
 
 23. Exception handling
+      1. Introduction
+      2. Try and Catch Blocks and scope
+      3. The need for exceptions
+      4. Handling Exceptions At Different Levels
+      5. Multiple Handlers for an Exception
+      6. Nested Try Block
+      7. Throwing Classs Objects
+      8. Exceptions as Class Objects with Inheritance Hierarchies
+      9. Polymorphic Exceptions
+      10. Rethrown Exceptions
+      11. Program custom termination
+      12. Ellipsis catch all block
+      13. noexcept Specifier
+      14. Exceptions in Destructors
+      15. Standard Exceptions
+      16. Catching Standard Exceptions
+      17. Throwing Standard Exceptions
+      18. Subclassing Standard Exceptions
 
 24. BoxContainer: A case study
+      1. Introduction
+      2. Constructing and destructing
+      3. Adding and Expanding
+      4. Removing Items
+      5. Other operators (=,+,+=)
+      6. Zooming out on BoxContainer
+      7. Storing In Different Types
+      8. Summary
 
 25. Class templates
-
+      1. Introduction
+      2. Your First Class Template
+      3. Instances Of Class templates
+      4. Non type template parameters
+      5. Default Values for template parameters
+      6. Explicit Template Instantiations
+      7. Template Specialization
+      8. Tempate Specialization with select methods
+      9. Friends of class templates[Theory intro]
+      10. Friend functions for class templates
+      11. Stream insertion operator for class templates
+      12. Class templates with type traits and static asserts
+      13. Class templates with C++ 20 concepts
+      14. Built In Concepts
+      15. Concepts Example #1
+      16. Concepts Example #2
+     
 26. Move semantics
+      1. Introduction
+      2. Lvalues and Rvalues
+      3. Rvalue references
+      4. Moving temporaries around
+      5. Move constructors and assignment operators
+      6. Moving Lvalues with std::move
+      7. Invalidating pointers after std.move
+      8. Move-only types
+      9. Passing by rvalue reference
+      10. Summary
 
 27. Function like entities
+      1. Introduction
+      2. Function Pointers
+      3. Callback Functions
+      4. Function Pointer Type Aliases
+      5. Function Pointer Type Aliases with Templates
+      6. Functors
+      7. Standard Functors (in the <functional> header)
+      8. Functors with parameters
+      9. Functors and lambda functions
+      10. Lambda functions as callbacks
+      11. Capturing by value under the hood
+      12. Capturing by reference under the hood
+      13. Mixin capturing
+      14. Capturing the this pointer
+      15. std::function
 
 28. STL, Containers and Iterators
+      1. Introduction
+      2. std::vector
+      3. std::array
+      4. Iterators
+      5. Traversing container subsets with iterators
+      6. Reverse iterators
+      7. Constant iterators
+      8. Iterator types
+      9. std::begin and std::end
+      10. Summary
 
-29. STL Algorithms
+29. Zooming in on STL containers
+      1. Introduction
+      2. Sequence Containers : Deque
+      3. Sequence Containers : Forward list
+      4. Sequence Containers : List
+      5. Sequence containers : std::vector revisited
+      6. Sequence Containers : std::array revisited
+      7. Associative Containers : Intro
+      8. Associative Containers : Pair
+      9. Associative Containers : Set
+      10. Associative Containres : Map
+      11. Associative Containers : Multiset & multimap
+      12. Unordered Associative Containers
+      13. Container Adaptors : Intro
+      14. Container Adaptors : Stack
+      15. Container Adaptors: Queue
+      16. Container Adaptors : Priority queue
 
-30. C++ 20 Ranges and Range Algorithms
+30. STL Algorithms
+      1. Introduction
+      2. All of
+      3. for_each
+      4. max_element and min_element
+      5. find
+      6. copy
+      7. sort
+      8. Transform
+      9. Summary
 
-31. Building custom iterators for your containers
+31.  C++ 20 Ranges and Range Algorithms
 
-32. C++ 20 Coroutines
+      1. Introduction
+      2. Range Algorithms
+      3. C++ 20 Ranges Library Iterator Pair Algorithms
+      4. Projections
+      5. Views and and Range Adaptors
+      6. View composition and Pipe operator
+      7. Range Factories
+      8. Summary
 
-33. C++ 20 Modules
+32.   Building custom iterators for your containers
+      1. Introduction
+      2. Iterator Powers
+      3. Custom Iterator Theory
+      4. Building Custom Input Iterators
+      5. Building Custom Output Iterators
+      6. Building Custom Forward Iterators
+      7. Building Custom Bidirectional Iterators
+      8. Building Custom Random Access Iterators
+      9. Custom Iterators with C++ 20 Ranges and Views
+      10. Constant Iterators
+      11. Raw Pointers as Iterators
+      12. Wrapping Iterators From Other Containers
+      13. Summary
+
+33.   C++ 20 Coroutines
+      1. Introduction
+      2. Coroutine workflow
+      3. Coroutine keywords
+      4. Couroutine Infrastructure
+      5. co_await
+      6. co_yield
+      7. co_rerturn
+      8. Custom Generator Coroutine Type
+      9. Third Party Generator Type
+      10. Summary
+    
+34.   C++ 20 Modules
+
+      1. Introduction
+      2. Your First Module
+      3. Block Export
+      4. Separating the Module Interface from the Implementation(Same File)
+      5. Separating the Module Interface from the Implementation(Different Files)
+      6. Multiple Implementatyion Files
+      7. Multiple Interface Files
+      8. Export Import
+      9. Sub-Modules
+      10. Module Interface Partitions
+      11. Custom Class Templates as Modules (BoxContainer)
+      12. Modules with Namespaces
+      13. Visibility and Reachability
+      14. Private Module Fragments
+      15. Do's and Don't's
+      16. Summary
