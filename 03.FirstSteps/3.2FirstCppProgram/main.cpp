@@ -19,7 +19,7 @@
 */
 
 void print_number(int number){
-    std::cout << "Number : " << number << std::endl;
+    fmt::println("Number : {}", number);
 }
 int add_numbers( int first_param, int second_param){
     int result = first_param + second_param;
@@ -29,14 +29,14 @@ int add_numbers( int first_param, int second_param){
 int main(){
 
     //This is going to print Number1, Number2 and Number3.
-    std::cout << "Number1" << std::endl;
-    std::cout << "Number2" << std::endl;
-    std::cout << "Number3" << std::endl;
+    fmt::println("Number1");
+    fmt::println("Number2");
+    fmt::println("Number3");
     print_number(5);
     
 
     //Compile time error- Introduce a syntax error.
-   std::cout << "Hello Word!" << std::endl;
+   fmt::println("Hello Word!");
 
    //Run time error - dividing by zero.
 //    int value = 7/0;
@@ -47,6 +47,6 @@ int main(){
     int num1 = 5;
     int num2 = 6;
     int result = add_numbers(num1, num2);
-    std::cout << "Result: " << result << std::endl;
+    fmt::println("Result: {}", result);
     return 0;
 }
