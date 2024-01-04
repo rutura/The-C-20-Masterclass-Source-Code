@@ -31,6 +31,8 @@
 //Declare the function
 void represent_float(float& num);
 
+void print_type_ranges();
+
 int main() {
   // Integers
   int number1 = 15;          // Decimal
@@ -56,6 +58,12 @@ int main() {
 
   represent_float(num);
 
+  print_type_ranges();
+
+  return 0;
+}
+
+void print_type_ranges() {
   // Ranges
   fmt::println("The range for short is from {} to {}",
                std::numeric_limits<short>::min(),
@@ -86,9 +94,8 @@ int main() {
                std::numeric_limits<long double>::max());
   fmt::println("int is signed: {}", std::numeric_limits<int>::is_signed);
   fmt::println("int digits: {}", std::numeric_limits<int>::digits);
-
-  return 0;
 }
+
 void represent_float(float& num) {
   // Bit manipulation to get the binary representation
   uint32_t* numBits = reinterpret_cast<uint32_t*>(&num);
