@@ -196,6 +196,7 @@ int main(){
     fmt::println("{} / {} = {}", number11, number12, result);
 
     //----------------------------------------------------------------------------------------------------
+    //Booleans
 
     bool red_light {false};
     bool green_light{true};
@@ -222,6 +223,5 @@ int main(){
     fmt::println("red_light : {}", red_light);
     fmt::println("red_light : {}", red_light);
     fmt::println("green_light : {}", green_light);
-
     return 0;
 }
