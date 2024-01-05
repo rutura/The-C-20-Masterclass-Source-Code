@@ -57,10 +57,13 @@
 		 - Logical Bitwise Operators
 		 - Compound Bitwise and Assignment Operators
 		 - Masks
+	  10. Bitwise operators in practice
 		 - Mask Example
-Packing Color Information
-      10. Challenge: SFML Window.
-          * Use the code here: https://github.com/SFML/cmake-sfml-project/blob/master/src/main.cpp 
+		 - Packing Color Information
+      11. Challenge: SFML Window.
+          * Encode and decode a floating point number.
+			- Take a binary representation and print the float.
+			- Take the float and print binary representation.
 
 5. Modern C++ Formatting: std::format [ADJUSTED]
       1. Overview
