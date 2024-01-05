@@ -21,39 +21,45 @@
          - Errors
          - Statements and Functions
       3. C++ Program Execution Model
-      4. Challenge
+      4. Challenge: SFML Window and circle - See code.
 
-4. Variables, data types and operations [ADJUSTED]
-      1. Introduction
-      2. Number Systems
-          - Integers
+4. Variables, data types and operations [ADJUSTED] - by Monday Jan 8, 2024
+      1. Number Systems
+          - Integers - OK
           - Floating points: IEEE 754
           - Numeric limits to show the ranges
-      3. Decimals and Integers
+      2. Decimals and Integers
          - Note: Integrate std::cin and std::cout into your code examples. No need to specifically set up lectures for them
          - Note: Use std::format for output formatting.
          - Note: use std::vector and std::array where you need to store collections.
          - Integers and modifiers
          - Floating points and modifiers
          - Booleans
-      4. Characters And Text
+      3. Characters And Text
          1. char and std::string
-      5. Auto
-      6. Operations
+      4. Auto
+      5. Operations
          - Basic operations
          - Precedence and associativity
          - Prefix and postfix + and -
          - Compound assignment
          - Relational operators
          - Logical operators
-      7. Math Functions
-      8. Weird Integral types
-      9. Data conversions
+      6. Math Functions
+      7. Weird Integral types
+      8. Data conversions
          - Implicit conversions
          - Explicit conversions
          - Overflow and underflow
-      10. Bitwise operators [Optional]
-      11. Challenge: SFML Window.
+      9. Bitwise operators [Optional]
+		 - Printing Integers in Binary
+		 - Shift Operators
+		 - Logical Bitwise Operators
+		 - Compound Bitwise and Assignment Operators
+		 - Masks
+		 - Mask Example
+Packing Color Information
+      10. Challenge: SFML Window.
           * Use the code here: https://github.com/SFML/cmake-sfml-project/blob/master/src/main.cpp 
 
 5. Modern C++ Formatting: std::format [ADJUSTED]
