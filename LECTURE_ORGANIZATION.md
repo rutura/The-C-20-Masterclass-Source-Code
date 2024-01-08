@@ -61,13 +61,19 @@
 		 - Mask Example
 		 - Packing Color Information
       11. Challenge: SFML Window.
-          * Encode and decode a floating point number.
+          - Encode and decode a floating point number.
 			- Take a binary representation and print the float.
 			- Take the float and print binary representation.
+		  - Write a program that prints the information about  basic C++ data types in a table. It should print the type, how many bytes, the range and a short description. Do this for , int, double, float, long double, char and unsigned int.
+		  - The calory count example from your Qt6 class.
 
-5. Modern C++ Formatting: std::format [ADJUSTED]
-      1. Overview
-      2. Challenge
+5. Input and Output Streams and  Formatting through std::format [ADJUSTED]
+      1. std::cin and std::cout
+	  2. stream formatting
+      3. std::format
+	  4. Challenge: 
+		- Output tabular data through stream formatting
+		- Output tabular date through std::format.
 
 6. Literals, constants and compile time programming. [ADJUSTED] Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
     1. Literals
