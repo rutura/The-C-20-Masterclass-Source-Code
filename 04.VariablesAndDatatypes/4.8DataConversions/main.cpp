@@ -69,6 +69,7 @@ int main() {
         //Overflow 
 
     unsigned char data {250};
+    fmt::println("unsigned char min: {} and max: {}", std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max());
 
     ++data;
     fmt::println("data : {}", static_cast<int>(data));

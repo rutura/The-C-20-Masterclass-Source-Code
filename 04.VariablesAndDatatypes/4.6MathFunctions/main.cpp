@@ -1,6 +1,11 @@
 /*
     . Exploring some math functions.
 */
+/**
+ * Changes;
+ * - Rounding of negative doubles
+ * - Type of the result of round()
+ */
 #include <fmt/format.h>
 
 int main(){
@@ -38,9 +43,14 @@ int main(){
     //sqrt
     fmt::println("The square root of 81 is : {}", std::sqrt(81));
 
-    //round. Halfway points are rounded away from 0. 2,5 is rounded to 5 for example
+    //round. Halfway points are rounded away from 0. 2.5 is rounded to 3 for example
     fmt::println("3.654 rounded to : {}", std::round(3.654));
     fmt::println("2.5 is rounded to : {}", std::round(2.5));
     fmt::println("2.4 is rounded to : {}", std::round(2.4));
+    fmt::println("-2.4 is rounded to : {}", std::round(-2.4));
+    // round: type of result
+    auto result = std::round(-2.4);
+    fmt::println("Type of rounded -2.4: {}", typeid(result).name());
+
     return 0;
 }
