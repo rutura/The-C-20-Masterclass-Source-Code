@@ -9,6 +9,7 @@ project(Template  VERSION 1.0.0 LANGUAGES CXX)
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
 set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
 
+
 find_package(fmt CONFIG REQUIRED)
 
 add_executable(rooster main.cpp)
