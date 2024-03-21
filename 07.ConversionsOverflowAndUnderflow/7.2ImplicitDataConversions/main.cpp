@@ -1,5 +1,23 @@
-#include <iostream>
+#include <fmt/format.h>
 
+/*
+ * - Changes the stream to fmt's
+ * - Demonstrated more on the implicit conversions
+ *  Cppreference: https://en.cppreference.com/w/cpp/language/implicit_conversion
+ */
+void func(double val) {//an int or any other variable when passed, is implicity converted to duoble
+	fmt::println("val: {}", val);
+}
+double func2() {
+	int val = 20;
+	return val; // implicitly converted to double
+}
+
+struct ThisClass {
+	operator int() const { return val; }
+private:
+	double val {20.5f};
+};
 
 int main(){
 
@@ -15,10 +33,9 @@ int main(){
     int units {10};
     
     auto total_price = price * units; // units will be implicitly converted to double
-	
-	std::cout << "Total price : " << total_price << std::endl;
-	std::cout << "sizeof total_price : " << sizeof(total_price) << std::endl;
 
+	fmt::println("Total price: {}", total_price);
+	fmt::println("Size of total price: {}", sizeof(total_price));
 
 	//Implicit conversions in assignments
 	// The assignment operation is going to cause an implicit
@@ -26,9 +43,37 @@ int main(){
 	int x;
     double y {45.44};
     x = y; // double to int
-	std::cout << "The value of x is : " << x << std::endl; // 45
-	std::cout << "sizeof x : " << sizeof(x) << std::endl;// 4
-	
-   
+	fmt::println("The value of x is : {}", x);// 45
+	fmt::println("sizeof x: {}", sizeof(x)); // 4
+
+
+	// function implicit ocnversion
+	int val = 20;
+	func(val);// val is implicitly converted to double
+
+	double r_val = func2();
+
+	fmt::println("returned val: {}", r_val);
+
+	// switch case implicit coversios
+	ThisClass this_class;
+	switch (this_class) {
+		case 20:
+			fmt::println("Class value: 20");
+		break;
+		case 21:
+			fmt::println("CLass value: 21");
+			break;
+		default:
+			fmt::println("Failed to convert");
+			break;
+	}
+
+	// if statement implicit conversions
+	double my_val = 40.5f;
+	if(my_val) {// if T2 is bool
+		fmt::println("my_val implicitly converted");
+	}
+
     return 0;
 }
