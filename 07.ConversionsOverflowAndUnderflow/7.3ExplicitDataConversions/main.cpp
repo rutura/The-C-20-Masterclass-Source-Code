@@ -5,13 +5,12 @@
  *
  */
 
-class Interface {
-protected:
+struct Interface {
 	virtual void interface_func() = 0;
 };
-class InterfaceImpl: public Interface {
+struct InterfaceImpl: Interface {
 	void interface_func() override {
-		fmt::println("interface func");
+		fmt::println("{}", __PRETTY_FUNCTION__);
 	}
 };
 struct ConstCastTestClass {
@@ -54,6 +53,13 @@ int main(){
 
 	// static cast with classes
 	InterfaceImpl(interface_impl);
+	Interface& interface = interface_impl;
+	static_cast<InterfaceImpl&>(interface);// downcast to child
+	interface.interface_func();
+
+	//reinterpret-cast
+	Interface* new_interface = reinterpret_cast<Interface *>(&interface_impl);
+	new_interface->interface_func();
 
 	// const cast
 	const int val1 = 32;
@@ -65,6 +71,5 @@ int main(){
 	const_cast_test.setVal(val2);
 	fmt::println("ConstCastTestClass val after set:{}", const_cast_test.getVal());
 
-	//
     return 0;
 }
