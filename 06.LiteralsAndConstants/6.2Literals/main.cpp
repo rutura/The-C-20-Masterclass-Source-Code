@@ -1,12 +1,19 @@
 #include <iostream>
 
-
+/*
+ *cppreference: https://en.cppreference.com/w/cpp/language/integer_literal
+ * - auto to derive type of literal(compile time)
+ * - static assert to confirm the type due to the literal
+ * - literal converts int to type defined by literal.
+ */
 int main(){
-
-   
     //Literal types : u and l combinations for unsigned and long.
-    unsigned char unsigned_char {53u};// 555U would fail because of narrowing
-    
+    auto unsigned_value  {53u};// converts int to unsigned
+    static_assert(std::is_same_v<decltype(unsigned_value), unsigned>);
+
+    auto unsigned_value_2 {55U};
+    static_assert(std::is_same_v<decltype(unsigned_value), unsigned>);
+
     //2 Bytes
     short short_var {-32768} ; //  No special literal type for short)
     short int short_int {455} ; //  No special literal type for short
@@ -22,16 +29,25 @@ int main(){
     
     
     //4 or 8 Bytes
-    long long_var {88L}; // 4 OR 8 Bytes
-    long int long_int {33L};
-    signed long signed_long {44l};
-    signed long int signed_long_int {44l};
-    unsigned long int unsigned_long_int {555ul};
+    auto long_var {88L}; // 4 OR 8 Bytes
+    static_assert(std::is_same_v<decltype(long_var), long>);
+    auto long_int {33L};// long int
+    static_assert(std::is_same_v<decltype(long_int), long int>);
+    auto signed_long {44l};// signed long
+    static_assert(std::is_same_v<decltype(signed_long), signed long>);
+    auto signed_long_int {44l};// signed long int
+    static_assert(std::is_same_v<decltype(signed_long_int), signed long int>);
+    auto unsigned_long_int {555ul};// unsigned long int
+    static_assert(std::is_same_v<decltype(unsigned_long_int), unsigned long int>);
 
-    long long long_long {888ll};// 8 Bytes
-    long long int long_long_int {999ll};
-    signed long long signed_long_long {444ll};
-    signed long long int signed_long_long_int{1234ll};
+    auto long_long {888ll};// 8 Bytes
+    static_assert(std::is_same_v<decltype(long_long), long long>);
+    auto long_long_int {999ll};// long long int
+    static_assert(std::is_same_v<decltype(long_long_int), long long int>);
+    auto signed_long_long {444ll};
+    static_assert(std::is_same_v<decltype(signed_long_long), signed long long >);
+    auto signed_long_long_int{1234ll};
+    static_assert(std::is_same_v<decltype(signed_long_long_int), signed long long int>);
     
     //Grouping Numbers : C++14 and onwards
     unsigned int prize  {1'500'00'0u};
@@ -49,7 +65,8 @@ int main(){
     //std::cout << "game_score : " << game_score << std::endl;
 
     //With number systems - Hex : prefix with 0x
-    unsigned int hex_number{ 0x22BU}; // Dec 555
+    auto hex_number{ 0x22BU}; // Dec 555
+    static_assert(std::is_same_v<decltype(hex_number), unsigned int>);
     int hex_number2 {0x400};// Dec 1024
     std::cout << std::hex <<  "The hex number is : " << hex_number << std::endl;
     std::cout << std::dec <<  "The hex number2 is : " << hex_number2 << std::endl;
@@ -82,6 +99,9 @@ int main(){
     std::cout << "The number literal is : " << number_literal << std::endl;
     std::cout << "The fractional literal is : " << fractional_literal << std::endl;
     std::cout << "The string literal is : " << string_literal << std::endl;
-   
+
+    // unsigned long long - 64 bits
+    auto long_long_value_1{184467'440737'0'95505'92LLU};
+    static_assert(std::is_same_v<decltype(long_long_value_1), unsigned long long>);
     return 0;
 }
