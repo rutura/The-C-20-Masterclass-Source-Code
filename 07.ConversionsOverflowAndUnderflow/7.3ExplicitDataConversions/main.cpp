@@ -2,7 +2,8 @@
 
 /*
  *cppreference: https://en.cppreference.com/w/cpp/language/explicit_cast
- *
+ * - Added examples on reinterpret_cast, and const_cast
+ * -
  */
 
 struct Interface {
