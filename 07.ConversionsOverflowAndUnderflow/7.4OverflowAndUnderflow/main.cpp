@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -7,33 +7,31 @@ int main(){
     unsigned char data {250};
 
     ++data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
     ++data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
     ++data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
     ++data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
     ++data; 
-    std::cout << "data : " << std::hex <<  static_cast<int>(data) << std::endl; // 255
+    fmt::println("data : {0:x}" ,static_cast<int>(data) ); // 255 in hex(ff)
 
     ++data;  // Overflow
-    std::cout << "data : " << static_cast<int>(data) << std::endl; // 256
-
-    std::cout << std::dec ;
+    fmt::println("data : {}" , static_cast<int>(data) ); // 256
 
 
     data = 1;
 
     --data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
     --data;
-    std::cout << "data : " << static_cast<int>(data) << std::endl;
+    fmt::println("data : {}" , static_cast<int>(data) );
 
    
     return 0;
