@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <bitset>
 
 
@@ -6,53 +6,45 @@ int main(){
 
 	unsigned short int value {0xff0u};
 
-	std::cout << "Size of short int " << sizeof(short int) <<  std::endl;//  16 bits
+	fmt::println("Size of short int : {}" ,  sizeof(short int));//  16 bits
 	
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, dec : {}",  std::bitset<16>(value).to_string(), value);
 
     //Shift left by one bit
     value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, , dec : {}" ,  std::bitset<16>(value).to_string() , value);
 
     //Shift left by one bit
     value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, dec : {}", std::bitset<16>(value).to_string() , value);
 
     //Shift left by one bit
     value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value :{}, dec : {} ",  std::bitset<16>(value).to_string() , value);
 
 
     //Shift left by one bit
     value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, , dec : {}", std::bitset<16>(value).to_string(),value);
 
     //Shift left by one bit
     value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, dec : {}", std::bitset<16>(value).to_string(), value);
 
     //Shift right by one bit
     value = static_cast<unsigned short int>(value >> 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, dec : {}", std::bitset<16>(value).to_string(), value);
 
 
     //Shift by multiple bits in one go
     //Shift right by four bits 
     value = static_cast<unsigned short int>(value >> 4);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+    fmt::println("value : {}, dec : {}", std::bitset<16>(value).to_string() , value);
 
 
 
     //
-    std::cout << "value : " << (value >> 1) << std::endl;
+    fmt::println("value : {}",  (value >> 1));
 
 
 
