@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -11,58 +11,51 @@ int main(){
     
     int * p_score { scores};
     
-    /*
-    std::cout << "Values in scores array (p_score pointer increment) : " << std::endl;
+    fmt::println( "Values in scores array (p_score pointer increment) : " );
 	
-    std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+    fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
 	
-	std::cout << "Address : " << p_score << " value : " <<  *(p_score) << std::endl;
+	fmt::println( "Address : {},  value : {}" , fmt::ptr(p_score) , *(p_score) );
 	++p_score; // Moves froward by sizeof(int) : 4 bytes
-	std::cout << std::endl;
-    */
 
-   /*
-	std::cout << std::endl;
-	std::cout << "Explicit addition of integer : " << std::endl;
+	/*
+	fmt::println( "Explicit addition of integer : " );
 	p_score = scores; // Reset the pointer to the start of the array
-	std::cout << "scores[4] : " << *(p_score + 4) << std::endl; // Moves forward by 4 * sizeof(int)
+	fmt::println( "scores[4] : {}" , *(p_score + 4) ); // Moves forward by 4 * sizeof(int)
 	*/
 
     //Can use loops to print these things out : easier
-    /*
-    p_score = scores;
+    /*p_score = scores;
     
-	std::cout << std::endl;
-    std::cout << "Pointer arithmetic on p_scores pointer and a for loop: " << std::endl;
+    fmt::println( "Pointer arithmetic on fmt::ptr(p_score)s pointer and a for loop: " );
     for ( size_t i{0} ; i < std::size(scores) ; ++i){
-        std::cout <<"Value : "<< *(p_score + i) << std::endl; // scores[i]
-    }
-    */
+        fmt::println("Value : {}", *(p_score + i) ); // scores[i]
+    }*/
 
 
     //Can also do arithmetic on the array name
@@ -70,42 +63,34 @@ int main(){
     /*
     p_score = scores;
     
-	std::cout << std::endl;
-    std::cout << "Pointer arithmetic on array name: " << std::endl;
+    fmt::println( "Pointer arithmetic on array name: " );
     for ( size_t i{0} ; i < std::size(scores) ; ++i){
-        std::cout <<"Value : "<< *(scores + i) << std::endl;
+        fmt::println("Value : {}", *(scores + i) );
 	}
-    */
+	*/
 
     // Can Print the elements in reverse order
-    /*
-	std::cout<< std::endl;
-    std::cout << "Elements in reverse order with decrementing pointer arithmetic: " << std::endl;
+    /*fmt::println( "Elements in reverse order with decrementing pointer arithmetic: " );
     for ( size_t i{std::size(scores)} ; i > 0 ; --i){
-        std::cout <<"Value : "<< *(scores + i -1) << std::endl;	// Here we do the -1 thing, because
+        fmt::println("Value : {}", *(scores + i -1) );	// Here we do the -1 thing, because
 																//scores is already pointing to the first
 																//element in the array.
-    }
-    */
+    }*/
 
 	//Print in reverse order with -- operator on p_score
-    /*
-	std::cout<< std::endl;
-    std::cout << "Elements in reverse order -- arithmetic on the p_scores pointer: " << std::endl;
+    /*fmt::println( "Elements in reverse order -- arithmetic on the p_scores pointer: " );
     p_score = scores + std::size(scores) -1;
 	for ( size_t i{std::size(scores)} ; i > 0 ; --i){
-        std::cout <<"Value : "<< *(p_score--) << std::endl;		// Here we do the -1 thing, because
+        fmt::println("Value : {}", *(p_score--) );		// Here we do the -1 thing, because
 																//scores is already pointing to the first
 																//element in the array.
-    }
-    */
+    }*/
 
     // Can Print the elements in reverse order with array index
     /*
-	std::cout<< std::endl;
-    std::cout << "Elements in reverse order with array index notation: " << std::endl;
+    fmt::println( "Elements in reverse order with array index notation: " );
     for ( size_t i{std::size(scores)} ; i > 0 ; --i){
-        std::cout <<"Value : "<< scores [ i -1] << std::endl;
+        fmt::println("Value : {}", scores [ i -1] );
     }
     */
 
@@ -115,10 +100,9 @@ int main(){
     *(scores + 1) = 32; // Equivalent to scores[1] = 32 . Pointer arithmetic on array name
     *(p_score + 2) = 33; // Equivalent to scores[2] = 33 . Pointer arithmetic on p_score pointer
     
-	std::cout << std::endl;
-	std::cout << "Printing out the array after modification of 3 first elements: " << std::endl;
+	fmt::println( "Printing out the array after modification of 3 first elements: " );
     for ( size_t i{0} ; i < std::size(scores) ; ++i){
-        std::cout <<"Value : "<< scores[i] << std::endl;
+        fmt::println("Value : {}", scores[i] );
     }
 	
 	

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -9,18 +9,16 @@ int main(){
     int * p_arr0 {arr0};
 
     //Print arr0
-    std::cout << "arr0 : ";
+    fmt::println( "arr0 : ");
     for (size_t i{}; i < std::size(arr0); ++i) {
-        std::cout << p_arr0[i] << " ";
+        fmt::print(  "{} ", p_arr0[i]);
     }
-    std::cout << std::endl;
-
     //Print arr1
-    std::cout << "arr1 : ";
+    fmt::println("");
+    fmt::println( "arr1 : ");
     for (size_t i{}; i < std::size(arr1); ++i) {
-        std::cout << p_arr1[i] << " ";
+        fmt::print( "{} ", p_arr1[i]);
     }
-    std::cout << std::endl;
 
     //Swapping data the hard way
     /*
@@ -56,18 +54,18 @@ int main(){
     p_arr0 = temp;
 
     //Print arr0
-    std::cout << "arr0 : ";
+    fmt::println("");
+    fmt::println( "arr0 : ");
     for (size_t i{}; i < std::size(arr0); ++i) {
-        std::cout << p_arr0[i] << " ";
+        fmt::print( "{} ", p_arr0[i]);
     }
-    std::cout << std::endl;
 
     //Print arr1
-    std::cout << "arr1 : ";
+    fmt::println("");
+    fmt::println( "arr1 : ");
     for (size_t i{}; i < std::size(arr1); ++i) {
-        std::cout << p_arr1[i] << " ";
+        fmt::print( "{} ", p_arr1[i]);
     }
-    std::cout << std::endl;
 
 
 

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -8,17 +8,16 @@ int main(){
     // For loops
 	
 	
-	std::cout << "Incrementing for loop : " << std::endl;
+	fmt::println( "Incrementing for loop : " );
     for (size_t i{} ; i < COUNT ; ++i){
-        std::cout << "i  : " << i << std::endl;
+        fmt::println( "i  : {}", i );
     }
 	
 	
-	std::cout << std::endl;
-	std::cout << "Decrementing for loop : " << std::endl;
+	fmt::println( "Decrementing for loop : " );
 	
     for(size_t i{COUNT} ; i > 0 ; --i){
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
     }
     */
 
@@ -28,23 +27,21 @@ int main(){
     //While loop
     /*
     //Incrementing while
-	std::cout << std::endl;
-	std::cout << "Incrementing while" << std::endl;
+	fmt::println( "Incrementing while" );
 	
     size_t i{0};
     
     while( i < COUNT){
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
         ++i;
     }
     
     //Decrementing while
-	std::cout << std::endl;
-	std::cout << "Decrementing while : " << std::endl;
+	fmt::println( "Decrementing while : " );
     i = COUNT;
     
     while( i > 0){
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
         --i;
     }
     */
@@ -52,24 +49,22 @@ int main(){
    //Do while loop
     /*
 	//Incrementing do while
-    std::cout << std::endl;
-	std::cout << "Incrementing do while" << std::endl;
+	fmt::println( "Incrementing do while" );
     size_t i = 0;
     
     do {
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
         ++i;
         
     }while ( i < COUNT);
     
     
     //Decrementing do while
-	std::cout << std::endl;
-	std::cout << "Decrementing do while" << std::endl;
+	fmt::println( "Decrementing do while" );
     i = COUNT;
     
     do {
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
         --i;
     }while ( i > 0);
     */
@@ -77,12 +72,11 @@ int main(){
 
    //Infinite loop
     //Decrementing do while
-	std::cout << std::endl;
-	std::cout << "Decrementing do while" << std::endl;
+	fmt::println( "Decrementing do while" );
     unsigned int i = COUNT;
     
     do {
-        std::cout << "i : " << i << std::endl;
+        fmt::println( "i : {}", i );
         --i;
     }while ( i >= 0);
 

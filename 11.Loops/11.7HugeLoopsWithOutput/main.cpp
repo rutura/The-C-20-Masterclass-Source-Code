@@ -1,21 +1,21 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
     /*
     for(size_t i{0} ; i < 100000 ; ++i){
-        //std::cout << "i : " << i << std::endl;
+        //fmt::println( "i : {}" , i );
     }
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
     */
 
    size_t i{0}; // Iterator
 
    while(i < 100000){
-        //std::cout << "i : " << i << std::endl; 
+        //fmt::println( "i : {}" , i );
         ++i;     
    }
-   std::cout << "Done!" << std::endl;
+   fmt::println( "Done!" );
    
     return 0;
 }

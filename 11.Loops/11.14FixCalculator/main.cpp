@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -7,50 +8,48 @@ int main(){
     double operand2;
     bool end {false};
     
-    std::cout << "Welcome to Awesome Calculator"<< std::endl;
+    fmt::println( "Welcome to Awesome Calculator");
     
     while((end == false)){
 		//Do some processing
-        std::cout << "--------------------------------------------" << std::endl;
-        std::cout << "What operation do you want help with? " << std::endl;
-        std::cout << "+,-,* and / are supported. Please choose one and type below"<< std::endl;
-        std::cout << "Your operation : ";
+        fmt::println( "--------------------------------------------" );
+        fmt::println( "What operation do you want help with? " );
+        fmt::println( "+,-,* and / are supported. Please choose one and type below");
+        fmt::print( "Your operation : ");
         std::cin >> operation;
 
         if( (operation != '+') &&  
             (operation != '-') &&
             (operation != '*') &&
             (operation != '/')){
-                std::cout << "operation " << operation << " NOT SUPPORTED!" << std::endl;
+                fmt::println( "operation {} NOT SUPPORTED!", operation );
                 continue;
 
             }
         
-        std::cout << std::endl;
-        std::cout << "Please type in your two operands separated by a space and hit enter: ";
+        fmt::print( "Please type in your two operands separated by a space and hit enter: ");
         std::cin >> operand1 >> operand2;
-        std::cout <<std::endl;
-        
+
 		switch(operation){
-        case '+' : 
-            std::cout << operand1 << " + " << operand2 << " = " << (operand1 + operand2) << std::endl;
+		    case '+' :
+            fmt::println("{} + {} = {}", operand1, operand2, (operand1 + operand2));
             break;
-        case '-' : 
-            std::cout << operand1 << " - " << operand2 << " = " << (operand1 - operand2) << std::endl;
+        case '-' :
+            fmt::println("{} - {} = {}", operand1, operand2, (operand1 - operand2));
             break;
-        case '*' : 
-            std::cout << operand1 << " * " << operand2 << " = " << (operand1 * operand2) << std::endl;
+        case '*' :
+            fmt::println("{} * {} = {}", operand1, operand2, (operand1 * operand2));
             break;
-        case '/' : 
-            std::cout << operand1 << " / " << operand2 << " = " << (operand1 / operand2) << std::endl;
+        case '/' :
+            fmt::println("{} / {} = {}", operand1, operand2, (operand1 / operand2));
             break;
         default :
-            std::cout << operation << " operation not supported" << std::endl;
+            fmt::println( " operation not supported", operation );
             break;
 		}
 	
 		
-        std::cout << "Continue ? ( Y | N) : ";
+        fmt::print( "Continue ? ( Y | N) : ");
         
         char go_on;
         std::cin >> go_on;
@@ -65,7 +64,7 @@ int main(){
         }
     }
     
-    std::cout << "Done helping out. BYE!" << std::endl;
+    fmt::println( "Done helping out. BYE!" );
 
     return 0;
 }

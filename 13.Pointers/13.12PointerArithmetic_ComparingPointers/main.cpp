@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -12,14 +12,14 @@ int main(){
     
     //The further you go in the array, the bigger the address
     
-    std::cout << "Comparing pointers : " <<std::boolalpha <<  std::endl;
+    fmt::println( "Comparing pointers : " );
 	
-    std::cout << "pointer1 > pointer2 : " <<  (pointer1 > pointer2) << std::endl;
-    std::cout << "pointer1 < pointer2 : " << (pointer1 < pointer2) << std::endl;
-    std::cout << "pointer1 >= pointer2 : " <<  (pointer1 >= pointer2) << std::endl;
-    std::cout << "pointer1 <= pointer2: " << (pointer1 <= pointer2) << std::endl;
-    std::cout << "pointer1 == pointer2 : " <<  (pointer1 == pointer2) << std::endl;
-    std::cout << "pointer1 != pointer2 : " << (pointer1 != pointer2) << std::endl;
+    fmt::println( "pointer1 > pointer2 : {}" ,  (pointer1 > pointer2) );
+    fmt::println( "pointer1 < pointer2 : {}" , (pointer1 < pointer2) );
+    fmt::println( "pointer1 >= pointer2 : {}" ,  (pointer1 >= pointer2) );
+    fmt::println( "pointer1 <= pointer2: {}" , (pointer1 <= pointer2) );
+    fmt::println( "pointer1 == pointer2 : {}" ,  (pointer1 == pointer2) );
+    fmt::println( "pointer1 != pointer2 : {}" , (pointer1 != pointer2) );
     
     return 0;
 }

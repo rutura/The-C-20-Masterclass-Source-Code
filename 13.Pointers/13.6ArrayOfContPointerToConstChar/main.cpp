@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -14,10 +14,9 @@ int main(){
     
 
     //Print out the students
-	std::cout << std::endl;
-    std::cout << "Printing out the students : " << std::endl;
+    fmt::println( "Printing out the students : " );
     for ( const char * student : students){
-        std::cout << student << std::endl;
+        fmt::println( "{}", student );
     }
 
 
@@ -29,10 +28,9 @@ int main(){
 
 
    //Print out the students
-	std::cout << std::endl;
-    std::cout << "Printing out the students : " << std::endl;
+    fmt::println( "Printing out the students : " );
     for ( const char * student : students){
-        std::cout << student << std::endl;
+        fmt::println( "{}", student );
     }
    
     return 0;

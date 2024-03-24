@@ -1,6 +1,4 @@
-#include <iostream>
-
-
+#include <fmt/format.h>
 
 int main(){
 
@@ -9,7 +7,7 @@ int main(){
 	
     /*
     for(size_t i {0} ; i < 10 ; ++i){
-        std::cout << "value : " << bag_of_values[i] << std::endl;
+        fmt::println( "value : {}" , bag_of_values[i] );
     }
     */
 	
@@ -17,7 +15,7 @@ int main(){
     /*
     for (int value : bag_of_values){
         //value holds a copy of the current iteration in the whole bag
-        std::cout << " value : " << value << std::endl;
+        fmt::println( " value : {}" , value );
     }
     */
 
@@ -26,14 +24,14 @@ int main(){
    /*
     for (int value : {1,2,3,4,5,6,7,8,9,10}){
         //value holds a copy of the current iteration in the whole bag
-        std::cout << " value : " << value << std::endl;
+        fmt::println( " value : {}" , value );
     }
     */
 
    //Auto type deduction
 	for (auto value : {1,2,3,4,5,6,7,8,9,10}){
         //value holds a copy of the current iteration in the whole bag
-        std::cout << " value : " << value << std::endl;
+        fmt::println( " value : {}" , value );
     }
    
     return 0;
