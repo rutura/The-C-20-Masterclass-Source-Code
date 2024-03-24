@@ -1,5 +1,4 @@
-#include <iostream>
-#include <string>
+#include <fmt/format.h>
 
 
 // Tools
@@ -18,12 +17,12 @@ int main(){
     switch (double strength{3.56};tool)
     {
         case Pen : {
-             std::cout << "Active tool is Pen. strength : " <<  strength << std::endl;
+             fmt::println( "Active tool is Pen. strength : {}",  strength );
         }
         break;
 
         case Marker : {
-             std::cout << "Active tool is Marker. strength : " <<  strength << std::endl;
+             fmt::println( "Active tool is Marker. strength : {}",  strength );
         }
         break;
 
@@ -31,22 +30,22 @@ int main(){
         case Eraser :
         case Rectangle : 
         case Circle : {
-             std::cout << "Drawing Shapes. strength : " <<  strength << std::endl;
+             fmt::println( "Drawing Shapes. strength : {}",  strength );
         }
         break;
 
         case Ellipse : {
-             std::cout << "Active tool is Ellipse. strength : " <<  strength << std::endl;
+             fmt::println( "Active tool is Ellipse. strength : {}",  strength );
         }
         break;
     
         default: {
-            std::cout << "No match found. strength : " <<  strength << std::endl;
+            fmt::println( "No match found. strength : {}",  strength );
         }
         break;
     }
 
-    std::cout << "Moving on" << std::endl;
+    fmt::println( "Moving on" );
     //strength++;
 
 

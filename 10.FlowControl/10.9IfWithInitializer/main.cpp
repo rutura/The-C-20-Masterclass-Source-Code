@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 
@@ -8,19 +8,19 @@ int main(){
 	bool go {true};
 
 	if(int speed {10};go){
-        std::cout << "speed : " << speed << std::endl;
+        fmt::println( "speed : {}" , speed );
 		
 		if(speed > 5){
-			std::cout << "Slow down!" << std::endl;
+			fmt::println( "Slow down!" );
 		}else{
-			std::cout << "All good!" << std::endl;
+			fmt::println( "All good!" );
 		}
 	}else{
-        std::cout << "speed : " << speed << std::endl;
-		std::cout << "Stop" << std::endl;
+        fmt::println( "speed : {}" , speed );
+		fmt::println( "Stop" );
 	}
 
-    //std::cout << "Out of the if block , speed : " << speed << std::endl;
+    //fmt::println( "Out of the if block , speed : {}" , speed );
    
     return 0;
 }

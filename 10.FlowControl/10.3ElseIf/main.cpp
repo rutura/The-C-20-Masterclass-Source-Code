@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 // Tools
 const int Pen{ 10 }; 
@@ -15,26 +14,26 @@ int main(){
     int tool {Eraser};
 
     if (tool == Pen) {
-        std::cout << "Active tool is pen" << std::endl;
+        fmt::println( "Active tool is pen" );
         //Do the actual painting
     }
     else if (tool == Marker) {
-        std::cout << "Active tool is Marker" << std::endl;
+        fmt::println( "Active tool is Marker" );
     }
     else if (tool == Eraser) {
-        std::cout << "Active tool is Eraser" << std::endl;
+        fmt::println( "Active tool is Eraser" );
     }
     else if (tool == Rectangle) {
-        std::cout << "Active tool is Rectangle" << std::endl;
+        fmt::println( "Active tool is Rectangle" );
     }
     else if (tool == Circle) {
-        std::cout << "Active tool is Circle" << std::endl;
+        fmt::println( "Active tool is Circle" );
     }
     else if (tool == Ellipse) {
-        std::cout << "Active tool is Ellipse" << std::endl;
+        fmt::println( "Active tool is Ellipse" );
     }
 
-    std::cout << "Moving on" << std::endl;
+    fmt::println( "Moving on" );
     
     return 0;
 }

@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 
 int main(){
@@ -19,28 +18,28 @@ int main(){
         x = 6;
         x++;
         //z =6;
-        std::cout << "x : " << x << std::endl;
-        std::cout << "Statement1" << std::endl;
-        std::cout << "Statement2" << std::endl;
+        fmt::println( "x : {}", x );
+        fmt::println( "Statement1" );
+        fmt::println( "Statement2" );
         break;
 
     case 1 : 
         int z;
         my_var++;
         y = 5;
-        std::cout << "y : " << y << std::endl;
-        std::cout << "Statement3" << std::endl;
-        std::cout << "Statement4" << std::endl;
+        fmt::println( "y : {}", y);
+        fmt::println( "Statement3" );
+        fmt::println( "Statement4" );
         break;
     
     default:
         int u;
         z = 10;
-        std::cout << "Statement5" << std::endl;
-        std::cout << "Statement6" << std::endl;
+        fmt::println( "Statement5" );
+        fmt::println( "Statement6" );
         break;
     }
-    std::cout << "Moving on..." << std::endl;
+    fmt::println( "Moving on..." );
    
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -6,9 +6,9 @@ int main(){
    constexpr bool condition {false};
 
    if constexpr (condition){
-       std::cout << "Condition is true" << std::endl;
+       fmt::println( "Condition is true" );
    }else{
-       std::cout << "Condition is false" << std::endl;
+       fmt::println( "Condition is false" );
    }
     return 0;
 }
