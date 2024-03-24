@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -14,14 +14,12 @@ int main(){
     //We shift to make sure the color byte of interest is in the 
     // lower index byte position so that we can interpret that as an integer,
     // which will be between 0 and 255. 
-    
-	//Set some format options
-	std::cout << std::dec << std::showbase << std::endl;
+
 	
-    std::cout << "Red is : " <<  ((my_color & red_mask) >> 24) << std::endl;
-    std::cout << "Green is : " <<  ((my_color & green_mask) >> 16) << std::endl;
-    std::cout << "Blue is : " <<  ((my_color & blue_mask) >> 8) << std::endl;
-    std::cout << "Alpha is : " <<  ((my_color & alpha_mask) >> 0) << std::endl;
+    fmt::println( "Red is : {0:d}" ,  ((my_color & red_mask) >> 24) );
+    fmt::println( "Green is : {0:d}" ,  ((my_color & green_mask) >> 16) );
+    fmt::println( "Blue is : {0:d}" ,  ((my_color & blue_mask) >> 8) );
+    fmt::println( "Alpha is : {0:d}" ,  ((my_color & alpha_mask) >> 0) );
     
     return 0;
 }
