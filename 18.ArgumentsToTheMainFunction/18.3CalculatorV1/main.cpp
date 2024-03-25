@@ -1,32 +1,28 @@
-#include <iostream>
+#include <fmt/format.h>
 
-int main(){
-
-	double first_number {5.0};
-    double second_number {33.1};
+int main() {
+    double first_number{5.0};
+    double second_number{33.1};
     char c{'+'};
-    
-    switch(c){
+
+    switch (c) {
         case '+':
-        std::cout << first_number << " + " << second_number << " = " 
-                << first_number + second_number << std::endl;
-        break;
-        
+            fmt::println("{} + {} = {}", first_number, second_number, first_number + second_number);
+            break;
+
         case '-':
-        std::cout << first_number << " - " << second_number << "=" 
-                << first_number - second_number << std::endl;
-        break;
-        
+            fmt::println("{} - {} = {}", first_number, second_number, first_number - second_number);
+            break;
+
         case 'x':
-        std::cout << first_number << " * " << second_number << " = " 
-                << first_number * second_number << std::endl;
-        break;
-        
+            fmt::println("{} x {} = {}", first_number, second_number, first_number * second_number);
+
+            break;
+
         case '/':
-        std::cout << first_number << " / " << second_number << " = " 
-                << first_number / second_number << std::endl;
-        break;
-		
+            fmt::println("{} / {} = {}", first_number, second_number, first_number / second_number);
+
+            break;
     }
-	return 0;
+    return 0;
 }
