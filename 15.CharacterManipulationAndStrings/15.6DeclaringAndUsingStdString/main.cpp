@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 int main(){
@@ -16,23 +16,23 @@ int main(){
 											// starting at index 6, taking 5 characters.
 											//Will contain World.
 	
-	std::cout << "full_name : " << full_name << std::endl;
-	std::cout << "planet : " << planet << std::endl;
-	std::cout << "prefered_planet : " << prefered_planet << std::endl;
-	std::cout << "message : " << message << std::endl;
-	std::cout << "weird_message : " << weird_message << std::endl;
-	std::cout << "greeting : " << greeting << std::endl;
-	std::cout << "saying_hello : " << saying_hello << std::endl;
+	fmt::println( "full_name : {}" , full_name );
+	fmt::println( "planet : {}" , planet );
+	fmt::println( "prefered_planet : {}" , prefered_planet );
+	fmt::println( "message : {}" , message );
+	fmt::println( "weird_message : {}" , weird_message );
+	fmt::println( "greeting : {}" , greeting );
+	fmt::println( "saying_hello : {}" , saying_hello );
 
     //Changing std::string at runtime
     planet = "Earth. Where the sky is blue Earth. Where the sky is blue Earth. Where ";
-    std::cout << "planet : " << planet << std::endl;
+    fmt::println( "planet : {}" , planet );
 
 
     //Use a raw array
     const char * planet1 {"Earth. Where the sky is blue Earth."};
     planet1 = "Earth. Where the sky is blue Earth. Where the sky is blue Earth. Where ";
-    std::cout << "planet1 : " << planet1 << std::endl;
+    fmt::println( "planet1 : {}" , planet1 );
 
 
 

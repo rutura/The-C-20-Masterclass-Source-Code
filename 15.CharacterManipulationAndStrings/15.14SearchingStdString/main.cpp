@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 
@@ -14,23 +14,23 @@ int main(){
     std::string search_for{"ter"};
     
     size_t found_pos = string1.find(search_for);
-    std::cout << "find('ter') : index [" << found_pos << "]" << std::endl;// index : 2
+    fmt::println( "find('ter') : index [{}]",  found_pos);// index : 2
 	
     //find red
     search_for = "red";
     found_pos = string1.find(search_for);
-    std::cout << "find('red') : index [" << found_pos << "]" << std::endl;// 13
+    fmt::println( "find('red') : index [{}]", found_pos);// 13
 
     //Find something that isn't there
     search_for = "chicken";
     found_pos = string1.find(search_for);
-    std::cout << "find('chicken') : index ["<< found_pos << "]" << std::endl;//huge number
+    fmt::println( "find('chicken') : index [{}]", found_pos  );//huge number
 
     //std::string::npos
-    std::cout << "npos : " << std::string::npos << std::endl;
+    fmt::println( "npos : {}" , std::string::npos );
 
     size_t large = -1;
-    std::cout << "large : " << large << std::endl;
+    fmt::println( "large : {}" , large );
     */
 
 
@@ -42,9 +42,9 @@ int main(){
     
     size_t found_pos = string1. find(search_for);
     if(found_pos == std::string::npos){
-        std::cout << "Could not find the string 'red' : " << std::endl;
+        fmt::println( "Could not find the string 'red' : " );
     }else{
-        std::cout << "'red' found starting at position : " << found_pos << std::endl;
+        fmt::println( "'red' found starting at position : {}",  found_pos );
     }
 	
 	
@@ -53,9 +53,9 @@ int main(){
     found_pos = string1.find(search_for);
     
     if(found_pos == std::string::npos){
-        std::cout << "Could not find the string 'chicken'. " << std::endl;
+        fmt::println( "Could not find the string 'chicken'. " );
     }else{
-        std::cout << "'chicken' found starting at position : " << found_pos << std::endl;
+        fmt::println( "'chicken' found starting at position : {}",  found_pos );
     }
     */
 
@@ -65,19 +65,17 @@ int main(){
 	//Find(2)	
 	//Can specify the position where we want the search to start
     //using the second parameter of the method
-    /*
-    std::string string1{"Water was poured in the heater"};
+    /*std::string string1{"Water was poured in the heater"};
     std::string search_for{"ter"};
 
     size_t found_pos = string1.find(search_for); 
-    std::cout << "ter found at position : " << found_pos << std::endl;
+    fmt::println( "ter found at position : {}",  found_pos );
     
     found_pos = string1.find(search_for,0);
-    std::cout << "ter found at position : " << found_pos << std::endl;
+    fmt::println( "ter found at position : {}",  found_pos );
     
     found_pos = string1.find(search_for,10);
-    std::cout << "ter found at position : " << found_pos << std::endl;
-    */
+    fmt::println( "ter found at position : {}",  found_pos );*/
 
 
 	//Find(3)
@@ -90,18 +88,10 @@ int main(){
 	
 	size_t found_pos = string2.find(c_string2,2);
 	if( found_pos!= std::string::npos){
-		std::cout <<c_string2 <<  " found at position : " << found_pos << std::endl;
+		fmt::println(  "{} found at position : {}", c_string2, found_pos );
 	}else{
-        std::cout << "Could not find the string :  " << (c_string2) <<  std::endl;
+        fmt::println( "Could not find the string :  {}", (c_string2) );
 	}
 
-
-
-
-
-
- 
-
- 
     return 0;
 }
