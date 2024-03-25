@@ -1,7 +1,7 @@
-#include <iostream>
+#include <fmt/format.h>
 
 void print_sum(int* param1, int* param2){
-	std::cout << "sum : " << (*param1 + *param2) << std::endl;
+	fmt::println( "sum : {}", (*param1 + *param2) );
 }
 
 int main(){

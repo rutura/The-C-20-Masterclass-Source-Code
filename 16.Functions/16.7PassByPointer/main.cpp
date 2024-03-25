@@ -1,13 +1,13 @@
-#include <iostream>
+#include <fmt/format.h>
 
 void say_age(int* age); // Declaration
 
 int main(){
 
     int age{23}; // Local
-    std::cout << "age (before call) : " << age << "&age : " << &age << std::endl; //23
+    fmt::println( "age (before call) : {} &age :{} ", age, fmt::ptr(&age )); //23
     say_age(&age); // Argument
-    std::cout << "age (after call) : " << age << "&age : " << &age <<  std::endl; //24
+    fmt::println( "age (after call) : {} &age : {}", age,  fmt::ptr(&age) ); //24
 
     return 0;
 }
@@ -15,5 +15,5 @@ int main(){
 
 void say_age(int* age){ // Parameter
     ++(*age); 
-    std::cout <<  "Hello , you are " << *age << " years old! &age : " << &age <<  std::endl;//24
+    fmt::println(  "Hello , you are {} years old! &age : {}", fmt::ptr(age) , fmt::ptr(&age) );//24
 }

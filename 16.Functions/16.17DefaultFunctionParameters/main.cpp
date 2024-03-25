@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 void compute( int age = 27 , double weight = 72.4, double distance = 12.5);
 void greet_teacher(std::string_view name_sv = "teacher" , int homeworks =12,
@@ -22,16 +22,12 @@ int main(){
 }
 
 void compute( int age   , double weight , double distance  ){
-	std::cout << "Doing computations on age : " << age 
-		<< " weight : " << weight 
-		<< " and distance : " << distance << std::endl;
+	fmt::println( "Doing computations on age : {} weight :{} and distance :{}  ",age, weight, distance);
 }
 
 void greet_teacher(std::string_view name_sv,int homeworks,
                     int exams, double pass_rate, std::string_view first_dpmt){
-    std::cout << std::endl;
-    std::cout << "Good morning " << name_sv << "!" << std::endl;
-    std::cout << "In the past semester, we had " << homeworks << " homeworks, and "
-                << exams << " exams. The pass rate was around : " << pass_rate << std::endl;
-    std::cout << "The best performing department is : " << first_dpmt << std::endl;
+    fmt::println( "Good morning {} !" ,name_sv);
+    fmt::println( "In the past semester, we had {} homeworks, and {} exams. The pass rate was around : {} ",homeworks, exams,  pass_rate);
+    fmt::println( "The best performing department is :{} ",  first_dpmt);
 }

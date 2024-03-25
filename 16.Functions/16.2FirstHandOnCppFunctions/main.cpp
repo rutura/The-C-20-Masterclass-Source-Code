@@ -1,12 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Function that takes a single parameter, and doesn't 
 //give back the result explicitly
 void enter_bar(size_t age){ // Functions parameters
     if( age > 18){
-        std::cout << "You're " << age << " years old. Please proceed." << std::endl;
+        fmt::println( "You're {} years old. Please proceed.", age );
     }else{
-        std::cout << "Sorry, you're too young for this. No offense! " << std::endl;
+        fmt::println( "Sorry, you're too young for this. No offense! " );
     }
     return ;
 }
@@ -22,7 +22,7 @@ int max( int a, int b){
 
 //Function that doesnt' take parameters and returns nothing
 void say_hello(){
-    std::cout << "Hello there" << std::endl;
+    fmt::println( "Hello there" );
     return; // You could omit this return statement for functions returning void
 }
 
@@ -39,15 +39,15 @@ int lucky_number(){
 //passed to the function.
 double increment_multiply( double a ,double b){
 	
-	std::cout << "Inside function , before increment : " << std::endl;
-	std::cout << "a : " << a << std::endl;
-	std::cout << "b : " << b << std::endl;
+	fmt::println( "Inside function , before increment : " );
+	fmt::println( "a : {}" , a );
+	fmt::println( "b : {}" , b );
     
     double result = ((++a)  * (++b));
     
-	std::cout << "Inside function , after increment : " << std::endl;
-	std::cout << "a : " << a << std::endl;
-	std::cout << "b : " << b << std::endl;
+	fmt::println( "Inside function , after increment : " );
+	fmt::println( "a : {}" , a );
+	fmt::println( "b : {}" , b );
     
     //Returning the result
     return result;
@@ -72,7 +72,7 @@ int main(){
    int y{44};
    int result = max(100,20); // Arguments
    result = max(x,y);
-   std::cout << "max : " << result << std::endl;
+   fmt::println( "max : {}" , result );
    */
   
 
@@ -85,21 +85,21 @@ int main(){
     /*
     int result{};
     result = lucky_number();
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
     */
 
     double h{3.00};
     double i{4.00};
 							
-	std::cout << "Outside function , before increment : " << std::endl;
-	std::cout << "h : " << h << std::endl;
-	std::cout << "i : " << i << std::endl;
+	fmt::println( "Outside function , before increment : " );
+	fmt::println( "h : {}" , h );
+	fmt::println( "i : {}" , i );
     
     double incr_mult_result = increment_multiply(h,i);
     
-	std::cout << "Outside function , before increment : " << std::endl;
-	std::cout << "h : " << h << std::endl;
-	std::cout << "i : " << i << std::endl;
+	fmt::println( "Outside function , before increment : " );
+	fmt::println( "h : {}" , h );
+	fmt::println( "i : {}" , i );
 
 
 

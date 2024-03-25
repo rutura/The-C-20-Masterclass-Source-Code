@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int max(int a, int b); // Function declaration , prototype
                         // Signature doesn't include return type
@@ -12,10 +12,10 @@ int main(){
     int y{12};
 
     int result = min(x,y);
-    std::cout << "min : " << result << std::endl;
+    fmt::println( "min : {}" , result );
 
     result =inc_mult(x,y);
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
 
     return 0;
 }

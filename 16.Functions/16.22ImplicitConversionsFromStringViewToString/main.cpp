@@ -1,4 +1,5 @@
-#include <iostream>
+#include <fmt/format.h>
+
 void say_my_name(const std::string& name);
 void process_name(std::string_view name_sv);
 
@@ -11,7 +12,7 @@ int main(){
 
 //Definitions
 void say_my_name(const std::string& name){
-    std::cout << "Your name is " << name << std::endl;
+    fmt::println( "Your name is {}",  name );
 }
 
 void process_name(std::string_view name_sv){

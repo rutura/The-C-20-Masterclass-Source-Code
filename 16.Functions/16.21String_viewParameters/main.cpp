@@ -1,8 +1,8 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string_view>
 
 void say_my_name(std::string_view name){
-    std::cout << "Hello your name is : " << name << std::endl;
+    fmt::println( "Hello your name is : {}", name );
 }
 
 int main(){
