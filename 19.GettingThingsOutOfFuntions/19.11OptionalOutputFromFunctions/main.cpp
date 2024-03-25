@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int find_character_v0(const std::string & str, char c){
@@ -36,9 +36,9 @@ int main(){
     int index =  find_character_v0(str1,c);
 
     if((find_character_v0(str1,c))!=-1){
-        std::cout << "Found character " << c << " at index : " << index << std::endl;
+        fmt::println( "Found character {} at index : {}", c ,index );
     }else{
-       std::cout << "Didn't find our character" << std::endl; 
+       fmt::println( "Didn't find our character" );
     }
     */
 
@@ -47,9 +47,9 @@ int main(){
    find_character_v1(str1,c,success);
 
    if(success){
-         std::cout << "Found character " << c << " in our string " <<  std::endl;
+         fmt::println( "Found character {}  in our string ", c);
    }else{
-       std::cout << "Didn't find our character" << std::endl;
+       fmt::println( "Didn't find our character" );
    }
    
     return 0;

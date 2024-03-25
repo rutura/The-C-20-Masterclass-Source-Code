@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <optional>
 
 std::optional<size_t> find_character_v2(const std::string & str, char c){
@@ -30,7 +30,7 @@ std::optional<size_t> find_character_v3(const std::string & str,
    char char_to_find = c.value_or('z');
     
     for (size_t i{} ; i < str.size()  ; ++i){
-        //std::cout << "str[i] : " << str.at(i) << " , c : " << c << std::endl;
+        // fmt::println( "str[i] : {} , c: {}", str.at(i), c );
         if(str.c_str()[i] == char_to_find){
             return i;
         }
@@ -49,9 +49,9 @@ int main(){
     std::optional<size_t> result = find_character_v2(str1,c);
 
     if(result.has_value()){
-        std::cout << "Found our character at index : " << result.value() << std::endl;
+        fmt::println( "Found our character at index : {}", result.value() );
     }else{
-        std::cout << "Didn't find our character" << std::endl;
+        fmt::println( "Didn't find our character" );
     }
     */
 
@@ -60,9 +60,9 @@ int main(){
 	auto result1 = find_character_v3(str1,'o'); //Will search for 'z' if you don't specify 
 											// the character so search for
 	if(result1.has_value()){
-		std::cout << "Found character 'o' at index " << result1.value() << std::endl;
+		fmt::println( "Found character 'o' at index {}",  result1.value() );
 	}else{
-		std::cout << "Could not find character 'o' in the string : " << str1 << std::endl;
+		fmt::println( "Could not find character 'o' in the string : {}" , str1 );
 	}
    
     return 0;

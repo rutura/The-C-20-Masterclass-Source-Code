@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 
@@ -26,10 +26,10 @@ auto process_number(int value){
 int main(){
 
     auto result = process_number(17);
-    std::cout << "result : " << result << std::endl;
-    std::cout << "sizeof(result)  : " << sizeof(result) <<  std::endl;
-    std::cout << "sizeof(int) : " << sizeof(int) << std::endl;
-    std::cout << "sizeof(double) : " << sizeof(double) << std::endl;
+    fmt::println( "result : {}" , result );
+    fmt::println( "sizeof(result)  : {}" , sizeof(result));
+    fmt::println( "sizeof(int) : {}" , sizeof(int) );
+    fmt::println( "sizeof(double) : {}" , sizeof(double) );
 
     return 0;
 }

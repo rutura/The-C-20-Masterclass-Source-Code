@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int& max_return_reference(int& a, int& b)
 {
@@ -33,18 +33,18 @@ int main(){
     int& ref_max = max_return_reference(x,y); // Reference
     int val = max_return_reference(x,y); // Copy
 
-    std::cout << "ref_max : " << ref_max << std::endl;
-    std::cout << "val : " << val << std::endl;
-    std::cout << "x : " << x << std::endl;
-    std::cout << "y : " << y << std::endl;
+    fmt::println( "ref_max : {}" , ref_max );
+    fmt::println( "val : {}" , val );
+    fmt::println( "x : {}" , x );
+    fmt::println( "y : {}" , y );
 
     ref_max++;
 
-    std::cout << "----- " << std::endl;
-    std::cout << "ref_max : " << ref_max << std::endl; // 15
-    std::cout << "val : " << val << std::endl; // 14
-    std::cout << "x : " << x << std::endl; // 15
-    std::cout << "y : " << y << std::endl; // 9
+    fmt::println( "----- " );
+    fmt::println( "ref_max : {}" , ref_max ); // 15
+    fmt::println( "val : {}" , val ); // 14
+    fmt::println( "x : {}" , x ); // 15
+    fmt::println( "y : {}" , y ); // 9
 
     */
 
@@ -53,18 +53,18 @@ int main(){
     int x{14};
     int y{9};
     int& result = sum(x,y); // Reference
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
     */
 
 
     int x{14};
     int y{9};
     int& result = max_input_by_value(x,y); // Reference
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
 
 
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
    
     return 0;
 }

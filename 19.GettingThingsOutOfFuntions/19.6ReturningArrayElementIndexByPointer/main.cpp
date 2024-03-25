@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 const double* find_max_address(const double scores[], size_t count);
 
@@ -6,7 +6,7 @@ int main(){
 
 	double array[] {1.0,2.0,3.0,45.0,5.0,6.0,7.0,8.0,79.0,10.0};
     const double* p_max = find_max_address(array,std::size(array));
-    std::cout << "max : " << *p_max << std::endl;
+    fmt::println( "max : {}", *p_max );
     
     return 0;
 }

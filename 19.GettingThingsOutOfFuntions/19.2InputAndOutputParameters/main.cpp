@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 void max_str(const std::string& input1, const std::string input2,
@@ -36,7 +36,7 @@ int main(){
 	std::string string2("Bellevue");
 
 	max_str(string1,string2,out_str);
-	std::cout << "max_str : " << out_str << std::endl;
+	fmt::println( "max_str : {}", out_str );
     */
 
    /*
@@ -44,14 +44,14 @@ int main(){
     int in1{45};
     int in2{723};
     max_int(in1,in2,out_int);
-    std::cout << "max_int : " << out_int << std::endl;
+    fmt::println( "max_int : {}" , out_int );
     */
 
    double out_double;
    double in_double1{45.8};
    double in_double2{76.9};
    max_double(in_double1,in_double2,&out_double);
-   std::cout << "max_double : " << out_double << std::endl;
+   fmt::println( "max_double : {}", out_double );
    
     return 0;
 }

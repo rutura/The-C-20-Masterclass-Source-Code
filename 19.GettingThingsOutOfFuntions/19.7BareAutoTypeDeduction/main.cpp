@@ -1,25 +1,25 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
 
     //Type deduction with auto : Just a copy
-    /*
+	/*
 	double some_var{55.5};
 	
 	auto x = some_var;
 	
-	std::cout << "sizeof(some_var) : " << sizeof(some_var) << std::endl;
-	std::cout << "sizeof(x) : " << sizeof(x) << std::endl;
-	std::cout << "&some_var : " << &some_var << std::endl;
-	std::cout << "&x : " << &x << std::endl;
-    std::cout << " some_var : " << some_var << std::endl;
-    std::cout << " x : " << x << std::endl;
+	fmt::println( "sizeof(some_var) : {}" , sizeof(some_var) );
+	fmt::println( "sizeof(x) : {}" , sizeof(x) );
+	fmt::println( "&some_var : {}" , fmt::ptr(&some_var) );
+	fmt::println( "&x : {}" , fmt::ptr(&x) );
+    fmt::println( " some_var : {}" , some_var );
+    fmt::println( " x : {}" , x );
     */
 
 
 
-   /*
+	/*
 	double some_var = 55.5; //double
 	
 	double& some_var_ref {some_var};
@@ -29,20 +29,20 @@ int main(){
 						   // in some_var_ref
 	++y;
 					
-	std::cout << "sizeof(some_var) : " << sizeof(some_var) << std::endl; // 8
-	std::cout << "sizeof(some_var_ref) : " << sizeof(some_var_ref) << std::endl; // 8
-	std::cout << "sizeof(y) : " << sizeof(y) << std::endl; // 8
-	std::cout << "&some_var : " << &some_var << std::endl; // 0xabc123
-	std::cout << "&some_var_ref : " << &some_var_ref << std::endl ;// 0xabc123
-	std::cout << "&y : " << &y << std::endl;  // 0xaab543
-	std::cout << "some_var : " << some_var << std::endl; //55.5
-	std::cout << "some_var_ref : " << some_var_ref << std::endl; // 55.5
-	std::cout << "y : " << y << std::endl; // 56.5
-    */
+	fmt::println( "sizeof(some_var) : {}" , sizeof(some_var) ); // 8
+	fmt::println( "sizeof(some_var_ref) : {}" , sizeof(some_var_ref) ); // 8
+	fmt::println( "sizeof(y) : {}" , sizeof(y) ); // 8
+	fmt::println( "&some_var : {}" , fmt::ptr(&some_var) ); // 0xabc123
+	fmt::println( "&some_var_ref : {}" , fmt::ptr(&some_var_ref) ) ;// 0xabc123
+	fmt::println( "&y : {}" , fmt::ptr(&y) );  // 0xaab543
+	fmt::println( "some_var : {}" , some_var ); //55.5
+	fmt::println( "some_var_ref : {}" , some_var_ref ); // 55.5
+	fmt::println( "y : {}" , y ); // 56.5
+	*/
 
 
    // True reference deduction
-   /*
+   	/*
    	double some_var = 55.5; //double
     double& some_var_ref {some_var};
 
@@ -50,16 +50,16 @@ int main(){
 	auto& z = some_var_ref; // z is deduced as a double reference
 	++z;
 	
-	std::cout << "sizeof(some_var) : " << sizeof(some_var) << std::endl; // 8
-	std::cout << "sizeof(some_var_ref) : " << sizeof(some_var_ref) << std::endl; // 8
-	std::cout << "sizeof(z) : " << sizeof(z) << std::endl; // 8
-	std::cout << "&some_var : " << &some_var << std::endl;// 0xabc123
-	std::cout << "&some_var_ref : " << &some_var_ref << std::endl;// 0xabc123
-	std::cout << "&z : " << &z << std::endl;// 0xabc123
-	std::cout << "some_var : " << some_var << std::endl; // 56.5
-	std::cout << "some_var_ref : " << some_var_ref << std::endl; //56.5
-	std::cout << "z : " << z << std::endl; // 56.5
-    */
+	fmt::println( "sizeof(some_var) : {}" , sizeof(some_var) ); // 8
+	fmt::println( "sizeof(some_var_ref) : {}" , sizeof(some_var_ref) ); // 8
+	fmt::println( "sizeof(z) : {}" , sizeof(z) ); // 8
+	fmt::println( "&some_var : {}" , fmt::ptr(&some_var) );// 0xabc123
+	fmt::println( "&some_var_ref : {}" , fmt::ptr(&some_var_ref) );// 0xabc123
+	fmt::println( "&z : {}" , fmt::ptr(&z) );// 0xabc123
+	fmt::println( "some_var : {}" , some_var ); // 56.5
+	fmt::println( "some_var_ref : {}" , some_var_ref ); //56.5
+	fmt::println( "z : {}" , z ); // 56.5
+	*/
 
 
 	//Constness is preserved with properly deduced references.
@@ -70,15 +70,15 @@ int main(){
 	
 	auto& p = const_ref;
 	
-	std::cout << "some_other_var : " << some_other_var << std::endl;
-	std::cout << "const_ref : " << const_ref << std::endl;
-	std::cout <<  "p : " << p << std::endl;
+	fmt::println( "some_other_var : {}" , some_other_var );
+	fmt::println( "const_ref : {}" , const_ref );
+	fmt::println(  "p : {}" , p );
 	
 	//++p; // Compiler error
 	
-	std::cout << "some_other_var : " << some_other_var << std::endl;
-	std::cout << "const_ref : " << const_ref << std::endl;
-	std::cout <<  "p : " << p << std::endl;
+	fmt::println( "some_other_var : {}" , some_other_var );
+	fmt::println( "const_ref : {}" , const_ref );
+	fmt::println(  "p : {}" , p );
     */
 
 	//Constness doesn't matter with non reference deduction
