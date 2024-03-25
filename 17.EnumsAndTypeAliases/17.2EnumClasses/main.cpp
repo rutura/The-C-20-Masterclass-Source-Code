@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Declare an enum type
 //The default type associated with enum classes with C++ is int
@@ -14,8 +14,8 @@ enum class Month :  char {
 int main(){
 
     Month month {Month::Jan};
-    std::cout << "month : " << static_cast<int>(month) << std::endl;
-    std::cout << "sizeof(month) : " << sizeof(month) << std::endl;
+    fmt::println( "month : {}" , static_cast<int>(month) );
+    fmt::println( "sizeof(month) : {}" , sizeof(month) );
 
     return 0;
 }
