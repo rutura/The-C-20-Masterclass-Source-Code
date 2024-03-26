@@ -1,6 +1,5 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
-#include <cstring>
 
 
 int main(){
@@ -8,32 +7,29 @@ int main(){
 	std::string hello_str{"Hello"};
     std::string bello_str{"Bello"};
     
-    /*
+	/*
 	//Using the comparison operators
-	std::cout << std::endl;
-	std::cout << "Comparing with comparison operators : " << std::endl;
+	fmt::println( "Comparing with comparison operators : " );
 	
-	std::cout << std::boolalpha;
-    std::cout << hello_str << "==" <<  bello_str <<" : " << (hello_str == bello_str) << std::endl;//false
-    std::cout << hello_str << "!=" <<  bello_str <<" : " << (hello_str != bello_str) << std::endl; //true
-    std::cout << hello_str << ">" <<  bello_str <<" : " << (hello_str > bello_str) << std::endl; // true
-    std::cout << hello_str << ">=" <<  bello_str <<" : " << (hello_str >= bello_str) << std::endl; // true
-    std::cout << hello_str << "<" <<  bello_str <<" : " << (hello_str < bello_str) << std::endl; // false
-    std::cout << hello_str << "<=" <<  bello_str <<" : " << (hello_str <= bello_str) << std::endl; // false
+    fmt::println( "{} == {} : {}",hello_str,   bello_str ,  (hello_str == bello_str) );//false
+    fmt::println( " {} != {} : {}", hello_str,  bello_str , (hello_str != bello_str) ); //true
+    fmt::println( "{} > {} : {}", hello_str,   bello_str ,  (hello_str > bello_str) ); // true
+    fmt::println(  " {} >= {} : {}" , hello_str, bello_str , (hello_str >= bello_str) ); // true
+    fmt::println(  "{} < {} : {}" , hello_str, bello_str , (hello_str < bello_str) ); // false
+    fmt::println(  "{} <= {} : {}", hello_str,  bello_str ,  (hello_str <= bello_str) ); // false*/
 
-    */
 
 	//Can even compare std::strings to C-strings
     /*
     const char * c_string1 {"Bello"};
     hello_str = "Hello";
     
-    std::cout << "hello_str.size() : " << hello_str.size() << std::endl;
-    std::cout << "std::strlen(c_string1) : " << std::strlen(c_string1) << std::endl;
-    std::cout << hello_str << "==" <<  c_string1 <<" (C-String) : " << (hello_str == c_string1) << std::endl; //false
-    std::cout << c_string1 << " (C-String) ==" <<  hello_str <<" : " << (c_string1 == hello_str) << std::endl;//false
-	std::cout << c_string1 << " (C-String) >=" <<  hello_str <<" : " << (c_string1 >= hello_str) << std::endl;//false
-	std::cout << c_string1 << " (C-String) <" <<  hello_str <<" : " << (c_string1 < hello_str) << std::endl; // true
+    fmt::println( "hello_str.size() : {} ", hello_str.size() );
+    fmt::println( "std::strlen(c_string1) : {}" , std::strlen(c_string1) );
+    fmt::println(  "{} == {} : (C-String) :{}", hello_str,   c_string1 , (hello_str == c_string1) ); //false
+    fmt::println(  "{} (C-String) == {} : {}", c_string1,  hello_str ,  (c_string1 == hello_str) );//false
+	fmt::println(   "{} (C-String) >= {} : {}", c_string1,  hello_str ,  (c_string1 >= hello_str) );//false
+	fmt::println(  "{} (C-String) < {} : {}", c_string1,   hello_str , (c_string1 < hello_str) ); // true
 	*/
 
 
@@ -45,7 +41,7 @@ int main(){
 														   //erronous results
 	
 	const char hello_char_array[] {'h','e','l','l','o','\0'};//It works right if you put the '\' yourself
-	std::cout << hello_str << "== hello_char_array : "  << (hello_str == hello_char_array) << std::endl;
+	fmt::println(  "{} == hello_char_array : {}", hello_str,  (hello_str == hello_char_array) );
 	
     return 0;
 }

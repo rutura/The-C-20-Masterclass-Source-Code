@@ -1,22 +1,20 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 int main(){
 
 	//Declare array
-    char message [5]  {"Hello"};
+    char message [5]  {'H','e','l','l','o'};
     //int data[5] {1,2,3,3,3};
 
-    //std::cout << "data : " << data << std::endl;
+    //fmt::println( "data : {}",  data );
     
   
     //Print out the array through looping
     /*
-    std::cout << "message : ";
+    fmt::println( "message : ");
     for( auto c : message){
-        std::cout << c ;
+        fmt::println( c );
     }
-    std::cout << std::endl;
     */
 
     
@@ -25,18 +23,17 @@ int main(){
     message[1] = 'a';
 
     //Print out the array through looping
-    std::cout << "message : ";
+    fmt::println( "message : ");
     for( auto c : message){
-        std::cout << c ;
+        fmt::println( c );
     }
-    std::cout << std::endl;
     */
 
    
    
     // Will probably print garbage after your char array
     /*
-    std::cout << "message : " << message << std::endl;
+    fmt::println( "message : {}", message );
     */
    
 
@@ -44,20 +41,20 @@ int main(){
     //If a character array is null terminated, it's called as C-String
     /*
     char message1 [] {'H','e','l','l','o','\0'};
-    std::cout << "message1 : " << message1 << std::endl;
-    std::cout << "sizeof(message1) : " << sizeof(message1) << std::endl;
+    fmt::println( "message1 : {}", message1 );
+    fmt::println( "sizeof(message1) : {}", sizeof(message1) );
     */
 
   
    /*
     char message2 [6] {'H','e','l','l','o'};
-    std::cout << "message2 : " << message2 << std::endl;
-    std::cout << "sizeof(message2) : " << sizeof(message2) << std::endl;
+    fmt::println( "message2 : {}", message2 );
+    fmt::println( "sizeof(message2) : {}", sizeof(message2) );
 
     char message3 [] {'H','e','l','l','o'}; // This is not a c string ,
 											//as there is not null character
-    std::cout << "message3 : " << message3 << std::endl;
-    std::cout << "sizeof(message3) : " << sizeof(message3) << std::endl;
+    fmt::println( "message3 : {}", message3 );
+    fmt::println( "sizeof(message3) : {}", sizeof(message3) );
     */
 
     
@@ -65,15 +62,15 @@ int main(){
     //String literal
     /*
     char message4 [] {"Hello"};
-    std::cout << "message4 : " << message4 << std::endl;
-    std::cout << "sizeof(message4) : " << sizeof(message4) << std::endl;
+    fmt::println( "message4 : {}", message4 );
+    fmt::println( "sizeof(message4) : {}", sizeof(message4) );
     */
 
 
 
     //Can't safely print out arrays other than those of characters
     int numbers [] {1,2,3,4,5};
-    std::cout << "numbers :  " << numbers << std::endl;
+    fmt::println( "numbers :  {}" , numbers );// error
  
 
     

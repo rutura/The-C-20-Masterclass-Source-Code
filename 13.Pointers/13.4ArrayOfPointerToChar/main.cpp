@@ -1,5 +1,6 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <ctime>
+#include <iostream>
 
 int main(){
    //srand() has to run once per program run
@@ -55,63 +56,63 @@ int main(){
     const int  max_length{ 15 };
     char name[max_length]{};
 
-    std::cout << "What's your name dear :" << std::endl;
+    fmt::print( "What's your name dear :" );
 
     std::cin.getline(name, max_length); // Get input with spaces
 
     while (!end) {
-        std::cout << "Oh dear " << name << ", I see ";
+        fmt::println( "Oh dear {}, I see",  name );
 
         size_t rand_num = static_cast<size_t>((std::rand() % std::size(predictions)));
 
-        std::cout << predictions[rand_num] << std::endl;
+        fmt::println( "{}", predictions[rand_num] );
 
 
 
         /*
         switch (rand_num) { // [0~10]
         case 0:
-            std::cout << prediction0 << std::endl;
+            fmt::println( prediction0 );
             break;
         case 1:
-            std::cout << prediction1 << std::endl;
+            fmt::println( prediction1 );
             break;
 
         case 2:
-            std::cout << prediction2 << std::endl;
+            fmt::println( prediction2 );
             break;
         case 3:
-            std::cout << prediction3 << std::endl;
+            fmt::println( prediction3 );
             break;
         case 4:
-            std::cout << prediction4 << std::endl;
+            fmt::println( prediction4 );
             break;
         case 5:
-            std::cout << prediction5 << std::endl;
+            fmt::println( prediction5 );
             break;
         case 6:
-            std::cout << prediction6 << std::endl;
+            fmt::println( prediction6 );
             break;
         case 7:
-            std::cout << prediction7 << std::endl;
+            fmt::println( prediction7 );
             break;
 
         case 8:
-            std::cout << prediction8 << std::endl;
+            fmt::println( prediction8 );
             break;
 
         case 9:
-            std::cout << prediction9 << std::endl;
+            fmt::println( prediction9 );
             break;
         default:
-            std::cout << ", huum, I don't see anything" << std::endl;
+            fmt::println( ", huum, I don't see anything" );
         }
         */
 
 
 
 
-        std::cout << "Do you want me to try again ? (Y | N) : ";
+        fmt::print( "Do you want me to try again ? (Y | N) : ");
 
         char go_on;
         std::cin >> go_on;
@@ -120,7 +121,7 @@ int main(){
 
     }
 
-    std::cout << "That's all I have for you today dear. Best wishes" << std::endl;
+    fmt::println( "That's all I have for you today dear. Best wishes" );
 
     return 0;
 }

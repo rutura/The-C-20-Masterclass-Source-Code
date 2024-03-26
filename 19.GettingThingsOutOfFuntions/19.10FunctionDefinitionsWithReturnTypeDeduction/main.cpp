@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Definition
 auto max(int& a, int& b){

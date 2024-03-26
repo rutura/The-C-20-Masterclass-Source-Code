@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Declarations
 double sum(const double array[][3], size_t size);
@@ -26,11 +26,11 @@ int main(){
     };
 
     double result = sum(weights,std::size(weights));
-    std::cout << "2d array sum : " << result << std::endl;
+    fmt::println( "2d array sum : {}", result );
 
 
     result = sum_3d(weights_3d,std::size(weights_3d));
-    std::cout << "3d array sum : " << result << std::endl;
+    fmt::println( "3d array sum : {}", result );
 
 
     

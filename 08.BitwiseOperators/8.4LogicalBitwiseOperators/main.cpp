@@ -1,5 +1,4 @@
-#include <iostream>
-#include <iomanip>
+#include <fmt/format.h>
 #include <bitset>
 
 int main(){
@@ -9,52 +8,31 @@ int main(){
     unsigned char value2 {0x5}; // 0000 0101
 	
 
-    std::cout << std::setw(COLUMN_WIDTH) << "value1 : " 
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(value1) << std::endl; 
-		
-	std::cout << std::setw(COLUMN_WIDTH) << "value2 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(value2) << std::endl;
+	fmt::println("{:>{}} value1 : {:>{}} ", " ", COLUMN_WIDTH/2, std::bitset<8>(value1).to_string(), COLUMN_WIDTH);
+	fmt::println("{:>{}} value1 : {:>{}} ", " ", COLUMN_WIDTH/2, std::bitset<8>(value2).to_string(), COLUMN_WIDTH);
     
 	//AND
-	std::cout << std::endl;
-	std::cout << "Bitwise AND :  " << std::endl;
-    std::cout << std::setw(COLUMN_WIDTH) << "value1 & value2 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(value1 & value2) << std::endl;
-    std::cout << std::endl;
+	fmt::println("Bitwise AND :  ");
+    fmt::println(" {:>{}} value1 & value2 : {:>{}}", " ", COLUMN_WIDTH/2, std::bitset<8>(value1 & value2).to_string() , COLUMN_WIDTH );
 
 	//OR
-	std::cout << std::endl;
-	std::cout << "Bitwise OR :  " << std::endl;
-    std::cout << std::setw(COLUMN_WIDTH) << "value1 | value2 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(value1 | value2) << std::endl;
-    std::cout << std::endl;
-
+	fmt::println("Bitwise OR :  " );
+    fmt::println("{:>{}} value1 | value2 : {:>{}} ", " ", COLUMN_WIDTH / 2 , std::bitset<8>(value1 | value2).to_string(), COLUMN_WIDTH);
 
     //NOT
-	std::cout << std::endl;
-    std::cout << "Bitwise NOT " << std::endl;
+    fmt::println("Bitwise NOT ");
 	
-    std::cout << std::setw(COLUMN_WIDTH) << "~value1 : "
-		<< std::setw(COLUMN_WIDTH) <<  std::bitset<8>(~value1) << std::endl;
+    fmt::println("{:>{}} ~value1 : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(~value1).to_string(), COLUMN_WIDTH);
 		
-    std::cout << std::setw(COLUMN_WIDTH) << "~value2 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(~value2) << std::endl;
+    fmt::println("{:>{}} ~value2 : {:>{}}", " ", COLUMN_WIDTH /2,std::bitset<8>(~value2).to_string() , COLUMN_WIDTH);
 		
-    std::cout << std::setw(COLUMN_WIDTH) << "~01011001 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(~0b01011001) << std::endl;//Using bin literal
+    fmt::println("{:>{}} ~01011001 : {:>{}}"," ", COLUMN_WIDTH /2, std::bitset<8>(~0b01011001).to_string(), COLUMN_WIDTH);//Using bin literal
 		
-    std::cout << std::setw(COLUMN_WIDTH) << "~01011001 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(~0x59) << std::endl;//Using hex literal
-    std::cout << std::endl; 
-
+    fmt::println("{:>{}} ~01011001 : {:>{}}"," ", COLUMN_WIDTH / 2 , std::bitset<8>(~0x59).to_string(), COLUMN_WIDTH);//Using hex literal
 
 	//XOR
-	std::cout << std::endl;
-	std::cout << "Bitwise XOR :  " << std::endl;
-    std::cout << std::setw(COLUMN_WIDTH) << "value1 ^ value2 : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(value1 ^ value2) << std::endl;
-    std::cout << std::endl;
-
+	fmt::println("Bitwise XOR :");
+    fmt::println("{:>{}} value1 ^ value2 : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(value1 ^ value2).to_string(), COLUMN_WIDTH);
 
 
    

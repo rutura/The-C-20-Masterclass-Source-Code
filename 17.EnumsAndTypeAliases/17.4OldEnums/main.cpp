@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 enum   Direction : unsigned char  {
     TopLeft = 64, TopRight,Center,BottomLeft,BottomRight
@@ -14,9 +14,9 @@ int main(){
 	Direction direction{Direction::TopLeft};
 	Tool tool {Tool::Pen};
 
-    std::cout << "direction : " << static_cast<unsigned int>(direction) << std::endl;
-    std::cout << "tool : " << tool << std::endl;
-    //std::cout << "(tool > direction) : " << (tool > direction) << std::endl;
+    fmt::println( "direction : {}" , static_cast<unsigned int>(direction) );
+    // fmt::println( "tool : {}" , tool );
+    //fmt::println( "(tool > direction) : {}" , (tool > direction) );
    
     return 0;
 }

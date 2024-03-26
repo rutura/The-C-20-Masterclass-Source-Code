@@ -1,12 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int global_var1{23}; // global variable
 
 
 void some_function(){
     int local_var{10};
-    std::cout << "Inside function global_var : " << global_var1 << std::endl;
-    std::cout << "Inside functoin local_var : " << local_var << std::endl;
+    fmt::println( "Inside function global_var : {}" , global_var1 );
+    fmt::println( "Inside functoin local_var : {}" , local_var );
 }
 
 void some_other_function(){
@@ -16,7 +16,7 @@ void some_other_function(){
 
 
 int main(){
- std::cout << "Inside main function global_var : " << global_var1 << std::endl;
+ fmt::println( "Inside main function global_var : {}" , global_var1 );
  //local_var = 5;
    
     return 0;

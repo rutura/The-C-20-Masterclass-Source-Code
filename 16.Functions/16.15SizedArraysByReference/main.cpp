@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Declaration
 double sum( const double (&scores) [10]);
@@ -10,7 +10,7 @@ int main(){
     
     double sum_result = sum(student_scores);
 	
-    std::cout << "result is : " << sum_result << std::endl;
+    fmt::println( "result is : {}", sum_result);
    
     return 0;
 }

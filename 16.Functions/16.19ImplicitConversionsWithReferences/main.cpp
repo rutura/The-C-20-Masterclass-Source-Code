@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 void increment(int& value);
 void print_out(const int & value);
@@ -24,9 +24,9 @@ int main(){
 
 void increment(int& value){
     value++;
-	std::cout << "value incremented to : " << value << std::endl;
+	fmt::println( "value incremented to : {}" ,  value );
 }
 
 void print_out(const int & value){
-    std::cout << "value : " << value << std::endl;
+    fmt::println( "value : {}" ,  value );
 }

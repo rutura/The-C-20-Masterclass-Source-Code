@@ -1,108 +1,99 @@
 #include <iostream>
-#
+#include <fmt/format.h>
 
 int main(){
 
     //Check if character is alphanumeric
-    /*
-    std::cout << std::endl;
-    std::cout << "std::isalnum : "<<std::endl;
+    /*fmt::println("");
+    fmt::println( "std::isalnum : ");
 	
-    std::cout << "C is alphanumeric : " << std::isalnum('C') << std::endl;
-    std::cout << "^ is alphanumeric : " << std::isalnum('^') << std::endl;
+    fmt::println( "C is alphanumeric : {}", std::isalnum('C') );
+    fmt::println( "^ is alphanumeric : {}", std::isalnum('^') );
 	
 	//Can use this as a test condition
 	char input_char {'*'};
 	if(std::isalnum(input_char)){
-		std::cout << input_char << " is alhpanumeric." << std::endl;
+		fmt::println( "{} is alhpanumeric.", input_char );
 	}else{
-		std::cout << input_char <<  " is not alphanumeric." << std::endl;
-	}
-    */
+		fmt::println(  "{} is not alphanumeric.", input_char );
+	}*/
 
     //Check if character is alphabetic
-    /*
-    std::cout << std::endl;
-    std::cout << "std::isalpha : "<<std::endl;
-    std::cout <<   "C is alphabetic : " << std::isalpha('e') << std::endl; // 1
-    std::cout <<   "^ is alphabetic : " << std::isalpha('^') << std::endl; // 0
-    std::cout <<   "7 is alphabetic : " << std::isalpha('7') << std::endl; // 0
+    /*fmt::println("");
+    fmt::println( "std::isalpha : ");
+    fmt::println(   "C is alphabetic : {}", std::isalpha('e') ); // 1
+    fmt::println(   "^ is alphabetic : {}", std::isalpha('^') ); // 0
+    fmt::println(   "7 is alphabetic : {}", std::isalpha('7') ); // 0
 
     if(std::isalpha('e')){
-        std::cout << 'e' << " is alphabetic" << std::endl;
+        fmt::println( "e is alphabetic" );
     }else{
-        std::cout << 'e' << " is NOT alphabetic" << std::endl;        
-    }
-    */
+        fmt::println( "e is NOT alphabetic" );
+    }*/
 
 	//Check if a character is blank
-    /*
-    std::cout << std::endl;
-    std::cout << "std::isblank : "<<std::endl;
+    /*fmt::println("");
+    fmt::println( "std::isblank : ");
     char message[] {"Hello there. How are you doing? The sun is shining."};
-    std::cout << "message : " << message << std::endl;
+    fmt::println( "message : {}", message );
     
     //Find and print blank index
     size_t blank_count{};
     for (size_t i{0} ; i < std::size(message); ++i){
-        //std::cout << "Value : " << message[i] << std::endl;
+        //fmt::println( "Value : " << message[i] );
         if(std::isblank(message[i])){
-            std::cout << "Found a blank character at index : [" << i << "]" << std::endl;
+            fmt::println( "Found a blank character at index : [{}]",  i );
             ++blank_count;
         }
     }
-    std::cout << "In total we found " << blank_count << " blank characters."<< std::endl;
-   */
+    fmt::println( "In total we found {} blank characters.", blank_count);*/
 
 	//Check if character is lowercase or uppercase
     /*
-    std::cout << "std::islower and std::isupper : "<<std::endl;
+    fmt::println( "std::islower and std::isupper : ");
 
-    std::cout << std::endl;
+    fmt::println("");
     char thought[] {"The C++ Programming Language is one of the most used on the Planet"};
     size_t lowercase_count{};
     size_t upppercase_count{};
     
     //Print original string for ease of comparison on the terminal
-    std::cout << "Original string  : " << thought << std::endl;
+    fmt::println( "Original string  : {}" , thought );
     
     for( auto character : thought){
         if(std::islower(character)){
-            std::cout <<" " << character;
+            fmt::print("{} ", character);
             ++lowercase_count;
         }
         if(std::isupper(character)){
             ++upppercase_count;
         }
     }
-    std::cout << std::endl;
-    std::cout << "Found " << lowercase_count << " lowercase characters and "
-                <<upppercase_count << " uppercase characters."<<  std::endl;
+    fmt::println("");
+    fmt::println( "Found {} lowercase characters and {} uppercase characters.", lowercase_count, upppercase_count);
     */
 
 
     //Check if a character is a digit
-    /*
-    std::cout << std::endl;
-    std::cout << "std::isdigit : "<<std::endl;
+    /*fmt::println("");
+    fmt::println( "std::isdigit : ");
 
     char statement[] {"Mr Hamilton owns 221 cows. That's a lot of cows! The kid exclamed."};
-	std::cout << "statement : " << statement << std::endl;
+	fmt::println( "statement : {}", statement );
     
     size_t digit_count{};
     
     for(auto character : statement){
         if(std::isdigit(character)){
-            std::cout << "Found digit : " << character << std::endl;
+            fmt::println( "Found digit : {}", character );
             ++digit_count;
         }
     }
-    std::cout << "Found " << digit_count << " digits in the statement string" << std::endl;
-    */
+    fmt::println( "Found {} digits in the statement string", digit_count );*/
 
     //Turning a character to lowercase using the std::tolower() function
-    std::cout << std::endl;
-    std::cout << "std::tolwer and std::toupper: " << std::endl;
+    fmt::println("");
+    fmt::println( "std::tolwer and std::toupper: " );
     char original_str[] {"Home. The feeling of belonging"};
     char dest_str[std::size(original_str)];
     
@@ -111,14 +102,14 @@ int main(){
         dest_str[i] = std::toupper(original_str[i]);
     }
     
-    std::cout << "Original string : " << original_str << std::endl;
-    std::cout << "Uppercase string : " << dest_str << std::endl;
+    fmt::println( "Original string : {}", original_str );
+    fmt::println( "Uppercase string : {}",dest_str );
     
     //Turn this to lowercase. Change the array in place
     for(size_t i{}; i < std::size(original_str) ; ++i){
         dest_str[i] = std::tolower(original_str[i]);
     }
     
-    std::cout << "Lowercase string : " << dest_str << std::endl;
+    fmt::println( "Lowercase string : {}",dest_str );
     return 0;
 }

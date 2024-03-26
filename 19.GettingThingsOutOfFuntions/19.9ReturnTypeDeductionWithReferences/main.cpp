@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 auto& max(int& a, int& b){
     if(a>b){
@@ -22,9 +21,9 @@ int main(){
 	
 	++ result;
 	
-	std::cout << "x :" << x << std::endl; // 10
-	std::cout << "y :" << y << std::endl; // 46
-	std::cout << "result : " << result << std::endl; // 46
+	fmt::println( "x :{}" , x ); // 10
+	fmt::println( "y :{}" , y ); // 46
+	fmt::println( "result : {}" , result ); // 46
    
     return 0;
 }

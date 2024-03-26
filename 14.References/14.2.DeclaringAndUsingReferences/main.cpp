@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -10,35 +10,34 @@ int main(){
     double& ref_double_data{double_data};
 
     //Print stuff out
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
+    fmt::println( "int_data : {}" , int_data );
+    fmt::println( "&int_data : {}" , fmt::ptr(&int_data) );
+    fmt::println( "double_data : {}" , double_data );
+    fmt::println( "&double_data : {}" , fmt::ptr(&double_data) );
 
-    std::cout << "=======================" << std::endl;
+    fmt::println( "=======================" );
 
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
+    fmt::println( "ref_int_data : {}" , ref_int_data );
+    fmt::println( "&ref_int_data : {}" , fmt::ptr(&ref_int_data) );
+    fmt::println( "ref_double_data : {}" , ref_double_data );
+    fmt::println( "&ref_double_data : {}" , fmt::ptr(&ref_double_data ));
 
     int_data = 111;
     double_data = 67.2;
 
 
     //Print stuff out
-    std::cout << std::endl;
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
+    fmt::println( "int_data : {}" , int_data );
+    fmt::println( "&int_data : {}" , fmt::ptr(&int_data ));
+    fmt::println( "double_data : {}" , double_data );
+    fmt::println( "&double_data : {}" , fmt::ptr(&double_data ));
 
-    std::cout << "=======================" << std::endl;
+    fmt::println( "=======================" );
 
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
+    fmt::println( "ref_int_data : {}" , ref_int_data );
+    fmt::println( "&ref_int_data : {}" , fmt::ptr(&ref_int_data ));
+    fmt::println( "ref_double_data : {}" , ref_double_data );
+    fmt::println( "&ref_double_data : {}" , fmt::ptr(&ref_double_data) );
 
 
     ref_int_data = 1012;
@@ -46,18 +45,17 @@ int main(){
 
 
    //Print stuff out
-    std::cout << std::endl;
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
+    fmt::println( "int_data : {}" , int_data );
+    fmt::println( "&int_data : {}" , fmt::ptr(&int_data ));
+    fmt::println( "double_data : {}" , double_data );
+    fmt::println( "&double_data : {}" , fmt::ptr(&double_data ));
 
-    std::cout << "=======================" << std::endl;
+    fmt::println( "=======================" );
 
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
+    fmt::println( "ref_int_data : {}" , ref_int_data );
+    fmt::println( "&ref_int_data : {}" , fmt::ptr(&ref_int_data ));
+    fmt::println( "ref_double_data : {}" , ref_double_data );
+    fmt::println( "&ref_double_data : {}" , fmt::ptr(&ref_double_data) );
     
     return 0;
 }

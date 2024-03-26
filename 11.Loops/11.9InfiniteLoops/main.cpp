@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -7,7 +7,7 @@ int main(){
    //Infinite loop : for loop
    /*
    for(size_t i{};true ; ++i){
-       std::cout << i <<  " : I love C++" << std::endl;
+       fmt::println( "{} : I love C++", i);
    }
    */
 
@@ -16,7 +16,7 @@ int main(){
     size_t i{0};
 
     while(true){
-        std::cout << i  << " : I love C++" << std::endl;
+    fmt::println( "{} : I love C++", i);
         ++i;
     }
     */
@@ -27,7 +27,7 @@ int main(){
     size_t i{0};
 
     do{
-        std::cout << i  << " : I love C++" << std::endl;
+        fmt::println( "{} : I love C++", i);
         ++i;
     }while(true);
     

@@ -1,5 +1,4 @@
-#include <iostream>
-#include <iomanip>
+#include <fmt/format.h>
 
 int main(){
 
@@ -9,7 +8,7 @@ int main(){
 
 
     /*
-	std::cout << "Tabular data visualization with nested for loops : " << std::endl;
+	fmt::println("Tabular data visualization with nested for loops : ");
 	
 
 	
@@ -17,9 +16,8 @@ int main(){
         
 		for (size_t col{0} ; col < COLS ; ++col){
 
-			std::cout  << "( row "  <<  std::setw(2) << row << ",col " << std::setw(2) <<  col << ")  ";
+			fmt::println("( row {:>2}, col {:>2})", row, col);
 		}
-        std::cout << std::endl;
     }
 
     */
@@ -27,8 +25,7 @@ int main(){
 
    //While loop
    /*
-	std::cout << std::endl;
-	std::cout << "Tabular data visualization with nested while loops : " << std::endl;
+	fmt::println("Tabular data visualization with nested while loops : " << );
 	
 	//Remember to reset col to 0 after the inner loop is done for the next row 
     // to use the right columns.
@@ -38,10 +35,9 @@ int main(){
     while(row < ROWS){
         
         while(col < COLS){
-            std::cout  << "( row " << std::setw(2) <<  row << ",col "<< std::setw(2) <<  col << ") ";
+			fmt::println("( row {:>2}, col {:>2})", row, col);
             ++col;
         }
-        std::cout << std::endl;
         col = 0 ;   // Reset col to 0 to allow printing from col 0 . col is in main
                     // function local scope now.
         ++row;
@@ -51,8 +47,7 @@ int main(){
 
 
 
-	std::cout << std::endl;
-	std::cout << "Tabular data visualization with nested do while loops : " << std::endl;
+	fmt::println("Tabular data visualization with nested do while loops : " );
 	
     size_t row = 0;
     size_t col = 0;
@@ -60,11 +55,10 @@ int main(){
     do { // row
     
         do {
-			std::cout  << "( row " << std::setw(2) <<  row << ",col "<< std::setw(2) <<  col << ")   ";
+        	fmt::println("( row {:>2}, col {:>2})", row, col);
             ++col;
         }while(col < COLS);
         
-        std::cout << std::endl;
         col = 0 ; 	// Reset col to 0 to allow printing from col 0 . col is in main
 					// function local scope now.
         ++row;

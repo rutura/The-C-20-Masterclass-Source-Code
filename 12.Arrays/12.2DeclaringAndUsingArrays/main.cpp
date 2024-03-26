@@ -1,6 +1,4 @@
-#include <iostream>
-
-
+#include <fmt/format.h>
 
 int main(){
 
@@ -9,14 +7,14 @@ int main(){
 
     //Read data
 
-   // std:: cout << " scores [0] : " << scores[0] << std::endl;
-   // std:: cout << " scores [1] : " << scores[1] << std::endl;
+   // fmt::println( " scores [0] : {}",  scores[0] );
+   // fmt::println( " scores [1] : {}",  scores[1] );
    
 
     //Read with a loop
     /*
     for( size_t i {0} ; i < 10 ; ++i){
-        std::cout << "scores [" << i << "] : " << scores[i] << std::endl;
+        fmt::println("scores [{}] : {}", i, scores[i] );
     }
     */
   
@@ -29,7 +27,8 @@ int main(){
 
     //Print the data out
     for( size_t i {0} ; i < 10 ; ++i){
-        std::cout << "scores [" << i << "] : " << scores[i] << std::endl;
+	fmt::println("scores [{}] : {}", i, scores[i] );
+
     }
     */
 
@@ -42,7 +41,9 @@ int main(){
 
     //Print the data out
     for( size_t i {0} ; i < 10 ; ++i){
-        std::cout << "scores [" << i << "] : " << scores[i] << std::endl;
+	fmt::println("scores [{}] : {}", i, scores[i] );
+
+
     }
     */
 
@@ -51,7 +52,8 @@ int main(){
 	double salaries[5] {12.7, 7.5, 13.2, 8.1, 9.3};
 	
 	for(size_t i{0}; i < 5; ++i){
-		std::cout << "salary[" << i << "] : " << salaries[i] << std::endl;
+        fmt::println("salaries [{}] : {}", i, salaries[i] );
+;
 	}
     */
   
@@ -62,7 +64,8 @@ int main(){
     int families[5] {12, 7, 5};
 	
 	for(size_t i{0}; i < 5; ++i){
-		std::cout << "families[" << i << "] : " << families[i] << std::endl;
+	fmt::println("families [{}] : {}", i, families[i] );
+
 	}
     */
     
@@ -73,7 +76,7 @@ int main(){
 	
 	// Will print this with a range based for loop
 	for(auto value : class_sizes){
-		std::cout << "value : " << value << std::endl;
+		fmt::println("value : {}", value);
 	}
     */
     
@@ -94,7 +97,7 @@ int main(){
     for( int element : scores){
         sum += element;
     }
-    std::cout << "Score sum : " << sum << std::endl;
+    fmt::println("Score sum : {}", sum );
   
    
     return 0;

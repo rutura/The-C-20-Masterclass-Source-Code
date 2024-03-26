@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -16,7 +16,7 @@ int main(){
         try{
             int * data = new int[1000000000];
         }catch(std::exception& ex){
-            std::cout << "  Something went wrong : " << ex.what() << std::endl;
+            fmt::println( "  Something went wrong : {}", ex.what() );
         }
     }
     */
@@ -28,15 +28,15 @@ int main(){
         int * data = new(std::nothrow) int[1000000000];
 
         if(data!=nullptr){
-            std::cout << "Data allocated" << std::endl;
+            fmt::println( "Data allocated" );
         }else{
-            std::cout << "Data allocation failed" << std::endl;
+            fmt::println( "Data allocation failed" );
         }
        
     }
 
 
-    std::cout << "Program ending well" << std::endl;
+    fmt::println( "Program ending well" );
     
     return 0;
 }

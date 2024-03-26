@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -16,9 +16,11 @@ int main(){
 
         if(i == 11)
             break; // Breaks out of the loop
-        std::cout << "i : " << i << std::endl;
+    fmt::println("i : {}", i );
+
     }
-    std::cout << "Loop done!" << std::endl;
+    fmt::println( "Loop done!");
+
     */
 
 
@@ -37,11 +39,12 @@ int main(){
         break;
 
 
-        std::cout << "i : " << i << std::endl;
+    fmt::println("i : {}", i );
+
         ++i;
 
    }
-   std::cout << "Loop done!" << std::endl;
+   fmt::println( "Loop done!");
    */
 
 
@@ -58,7 +61,7 @@ int main(){
         break;
 
 
-        std::cout << "i : " << i << std::endl;
+        fmt::println("i : {}", i );
         ++i;
 
   }while(i <20);

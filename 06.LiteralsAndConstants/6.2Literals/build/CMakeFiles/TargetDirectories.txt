@@ -1,0 +1,3 @@
+/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/06.LiteralsAndConstants/6.2Literals/build/CMakeFiles/rooster.dir
+/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/06.LiteralsAndConstants/6.2Literals/build/CMakeFiles/edit_cache.dir
+/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/06.LiteralsAndConstants/6.2Literals/build/CMakeFiles/rebuild_cache.dir

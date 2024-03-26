@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <optional>
 
 
@@ -22,62 +22,59 @@ int main(){
 
 
     //Read from an std::optional variable
-	std::cout << "items : " << items.value() << std::endl;
-	std::cout << "items : " << *items << std::endl; // Personaly find this confusing as
+	fmt::println( "items : {}" , items.value() );
+	fmt::println( "items : {}" , *items ); // Personaly find this confusing as
 													// it's not a pointer, so this the 
 													// first and last time I use it in the
 													// course
-    //std::cout << "items : " << items << std::endl;
-	std::cout << "name : " << name.value() << std::endl;
-	std::cout << "weight : " << weight.value() << std::endl;
-	std::cout << "character : " << character.value() << std::endl;
+    //fmt::println( "items : {}" , items );
+	fmt::println( "name : {}" , name.value() );
+	fmt::println( "weight : {}" , weight.value() );
+	fmt::println( "character : {}" , character.value() );
 
 
     //Write stuff
 	dog_name = "Fluffy";
 	age = 26;
 	
-    std::cout << std::endl;
-    std::cout << "Writting data in ..." << std::endl;
-	std::cout << "dog_name : " << dog_name.value() << std::endl;
-	std::cout << "age : " << age.value() << std::endl;
+    fmt::println( "Writting data in ..." );
+	fmt::println( "dog_name : {}" , dog_name.value() );
+	fmt::println( "age : {}" , age.value() );
 
 
     //Reading bad data
-	//std::cout << letter.value() << std::endl; // Throws exception and crashes program
-	//std::cout << height.value() << std::endl; // Trhows exception and crashes program
+	//fmt::println( letter.value() ); // Throws exception and crashes program
+	//fmt::println( height.value() ); // Trhows exception and crashes program
 
 
     //has_value()
-    std::cout << std::boolalpha;
-    std::cout << "letter.has_value() : " << letter.has_value() << std::endl;
-    std::cout << "height.has_value() : " << height.has_value() << std::endl;
-    std::cout << "dog_name.has_value() : " << dog_name.has_value() << std::endl;
+    fmt::println( "letter.has_value() : {}" , letter.has_value() );
+    fmt::println( "height.has_value() : {}" , height.has_value() );
+    fmt::println( "dog_name.has_value() : {}" , dog_name.has_value() );
 
 
     //Do your checks before you read data
 
-    std::cout << std::endl;
-    std::cout << "Conditional reading" << std::endl;
+    fmt::println( "Conditional reading" );
 	if(letter.has_value()){
-		std::cout << "letter contains a useful value" << std::endl;
+		fmt::println( "letter contains a useful value" );
 	}else{
-		std::cout << "letter contains std::nullopt" << std::endl;
+		fmt::println( "letter contains std::nullopt" );
 	}
 	
 	//Checking against std::nullopt
 	if(letter != std::nullopt){
-		std::cout << "letter contains a useful value" << std::endl;
+		fmt::println( "letter contains a useful value" );
 	}else{
-		std::cout << "letter contains std::nullopt" << std::endl;
+		fmt::println( "letter contains std::nullopt" );
 	}
 
 
     //Checking against std::nullopt
 	if(dog_name != std::nullopt){
-		std::cout << "dog_name contains a useful value : " << dog_name.value() << std::endl;
+		fmt::println( "dog_name contains a useful value : {}" , dog_name.value() );
 	}else{
-		std::cout << "dog_name contains std::nullopt" << std::endl;
+		fmt::println( "dog_name contains std::nullopt" );
 	}
 
     

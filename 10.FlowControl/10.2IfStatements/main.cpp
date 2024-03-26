@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 int main(){
 
@@ -9,19 +8,18 @@ int main(){
     
     /*
 	
-	std::cout << std::boolalpha << "result : " << result << std::endl; 
+	fmt::println("result : {}" ,  result );
 	
-	std::cout << std::endl;
-	std::cout << "free standing if statement" << std::endl;
+	fmt::println( "free standing if statement" );
    
     //if(result){
 	if(result == true){
-        std::cout << number1 << " is less than " << number2 << std::endl;
+        fmt::println("{} is less than {}" , number1, number2 );
     }
     
     //if(!result){
 	if(!(result == true)){
-        std::cout << number1 << " is NOT less than " << number2 << std::endl;
+        fmt::println( " {}is NOT less than{} " , number1,number2 );
     }
 
     */
@@ -29,33 +27,31 @@ int main(){
 
    	//Using else
     /*
-	std::cout << std::endl;
-	std::cout << "using the else clause : " << std::endl;
+	fmt::println( "using the else clause : " );
 	
 	if(result == true){
-        std::cout << number1 << " is less than " << number2 << std::endl;
+        fmt::println(" {} is less than {}" , number1, number2 );
     }else{
-        std::cout << number1 << " is NOT less than " << number2 << std::endl;
+        fmt::println( "{} is NOT less than {}" , number1, number2 );
     }
     */
 
 
 	//Use expression as condition directly
     /*
-	std::cout << std::endl;
-	std::cout << "Using expression as condition : " << std::endl;
+	fmt::println( std::endl;
+	fmt::println( "Using expression as condition : " );
 	
 	if(number1 < number2){
-        std::cout << number1 << " is less than " << number2 << std::endl;
+        fmt::println("{} is less than {}" ,number1, number2 );
     }else{
-        std::cout << number1 << " is NOT less than " << number2 << std::endl;
+        fmt::println("{} is NOT less than {}" ,number1, number2 );
     }
     */
 
 
 	//Nesting if statements
-	std::cout << std::endl;
-	std::cout << "Nesting if statements" << std::endl;
+	fmt::println( "Nesting if statements" );
 	
     bool red = false;
     bool green {true};
@@ -69,37 +65,35 @@ int main(){
      * */
      /*
      if(red){
-         std::cout << "Stop" << std::endl;
+         fmt::println( "Stop" );
      }
      if(yellow){
-         std::cout << "Slow down" << std::endl;
+         fmt::println( "Slow down" );
      }
 	 if(green){
-		 std::cout << "Go" << std::endl;
+		 fmt::println( "Go" );
 	 }
      */
 
     /*
-    std::cout << std::endl;
-	 std::cout << "Police officer stops(verbose)" << std::endl;
+	 fmt::println( "Police officer stops(verbose)" );
 	 if(green){
          if(police_stop){
-             std::cout << "Stop" << std::endl;
+             fmt::println( "Stop" );
          }
          else{
-             std::cout << "Go" << std::endl;
+             fmt::println( "Go" );
          }
 
      }
      */
 
 
-     std::cout << std::endl;
-	 std::cout << "Police officer stops(less verbose)" << std::endl;
+	 fmt::println( "Police officer stops(less verbose)" );
 	 if(green && !police_stop){
-         std::cout << "Go" << std::endl;
+         fmt::println( "Go" );
      }else{
-         std::cout << "Stop" << std::endl;
+         fmt::println( "Stop" );
      }
 
 

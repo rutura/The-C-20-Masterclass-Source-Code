@@ -1,57 +1,53 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
 
 	//How we've used pointers so far
-    /*
-	int number {22}; // Stack
+	/*int number {22}; // Stack
 	
 	int * p_number = &number;
 	
-	std::cout << std::endl;
-	std::cout << "Declaring pointer and assigning address : " << std::endl;
-	std::cout << "number : " << number << std::endl;
-	std::cout << "p_number : " << p_number << std::endl;
-	std::cout << "&number : " << &number << std::endl;
-	std::cout << "*p_number : " << *p_number <<  std::endl;
+	fmt::println("");
+	fmt::println( "Declaring pointer and assigning address : " );
+	fmt::println( "number : {}", number );
+	fmt::println( "p_number : {}", fmt::ptr(p_number) );
+	fmt::println( "&number : {}", &number );
+	fmt::println( "*p_number : {}", *p_number);
 	
 	
 	int * p_number1; // Uninitialized pointer , contains junk address
 	int number1 {12};
 	p_number1 = &number1; // Make it point to a valid address
-	std::cout << std::endl;
-	std::cout << "Uninitialized pointer : " << std::endl;
-	std::cout << "*p_number1 : " << *p_number1 << std::endl;
-    */
+	fmt::println("");
+	fmt::println( "Uninitialized pointer : " );
+	fmt::println( "*p_number1 : {}", *p_number1 );*/
 
    //BAD
 	//Writing into uninitialized pointer through dereference
-    /*
-	int *p_number2; // Contains junk address : could be anything
-    std::cout << "Writting in the 55" << std::endl;
+	/*int *p_number2; // Contains junk address : could be anything
+    fmt::println( "Writting in the 55" );
 	*p_number2 = 55; // Writing into junk address : BAD!
-	std::cout << std::endl;
-	std::cout << "Writing into uninitialized pointer through dereference" << std::endl;
-	std::cout << "p_number2 : " << p_number2 << std::endl; // Reading from junk address.
-    std::cout << "Dereferencing bad memory" << std::endl;
-	std::cout << "*p_number2 : " << *p_number2 << std::endl;
-    */
-	
+	fmt::println("");
+	fmt::println( "Writing into uninitialized pointer through dereference" );
+	fmt::println( "p_number2 : {}", p_number2 ); // Reading from junk address.
+    fmt::println( "Dereferencing bad memory" );
+	fmt::println( "*p_number2 : {}", *p_number2 );*/
+
 	
 	//Initializing pointer to null
     /*
 	//int *p_number3{nullptr}; // Also works
 	int * p_number3 {}; // Initialized with pointer equivalent of zero : nullptr
 						// A pointer pointing nowhere
-    std::cout << "Writting into nullptr memory" << std::endl;
+    fmt::println( "Writting into nullptr memory" );
 	//*p_number3 = 33; // Writting into a pointer pointing nowhere : BAD, CRASH
-    std::cout << "Done writting" << std::endl;
+    fmt::println( "Done writting" );
 	
-	std::cout << std::endl;
-	std::cout << "Reading and writting through nullptr : " << std::endl;
-	//std::cout << "p_number3 : " << p_number3 << std::endl;
-	//std::cout << "*p_number3 : " << *p_number3 << std::endl;// Reading from nullptr
+	fmt::println( std::endl;
+	fmt::println( "Reading and writting through nullptr : " );
+	//fmt::println( "p_number3 : {}", p_number3 );
+	//fmt::println( "*p_number3 : {}", *p_number3 );// Reading from nullptr
 															// BAD, CRASH.
                                                             */
 
@@ -68,9 +64,9 @@ int main(){
 						
 					
 	*p_number4 = 77; // Writting into dynamically allocated memory
-	std::cout << std::endl;
-	std::cout << "Dynamically allocating memory : " << std::endl;
-	std::cout <<"*p_number4 : " << *p_number4 << std::endl;
+	fmt::println( std::endl;
+	fmt::println( "Dynamically allocating memory : " );
+	fmt::println("*p_number4 : {}", *p_number4 );
 
     //Return memory to the OS
     delete p_number4;
@@ -84,16 +80,16 @@ int main(){
      int *p_number6{ new int (22) }; // use direct initialization
      int *p_number7{ new int { 23 } }; // use uniform initialization
 	 
-	 std::cout << std::endl;
-	 std::cout << "Initialize with valid memory address at declaration : " << std::endl;
-	 std::cout << "p_number5 : " << p_number5 << std::endl;
-	 std::cout << "*p_number5 : " << *p_number5 << std::endl; // Junk value
+	fmt::println("");
+	 fmt::println( "Initialize with valid memory address at declaration : " );
+	 fmt::println( "p_number5 : {}", fmt::ptr(p_number5) );
+	 fmt::println( "*p_number5 : {}", *p_number5 ); // Junk value
 	 
-	 std::cout << "p_number6 : " << p_number6 << std::endl;
-	 std::cout << "*p_number6 : " << *p_number6 << std::endl;
+	 fmt::println( "p_number6 : {}", fmt::ptr(p_number6) );
+	 fmt::println( "*p_number6 : {}", *p_number6 );
 	 
-	 std::cout << "p_number7 : " << p_number7 << std::endl;
-	 std::cout << "*p_number7 : " << *p_number7 << std::endl;
+	 fmt::println( "p_number7 : {}", fmt::ptr(p_number7) );
+	 fmt::println( "*p_number7 : {}", *p_number7 );
 	 
 	 //Remember to release the memory
 	  delete p_number5;
@@ -108,7 +104,7 @@ int main(){
 
       //Can reuse pointers
       p_number5 = new int(81);
-      std::cout << "*p_number : " << *p_number5 << std::endl;
+      fmt::println( "*p_number : {}", *p_number5 );
 
 
       delete p_number5;
@@ -116,7 +112,7 @@ int main(){
 
       //Calling delete twice on a pointer : BAD!
       p_number5 = new int(99);
-      std::cout << "*p_number5 : " << *p_number5 << std::endl;
+      fmt::println( "*p_number5 : {}", *p_number5 );
 
 
       delete p_number5;
@@ -126,6 +122,6 @@ int main(){
       //
 
                                                             
-   std::cout << "Program is ending well" << std::endl;
+   fmt::println( "Program is ending well" );
     return 0;
 }

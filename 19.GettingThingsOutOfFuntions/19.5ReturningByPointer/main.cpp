@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 int* max_return_pointer(int* a, int* b)
 {
@@ -33,17 +32,17 @@ int main(){
     int y{45};
     int* p_max = max_return_pointer(&x,&y);
 
-    std::cout << "x : " << x << std::endl;
-    std::cout << "y : " << y << std::endl;
-    std::cout << "*p_max : " << *p_max << std::endl;
+    fmt::println( "x : {}" , x );
+    fmt::println( "y : {}" , y );
+    fmt::println( "*p_max : {}" , *p_max );
 
 
     ++(*p_max);
 
-    std::cout << "-----" << std::endl;
-    std::cout << "x : " << x << std::endl;
-    std::cout << "y : " << y << std::endl;
-    std::cout << "*p_max : " << *p_max << std::endl;
+    fmt::println( "-----" );
+    fmt::println( "x : {}" , x );
+    fmt::println( "y : {}" , y );
+    fmt::println( "*p_max : {}" , *p_max );
     */
 
 
@@ -51,19 +50,19 @@ int main(){
     int x{56};
     int y{45};
     int* p_sum = sum(&x,&y);
-    std::cout << *p_sum << std::endl;
+    fmt::println( *p_sum );
     */
 
 
     int x{56};
     int y{45};
     int* p_sum = max_input_by_value(x,y);
-    std::cout << *p_sum << std::endl;
+    fmt::println( "{}", *p_sum );
 
 
 
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
    
     return 0;
 }

@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 //Marking a function as constexpr gives it the potential 
 //to be evaluated at compile time
 constexpr int get_value(int multiplier){
@@ -16,12 +15,12 @@ int main(){
 
     */
     constexpr int result = get_value(4); // Compile time
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" ,  result );
 
     /*
     int some_var{5}; // Run time variable
     int result = get_value(some_var); // Run time
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" ,  result );
     */
    
     return 0;

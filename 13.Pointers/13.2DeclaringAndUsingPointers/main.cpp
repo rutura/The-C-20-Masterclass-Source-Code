@@ -1,9 +1,7 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 
 int main(){
-    /*
     //Declare and initialize pointer
     int* p_number {}; // Will initialize with nullptr
     double*  p_fractional_number{};
@@ -13,12 +11,12 @@ int main(){
     int* p_fractional_number1{nullptr};
 
     //Pointers to different variables are  of the same size
-    std::cout << "sizeof(int) : " << sizeof(int) << std::endl; // 4
-    std::cout << "sizeof(double) : " << sizeof(double) << std::endl; // 8
-    std::cout << "sizeof(double*) : " << sizeof(double*) << std::endl;
-    std::cout << "sizeof(int*) : " << sizeof(int*) << std::endl;
-    std::cout << "sizeof(p_number1) : " << sizeof(p_number1) << std::endl;
-    std::cout << "sizeof(p_fractional_number1) : " << sizeof(p_fractional_number1) << std::endl;
+    fmt::println( "sizeof(int) : {}" , sizeof(int) ); // 4
+    fmt::println( "sizeof(double) : {}" , sizeof(double) ); // 8
+    fmt::println( "sizeof(double*) : {}" , sizeof(double*) );
+    fmt::println( "sizeof(int*) : {}" , sizeof(int*) );
+    fmt::println( "sizeof(p_number1) : {}" , sizeof(p_number1) );
+    fmt::println( "sizeof(p_fractional_number1) : {}" , sizeof(p_fractional_number1) );
 
 
     //It doesn't matter if you put the * close to data type or to varible name
@@ -32,15 +30,14 @@ int main(){
 										// The structure is exactly the same for the
 										//previous statement
 
-    std::cout << "sizeof(p_number5) : " << sizeof(p_number5) << std::endl;
-    std::cout << "sizeof(other_int_var) : " << sizeof(other_int_var) << std::endl;
-    std::cout << "sizeof(p_number6) : " << sizeof(p_number6) << std::endl;
-    std::cout << "sizeof(other_int_var6) : " << sizeof(other_int_var6) << std::endl;
+    fmt::println( "sizeof(p_number5) : {}" , sizeof(p_number5) );
+    fmt::println( "sizeof(other_int_var) : {}" , sizeof(other_int_var) );
+    fmt::println( "sizeof(p_number6) : {}" , sizeof(p_number6) );
+    fmt::println( "sizeof(other_int_var6) : {}" , sizeof(other_int_var6) );
 
     //It is better to separate these declarations on different lines though
     int *p_number7{};
     int other_int_var7{}; // No room for confusion this time
-    */
 
 
     //Initializing pointers and assigning them data
@@ -48,13 +45,13 @@ int main(){
     int int_var {43};
     int *p_int{&int_var};// The address of operator (&);
     
-    std::cout << "Int var : " << int_var << std::endl;
-    std::cout << "p_int (Address in memory)  : " << p_int << std::endl;
+    fmt::println( "Int var : {}" , int_var );
+    fmt::println( "p_int (Address in memory)  : {}" , fmt::ptr(p_int) );
 
     //You can also change the address stored in a pointer any time
     int int_var1 {65};
     p_int = &int_var1; // Assign a different address to the pointer
-    std::cout << "p_int (with different address)  : " << p_int << std::endl;
+    fmt::println( "p_int (with different address)  : {}" ,  fmt::ptr(p_int) );
 
 
     //Can't cross assign between pointers of different types
@@ -64,12 +61,12 @@ int main(){
     //p_int = &double_var; // Compiler error
 
 
-    //Dereferencing a pointer : 
+    //Dereferencing a pointer : {}
     int* p_int2 {nullptr};
     int int_data {56};
     p_int2 = &int_data;
 
-    std::cout << "value : " << *p_int2 << std::endl; // Dereferencing a pointer
+    fmt::println( "value : {}" , *p_int2 ); // Dereferencing a pointer
 
 
     return 0;

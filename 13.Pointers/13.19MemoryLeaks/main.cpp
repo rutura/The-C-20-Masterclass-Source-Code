@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -37,6 +37,6 @@ int main(){
 	}
 	//Memory with int{57} leaked.
 
-    std::cout << "Program ending well" << std::endl;
+    fmt::println("Program ending well" );
     return 0;
 }

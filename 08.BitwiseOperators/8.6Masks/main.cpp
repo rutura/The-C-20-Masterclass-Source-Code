@@ -1,5 +1,4 @@
-#include <iostream>
-#include <iomanip>
+#include <fmt/format.h>
 #include <bitset>
 
 
@@ -21,11 +20,8 @@ int main(){
     
     //Sandbox variable
     unsigned char var {0b00000000};// Starts off all bits off
-    
-    std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
 
-
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
     //Set a few bits : make them 1's regardless of what's in there
 
@@ -33,88 +29,77 @@ int main(){
     //Setting : |= with mask of the bit
 	
     //Set bit 1
-	std::cout << "Setting bit in position 1" << std::endl;
+	fmt::println("Setting bit in position 1" );
 	var |= mask_bit_1;
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 	//Set bit 5
-	std::cout << "Setting bit in position 5" << std::endl;
+	fmt::println("Setting bit in position 5" );
 	var |= mask_bit_5;
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
-
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 	//RESETTING BITS : set to 0
     //Resetting : &= (~mask)
 	
 	//Reset bit 1
-	std::cout << "Resetting bit in position 1" << std::endl;
+	fmt::println("Resetting bit in position 1" );
     var &= (~mask_bit_1);
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 	//Reset bit 5
-	std::cout << "Resetting bit in position 1" << std::endl;
+	fmt::println("Resetting bit in position 1" );
     var &= (~mask_bit_5);
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
-
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 	//Set all bits
-	std::cout << "Setting all bits" << std::endl;
+	fmt::println("Setting all bits" );
     var |= ( mask_bit_0 | mask_bit_1 | mask_bit_2 | mask_bit_3 |
              mask_bit_4 | mask_bit_5 | mask_bit_6 | mask_bit_7);
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 
 	//Reset bits at pos 0,2,4,6
-	std::cout << "Reset bits at pos 0,2,4,6" << std::endl;
+	fmt::println("Reset bits at pos 0,2,4,6" );
     var &= ~(mask_bit_0 | mask_bit_2 | mask_bit_4 | mask_bit_6);
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
 
 
 
 	//Check state of a bit
-	std::cout << std::endl;
-	std::cout << "Checking the state of each bit position (on/off)" << std::endl;
-	std::cout << "bit0 is " << ((var & mask_bit_0) >> 0 )<< std::endl;
-    std::cout << "bit1 is " << ((var & mask_bit_1) >> 1 ) << std::endl;
-    std::cout << "bit2 is " << ((var & mask_bit_2) >> 2 ) << std::endl;
-    std::cout << "bit3 is " << ((var & mask_bit_3) >> 3 ) << std::endl;
-    std::cout << "bit4 is " << ((var & mask_bit_4) >> 4 ) << std::endl;
-    std::cout << "bit5 is " << ((var & mask_bit_5) >> 5 ) << std::endl;
-	std::cout << std::boolalpha;
-    std::cout << "bit6 is " << ((var & mask_bit_6) >> 6 ) << std::endl;
-	std::cout << "bit6 is " << static_cast<bool>(var & mask_bit_6) << std::endl;
+	fmt::println("Checking the state of each bit position (on/off)" );
+	fmt::println("bit0 is {}" , ((var & mask_bit_0) >> 0 ));
+    fmt::println("bit1 is {}" , ((var & mask_bit_1) >> 1 ) );
+    fmt::println("bit2 is {}" , ((var & mask_bit_2) >> 2 ) );
+    fmt::println("bit3 is {}" , ((var & mask_bit_3) >> 3 ) );
+    fmt::println("bit4 is {}" , ((var & mask_bit_4) >> 4 ) );
+    fmt::println("bit5 is {}" , ((var & mask_bit_5) >> 5 ) );
+    fmt::println("bit6 is {}" , ((var & mask_bit_6) >> 6 ) );
+	fmt::println("bit6 is {}" , static_cast<bool>(var & mask_bit_6) );
 
-    std::cout << "bit7 is " << ((var & mask_bit_7) >> 7 ) << std::endl;
-    std::cout << "bit7 is " << static_cast<bool>(var & mask_bit_7) << std::endl;
+    fmt::println("bit7 is {}" , ((var & mask_bit_7) >> 7 ) );
+    fmt::println("bit7 is {}" , static_cast<bool>(var & mask_bit_7) );
 
 
 	//Toggle bits
 	//Toggle : var ^ mask
 	
 	//Toggle bit 0
-	std::cout << std::endl;
-	std::cout << "Toggle bit 0" << std::endl;
+	fmt::println("Toggle bit 0" );
     var ^= mask_bit_0;
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
+
 
     //Toggle bit7 
-	std::cout << "Toggle bit 7" << std::endl;
+	fmt::println("Toggle bit 7" );
     var ^= mask_bit_7;
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
+
 
 	//Toggle multiple bits in one go : the 4 higher bits
-	std::cout << "Toggle multiple bits in one go : the 4 higher bits" << std::endl;
+	fmt::println("Toggle multiple bits in one go : the 4 higher bits" );
     var ^= (mask_bit_7 | mask_bit_6 | mask_bit_5 | mask_bit_4);
-	std::cout << std::setw(COLUMN_WIDTH) <<  "var : "
-		 << std::setw(COLUMN_WIDTH) << std::bitset<8>(var) << std::endl;
+	fmt::println("{:>{}} var : {:>{}}"," ", COLUMN_WIDTH / 2, std::bitset<8>(var).to_string(), COLUMN_WIDTH);
+
    
     return 0;
 }

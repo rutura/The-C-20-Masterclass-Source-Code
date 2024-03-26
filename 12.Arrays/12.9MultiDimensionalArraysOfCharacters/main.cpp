@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -16,37 +16,26 @@ int main(){
     //Printing out like this is unsafe : may go over and print
 	//outside your valid memory block
     //until a terminating null character is encountered.
-    /*
-	std::cout << "Unsafe printing of members : " << std::endl;
+	/*fmt::println( "Unsafe printing of members : " );
     for (size_t i {0}; i < std::size(members) ; ++i){
-        std::cout << members[i] << std::endl;
-    }
-    */
-  
+        fmt::println( "{}", members[i] );
+    }*/
+
 
 
     //Can loop around manually printing out each character
-    /*
-	std::cout << std::endl;
-    std::cout << "Printing out character by character manually : " << std::endl;
+    /*fmt::println( "Printing out character by character manually : " );
     for (size_t i{0} ; i < std::size(members) ; ++i){
-        
         for (size_t j{0} ; j < std::size(members[i]) ; ++j){
-            
-            std::cout << members[i][j] ;
+            fmt::println( "{}", members[i][j] );
         }
-        std::cout << std::endl;
-    }
-    */
- 
-
+    }*/
 
 	//Better : Using C-string litterals
 	//Compared to initialization with charactes with in '', this
 	// is even easier to type. The entire string is a single entity 
 	//you can manage easily.
-    /*
-    char members1 [][name_length] {
+    /*char members1 [][name_length] {
         "John",
         "Samuel",
         "Rashid",
@@ -54,12 +43,11 @@ int main(){
     };
     
     //Printing out members1
-    std::cout << "Printing out members1 (C-string literals) : " << std::endl;
+    fmt::println( "Printing out members1 (C-string literals) : " );
     for (size_t i {0}; i < std::size(members1) ; ++i){
-        std::cout << members1[i] << std::endl;
-    }
-    */
-   
+        fmt::println( "{}", members1[i] );
+    }*/
+
 
 
     //Updating our prediction declaration in the fortune teller game
@@ -78,8 +66,7 @@ int main(){
         
     };
     
-	std::cout << std::endl;
-    std::cout << "Prediction : " << predictions[5] << std::endl;
+    fmt::println( "Prediction : {}",  predictions[5] );
  
 
    

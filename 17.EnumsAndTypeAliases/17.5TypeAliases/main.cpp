@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -6,10 +6,10 @@ int main(){
      //typedef unsigned long long int HugeInt; // Older C++ syntax for type aliases
      HugeInt huge_number {123378997};
 
-     std::cout << "sizeof(unsigned long long int ) : " << sizeof(unsigned long long int) << std::endl;
-     std::cout << "sizeof(HugeInt) : " << sizeof(HugeInt) << std::endl;
+     fmt::println( "sizeof(unsigned long long int ) : {}" , sizeof(unsigned long long int) );
+     fmt::println( "sizeof(HugeInt) : {}" , sizeof(HugeInt) );
 
-    std::cout << "huge_number : " << huge_number << std::endl;
+    fmt::println( "huge_number : {}" , huge_number );
 
     return 0;
 }

@@ -1,0 +1,12 @@
+Detecting compiler hash for triplet x64-linux...
+All requested packages are currently installed.
+Total install time: 659 ns
+The package fmt provides CMake targets:
+
+    find_package(fmt CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE fmt::fmt)
+
+    # Or use the header-only version
+    find_package(fmt CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE fmt::fmt-header-only)
+

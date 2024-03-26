@@ -1,5 +1,4 @@
-#include <iostream>
-#include <string>
+#include <fmt/format.h>
 
 
 // Tools
@@ -18,12 +17,12 @@ int main(){
     switch (tool)
     {
         case Pen : {
-             std::cout << "Active tool is Pen" << std::endl;
+             fmt::println( "Active tool is Pen" );
         }
         break;
 
         case Marker : {
-             std::cout << "Active tool is Marker" << std::endl;
+             fmt::println( "Active tool is Marker" );
         }
         break;
 
@@ -31,22 +30,22 @@ int main(){
         case Eraser :
         case Rectangle : 
         case Circle : {
-             std::cout << "Drawing Shapes" << std::endl;
+             fmt::println( "Drawing Shapes" );
         }
         break;
 
         case Ellipse : {
-             std::cout << "Active tool is Ellipse" << std::endl;
+             fmt::println( "Active tool is Ellipse" );
         }
         break;
     
         default: {
-            std::cout << "No match found" << std::endl;
+            fmt::println( "No match found" );
         }
             break;
     }
 
-    std::cout << "Moving on" << std::endl;
+    fmt::println( "Moving on" );
 
 
     /*
