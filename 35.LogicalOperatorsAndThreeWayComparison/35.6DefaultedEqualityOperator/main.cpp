@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Item {
@@ -23,13 +23,12 @@ int main(){
   Item i1{1,2,3};
   Item i2{1,2,33};
 
-  std::cout << std::boolalpha;
-  std::cout << "i1 == i2 : " << (i1 == i2) << std::endl;
-  std::cout << "i1 != i2 : " << (i1 != i2) << std::endl;
-  std::cout << "i1 == 12 : " << (i1 == 12) << std::endl;
-  std::cout << "36 == i2 : " << (36 == i2) << std::endl; // Watch out : i2==36
-  std::cout << "i1 != 12 : " << (i1 != 12) << std::endl;
-  std::cout << "36 != i2 : " << (36 != i2) << std::endl;
+  fmt::println( "i1 == i2 : {}" , (i1 == i2) );
+  fmt::println( "i1 != i2 : {}" , (i1 != i2) );
+  fmt::println( "i1 == 12 : {}" , (i1 == 12) );
+  fmt::println( "36 == i2 : {}" , (36 == i2) ); // Watch out : i2==36
+  fmt::println( "i1 != 12 : {}" , (i1 != 12) );
+  fmt::println( "36 != i2 : {}" , (36 != i2) );
    
     return 0;
 }

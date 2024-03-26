@@ -1,6 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
-#include <iostream>
+#include <fmt/format.h>
 //#include <utility>
 #include "my_utility.h"
 
@@ -18,12 +18,25 @@ public:
 	}
 	~Point() = default;
 
-  
-private: 
+	double x() const {
+		return m_x;
+	}
+	double y() const {
+		return m_y;
+	}
 	double length() const;   // Function to calculate distance from the point(0,0)
 private : 
 	double m_x{};
 	double m_y{};
+};
+
+template <>
+struct fmt::formatter<Point> : nested_formatter<double> {
+	auto format(Point p, format_context& ctx) const {
+		return write_padded(ctx, [=](auto out) {
+		  return format_to(out, "Point [ x: {}, y: {}, length: {}]", nested(p.x()), nested(p.y()), nested(p.length()));
+		});
+	}
 };
 
 inline std::ostream& operator<< (std::ostream& out , const Point& p){

@@ -1,7 +1,7 @@
 #ifndef NUMBER_H
 #define NUMBER_H
+#include <fmt/format.h>
 
-#include <iostream>
 class Number
 {
     friend std::ostream& operator<<(std::ostream& out , const Number& number);
@@ -42,6 +42,15 @@ public:
     ~Number();
 private : 
     int m_wrapped_int{0};
+};
+
+template <>
+struct fmt::formatter<Number> : nested_formatter<int> {
+	auto format(Number n, format_context& ctx) const {
+		return write_padded(ctx, [=](auto out) {
+		  return format_to(out, "Number : [{}]", nested(n.get_wrapped_int()));
+		});
+	}
 };
 
 
