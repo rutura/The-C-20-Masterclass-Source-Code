@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 namespace Level1{
     namespace Level2{
@@ -15,8 +15,8 @@ int main(){
     namespace Data = Level1::Level2::Level3;
 
     //std::cout << "weight : " << Level1::Level2::Level3::weight << std::endl;
-    std::cout << "weight : " << Data::weight << std::endl;
-    std::cout << "weight : " << Data::weight << std::endl;
+    fmt::println( "weight : {}" , Data::weight );
+    fmt::println( "weight : {}" , Data::weight );
     
     return 0;
 }

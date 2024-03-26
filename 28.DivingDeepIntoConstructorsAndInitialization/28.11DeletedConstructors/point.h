@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 class Point
 {
@@ -15,7 +15,7 @@ private :
 	}
 public:
 	Point() = delete;
-	Point(double x_param, double y_param);
+    Point(double x_param, double y_param);
 	~Point();
     //Copy constructor
 	Point(const Point& source_point) = delete;
@@ -55,7 +55,7 @@ public:
 	
 	//Utilities
 	void print_info()const{
-			std::cout << "Point [ x : " << *x << ", y: " << (*y) << "]" << std::endl;
+			fmt::println( "Point [ x : {}{}{}{}" , *x , ", y: " , (*y) , "]" );
 	}
 };
 

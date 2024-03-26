@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <iostream> // Included just to get access to size_t
+#include <fmt/format.h> // Included just to get access to size_t
 
 class Point
 {
@@ -19,7 +19,7 @@ public:
   }
 
   void print_info()const{
-    std::cout << "Point  [ &m_x : " << &m_x << ", &m_y : " << &m_y << "]" << std::endl;
+    fmt::println( "Point  [ &m_x : {}{}{}{}" , fmt::ptr(&m_x) , ", &m_y : " , fmt::ptr(&m_y) , "]" );
   }
   
 private:

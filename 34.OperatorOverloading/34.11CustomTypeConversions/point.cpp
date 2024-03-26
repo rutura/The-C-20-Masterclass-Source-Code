@@ -8,7 +8,7 @@ Point::Point(const Number& n)
 : Point(static_cast<double>(n.get_wrapped_int()) ,
         static_cast<double>(n.get_wrapped_int()))
 {
-    std::cout << "Using the Point constructor" << std::endl;
+    fmt::println( "Using the Point constructor" );
 }
 */
 

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "utility.h"
 
 void print_age_utility1();

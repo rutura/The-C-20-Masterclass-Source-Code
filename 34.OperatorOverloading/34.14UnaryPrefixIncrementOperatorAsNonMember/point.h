@@ -1,6 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
-#include <iostream>
+#include <fmt/format.h>
 
 class Number;
 

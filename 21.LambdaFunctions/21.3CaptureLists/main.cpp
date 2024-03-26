@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 int main(){
 
@@ -8,36 +8,33 @@ int main(){
      double b{20};
      
      auto func = [a,b](){
-         std::cout  << "a + b : " << a + b << std::endl;
+         fmt::println( "a + b : " , a + b );
      };
      func();
-     */
 
     //Capturing by value
-    /*
      int c{42};
-     
+
      auto func = [c](){
-         std::cout << "Inner value : " << c << " &inner : " <<&c <<  std::endl;
+         fmt::println( "Inner value : {}{}{}" , c , " &inner : " ,fmt::ptr(&c ));
      };
      
      for(size_t i{} ; i < 5 ;++i){
-         std::cout << "Outer value : " << c << " &outer : " << &c << std::endl;
+         fmt::println( "Outer value : {}{}{}" , c , " &outer : " , fmt::ptr(&c ));
          func();
          ++c;
-     }
-
+     };
      */
 
     //Capture by reference
      int c{42};
-     
+
      auto func = [&c](){
-         std::cout << "Inner value : " << c << " &inner : " <<&c <<  std::endl;
+         fmt::println( "Inner value : {} {}{}" , c , " &inner : " ,fmt::ptr(&c ));
      };
      
      for(size_t i{} ; i < 5 ;++i){
-         std::cout << "Outer value : " << c << " &outer : " << &c << std::endl;
+         fmt::println( "Outer value : {} {}{}" , c , " &outer : " , fmt::ptr(&c ));
          func();
          ++c;
      }

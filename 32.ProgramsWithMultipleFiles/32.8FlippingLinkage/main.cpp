@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //internal linkage -> external linkage 
 extern const double distance {45.7}; 
@@ -10,13 +10,13 @@ void some_other_function(); // Declaration
 
 int main(){
 
- 	std::cout << "distance(main) : " << distance << std::endl;
-	std::cout << "&distance(main) : " << &distance << std::endl;
+ 	fmt::println( "distance(main) : {}" , distance );
+	fmt::println( "&distance(main) : {}" , fmt::ptr(&distance ));
 	
-	std::cout << std::endl;
+	fmt::println("\n");
 	print_distance();
 
-    std::cout << "----" << std::endl;
+    fmt::println( "----" );
     some_other_function();
     return 0;
 }

@@ -1,23 +1,23 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 inline int age{12};
 
 inline void some_age_function(){
-	std::cout << "age : " << age << std::endl;
-	std::cout << "&age : " << &age << std::endl;
+	fmt::println( "age : {}" , age );
+	fmt::println( "&age : {}" , fmt::ptr(&age ));
 }
 
 void print_age_2(){
-	std::cout << "age(utility2) : " << std::endl;
+	fmt::println( "age(utility2) : " );
 	some_age_function();
 }
 
 static double distance {23.9};
 
 static void some_distance_function(){
-	std::cout << "distance : " << distance << std::endl;
-	std::cout << "&distance : " << &distance << std::endl;
+	fmt::println( "distance : {}" , distance );
+	fmt::println( "&distance : {}" ,fmt::ptr( &distance ));
 }
 
 
@@ -26,13 +26,13 @@ namespace{
 	double distance {23.9};
 
 	void some_distance_function(){
-		std::cout << "distance : " << distance << std::endl;
-		std::cout << "&distance : " << &distance << std::endl;
+		fmt::println( "distance : {}" , distance );
+		fmt::println( "&distance : {}" ,fmt::ptr( &distance) );
 	}
 }
 */
 void print_distance_2(){
-	std::cout << "distance(utility2) : " << std::endl;
+	fmt::println( "distance(utility2) : " );
 	some_distance_function();
 }
 

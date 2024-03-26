@@ -1,14 +1,14 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 
 
 int main(){
 
-   // std::cout << "Point count : " << Point::get_point_count() << std::endl;
+   // fmt::println( "Point count : {}" , Point::get_point_count() );
 
     Point p1{6,7};
 
-   // std::cout << "Point count : " << p1.get_point_count() << std::endl;
+   // fmt::println( "Point count : {}" , p1.get_point_count() );
     p1.print_info(p1) ;
 
  

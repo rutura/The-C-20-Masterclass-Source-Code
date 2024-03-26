@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 /*
 template <int threshold,typename T>
@@ -40,8 +40,7 @@ int main(){
 	double temperatures[] {10.0,20.0,30.0,40.0,50.0,100.0};
 
     auto result = is_valid<double>(temperatures,200,std::size(temperatures));
-    std::cout << std::boolalpha;
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
    
     return 0;
 }

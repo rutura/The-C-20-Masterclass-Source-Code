@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 const double distance{}; // Declaration and definition
 
@@ -8,12 +8,12 @@ extern int item_count; // Declaration of some variable defined in some
 
 //Functions have external linkage by default
 void print_distance(){
-    std::cout << "distance (other_file) : " << distance << " &distance  :"
-     << &distance << std::endl;
+    fmt::println( "distance (other_file) : {}{}{}" , distance , " &distance  :"
+     ,fmt::ptr( &distance) );
 }
 
 void print_item_count(){
-    std::cout << "item_count(other_file) : " << item_count << " &item_count : "
-        << &item_count << std::endl;
+    fmt::println( "item_count(other_file) : {}{}{}" , item_count , " &item_count : "
+        ,fmt::ptr( &item_count) );
 }
 

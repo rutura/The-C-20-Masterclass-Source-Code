@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string_view>
 
 
@@ -19,12 +19,12 @@ Dog::Dog(std::string_view name_param, std::string_view breed_param, int  age_par
     breed = breed_param;
     p_age = new int;
     *p_age = age_param;
-    std::cout << "Dog constructor called for " << name << std::endl;
+    fmt::println( "Dog constructor called for {}" , name );
 }
 
 Dog::~Dog(){
     delete p_age;
-    std::cout << "Dog destructor called for : " << name << std::endl;
+    fmt::println( "Dog destructor called for : {}" , name );
 }
 
 

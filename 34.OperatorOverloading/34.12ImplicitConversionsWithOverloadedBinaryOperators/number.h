@@ -1,5 +1,5 @@
 
-#include <iostream>
+#include <fmt/format.h>
 
 class Number
 {

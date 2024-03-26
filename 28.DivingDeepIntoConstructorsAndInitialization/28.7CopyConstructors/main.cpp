@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "person.h"
 
 
@@ -11,7 +11,7 @@ int main(){
     Person p2(p1);
     p2.print_info();
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     p1.set_age(30);
     p1.print_info();

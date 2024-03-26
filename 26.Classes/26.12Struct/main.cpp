@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 class Dog{
     public : 
@@ -18,7 +18,7 @@ struct Point{
 };
 
 void print_point(const Point& point){
-    std::cout << "Point [ x: " << point.x << ", y : " << point.y << "]" << std::endl;
+    fmt::println( "Point [ x: {}{}{}{}" , point.x , ", y : " , point.y , "]" );
 }
 
 
@@ -28,8 +28,8 @@ int main(){
 
     dog1.m_name = "Fluffy"; // Compiler error
     cat1.m_name = "Juny";
-    std::cout << dog1.m_name << std::endl;
-    std::cout << cat1.m_name << std::endl;
+    fmt::println( "{}",dog1.m_name );
+    fmt::println( "{}",cat1.m_name );
 
 
     Point point1;

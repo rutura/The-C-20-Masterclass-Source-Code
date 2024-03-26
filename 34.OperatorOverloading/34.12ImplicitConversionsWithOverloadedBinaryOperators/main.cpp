@@ -1,16 +1,18 @@
-#include <iostream>
-#include "number.h"
+#include <fmt/format.h>
+#include "number.h" // Assuming Number class is defined in number.h
 
 
-
-int main(){
-
+int main() {
     Number n1(22);
-    std::cout << "n1 : " << n1 << std::endl;
-    std::cout << "n1 + 2  : " << (n1 + 2) << std::endl;
-    std::cout << "2 + n1 : " << (2 + n1) << std::endl;
-    std::cout << "42 - n1 : " << (42 - n1) << std::endl;
-   
+
+    auto n12 = (n1 + 2);
+    auto n21 = (2 + n1);
+    auto n1_42 = 42 - n1;
+
+    fmt::println("n1: {}", fmt::ptr(&n1));
+    fmt::println("n1 + 2: {}", fmt::ptr(&(n12)));
+    fmt::println("2 + n1: {}",fmt::ptr(&(n21)));
+    fmt::println("42 - n1: {}", fmt::ptr(&(n1_42)));
 
     return 0;
 }

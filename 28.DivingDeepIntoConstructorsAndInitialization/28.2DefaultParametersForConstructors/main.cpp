@@ -1,11 +1,11 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "cylinder.h"
 
 
 int main(){
 
     Cylinder c1(4);
-    std::cout << "volume : " << c1.volume() << std::endl;
+    fmt::println( "volume : {}" , c1.volume() );
    
     return 0;
 }

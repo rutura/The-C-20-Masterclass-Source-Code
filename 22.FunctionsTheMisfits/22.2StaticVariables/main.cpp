@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 size_t dog_count{0};// Global scope
 
@@ -19,13 +19,13 @@ void do_something(){
 int main(){
 
     /*
-    std::cout << "student count : " << add_student()  << std::endl;//1
-    std::cout << "student count : " << add_student()  << std::endl;//2
-    std::cout << "student count : " << add_student()  << std::endl;//3
+    fmt::println( "student count : {}" , add_student()  );//1
+    fmt::println( "student count : {}" , add_student()  );//2
+    fmt::println( "student count : {}" , add_student()  );//3
     */
 
    for(size_t i {} ; i < 20 ;++i){
-       std::cout << "student count : " << add_student()  << std::endl;
+       fmt::println( "student count : {}" , add_student()  );
    }
    
     return 0;

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "dog.h"
 #include "person.h"
@@ -18,7 +18,7 @@ void do_something_with_dog_v2( const std::unique_ptr<Dog>& d){
 
 std::unique_ptr<Dog> get_unique_ptr(){
     std::unique_ptr<Dog> p_dog = std::make_unique<Dog>("Function Local");
-	std::cout << "unique_ptr address(in) : " << &p_dog << std::endl;
+	fmt::println( "unique_ptr address(in) : {}" , fmt::ptr(&p_dog ));
     return p_dog;  // The compiler does some optimizations and doesn't return a copy here
 					// it's returning something like a reference to the local object.
 					// We can prove this by looking at the address of objects in memory.
@@ -42,19 +42,19 @@ int main(){
 												// released when function returns.
 												// Not what you typically want.
 
-    std::cout << "p_dog_1 : " << p_dog_1.get() << std::endl; 
-    std::cout << "Hitting back the main function" << std::endl;
+    fmt::println( "p_dog_1 : {}" , fmt::ptr( p_dog_1.get() ));
+    fmt::println( "Hitting back the main function" );
 
     */
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
 
     //std::unique_ptr<Dog> p_dog_1 = std::make_unique<Dog>("Dog1");
 
     /*
     Person person1("John");
     person1.adopt_dog(std::move(p_dog_1)); // The same behavior when function is part of the class
-    std::cout << "Doing something , p_dog_1 points to :  " <<p_dog_1.get() <<  std::endl;
+    fmt::println( "Doing something , p_dog_1 points to :  {}" ,fmt::ptr(p_dog_1.get() ));
     */
 
 	//An implicit move is done when object is created in place as a temporary
@@ -66,7 +66,7 @@ int main(){
 	std::unique_ptr p_dog_2 = std::make_unique<Dog>("Dog2");
 	p_dog_2->print_info();
 	do_something_with_dog_v2(p_dog_2);
-	std::cout << "-----" << std::endl;
+	fmt::println( "-----" );
 	p_dog_2->print_info();
     */
 
@@ -75,15 +75,15 @@ int main(){
 	//Returning unique ptr from function by value
 /*
 	std::unique_ptr<Dog> p_dog_3 = get_unique_ptr();
-	std::cout << "delimiter" << std::endl;
-	std::cout << "unique_ptr address(out) : " << &p_dog_3 << std::endl;
+	fmt::println( "delimiter" );
+	fmt::println( "unique_ptr address(out) : {}" ,fmt::ptr( &p_dog_3 ));
 
 	 p_dog_3->print_info();
 */
 
     get_unique_ptr()->print_info();
 
-    std::cout << "function done" << std::endl;
+    fmt::println( "function done" );
     
 	
 	

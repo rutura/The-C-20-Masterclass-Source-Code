@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 #include "car.h"
 
@@ -10,7 +10,7 @@ int main(){
 
     p1 = c1;
 
-    std::cout << "p1 : " << p1 << std::endl;
+    fmt::println( "p1 : {}" , fmt::ptr(&p1 ));
     
 
     return 0;

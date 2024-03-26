@@ -1,7 +1,7 @@
-#include <iostream>
+#include <fmt/format.h>
 
 double max(double * numbers, size_t count){
-    std::cout << "doubles overload called" << std::endl;
+    fmt::println( "doubles overload called" );
     double maximum{0};
     
     for(size_t i{0}; i < count ;++i){
@@ -12,7 +12,7 @@ double max(double * numbers, size_t count){
 }
 
 int max(int * numbers, size_t count){
-    std::cout << "ints overload called" << std::endl;
+    fmt::println( "ints overload called" );
 
     int maximum{0};
     
@@ -31,7 +31,7 @@ int main(){
 	int  ints[] {1,2,5,2,8,4};
 
     auto result = max(ints,std::size(ints));
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}", result );
    
     return 0;
 }

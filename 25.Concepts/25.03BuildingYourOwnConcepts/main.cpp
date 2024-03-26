@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <type_traits>
 #include <concepts>
 
@@ -43,7 +43,7 @@ int main(){
 
     add(x,y);
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!");
     
     return 0;
 }

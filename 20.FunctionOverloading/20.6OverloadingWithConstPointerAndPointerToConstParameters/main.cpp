@@ -1,13 +1,13 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int max(int*a , int* b){
-    std::cout << "max with int* called" << std::endl;
+    fmt::println( "max with int* called" );
     return (*a > *b)? *a : *b;
 }
 
 int max(const int* a, const int* b){
-    std::cout << "max with cont int* called" << std::endl;
+    fmt::println( "max with cont int* called" );
     return (*a > *b)? *a : *b;
 }
 
@@ -20,8 +20,8 @@ int min(const int* a, const int* b){
 
 
 int min(const int* const a, const int* const b){
-	std::cout << "&a : " << &a << std::endl;
-	std::cout << "&b : " << &b << std::endl;
+	fmt::println( "&a : {}" , fmt::ptr(&a ));
+	fmt::println( "&b : {}" , fmt::ptr(&b ));
     return (*a < *b)? *a : *b;
 }
 
@@ -45,8 +45,8 @@ int main(){
     const int* p_c{&c};
     const int* p_d{&d};
 
-    std::cout << "&p_c : " << &p_c << std::endl;
-    std::cout << "&p_d : " << &p_d << std::endl;
+    fmt::println( "&p_c : {}" , fmt::ptr(&p_c) );
+    fmt::println( "&p_d : {}" , fmt::ptr(&p_d ));
 
     auto result = min(p_c,p_d);
 

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Global namespace
 double add(double a, double b){
@@ -12,7 +12,7 @@ namespace My_Thing{
     
     void do_something(){
         double result = ::add(5,6);
-        std::cout << "result : " << result << std::endl;
+        fmt::println( "result : {}" , result );
     }
     
 }

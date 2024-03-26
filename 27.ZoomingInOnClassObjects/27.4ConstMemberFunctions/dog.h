@@ -1,7 +1,7 @@
 #ifndef DOG_H
 #define DOG_H
 
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 class Dog{

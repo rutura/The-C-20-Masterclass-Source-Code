@@ -1,12 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <type_traits>
 
 
 void func_floating_point  (double d) {
-	std::cout << "func_floating_point called..." << std::endl;
+	fmt::println( "func_floating_point called..." );
 } 
 void func_integral(int i) { 
-	std::cout << "func_integral called..." << std::endl;
+	fmt::println( "func_integral called..." );
 } 
 
 template <typename T>

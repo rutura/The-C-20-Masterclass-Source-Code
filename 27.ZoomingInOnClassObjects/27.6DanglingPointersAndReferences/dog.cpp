@@ -34,7 +34,7 @@
 
      //Utility functions
      void Dog::print_info() const {
-         std::cout << "Dog (" << this << ") : [ name : " << this->m_name  
-                << ", breed : " << this->m_breed  
-                << ", age : " << this->m_age << "]" << std::endl;
+         fmt::println( "Dog ({}{}{}{}{}{}{}{}" , fmt::ptr(this) , ") : [ name : " , this->m_name
+                , ", breed : " , this->m_breed
+                , ", age : " , this->m_age , "]" );
      }

@@ -2,7 +2,7 @@
   #include <cmath>
 
   Point::Point(double x, double y) : m_x{x},m_y{y}{
-    std::cout << "Point constructor called" << std::endl;
+    fmt::println( "Point constructor called" );
     ++m_point_count;
   }
 

@@ -1,9 +1,9 @@
- #include <iostream>
+ #include <fmt/format.h>
 #include "point.h"
 #include "number.h"
 
 void do_something_with_point(const Point& p){
-    std::cout << "point : " << p << std::endl;
+    fmt::println( "point : {}" , fmt::ptr(& p ));
 }
 
 

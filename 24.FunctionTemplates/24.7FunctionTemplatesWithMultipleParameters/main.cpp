@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 /*
 //Problematic : return depends on the order of the template arguments : BAD!
@@ -22,7 +22,7 @@ int main(){
     double b{6.7};
 
     auto result = maximum <int>(a,b);
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl; 
+    fmt::println( "sizeof(result) : {}" , sizeof(result) );
     
     return 0;
 }

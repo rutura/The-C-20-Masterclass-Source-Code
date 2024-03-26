@@ -2,7 +2,7 @@
 #define SCORES
 
 #include <string>
-#include <iostream>
+#include <fmt/format.h>
 
 
 
@@ -30,11 +30,11 @@ class Scores{
 
 
     void print_info()const{
-        std::cout << m_course_name << " : [ ";
+        fmt::println( "{}{}",m_course_name , " : [ ");
         for(size_t i{}; i < 20; ++i){
-            std::cout << m_scores[i] << " ";
+            fmt::print( "{}{}",m_scores[i] , " ");
         }
-        std::cout << "]" << std::endl;
+        fmt::println( "]" );
     }
 
     private: 

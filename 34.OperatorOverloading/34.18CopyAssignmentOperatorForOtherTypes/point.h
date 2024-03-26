@@ -1,6 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
-#include <iostream>
+#include <fmt/format.h>
 
 class Car; // Forward declaration
 
@@ -16,7 +16,7 @@ public:
 	Point(const Point& p); // Copy constructor
 
 	Point& operator= (const Point& right_operand){
-		std::cout << "Copy assignment operator called" << std::endl;
+		fmt::println( "Copy assignment operator called" );
 		if(this != & right_operand){
 			delete p_data;
 			p_data = new int(*(right_operand.p_data));

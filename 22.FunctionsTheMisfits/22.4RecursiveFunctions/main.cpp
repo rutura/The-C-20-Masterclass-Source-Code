@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 size_t sum_up_to_zero(size_t value){
     if(value!=0)
@@ -8,7 +8,7 @@ size_t sum_up_to_zero(size_t value){
 
 int main(){
 
-    std::cout << "result : " << sum_up_to_zero(10) << std::endl;
+    fmt::println( "result : {}" , sum_up_to_zero(10) );
    
     return 0;
 }

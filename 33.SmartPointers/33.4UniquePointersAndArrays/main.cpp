@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "dog.h"
 
@@ -9,7 +9,7 @@ int main(){
      //Array allocated on the stack
      /*
      {
-        std::cout << "Working with dog array on the stack" << std::endl;
+        fmt::println( "Working with dog array on the stack" );
         Dog dog_array[3] {Dog("Dog1"), Dog("Dog2") , Dog("Dog3")};
         for( size_t i {0}; i < 3 ; ++i){
             dog_array[i].print_info();
@@ -52,7 +52,7 @@ int main(){
      }
 
 
-     std::cout << "Done!" << std::endl;
+     fmt::println( "Done!" );
 	
    
     return 0;

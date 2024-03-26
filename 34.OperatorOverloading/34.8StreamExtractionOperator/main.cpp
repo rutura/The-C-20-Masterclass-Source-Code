@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 
 int main(){
@@ -8,7 +8,7 @@ int main(){
 
     std::cin >> p2;//
 
-    std::cout << "p2 : " << p2 << std::endl;
-   
+//    fmt::println( "p2 : {}" , p2 );
+    p2.print_info();
     return 0;
 }

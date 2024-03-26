@@ -1,17 +1,17 @@
 #include "square.h"
-#include <iostream>
+#include <fmt/format.h>
 
 Square::Square(double side_param )
      : Square{side_param,"black",6}
 {
     m_position = 45.8;
-    std::cout << "One param constructor called" << std::endl;
+    fmt::println( "One param constructor called" );
 }
 
 Square::Square( double side_param, const std::string& color_param, int shading_param )
     : m_side{side_param},m_color{color_param},m_shading{shading_param}
 {
-    std::cout <<  "Three param constructor called" << std::endl;
+    fmt::println(  "Three param constructor called" );
 }
 
 double Square::surface() const {
@@ -20,6 +20,6 @@ double Square::surface() const {
 
 Square::~Square()
 {
-    std::cout << "Square object destroyed"  << std::endl;
+    fmt::println( "Square object destroyed"  );
 }
 

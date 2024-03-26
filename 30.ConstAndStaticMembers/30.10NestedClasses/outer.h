@@ -1,7 +1,7 @@
 #ifndef OUTER_H
 #define OUTER_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 class Outer
 {
@@ -12,7 +12,7 @@ public:
     
     void do_something(){
         Inner inner1(10.0);
-        //std::cout << "Created inner object with value : " <<inner1.get_double() <<  std::endl;
+//        fmt::println( "Created inner object with value : {}" ,inner1.get_double() );
         //inner1.inner_var; // Outer doesn't have access to private parts of Inner
                             // Has to go through setters and getters
                             
@@ -31,14 +31,14 @@ private :
 			
             double get_double() const{
                 //Accessing private parts of Outer
-                //std::cout << "Inner accessing m_var1 : " << m_var1 << std::endl;// Compiler error.
-                std::cout << "static_int : " << static_int << std::endl;
+                //fmt::println( "Inner accessing m_var1 : " << m_var1 );// Compiler error.
+                fmt::println( "static_int : {}" , static_int );
                 return inner_var;
             }
             
             void do_something_with_outer(Outer * outer){
-               std::cout << "This is inner accessing private parts of outer object, m_var1 : "  <<
-               outer->m_var1 << std::endl;
+               fmt::println( "This is inner accessing private parts of outer object, m_var1 : {}"  ,
+               outer->m_var1 );
             }
           
     private : 

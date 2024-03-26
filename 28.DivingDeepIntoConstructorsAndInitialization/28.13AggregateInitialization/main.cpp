@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 struct Point
 {
@@ -7,7 +7,7 @@ struct Point
 };
 
 void print_point(const Point& p){
-    std::cout << "Point [ x : " << p.x << " , y : " << p.y << "]" << std::endl;
+    fmt::println( "Point [ x : {}{}{}{}" , p.x , " , y : " , p.y , "]" );
 }
 
 

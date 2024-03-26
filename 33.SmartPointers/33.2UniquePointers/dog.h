@@ -3,7 +3,7 @@
 
 
 #include <string>
-#include <iostream>
+#include <fmt/format.h>
 class Dog
 {
 public:
@@ -12,7 +12,7 @@ public:
     ~Dog();
     
     void print_dog() const{
-        std::cout << "Printing dog : " << dog_name << std::endl;
+        fmt::println( "Printing dog : {}" , dog_name );
     }
     
     std::string get_name() const{

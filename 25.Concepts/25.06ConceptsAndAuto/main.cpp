@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <concepts>
 
 //This syntax constrains the auto parameters you pass in 
@@ -10,7 +10,8 @@ std::integral auto add (std::integral auto a,std::integral auto b){
 
 int main(){
 
-    std::floating_point auto x = add(5,8);
-  
+//    std::floating_point auto x = add(5,8);
+    auto x = add(5,8);
+
     return 0;
 }

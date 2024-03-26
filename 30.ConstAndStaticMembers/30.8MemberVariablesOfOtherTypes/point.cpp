@@ -1,5 +1,5 @@
 #include "point.h"
-#include <iostream>
+#include <fmt/format.h>
 #include <cmath>
 
 size_t Point::m_point_count {}; // Initialize static member of Point class to 0
@@ -12,31 +12,31 @@ Point::Point(double x, double y)
 	:	p_i5(new Integer(5)),
 		m_x(x) , m_y(y) 
 {
-	std::cout << "Constructing Point [ m_x : " << m_x << ", m_y : " << m_y << "]" << std::endl;
+	fmt::println( "Constructing Point [ m_x : {}{}{}{}" , m_x , ", m_y : " , m_y , "]" );
     ++m_point_count;
 }
 
 Point::Point(double xy_coord) : Point(xy_coord,xy_coord) {
-    std::cout << "Point single param constructor called" << std::endl;
+    fmt::println( "Point single param constructor called" );
 }
 
 Point:: Point() : Point(0.0,0.0){
-     std::cout << "Point default constructor called" << std::endl; 
+     fmt::println( "Point default constructor called" );
 }
 
 Point::Point(const Point& point) : m_x(point.m_x) {
     //Copy constructor
-    std::cout << "Copy constructor called" << std::endl;
+    fmt::println( "Copy constructor called" );
     ++m_point_count; // Creating a copy object. So we increment
 }
 
 Point::~Point(){
     //Destructor
-    std::cout << "Destroying point object. ";
+    fmt::println( "Destroying point object. ");
     //We destroy a point object , so we decrement
     --m_point_count;
 	
-    std::cout << " Current point count : " << m_point_count << std::endl;
+    fmt::println( " Current point count : {}" , m_point_count );
 }
 
 double Point::length() const{

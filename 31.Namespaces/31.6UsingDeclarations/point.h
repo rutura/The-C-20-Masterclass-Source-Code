@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 namespace Geom{
     
@@ -11,7 +11,7 @@ namespace Geom{
         Point();
         Point( double x, double y);
         void print_info()const{
-            std::cout << "Point [ x : " << m_x << ", y : " << m_y << "]" << std::endl;
+            fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
         }
         ~Point();
     private : 

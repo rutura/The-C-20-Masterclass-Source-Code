@@ -1,16 +1,16 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <cstring>
 
 //(3)Function template
 template <typename T> T maximum(T a,T b){
-    std::cout << "Template overload called(T) " << std::endl;
+    fmt::println( "Template overload called(T) " );
     return (a > b) ? a : b ; 
 }
 
 //(1)A raw overload will take precedence over any template instance
 //if const char* is passed to maximum
 const char* maximum(const char* a, const char* b){
-	std::cout << "Raw overload called" << std::endl;
+	fmt::println( "Raw overload called" );
 	return (std::strcmp(a,b) > 0) ? a : b ; 
 }
 
@@ -19,7 +19,7 @@ const char* maximum(const char* a, const char* b){
 //if a pointer is passed to maximum
 
 template <typename T> T* maximum(T* a, T* b){
-	std::cout << "Template overload called (T*) " << std::endl;
+	fmt::println( "Template overload called (T*) " );
      return (*a > *b)? a : b;
 }
 
@@ -40,7 +40,7 @@ int main(){
 	int b{23};
 
     auto result = maximum(&a,&b);
-    std::cout <<"result : " << *result << std::endl;
+    fmt::println("result : {}" , *result );
    
     return 0;
 }

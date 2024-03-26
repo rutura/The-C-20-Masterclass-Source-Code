@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 class Dog{
     friend class Cat;
@@ -16,7 +16,7 @@ private :
 class Cat{
 public : 
     void print_dog_info(const Dog& d) const{
-        std::cout << "Dog [ name : " << d.m_name << ", age : " << d.m_age << "]" << std::endl;
+        fmt::println( "Dog [ name : {}{}{}{}" , d.m_name , ", age : " , d.m_age , "]" );
     }
 
 };

@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 class Point
 {
@@ -22,8 +22,8 @@ public :
   }
 
   static void print_info(const Point& p){
-		std::cout << "Point : [ m_x : " << p.m_x << ", m_y : " << p.m_y << "]" 
-             << std::endl;
+		fmt::println( "Point : [ m_x : {}{}{}{}" , p.m_x , ", m_y : " , p.m_y , "]"
+             );
   }
 
 private:

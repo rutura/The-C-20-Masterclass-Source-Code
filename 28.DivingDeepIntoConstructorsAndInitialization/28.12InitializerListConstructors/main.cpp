@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <cassert>
 
 struct Point{
@@ -7,19 +7,19 @@ public:
         //static_assert( (list.size() == 2));
         assert(list.size() == 2); // If the size of the list is not 2, terminate the program with an error
         /*
-        std::cout << "Initalizer list constructor called" << std::endl;
-        std::cout << "list size : " << list.size() << std::endl;
+        fmt::println("Initalizer list constructor called" );
+        fmt::println("list size : {}" , list.size() );
         
         for(size_t i{} ;  i < list.size(); ++i){
-            std::cout << "elt [" << i << "]  :" << *(list.begin() + i) << std::endl;
+            fmt::println("elt [{}{}{}" , i , "]  :" , *(list.begin() + i) );
         }
-        */
+         */
        x = *(list.begin());
        y = *(list.begin() + 1);
     }
 
     void print_point() const {
-        std::cout << "Point [ x : " << x << ", y : " << y << "]" << std::endl;
+        fmt::println( "Point [ x : {}{}{}{}" , x , ", y : " , y , "]" );
     }
  private : 
     double x;

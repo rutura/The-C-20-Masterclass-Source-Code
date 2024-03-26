@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 void print_age_1();
@@ -14,7 +14,7 @@ int main(){
     print_age_1();
     print_age_2();
 
-    std::cout << "----" << std::endl;
+    fmt::println( "----" );
 
     print_distance_1();
     print_distance_2();

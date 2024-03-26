@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "integer.h"
 
 class Point{

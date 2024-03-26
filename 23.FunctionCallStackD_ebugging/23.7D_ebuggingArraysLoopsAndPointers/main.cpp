@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 double sum ( double array[], size_t count){
 
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     
 	double total = sum(numbers,std::size(numbers));
 	
-	std::cout << "sum : " << total << std::endl;
+	fmt::println( "sum : {}" , total );
 	
 	return 0;
 }

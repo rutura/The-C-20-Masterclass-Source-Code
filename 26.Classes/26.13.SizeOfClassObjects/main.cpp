@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 class Dog{
     public : 
@@ -20,13 +20,13 @@ class Dog{
 int main(){
 
     Dog dog1;
-    std::cout << "sizeof(size_t) : " << sizeof(size_t) << std::endl;
-    std::cout << "sizeof(int*) : " << sizeof(int*) << std::endl;
-    std::cout << "sizeof(Dog) : " << sizeof(dog1) << std::endl;
+    fmt::println( "sizeof(size_t) : {}" , sizeof(size_t) );
+    fmt::println( "sizeof(int*) : {}" , sizeof(int*) );
+    fmt::println( "sizeof(Dog) : {}" , sizeof(dog1) );
 
     std::string name{"I am the king of the universe!"};
 
-    std::cout << "sizeof(name) : " << sizeof(name) << std::endl;
+    fmt::println( "sizeof(name) : {}" , sizeof(name) );
    
     return 0;
 }

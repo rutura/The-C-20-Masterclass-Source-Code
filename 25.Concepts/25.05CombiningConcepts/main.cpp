@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <concepts>
 
 
@@ -24,8 +24,8 @@ T add(T a, T b){
 
 int main(){
 
-    long long int x{7};
-    long long int y{5};
+    int x{7};
+    int y{5};
 
     add(x,y);
 

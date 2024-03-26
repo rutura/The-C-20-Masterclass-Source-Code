@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 /*
 template <typename T, typename P>
@@ -19,8 +19,8 @@ int main(){
     double b{78.2};
 
     auto result = func_add(a,b);
-    std::cout << "result : " << result << std::endl;
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl;
+    fmt::println( "result : {}" , result );
+    fmt::println( "sizeof(result) : {}" , sizeof(result) );
    
     return 0;
 }

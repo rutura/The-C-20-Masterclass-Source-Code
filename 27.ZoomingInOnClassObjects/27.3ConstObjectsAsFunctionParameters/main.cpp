@@ -26,15 +26,15 @@ void function_taking_dog_p(Dog* p_dog){
 
 //Parameter passed as pointer to const
 void function_taking_pointer_to_const_dog(const Dog* const_p_dog){
-	const_p_dog->set_name("Hillo");//Error : Expected
-	const_p_dog->print_info(); //Error : Not expected
+//	const_p_dog->set_name("Hillo");//Error : Expected
+//	const_p_dog->print_info(); //Error : Not expected
 }
 
 
 int main(){
 
     const Dog dog1("Fluffy","Shepherd",2);
-    std::cout << "address of object : " << &dog1 << std::endl;
+    fmt::println( "address of object : {}" , fmt::ptr(&dog1) );
 
     //Function taking parameter by value : WORKS
     //function_taking_dog(dog1);
