@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <cmath>
 
 
@@ -43,24 +43,23 @@ int main(){
     Point p1(110,110);
     Point p2(20,20);
 
-    std::cout << std::boolalpha;
     auto result1 = (p1 > p2);
-    std::cout << "p1 > p2 : " << result1 << std::endl;
+    fmt::println( "p1 > p2 : {}" , result1 );
 
     auto result2 = (p1 >= p2);
-    std::cout << "p1 >= p2 : " << result2 << std::endl;
+    fmt::println( "p1 >= p2 : {}" , result2 );
 
     auto result3 = (p1 == p2);
-    std::cout << "p1 == p2 : " << result3 << std::endl;
+    fmt::println( "p1 == p2 : {}" , result3 );
 
     auto result4 = (p1 != p2);
-    std::cout << "p1 != p2 : " << result4 << std::endl;
+    fmt::println( "p1 != p2 : {}" , result4 );
 
     auto result5 = (p1 < p2);
-    std::cout << "p1 < p2 : " << result5 << std::endl;
+    fmt::println( "p1 < p2 : {}" , result5 );
 
     auto result6 = (p1 <= p2);
-    std::cout << "p1 <= p2 : " << result6 << std::endl;
+    fmt::println( "p1 <= p2 : {}" , result6 );
     
     return 0;
 }

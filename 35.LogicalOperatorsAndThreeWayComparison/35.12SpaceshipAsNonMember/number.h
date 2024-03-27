@@ -1,7 +1,7 @@
 #ifndef NUMBER_H
 #define NUMBER_H
 
-#include <iostream>
+#include <fmt/format.h>
 class Number
 {
     friend std::ostream& operator<<(std::ostream& out , const Number& number);  

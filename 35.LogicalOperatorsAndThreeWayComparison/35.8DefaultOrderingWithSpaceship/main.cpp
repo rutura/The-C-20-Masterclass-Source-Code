@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <fmt/format.h>
 class Item {
 public : 
 		Item() = default;
@@ -25,31 +24,31 @@ int main(){
     Item i1{1,2,5};
     Item i2{1,2,4};
     
+
     /*
-   
     //auto result1 = (i1 > i2);
     auto result1 = ( (i1 <=> i2) > 0); // A possible option for the compiler magic
-    std::cout << " i1 > i2 : " << result1 << std::endl;
+    fmt::println(" i1 > i2 : {}" , result1 );
 
     //auto result2 = (i1 >= i2);
     auto result2 = ( (i1 <=> i2) >= 0); // A possible option for the compiler magic
-    std::cout << " i1 >= i2 : " << result2 << std::endl;
+    fmt::println(" i1 >= i2 : {}" , result2 );
  
     auto result3 = (i1 == i2);
-    std::cout << " i1 == i2 : " << result3 << std::endl;
+    fmt::println(" i1 == i2 : {}" , result3 );
 
     auto result4 = (i1 != i2);
-    std::cout << " i1 != i2 : " << result4 << std::endl;
+    fmt::println(" i1 != i2 : {}" , result4 );
  
     //auto result5 = (i1 < i2);
     auto result5 = ( (i1 <=> i2) < 0); // A possible option for the compiler magic
-    std::cout << " i1 < i2 : " << result5 << std::endl;
+    fmt::println(" i1 < i2 : {}" , result5 );
 
     //auto result6 = (i1 <= i2);
     auto result6 = ( (i1 <=> i2) <= 0); // A possible option for the compiler magic
-    std::cout << " i1 <= i2 : " << result6 << std::endl;
-
+    fmt::println(" i1 <= i2 : {}" , result6 );
     */
+
 
 
     //Implicit conversions

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "number.h"
 
 class Point{
@@ -9,7 +8,7 @@ class Point{
 
     //Type conversion operator from Number to Point
     operator Number()const{
-        std::cout << "Converting : " << m_x << std::endl;
+        fmt::println( "Converting : {}" , m_x );
         return Number(static_cast<int>(m_x));
     }
     private : 
@@ -23,8 +22,7 @@ int main(){
     Point p2{20,20};
 
     bool result  = ( p1 > p2);  
-    std::cout << std::boolalpha;
-    std::cout << "p1 > p2 : " << result << std::endl;  
+    fmt::println( "p1 > p2 : {}" , result );
    
    
     return 0;
