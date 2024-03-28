@@ -1,15 +1,10 @@
-
 #include "person.h"
-#include "engineer.h"
 #include "civilengineer.h"
-#include <iostream>
 
-CivilEngineer::CivilEngineer()
-{
+CivilEngineer::CivilEngineer() {
 }
 
-std::ostream& operator<<(std::ostream& out, const CivilEngineer& operand){
-    
+std::ostream &operator<<(std::ostream &out, const CivilEngineer &operand) {
     /*
      out << "CivilEngineer [Full name : " << operand.get_full_name() <<
                     ",age : " << operand.get_age() << 
@@ -17,12 +12,11 @@ std::ostream& operator<<(std::ostream& out, const CivilEngineer& operand){
                     ",contract_count : " << operand.contract_count <<
                     ",speciality : " << operand.m_speciality << "]";
                     */
-                  
-				
-    return out;  
+
+
+    return out;
 }
 
 
-CivilEngineer::~CivilEngineer()
-{
+CivilEngineer::~CivilEngineer() {
 }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "child.h"
 
 
@@ -9,8 +8,8 @@ int main(){
     child.Parent::print_var(); // Calls the method in Parent, 
                                // value in parent just contains junk or whatever
                                // in class initialization we did.
-							   
-    std::cout << "--------" << std::endl;
+
+	fmt::println("--------");
     child.show_values();
     return 0;
 }

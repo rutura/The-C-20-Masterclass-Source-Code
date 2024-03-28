@@ -1,7 +1,8 @@
 #ifndef PARENT_H
 #define PARENT_H
 
-#include <iostream>
+#include <fmt/format.h>
+
 class Parent
 {
 public:
@@ -11,7 +12,7 @@ public:
     ~Parent() = default;
     
     void print_var()const{
-        std::cout << "The value in parent is : " << m_member_var << std::endl;
+        fmt::println( "The value in parent is : {}",  m_member_var);
     }
 protected: 
     int m_member_var{100};

@@ -7,6 +7,7 @@
 class Player : public Person
 {
     friend std::ostream& operator<<(std::ostream& out, const Player& player);
+    friend struct fmt::formatter<Player>;
 public:
     Player();
     ~Player();
@@ -27,4 +28,13 @@ private :
 
 };
 
+template<>
+struct fmt::formatter<Player> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const Player &obj, FormatContext &ctx) {
+        return format_to(ctx.out(), "Player [Full name: {}, age: {}, address: {}]", obj.get_full_name(),obj.get_age(),  obj.get_address() );
+    }
+};
 #endif // PLAYER_H

@@ -8,6 +8,8 @@ class Engineer : public Person
 {
     using Person::Person; // Inheriting constructors
 friend std::ostream& operator<<(std::ostream& out , const Engineer& operand);
+    friend struct fmt::formatter<Engineer>;
+
 public:
 /*
     Engineer();
@@ -30,6 +32,16 @@ public:
     
 private : 
     int contract_count{0};
+};
+
+template<>
+struct fmt::formatter<Engineer> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const Engineer &obj, FormatContext &ctx) const {
+        return format_to(ctx.out(), "Engineer [Full name: {}, age: {}, address: {}, contract_count: {}]", obj.get_full_name(), obj.get_age(),obj.get_address(), obj.get_contract_count());
+    }
 };
 
 #endif // ENGINEER_H

@@ -14,7 +14,6 @@ std::ostream& operator<<(std::ostream& out , const Engineer& operand){
     return out;   
 }
 
-
 Engineer::~Engineer()
 {
 }

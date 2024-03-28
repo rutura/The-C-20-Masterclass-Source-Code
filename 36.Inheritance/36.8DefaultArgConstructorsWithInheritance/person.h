@@ -3,9 +3,12 @@
 
 #include <string>
 #include <string_view>
+#include <fmt/format.h>
 class Person
 {
     friend std::ostream& operator<<(std::ostream& , const Person& person);
+
+    friend struct fmt::formatter<Person>;
 public:
     Person() ;
     Person(std::string_view fullname,int age,
@@ -43,5 +46,14 @@ private :
     std::string m_address{"None"};
 };
 
+template<>
+struct fmt::formatter<Person> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const Person &obj, FormatContext &ctx) const {
+        return format_to(ctx.out(), "Person [ Full name:{}, age: {}, address:{}]",obj.get_full_name(), obj.get_age(), obj.get_address() );
+    }
+};
 
 #endif // PERSON_H

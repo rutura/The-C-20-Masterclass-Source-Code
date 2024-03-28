@@ -5,6 +5,8 @@
 class CivilEngineer : public Engineer
 {
     friend std::ostream& operator<<(std::ostream&, const CivilEngineer& operand);
+
+    friend struct fmt::formatter<CivilEngineer>;
 public:
     CivilEngineer();
     ~CivilEngineer() ;
@@ -24,6 +26,16 @@ public:
 private : 
     std::string m_speciality{"None"};
 
+};
+
+template<>
+struct fmt::formatter<CivilEngineer> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const CivilEngineer &obj, FormatContext &ctx) const {
+        return format_to(ctx.out(), "CivilEngineer [ Full name: {}, age: {}, address: {}, contract_count: {}, speciality: {}]", obj.get_full_name(), obj.get_age(), obj.get_address(), obj.get_contract_count(), obj.m_speciality);
+    }
 };
 
 #endif // CIVIL_ENGINEER_H

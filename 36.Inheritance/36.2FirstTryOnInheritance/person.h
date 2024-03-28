@@ -2,11 +2,13 @@
 #define PERSON_H
 
 #include <string>
-#include <iostream>
+#include <fmt/format.h>
 
 class Person
 {
     friend std::ostream& operator<<(std::ostream& out, const Person& person);
+
+    friend struct fmt::formatter<Person>;
 public:
     Person();
     Person(std::string& first_name_param, std::string& last_name_param);
@@ -31,6 +33,16 @@ public:
 private : 
     std::string first_name{"Mysterious"};
     std::string last_name{"Person"};
+};
+
+template<>
+struct fmt::formatter<Person> {
+    constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
+
+    template<typename FormatContext>
+    auto format(const Person &obj, FormatContext &ctx) const {
+        return format_to(ctx.out(), "Person [{}, {}]", obj.get_first_name(), obj.get_last_name());
+    }
 };
 
 

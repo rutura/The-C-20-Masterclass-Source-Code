@@ -13,7 +13,6 @@ std::ostream& operator<<(std::ostream& out , const Nurse& operand){
     return out;
 }
 
-
 Nurse::~Nurse()
 {
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "person.h"
 #include "player.h"
 #include "nurse.h"
@@ -7,22 +7,22 @@
 int main(){
 
     Person person1("Daniel Gray",27,"Blue Sky St 233 #56");
-    std::cout << "person1 : " << person1 << std::endl;
+    fmt::println( "person1 : {}" , person1 );
 
-    std::cout << "---------------" << std::endl;
+    fmt::println( "---------------" );
 
     Player player;
     player.m_full_name = "Samuel Jackson";
     //player.m_age = 55; Compier error
     //player.m_address = "2i892317322"; Compiler
 
-    std::cout << "------------------" << std::endl;
+    fmt::println( "------------------" );
 
     Nurse nurse1;
     //nurse1.m_full_name = "Davy Johnes";Compiler error
     //nurse1.m_age = 51; // Compiler error
 
-    std::cout << "---------------" << std::endl;
+    fmt::println( "---------------" );
     Engineer engineer1;
     //engineer1.m_full_name = "Olivier Godson"; // Compiler error
     //engineer1.m_age = 55; // Compiler error

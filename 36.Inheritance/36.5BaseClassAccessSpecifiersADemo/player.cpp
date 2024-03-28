@@ -13,7 +13,6 @@ std::ostream& operator<<(std::ostream& out, const Player& player){
     return out;
 }
 
-
 Player::~Player()
 {
 }
