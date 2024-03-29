@@ -1,6 +1,6 @@
 #ifndef SHAPE_H
 #define SHAPE_H
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 class Shape
 {
@@ -10,11 +10,11 @@ public:
     ~Shape();
 public:
      void draw( )const{
-        std::cout << "Shape::draw() called for : " << m_description << std::endl;
+        fmt::println( "Shape::draw() called for : {}", m_description );
     }
 private : 
      void func() const {
-        std::cout << "Shape::func() called for : " << m_description << std::endl;
+        fmt::println( "Shape::func() called for : {}" , m_description );
     }
 protected:
     std::string m_description;

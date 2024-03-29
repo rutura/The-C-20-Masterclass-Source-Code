@@ -9,7 +9,7 @@ public:
     virtual ~Feline();
     
     virtual void run() const  {
-        std::cout << "Feline " << m_description << " is running" << std::endl;
+        fmt::println( "Feline {} is running", m_description);
     }
     std::string m_fur_style;
 };

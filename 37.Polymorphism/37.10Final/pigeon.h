@@ -9,7 +9,7 @@ public:
     virtual ~Pigeon();
     
     virtual void coo() const{
-        std::cout << "Pigeon::coo called for pigeon : " << m_description << std::endl;
+        fmt::println("Pigeon::coo called for pigeon : {}", m_description );
     }
 
 

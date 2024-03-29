@@ -3,7 +3,7 @@
 
 #include <string>
 #include <string_view>
-#include <iostream>
+#include <fmt/format.h>
 
 class Animal
 {
@@ -13,7 +13,7 @@ public:
     virtual ~Animal();
     
     virtual void breathe()const{
-        std::cout << "Animal::breathe called for : " << m_description << std::endl;
+        fmt::println( "Animal::breathe called for : {}", m_description );
     }
 protected: 
     std::string m_description;

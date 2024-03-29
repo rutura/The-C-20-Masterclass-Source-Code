@@ -11,11 +11,11 @@ public:
     ~Ellipse();
 private: 
      void draw( )const {
-        std::cout << "Ellipse::draw() called for : " << m_description << std::endl;
+        fmt::println( "Ellipse::draw() called for : {}" , m_description );
     }
 public: 
      void func() const  {
-        std::cout << "Ellipse::func() called for : " << m_description << std::endl;
+        fmt::println( "Ellipse::func() called for : {}" , m_description );
     }
 private : 
     double m_x_radius;

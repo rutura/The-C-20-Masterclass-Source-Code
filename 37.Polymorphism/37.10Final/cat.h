@@ -12,7 +12,7 @@ public:
 	//Useless virtual method. Cat is final, so no one will be deriving from
 	//this class and have a chance to specialize it
     virtual void miaw() const{
-        std::cout << "Cat::miaw() called for cat " << m_description << std::endl;
+        fmt::println( "Cat::miaw() called for cat {}" , m_description );
     }
 	
 	//This method is useful though

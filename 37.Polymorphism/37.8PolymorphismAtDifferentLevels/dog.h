@@ -9,15 +9,15 @@ public:
     virtual ~Dog();
     
     virtual void bark() const{
-        std::cout << "Dog::bark called : Woof!" << std::endl;
+        fmt::println( "Dog::bark called : Woof!" );
     }
 
     virtual void breathe()const override{
-        std::cout << "Dog::breathe called for : " << m_description << std::endl;
+        fmt::println( "Dog::breathe called for : {}", m_description );
     }
 
     virtual void run() const override{
-        std::cout << "Dog " << m_description << " is running" << std::endl;
+        fmt::println( "Dog {} is running" , m_description);
     }
 
 };

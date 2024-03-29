@@ -9,7 +9,7 @@ public:
      virtual ~Dog();
     
     virtual void bark() const{
-        std::cout << "Dog::bark called : Woof!" << std::endl;
+        fmt::println( "Dog::bark called : Woof!" );
     }
 
 };

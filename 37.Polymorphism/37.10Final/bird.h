@@ -12,7 +12,7 @@ public:
     //This is contradictory : virtual and final have counter acting effects.
 	//Final wins here
     virtual void fly() const final{
-        std::cout << "Bird::fly() called for bird : " << m_description << std::endl;
+        fmt::println( "Bird::fly() called for bird : {}" , m_description );
     }
     
 private : 

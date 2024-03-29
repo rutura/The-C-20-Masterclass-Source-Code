@@ -10,13 +10,16 @@ public:
     ~Bird();
     
     virtual void fly() const{
-        std::cout << "Bird::fly() called for bird : " << m_description << std::endl;
+        fmt::println("Bird::fly() called for bird : {}", m_description);
     }
     
     virtual void stream_insert(std::ostream& out)const override{
          out << "Bird [description : " << m_description << ", wing_color : " << 
                 m_wing_color << "]";
      }
+    void stream_insert(fmt::basic_memory_buffer<char> &out) const override {
+        format_to_n(std::back_inserter(out), out.capacity(), "Bird [description: {}, wing_color: {}]", m_description, m_wing_color);
+    }
     
 protected : 
     std::string m_wing_color;

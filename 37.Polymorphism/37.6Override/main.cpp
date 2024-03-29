@@ -1,5 +1,4 @@
-#include <iostream>
-#include <memory>
+#include <fmt/format.h>
 #include "shape.h"
 #include "oval.h"
 #include "circle.h"
@@ -18,8 +17,7 @@ int main(){
 	Shape* shapes3[] {&circle1,&oval1,&circle2,&oval2,&circle3,&oval3};
 	
 	for ( Shape* shape_ptr : shapes3){
-		shape_ptr->draw();	
-		std::cout << std::endl;
+		shape_ptr->draw();
 	}
  
     return 0;

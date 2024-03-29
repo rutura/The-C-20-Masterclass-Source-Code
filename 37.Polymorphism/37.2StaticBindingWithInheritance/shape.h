@@ -3,7 +3,8 @@
 
 #include <string>
 #include <string_view>
-#include <iostream>
+#include <fmt/format.h>
+
 class Shape
 {
 public:
@@ -12,7 +13,7 @@ public:
     ~Shape();
     
     void draw() const{
-        std::cout << "Shape::draw() called. Drawing " << m_description << std::endl;
+        fmt::println( "Shape::draw() called. Drawing {}", m_description);
     }
     
 protected : 

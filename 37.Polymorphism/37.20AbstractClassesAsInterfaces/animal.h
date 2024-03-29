@@ -2,8 +2,7 @@
 #define ANIMAL_H
 
 #include <string>
-#include <string_view>
-#include <iostream>
+#include <fmt/format.h>
 #include "stream_insertable.h"
 
 class Animal :public StreamInsertable
@@ -14,14 +13,17 @@ public:
     ~Animal();
     
     virtual void breathe()const{
-        std::cout << "Animal::breathe called for : " << m_description << std::endl;
+        fmt::println( "Animal::breathe called for : {}", m_description );
     }
     
     //Stream insertable interface
      virtual void stream_insert(std::ostream& out)const override{
          out << "Animal [description : " << m_description <<"]" ;
      }
-    
+    void stream_insert(fmt::basic_memory_buffer<char> &out) const override {
+        fmt::format_to_n(std::back_inserter(out), out.capacity(), "Animal [description: {}]", m_description);
+    }
+
 protected: 
     std::string m_description;
 };

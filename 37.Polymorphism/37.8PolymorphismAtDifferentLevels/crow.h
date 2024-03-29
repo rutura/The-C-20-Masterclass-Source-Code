@@ -10,15 +10,15 @@ public:
     ~Crow();
     
     virtual void cow() const{
-        std::cout << "Crow::cow called fro crow : " << m_description << std::endl;
+        fmt::println( "Crow::cow called fro crow : {}" , m_description );
     }
 
     virtual void breathe()const{
-        std::cout << "Crow::breathe called for : " << m_description << std::endl;
+        fmt::println( "Crow::breathe called for : {}" , m_description );
     }
 
     virtual void fly() const override{
-        std::cout << "Crow::fly() called for bird : " << m_description << std::endl;
+        fmt::println( "Crow::fly() called for bird : {}" , m_description );
     }
 
 };

@@ -1,6 +1,6 @@
 #ifndef BASE_H
 #define BASE_H
-#include <iostream>
+#include <fmt/format.h>
 class Base
 {
 public:
@@ -8,7 +8,7 @@ public:
     ~Base();
     
     virtual double add(double a = 5 , double b = 5) const{
-        std::cout << "Base::add() called" << std::endl;
+        fmt::println( "Base::add() called" );
         return (a + b + 1);
     }
 };

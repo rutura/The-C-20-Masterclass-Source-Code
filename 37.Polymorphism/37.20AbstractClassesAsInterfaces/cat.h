@@ -9,14 +9,16 @@ public:
     ~Cat();
     
     virtual void miaw() const{
-        std::cout << "Cat::miaw() called for cat " << m_description << std::endl;
+        fmt::println( "Cat::miaw() called for cat {}", m_description );
     }
     
-    virtual void stream_insert(std::ostream& out)const override{
+    void stream_insert(std::ostream& out)const override{
          out << "Cat [description : " << m_description << ", fur_style : " << 
                 m_fur_style << "]";
      }
-
+    void stream_insert(fmt::basic_memory_buffer<char> &out) const override {
+        format_to_n(std::back_inserter(out), out.capacity(), "Cat [description: {}, fur_style: {}]", m_description, m_fur_style);
+    }
 
 };
 

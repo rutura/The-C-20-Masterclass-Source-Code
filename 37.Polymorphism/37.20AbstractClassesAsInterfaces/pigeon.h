@@ -9,13 +9,16 @@ public:
     ~Pigeon();
     
     virtual void coo() const{
-        std::cout << "Pigeon::coo called for pigeon : " << m_description << std::endl;
+        fmt::println( "Pigeon::coo called for pigeon : {}", m_description);
     }
     
-    virtual void stream_insert(std::ostream& out)const override{
+    void stream_insert(std::ostream& out)const override{
          out << "Pigeon [description : " << m_description << ", wing_color : " << 
                 m_wing_color << "]";
      }
+    void stream_insert(fmt::basic_memory_buffer<char> &out) const override {
+        format_to_n(std::back_inserter(out), out.capacity(), "Pigeon [description : {}, wing_color : {}]", m_description, m_wing_color);
+    }
 
 };
 

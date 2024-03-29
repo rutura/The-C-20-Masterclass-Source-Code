@@ -9,7 +9,7 @@ public:
     ~Derived();
     
     virtual double add(double a = 10 , double b = 10) const override{
-        std::cout << "Derived::add() called" << std::endl;
+        fmt::println( "Derived::add() called" );
         return (a + b +2);
     }
 

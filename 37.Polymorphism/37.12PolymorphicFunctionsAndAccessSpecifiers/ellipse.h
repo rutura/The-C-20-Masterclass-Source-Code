@@ -11,11 +11,11 @@ public:
     ~Ellipse();
 private: 
     virtual void draw( )const override{
-        std::cout << "Ellipse::draw() called for : " << m_description << std::endl;
+        fmt::println( "Ellipse::draw() called for : {}" , m_description );
     }
 public: 
     virtual void func() const override {
-        std::cout << "Ellipse::func() called for : " << m_description << std::endl;
+        fmt::println( "Ellipse::func() called for : {}" , m_description );
     }
 private : 
     double m_x_radius;

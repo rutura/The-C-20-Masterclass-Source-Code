@@ -10,8 +10,7 @@ public:
     ~Circle();
     
     void draw() const{
-        std::cout << "Circle::draw() called. Drawing " << m_description <<
-            " with radius : " << get_x_rad() << std::endl;        
+        fmt::println("Circle::draw() called. Drawing {} with radius: {}",  m_description , get_x_rad() );
     }
 
 };

@@ -9,15 +9,15 @@ public:
     virtual ~Cat();
     
     virtual void miaw() const{
-        std::cout << "Cat::miaw() called for cat " << m_description << std::endl;
+        fmt::println( "Cat::miaw() called for cat {}" , m_description );
     }
 
     virtual void breathe()const{
-        std::cout << "Cat::breathe called for : " << m_description << std::endl;
+        fmt::println( "Cat::breathe called for : {}" , m_description );
     }
 
     virtual void run() const override{
-        std::cout << "Cat " << m_description << " is running" << std::endl;
+        fmt::println( "Cat {} is running", m_description );
     }
 
 

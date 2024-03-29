@@ -9,15 +9,15 @@ public:
     ~Pigeon();
     
     virtual void coo() const{
-        std::cout << "Pigeon::coo called for pigeon : " << m_description << std::endl;
+        fmt::println( "Pigeon::coo called for pigeon :{} " , m_description );
     }
 
     virtual void breathe()const{
-        std::cout << "Pigeon::breathe called for : " << m_description << std::endl;
+        fmt::println( "Pigeon::breathe called for :{} " , m_description );
     }
 
     virtual void fly() const override{
-        std::cout << "Pigeon::fly() called for bird : " << m_description << std::endl;
+        fmt::println( "Pigeon::fly() called for bird :{} " , m_description );
     }
 
 };

@@ -1,26 +1,26 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "dog.h"
 
 
 void do_something_with_animal_ptr(Animal* animal){
-	std::cout<< "In function taking base pointer..." << std::endl;
+	fmt::println( "In function taking base pointer..." );
 	Feline* feline_ptr = dynamic_cast<Feline*>(animal);
 	
 	if(feline_ptr){
 		feline_ptr->do_some_feline_thingy();
 	}else{
-		std::cout << "Couldn't cast to Feline pointer,Sorry." << std::endl;
+		fmt::println( "Couldn't cast to Feline pointer,Sorry." );
 	}
 	
 }
 
 void do_something_with_animal_ref(Animal & animal){
-	std::cout << "In function taking base reference..." << std::endl;
+	fmt::println( "In function taking base reference..." );
 	Feline* feline_ptr_1 {dynamic_cast<Feline*>(&animal)};
 	if(feline_ptr_1){
 		feline_ptr_1->do_some_feline_thingy();
 	}else{
-		std::cout << "Couldn't cast to Feline reference,Sorry." << std::endl;
+		fmt::println( "Couldn't cast to Feline reference,Sorry." );
 	}
 }
 
@@ -31,7 +31,7 @@ int main(){
 	 //animal1->do_some_feline_thingy();
 
 
-    std::cout << "-----------" << std::endl;
+    fmt::println( "-----------" );
 
 	//If the cast succeeds, we get a valid pointer back, 
 	//if it fails, we get nullptr. So we can check before
@@ -41,10 +41,10 @@ int main(){
     if(feline_ptr){
         feline_ptr->do_some_feline_thingy();
     }else{
-        std::cout << "Couldn't do the transformation from Animal* to Dog*" << std::endl;
+        fmt::println( "Couldn't do the transformation from Animal* to Dog*" );
     }
 
-    std::cout << "-----------" << std::endl;
+    fmt::println( "-----------" );
 
     //Can do the transformation downstream for references
 
@@ -64,17 +64,17 @@ int main(){
 	if(feline_ptr_1){
 		feline_ptr_1->do_some_dog_thingy();
 	}else{
-		std::cout << "Couldn't cast to Dog reference,Sorry." << std::endl;
+		fmt::println( "Couldn't cast to Dog reference,Sorry." );
 	}
  
 
 
-    std::cout << "---------------" << std::endl;
+    fmt::println( "---------------" );
     do_something_with_animal_ptr(animal1);
     do_something_with_animal_ref(animal_ref);
 
 
-    std::cout << "----------------" << std::endl;
+    fmt::println( "----------------" );
     /*
     int data{45};
     int data_ptr = &data;
@@ -82,7 +82,7 @@ int main(){
     std::string data_str = dynamic_cast<std::string *>(data_ptr);
     */
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
 
     delete animal1;
      

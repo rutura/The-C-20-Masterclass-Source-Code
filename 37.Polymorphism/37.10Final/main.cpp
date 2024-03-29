@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Intersting fact #1
 /*
@@ -14,6 +14,6 @@ class FigherJet : public Plane{
 
 int main(){
 
-    std::cout << "Hello" << std::endl;
+    fmt::println( "Hello" );
     return 0;
 }

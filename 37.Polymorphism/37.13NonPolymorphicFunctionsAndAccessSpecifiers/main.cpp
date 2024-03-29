@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "ellipse.h"
 
@@ -9,7 +9,7 @@ int main(){
     shape0->draw(); // Static binding
 	//shape0->func(); // Error :  func is private in Shape
 
-    std::cout << "------------" << std::endl;
+    fmt::println( "------------" );
 
     //Direct objects : static binding
 	Ellipse ellipse1 (1,6,"ellipse1");
@@ -18,7 +18,7 @@ int main(){
 
 
 
-     std::cout << "------------" << std::endl;   
+     fmt::println( "------------" );
 
 	//Raw derived object assigned to raw base object
     //Slicing will occur, Shape::draw will be called

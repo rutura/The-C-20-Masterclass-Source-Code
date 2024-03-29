@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Base
@@ -6,18 +6,18 @@ class Base
 public:
     Base()
     {
-        std::cout << "Base constructor called" << std::endl;
+        fmt::println( "Base constructor called" );
     }
     virtual ~Base(){
-        std::cout << "Base destructor called" << std::endl;
+        fmt::println( "Base destructor called" );
     }
     virtual void setup()
     {
-        std::cout << "Base::setup() called" << std::endl;
+        fmt::println( "Base::setup() called" );
         m_value = 10;
     }
     virtual void clean_up(){
-        std::cout << "Base::clean_up() called" << std::endl;
+        fmt::println( "Base::clean_up() called" );
     }
     int get_value()
     {
@@ -33,19 +33,19 @@ public:
     Derived()
         : Base()
     {
-        std::cout << "Derived constructor called" << std::endl;
+        fmt::println( "Derived constructor called" );
     }
     virtual ~Derived(){
-        std::cout << "Derived destructor called" << std::endl;
+        fmt::println( "Derived destructor called" );
     }
 
     virtual void setup() override
     {
-        std::cout << "Derived::setup() called" << std::endl;
+        fmt::println( "Derived::setup() called" );
         m_value = 100;
     }
     virtual void clean_up() override{
-        std::cout << "Derived::clean_up() called" << std::endl;
+        fmt::println( "Derived::clean_up() called" );
     }
 };
 
@@ -57,7 +57,7 @@ int main(){
     p_base->setup();
 
     auto value = p_base->get_value();
-    std::cout << "value : " << value <<  std::endl; // 100
+    fmt::println( "value : {}", value ); // 100
 
     p_base->clean_up();
 

@@ -9,11 +9,11 @@ public:
     virtual ~Dog();
     
     virtual void bark() const{
-        std::cout << "Dog::bark called : Woof!" << std::endl;
+        fmt::println( "Dog::bark called : Woof!" );
     }
 
 	void do_some_dog_thingy(){
-		std::cout << "Doing some dog thingy...,speed : " << m_speed << std::endl;
+		fmt::println( "Doing some dog thingy...,speed : {}" , m_speed );
 	}
 
 private : 

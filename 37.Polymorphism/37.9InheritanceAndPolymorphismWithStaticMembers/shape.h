@@ -1,6 +1,6 @@
 #ifndef SHAPE_H
 #define SHAPE_H
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 class Shape
 {
@@ -9,7 +9,7 @@ public:
     Shape(std::string_view description);
     virtual ~Shape();
     void draw( )const{
-        std::cout << "Shape::draw() called for : " << m_description << std::endl;
+        fmt::println( "Shape::draw() called for : {}" , m_description );
     }
     
     virtual int get_count() const{

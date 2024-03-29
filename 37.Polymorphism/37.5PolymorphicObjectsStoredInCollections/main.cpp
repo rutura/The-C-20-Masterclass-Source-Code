@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "shape.h"
 #include "oval.h"
@@ -18,11 +18,11 @@ int main(){
     //If you store raw object data in an array set up to store base class objects
     //the data is going to be sliced off!
     /*
-    std::cout << "sizeof (circle1) : " << sizeof(circle1) << std::endl;
+    fmt::printl( "sizeof (circle1) : {}" , sizeof(circle1) );
     Shape shapes1[] {circle1,oval1,circle2,oval2,circle3,oval3};
 
     for(Shape& s : shapes1){
-         std::cout << "sizeof (object) : " << sizeof(s) << std::endl;
+         fmt::printl( "sizeof (object) : {}" , sizeof(s) );
         s.draw(); //
     }
     */
@@ -36,9 +36,8 @@ int main(){
 	Shape* shapes3[] {&circle1,&oval1,&circle2,&oval2,&circle3,&oval3};
 	
 	for ( Shape* shape_ptr : shapes3){
-		std::cout << "Inside array , sizeof(*shape_ptr) : " << sizeof(*shape_ptr) << std::endl;
+		fmt::printl( "Inside array , sizeof(*shape_ptr) : {}" , sizeof(*shape_ptr) );
 		shape_ptr->draw();	
-		std::cout << std::endl;
 	}
     */
 

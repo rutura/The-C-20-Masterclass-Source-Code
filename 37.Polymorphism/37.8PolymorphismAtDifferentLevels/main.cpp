@@ -1,4 +1,3 @@
-#include <iostream>
 #include "animal.h"
 #include "feline.h"
 #include "dog.h"
@@ -22,7 +21,7 @@ int main(){
         animal->breathe();
     }
 
-    std::cout << "------------" << std::endl;
+    fmt::println( "------------" );
 
     //Feline polymorphism
     Dog dog2("dark gray","dog2");
@@ -38,7 +37,7 @@ int main(){
     }
 
 
-    std::cout << "------------" << std::endl;
+    fmt::println( "------------" );
 
     //Bird polymorphism
     Pigeon pigeon3("white","pigeon1");

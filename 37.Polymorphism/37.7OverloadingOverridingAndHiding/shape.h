@@ -3,7 +3,7 @@
 
 #include <string>
 #include <string_view>
-#include <iostream>
+#include <fmt/format.h>
 class Shape
 {
 public:
@@ -12,11 +12,11 @@ public:
     ~Shape();
     
     virtual void draw() const{
-        std::cout << "Shape::draw() called. Drawing " << m_description << std::endl;
+        fmt::println( "Shape::draw() called. Drawing {}", m_description );
     }
 
 	virtual void draw(int color_depth) const {
-		std::cout << "Shape::Drawing with color depth : " << color_depth << std::endl;
+		fmt::println( "Shape::Drawing with color depth : {}", color_depth );
 	}
     
 protected : 

@@ -9,13 +9,13 @@ public:
     virtual ~Dog();
     
     virtual void bark() const{
-        std::cout << "Dog::bark called : Woof!" << std::endl;
+        fmt::println( "Dog::bark called : Woof!" );
     }
     
     //The run method in subclasses of dog can't be overrided
     //further, derived classes are forced to use the implmenetation in Dog
     void run() const override final {
-        std::cout << "Dog::run called" << std::endl;
+        fmt::println( "Dog::run called" );
     }
 
 };

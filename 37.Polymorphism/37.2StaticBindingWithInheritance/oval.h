@@ -1,6 +1,7 @@
 #ifndef OVAL_H
 #define OVAL_H
 #include "shape.h"
+
 class Oval : public Shape
 {
 public:
@@ -10,9 +11,7 @@ public:
     ~Oval();
     
     void draw() const{
-        std::cout << "Oval::draw() called. Drawing " << m_description <<
-            " with m_x_radius : " << m_x_radius << " and m_y_radius : " << m_y_radius 
-                    << std::endl;
+        fmt::println("Oval::draw() called. Drawing {} with m_x_radius :  {} and m_y_radius : {}",  m_description , m_x_radius, m_y_radius );
     }
 
 protected:

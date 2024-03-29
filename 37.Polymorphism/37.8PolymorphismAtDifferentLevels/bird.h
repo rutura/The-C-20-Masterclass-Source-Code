@@ -10,7 +10,7 @@ public:
     ~Bird();
     
     virtual void fly() const{
-        std::cout << "Bird::fly() called for bird : " << m_description << std::endl;
+        fmt::println( "Bird::fly() called for bird : {}", m_description);
     }
     
 private : 

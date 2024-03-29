@@ -12,14 +12,12 @@ public:
     
 
     virtual void draw() const override{
-        std::cout << "Oval::draw() called. Drawing " << m_description <<
-            " with m_x_radius : " << m_x_radius << " and m_y_radius : " << m_y_radius 
-                    << std::endl;
+        fmt::println( "Oval::draw() called. Drawing {} with m_x_radius : {} and m_y_radius :{}", m_description,  m_x_radius,  m_y_radius);
+
     }
 
     virtual void draw(int color_depth, std::string_view color) const{
-		std::cout << "Drawing with color depth : " << color_depth 
-		<< " and color : " << color << std::endl;
+		fmt::println( "Drawing with color depth : {} and color : {}", color_depth, color );
 	}
 
 public:

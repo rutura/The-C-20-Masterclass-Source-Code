@@ -10,7 +10,7 @@ public:
     virtual ~Crow();
     
     virtual void cow() const{
-        std::cout << "Crow::cow called fro crow : " << m_description << std::endl;
+        fmt::println( "Crow::cow called fro crow : {}", m_description);
     }
     
     //This will give a compiler error is fly is marked as final in Bird
