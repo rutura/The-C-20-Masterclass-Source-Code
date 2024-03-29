@@ -1,12 +1,47 @@
 #ifndef STREAM_INSERTABLE_H
 #define STREAM_INSERTABLE_H
-#include <iostream>
+#include <fmt/format.h>
 
 class StreamInsertable{
     friend std::ostream& operator<< (std::ostream& out, const StreamInsertable& operand);
-    
-public : 
-    virtual void stream_insert(std::ostream& out)const =0;
+    friend struct fmt::formatter<StreamInsertable>;
+    public :
+        virtual void stream_insert(std::ostream& out)const =0;
+    virtual void stream_insert(fmt::basic_memory_buffer<char>& out) const = 0;
 };
+
+template<>
+struct fmt::formatter<StreamInsertable> {
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const StreamInsertable& obj, FormatContext& ctx) {
+        basic_memory_buffer<char> buf;
+        obj.stream_insert(buf);
+        return format_to(ctx.out(), "{}", buf);
+    }
+};
+
+template<typename T>
+std::string make_streamable(const T& obj) {
+    fmt::memory_buffer buf;
+    obj.stream_insert(buf);
+    return fmt::to_string(buf);
+}
+
+template<typename T>
+void format_int_pointer_array(fmt::basic_memory_buffer<char>& out, T const* array, size_t size) {
+    format_to_n(std::back_inserter(out), 1, "[");
+    for (size_t i = 0; i < size; ++i) {
+        format_to_n(std::back_inserter(out), 1, "{}", (array[i]));
+        if (i < size - 1) {
+            format_to_n(std::back_inserter(out), 1,", ");
+        }
+    }
+    format_to_n(std::back_inserter(out), 1, "]");
+}
+
 
 #endif //STREAM_INSERTABLE_H

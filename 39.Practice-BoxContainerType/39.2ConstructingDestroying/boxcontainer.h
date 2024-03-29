@@ -34,7 +34,8 @@ public:
 		
 		//Using the default capacity
 	}
-	
+
+	void stream_insert(fmt::basic_memory_buffer<char> &out) const override;
 private : 
 	value_type * m_items;
 	size_t m_capacity;

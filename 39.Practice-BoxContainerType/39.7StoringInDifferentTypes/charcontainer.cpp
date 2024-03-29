@@ -34,12 +34,18 @@ void CharContainer::stream_insert(std::ostream& out)const{
 	for(size_t i{0}; i < m_size; ++i){
 		out << m_items[i] << " " ;
 	}
-	std::cout << "]";
+	out << "]";
+}
+
+void CharContainer::stream_insert(fmt::basic_memory_buffer<char> &out) const {
+	fmt::memory_buffer buf;
+	format_int_pointer_array(buf, m_items, m_size);
+	format_to_n(std::back_inserter(out), out.capacity(), "BoxContainer : [size: {}, capacity: {}, items: {}]", m_size,  m_capacity, fmt::to_string(buf));
 }
 
 
 void CharContainer::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println( "Expanding to {}", new_capacity);
 	value_type *new_items_container;
 
 	if (new_capacity <= m_capacity)

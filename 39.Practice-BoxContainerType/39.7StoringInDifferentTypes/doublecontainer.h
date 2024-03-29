@@ -16,7 +16,7 @@ public:
 	
 	//StreamInsertable Interface
 	virtual void stream_insert(std::ostream& out)const;
-	
+	void stream_insert(fmt::basic_memory_buffer<char> &out) const override;
 	// Helper getter methods
 	size_t size( ) const { return m_size; }
 	size_t capacity() const{return m_capacity;};

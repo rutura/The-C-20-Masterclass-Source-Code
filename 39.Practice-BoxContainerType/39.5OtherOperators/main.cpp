@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 int main(){
@@ -9,58 +8,55 @@ int main(){
 	box1.add(2);
 	box1.add(3);
 	
-	std::cout << "box1 : " << box1 << std::endl;
+	fmt::println( "box1 : {}" , make_streamable(box1) );
 	
 	BoxContainer box2;
 	box2.add(10);
 	box2.add(20);
 	box2.add(30);
 	
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box2 : {}" , make_streamable(box2) );
 	
-	std::cout << std::endl;
-	std::cout << "operator+= : " << std::endl;
+	fmt::println( "operator+= : " );
 	box2+= box1;
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box2 : {}" , make_streamable(box2) );
 	box2.add(50);
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box2 : {}" , make_streamable(box2) );
 
-	std::cout << "--------------------------" << std::endl;
+	fmt::println( "--------------------------" );
 	
 //----------------------------------------------------
 	
 	//Operator+
-	std::cout << std::endl;
-	std::cout << "operator+ : " << std::endl;
+	fmt::println( "operator+ : " );
 	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box1 : {}" , make_streamable(box1) );
+	fmt::println( "box2 : {}" , make_streamable(box2) );
 	
 	BoxContainer box3;
 	box3.add(81);
 	box3.add(82);
 	
-	std::cout << "box3 : " << box3 << std::endl;
+	fmt::println( "box3 : {}" , make_streamable(box3) );
 	
-	std::cout << "box1 + box3 : " << (box1 + box3) << std::endl;
+	fmt::println( "box1 + box3 : {}" , make_streamable((box1 + box3)) );
 
-	std::cout << "--------------------------" << std::endl;
+	fmt::println( "--------------------------" );
 	
 //----------------------------------------------------
 
 	//Operator=
-	std::cout << std::endl;
-	std::cout << "operator= : " << std::endl;
+	fmt::println( "operator= : " );
 	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
-	std::cout << "box3 : " << box3 << std::endl;
+	fmt::println( "box1 : {}" , make_streamable(box1) );
+	fmt::println( "box2 : {}" , make_streamable(box2) );
+	fmt::println( "box3 : {}" , make_streamable(box3) );
 	
 	box3 = box2;
 	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
-	std::cout << "box3 : " << box3 << std::endl;
+	fmt::println( "box1 : {}" , make_streamable(box1) );
+	fmt::println( "box2 : {}" , make_streamable(box2) );
+	fmt::println( "box3 : {}" , make_streamable(box3) );
 
 
 
