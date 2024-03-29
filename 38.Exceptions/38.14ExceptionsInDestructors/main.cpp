@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 class Item{
 public : 
@@ -18,9 +18,9 @@ int main(){
  		try{
 			Item item;	
 		}catch(int ex){
-			std::cout << "main() : Catching int exception" << std::endl;
+			fmt::println( "main() : Catching int exception" );
 		} 
 
-        std::cout << "END." << std::endl; 
+        fmt::println( "END." );
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //Declarations
 void f1();
@@ -6,9 +6,9 @@ void f2();
 void f3();
 
 void exception_thrower(){
-    std::cout << "starting exception_thrower()" << std::endl;
+    fmt::println( "starting exception_thrower()" );
     throw 0;// Execution will half from here
-    std::cout << "ending exception_thrower()" << std::endl;
+    fmt::println( "ending exception_thrower()" );
 }
 
 
@@ -17,9 +17,9 @@ int main(){
     try{
         f1();
     }catch(int ex){
-        std::cout << "Handling execution in main()" << std::endl;        
+        fmt::println( "Handling execution in main()" );
     }
-    std::cout << "main() finishing up" << std::endl;
+    fmt::println( "main() finishing up" );
    
     return 0;
 }
@@ -27,31 +27,31 @@ int main(){
 //Definitions
 
 void f1(){
-    std::cout << "Starting f1()" << std::endl;
+    fmt::println( "Starting f1()" );
     try{
         f2();
     }catch(int ex){
-        std::cout << "Exception handled in f1()" << std::endl;
+        fmt::println( "Exception handled in f1()" );
     }
-    std::cout << "Ending f1()" << std::endl;
+    fmt::println( "Ending f1()" );
 }
 
 void f2(){
-    std::cout << "Starting f2()" << std::endl;
+    fmt::println( "Starting f2()" );
     try{
         f3();
     }catch(int ex){
-        std::cout << "Exception handled in f2()" << std::endl;
+        fmt::println( "Exception handled in f2()" );
     }
-    std::cout << "Ending f2()" << std::endl;    
+    fmt::println( "Ending f2()" );
 }
 
 void f3(){
-    std::cout << "Starting f3()" << std::endl;
+    fmt::println( "Starting f3()" );
     try{
         exception_thrower();
     }catch(int ex){
-        std::cout << "Exception handled in f3()" << std::endl;
+        fmt::println( "Exception handled in f3()" );
     }
-    std::cout << "Ending f3()" << std::endl;    
+    fmt::println( "Ending f3()" );
 }

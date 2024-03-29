@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 
@@ -11,13 +11,13 @@ public :
         
     //Copy Constructor
     SomethingIsWrong(const SomethingIsWrong& source){
-        std::cout << "Copy constructor for SomethingIsWrong called" << std::endl;
+        fmt::println( "Copy constructor for SomethingIsWrong called" );
         m_message = source.m_message;
     }
     
     //Destructor
     ~SomethingIsWrong(){
-        std::cout << "SomethingIsWrong destructor called" << std::endl;
+        fmt::println( "SomethingIsWrong destructor called" );
     }
     const std::string& what()const{
         return m_message;
@@ -31,7 +31,7 @@ void do_something(size_t i){
       if(i == 2){
           throw SomethingIsWrong("i is 2");
       }
-      std::cout << "Doing something at iteration : " << i << std::endl;
+      fmt::println( "Doing something at iteration : {}" , i );
 }
 
 
@@ -44,7 +44,7 @@ int main(){
           do_something(i);
       }
       catch(SomethingIsWrong& ex){
-          std::cout << "Exception cought : " << ex.what() << std::endl;
+          fmt::println( "Exception cought : {}" , ex.what() );
       }
     }
    

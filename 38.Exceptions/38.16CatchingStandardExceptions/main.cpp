@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Animal{
@@ -30,10 +30,10 @@ int main(){
         Feline& feline_ref = dynamic_cast<Feline&>(animal);
     }
     catch(std::exception& ex){
-        std::cout << "Something is wrong : " << ex.what() << std::endl;       
+        fmt::println( "Something is wrong : {}" , ex.what() );
     }
 
-    std::cout << "END." << std::endl;
+    fmt::println( "END." );
 
    
     return 0;

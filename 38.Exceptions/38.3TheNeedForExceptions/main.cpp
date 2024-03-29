@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Animal{
@@ -16,7 +16,7 @@ public :
    Dog() = default;  
    virtual void breathe()const override{};
    void run(){
-	   std::cout << "Dog running..." << std::endl;
+	   fmt::println( "Dog running..." );
    }
 private : 
      std::string m_fur_color;
@@ -42,7 +42,7 @@ int main(){
     const int a{45};
     const int b{0};
     int result = a/b; 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
     */
 
 
@@ -54,7 +54,7 @@ int main(){
     Animal a;
     Dog& d{dynamic_cast<Dog&>(a)};
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
     */
 
 
@@ -74,16 +74,16 @@ int main(){
     }
 	catch(std::string ex){
 		//Some processing
-        std::cout << "Something went wrong : " << ex << std::endl;
+        fmt::println( "Something went wrong : {}", ex );
 	}
 
     catch(int ex){
-        std::cout << "Integer division detected, ex  : " << ex << std::endl;
+        fmt::println( "Integer division detected, ex  : {}", ex );
     }
 
-	std::cout<< "END." << std::endl;
+	fmt::println("END." );
+	*/
 
-    */
 
 
     //Exceptions thrown out of other parts of code written by you 
@@ -91,10 +91,10 @@ int main(){
 	try{
 		process_parameters(10,0);
 	}catch(const char* ex){
-		std::cout <<"Exception: " <<  ex << std::endl;
+		fmt::println("Exception: {}" ,  ex );
 	}
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
   
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "exceptions.h"
 
 void some_function(size_t i){
@@ -21,19 +21,19 @@ int main(){
                 some_function(i);
             }
             catch(int ex){
-                std::cout << "int handler- Cought an integer" << std::endl;
+                fmt::println( "int handler- Cought an integer" );
             }
             catch(...){
-                std::cout << "Inner... handler , Cought some exception" << std::endl;
+                fmt::println( "Inner... handler , Cought some exception" );
                 throw;
             }
         }        
     }
     catch(const std::string& ex){
-        std::cout << "Cought some string exception" << std::endl;
+        fmt::println( "Cought some string exception" );
     }
     catch(...){
-        std::cout << "Outer ...handler cought some other exception" << std::endl;
+        fmt::println( "Outer ...handler cought some other exception" );
     }
 
   

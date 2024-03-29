@@ -1,14 +1,13 @@
-#include <iostream>
-#include <memory>
+#include <fmt/format.h>
 
 class Item{
 public : 
      Item(){
-        std::cout << "Item constructor called" << std::endl; 
+        fmt::println( "Item constructor called" );
      }
 	 
      ~Item(){
-         std::cout << "Item destructor called" << std::endl;
+         fmt::println( "Item destructor called" );
      }
 };
 
@@ -27,7 +26,7 @@ int main(){
 
     //Showing that that automatic local variables are destroyed when 
     //we are thrown out of a try block
-	/*
+    /*
     int a{10};
     int b{10};
 
@@ -39,14 +38,14 @@ int main(){
             throw 110;
         a++; // Just using a and b in here, could use them to do anything.
         b++;
-        std::cout << "Code that executes when things are fine" << std::endl;
+        fmt::println( "Code that executes when things are fine" );
         
     } catch(int ex){
-        std::cout << "Something went wrong. Exception thrown : " << ex <<  std::endl;
+        fmt::println( "Something went wrong. Exception thrown : {}", ex);
     }
    
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
     */
 
 
@@ -56,20 +55,20 @@ int main(){
     //block is pointing to invalid data. The program may seem to work
     //sometimes but there are no guarantees you'll always get valid stuff
     //if you dereference pointers allocated in the try block.
+
     /*
-    
     int c{0};
     try{
         int var{55};
         int* int_ptr = &var;
         if(c == 0)
             throw int_ptr;
-        std::cout << "Keeping doing some other things..." << std::endl;
+        fmt::println( "Keeping doing some other things..." );
     }catch(int* ex){
-        std::cout << "Something went wrong. Exception thrown : " <<*ex << std::endl;
+        fmt::println( "Something went wrong. Exception thrown : ", *ex );
     }
-	std::cout << "END." << std::endl;
-    */
+	fmt::println( "END." );
+	*/
 
 
     //Potential memory leaks
@@ -82,21 +81,21 @@ int main(){
         std::shared_ptr<Item> item_ptr = std::make_shared<Item>();
         if(d == 0)
             throw 0;
-        std::cout << "Keeping doing some other things..." << std::endl;
+        fmt::println( "Keeping doing some other things..." );
     }catch(int ex){
-        std::cout << "Something went wrong. Exception thrown : "<< ex << std::endl;
+        fmt::println( "Something went wrong. Exception thrown : {}", ex );
     }
-	std::cout << "END." << std::endl;
+	fmt::println( "END." );
+	*/
 
-    */
 
 	//If you throw an exception and it's not handled anywhere in your code,
 	//you'll get a hard crash
     /*
 	throw 0;
-	std::cout << "Doing something after we throw" << std::endl;
+	fmt::println( "Doing something after we throw" );
 	
-	std::cout << "END." << std::endl;
+	fmt::println( "END." );
     */
 
 
@@ -110,7 +109,7 @@ int main(){
 	}catch(MyException ex){
 		
 	}
-	std::cout << "END." << std::endl;
+	fmt::println( "END." );
 
     return 0;
 }

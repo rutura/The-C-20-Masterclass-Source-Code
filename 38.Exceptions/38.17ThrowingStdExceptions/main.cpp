@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 
@@ -34,12 +34,12 @@ int main(){
 						"Nicholai Itchenko" , "Bilom Atunde" , "Lily Park");
 						
 	try{
-		//std::cout << students.get_student(2) << std::endl;
-		std::cout << students.get_student(-2) << std::endl;		
+		//fmt::println( students.get_student(2) );
+		fmt::println( "{}", students.get_student(-2) );
 	}catch(std::exception& ex){
-		std::cout << "Exception cought : " << ex.what() << std::endl;
+		fmt::println( "Exception cought : {}" ,ex.what() );
 	}
 
-    std::cout << "END." << std::endl;
+    fmt::println( "END." );
    
 }

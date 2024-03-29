@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 void exception_thrower(){
@@ -7,7 +7,7 @@ void exception_thrower(){
 
 void some_function(){
     for(size_t i{} ; i < 15 ;++i){ 
-        std::cout << "Iteration : " << i << std::endl;
+        fmt::println( "Iteration : {}" , i );
         
         try{ // Outer try block
             //Exceptions thrown in this scope are
@@ -37,15 +37,15 @@ void some_function(){
                 }
                 
             }catch(char ex){//Inner catch
-               std::cout << "Inner catch(char) block : cought thrown for : " << ex << std::endl; 
+               fmt::println( "Inner catch(char) block : cought thrown for : {}" , ex );
             }
         
         }
         catch(const char* ex){ //Outer catch
-            std::cout<< "Outer catch(const char*) block , cought  :" << ex  << std::endl;
+            fmt::println( "Outer catch(const char*) block , cought  :{}" , ex  );
         }
         catch(size_t ex){ // Outer catch
-            std::cout << "Outer catch(size_t) block, cought " << ex << std::endl;
+            fmt::println( "Outer catch(size_t) block, cought {}" , ex );
         }
     }
 }
@@ -56,9 +56,9 @@ int main(){
     try{
         some_function();
     }catch ( std::string& ex){
-        std::cout << "Main catch block , cought : " << ex << std::endl;
+        fmt::println( "Main catch block , cought : {}" , ex );
     }
-    std::cout << "END." << std::endl;
+    fmt::println( "END." );
    
     return 0;
 }

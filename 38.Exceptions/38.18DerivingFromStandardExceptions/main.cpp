@@ -1,6 +1,5 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <exception>
-#include <cstring>
 
 class DivideByZeroException : public std::exception {
 public :   
@@ -53,12 +52,11 @@ int main(){
         /*
         DivideByZeroException * d_z = dynamic_cast<DivideByZeroException*> (&ex);
         if(d_z){
-            std::cout<< ex.what() << ": dividing " << d_z->get_a() << 
-                " by "<<  d_z->get_b() << std::endl;
+            fmt::println("{}: dividing {} by {}",ex.what(), d_z->get_a(), d_z->get_b());
         }
         */
        
-       std::cout << ex.what() << std::endl;
+      fmt::println( "{}", ex.what() );
 		
     }
    
