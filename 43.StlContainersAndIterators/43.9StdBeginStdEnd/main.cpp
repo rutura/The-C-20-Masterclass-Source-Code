@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <vector>
 
 
@@ -9,18 +9,18 @@ int main(){
     
 
     /*
-    std::cout << " Collection : " ;
+    fmt::print( " Collection : " );
     for(auto it = vi.begin(); it!= vi.end(); ++it){
-        std::cout << *it  << " ";
+        fmt::print( "{} ", *it );
     }
 
     */
 
-   std::cout << "--------" << std::endl;
+   fmt::println("--------" );
 
-    std::cout << " Collection : " ;
+    fmt::print(" Collection : " );
     for(auto it = std::begin(vi); it!= std::end(vi); ++it){
-        std::cout << *it  << " ";
+        fmt::print(  "{} ", *it );
     }
   
    

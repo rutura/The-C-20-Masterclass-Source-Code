@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <vector>
 
 
@@ -7,12 +7,12 @@ void print_collection(const T& collection){
     
     auto it = collection.begin();
     
-    std::cout << " [";
+    fmt::print( " [");
     while(it != collection.end()){
-        std::cout << " " << *it ;
+        fmt::print( " {}", *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
 }
 
 
@@ -20,7 +20,7 @@ int main(){
 
     std::vector<int> numbers{ 11,22,33,44,55,66,77};
 
-    std::cout << "numbers : ";
+    fmt::print( "numbers : ");
     print_collection(numbers);
 
     /*
@@ -31,10 +31,10 @@ int main(){
     }
     */
 
-    std::cout << "numbers : ";
+    fmt::print( "numbers : ");
     print_collection(numbers);
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------");
 
     //std::vector<int>::const_iterator c_it = numbers.cbegin();
     auto c_it = numbers.cbegin();

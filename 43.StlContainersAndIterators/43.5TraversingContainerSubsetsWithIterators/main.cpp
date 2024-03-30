@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <vector>
 #include <array>
 
@@ -9,19 +9,19 @@ void print_collection(const T& collection , size_t begin_adjustment,
     auto start_point = collection.begin() + begin_adjustment;
     auto  end_point = collection.end() - end_adjustment;
     
-    std::cout << " [";
+    fmt::print( " [");
     while(start_point != end_point){
-        std::cout << " " << *start_point ;
+        fmt::print( " {}", *start_point) ;
         ++start_point;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
 }
 
 
 int main(){
 
-    std::vector<int> ints1{ 11,22,33,44,55,66,77 };
-    std::array<int,6> ints2 {100,200,300,400,500,600};
+    std::vector ints1{ 11,22,33,44,55,66,77 };
+    std::array ints2 {100,200,300,400,500,600};
 
     print_collection(ints1,1,3);
     print_collection(ints2,1,1);
