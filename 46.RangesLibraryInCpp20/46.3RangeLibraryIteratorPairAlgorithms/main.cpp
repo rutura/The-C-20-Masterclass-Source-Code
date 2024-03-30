@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <ranges>
 #include <concepts>
 #include <list>
@@ -8,13 +8,12 @@
 template<typename T>
 void print_collection( const T& collection){
     
-    std::cout << " Collection [" ;
+    fmt::print( " Collection [") ;
     for(const auto& elt : collection){
-        std::cout << " " << elt ;
+        fmt::print( " {}", elt );
     }
-    std::cout << "]" << std::endl;
+    fmt::print( "]");
 }
-
 
 
 
@@ -24,8 +23,8 @@ int main(){
     print_collection(numbers);
 
     //std::ranges::all_of()
-    std::cout << std::endl;
-    std::cout << "std::ranges::all_of() : " << std::endl;
+    fmt::println("");
+    fmt::println( "std::ranges::all_of() : " );
 
     auto odd = [](int n){
         return n%2 !=0;
@@ -35,49 +34,50 @@ int main(){
     auto result = std::ranges::all_of(numbers.begin(),numbers.end(),odd);
 
     if(result){
-        std::cout << "All elements in numbers are odd" << std::endl;
+        fmt::println( "All elements in numbers are odd" );
     }else{
-        std::cout << "Not all elements in numbers are odd" << std::endl;
+        fmt::println( "Not all elements in numbers are odd" );
     }
 
 
 
     //For each
-    std::cout << std::endl;
-    std::cout << "std::ranges::for_each() : " << std::endl;
+    fmt::println("");
+    fmt::println( "std::ranges::for_each() : " );
     print_collection(numbers);
     std::ranges::for_each(numbers.begin(),numbers.end(),[](int& n){n*=2;});
     print_collection(numbers);
 
  
     //Sort
-    std::cout << std::endl;
-    std::cout << "std::ranges::sort() : " << std::endl;
+    fmt::println("");
+    fmt::println( "std::ranges::sort() : " );
     print_collection(numbers);
     std::ranges::sort(numbers.begin(),numbers.end());
     print_collection(numbers);
 
     //Find
-    std::cout << std::endl;
-    std::cout << "std::ranges::find() : " << std::endl;
+    fmt::println("");
+    fmt::println( "std::ranges::find() : " );
     auto odd_n_position = std::ranges::find_if(numbers.begin(),numbers.end(),odd);
     
     if (odd_n_position != std::end(numbers)) {
-        std::cout << "numbers contains at least one odd number : " << *odd_n_position  << std::endl;
+        fmt::println( "numbers contains at least one odd number : {}" , *odd_n_position  );
     } else {
-        std::cout << "numbers does not contain any odd number" << std::endl;
+        fmt::println( "numbers does not contain any odd number" );
     }
 
     //Copy to the output stream
-    std::cout << std::endl;
-    std::cout << "numbers : " ;
-    std::ranges::copy(numbers.begin(),numbers.end(),std::ostream_iterator<int>(std::cout, " "));
+    fmt::println("");
+    fmt::print( "numbers : ") ;
+    // std::ranges::copy(numbers.begin(),numbers.end(),std::ostream_iterator<int>(std::cout, " "));
+    fmt::print("{}\n", fmt::join(numbers | std::views::common, " "));
 
   
     //Why you should prefer std::ranges algorithms from now on
-    std::cout << std::endl;
+    fmt::println("");
     std::vector<int> numbers_list {11,2,6,4,8,3,17,9};
-    std::cout << "numbers_list : ";
+    fmt::print( "numbers_list : ");
     print_collection(numbers_list);
 
     std::ranges::sort(numbers_list.begin(),numbers_list.end());

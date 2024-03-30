@@ -1,5 +1,4 @@
-#include <iostream>
-#include <vector>
+#include <fmt/format.h>
 #include <ranges>
 
 
@@ -11,7 +10,7 @@ int main(){
 
     //Numbers are generated lazily, on the fly, as we need them in each iteration
     for(auto i :std::views::iota(1) | std::views::take(20)){
-        std::cout << i << std::endl;
+        fmt::println( "{}", i);
     }
     
   

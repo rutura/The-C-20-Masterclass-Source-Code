@@ -1,16 +1,16 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <algorithm>
 #include <vector>
-
+#include <ranges>
 
 template<typename T>
 void print_collection( const T& collection){
     
-    std::cout << " Collection [" ;
+    fmt::print( " Collection [") ;
     for(const auto& elt : collection){
-        std::cout << " " << elt ;
+        fmt::print( " {}", elt );
     }
-    std::cout << "]" << std::endl;
+    fmt::print( "]");
 }
 
 
@@ -20,8 +20,8 @@ int main(){
     print_collection(numbers);
 
     //std::ranges::all_of()
-    std::cout << std::endl;
-    std::cout << "std::ranges::all_of() : " << std::endl;
+    fmt::println("");
+    fmt::print( "std::ranges::all_of() : " );
 
     auto odd = [](int n){
         return n%2 !=0;
@@ -30,45 +30,46 @@ int main(){
     auto result = std::ranges::all_of(numbers,odd);
 
     if(result){
-        std::cout << "All elements in numbers are odd" << std::endl;
+        fmt::print( "All elements in numbers are odd" );
     }else{
-        std::cout << "Not all elements in numbers are odd" << std::endl;
+        fmt::print( "Not all elements in numbers are odd" );
     }
 
 
 
     //For each
-    std::cout << std::endl;
-    std::cout << "std::ranges::for_each() : " << std::endl;
+    fmt::println("");
+    fmt::print( "std::ranges::for_each() : " );
     print_collection(numbers);
     std::ranges::for_each(numbers,[](int& n){n*=2;});
     print_collection(numbers);
 
 
     //Sort
-    std::cout << std::endl;
-    std::cout << "std::ranges::sort() : " << std::endl;
+    fmt::println("");
+    fmt::print( "std::ranges::sort() : " );
     print_collection(numbers);
     std::ranges::sort(numbers);
     print_collection(numbers);
 
 
     //Find
-    std::cout << std::endl;
-    std::cout << "std::ranges::find() : " << std::endl;
+    fmt::println("");
+    fmt::print( "std::ranges::find() : " );
     auto odd_n_position = std::ranges::find_if(numbers,odd);
     
     if (odd_n_position != std::end(numbers)) {
-        std::cout << "numbers contains at least one odd number : " << *odd_n_position  << std::endl;
+        fmt::print( "numbers contains at least one odd number : {}" , *odd_n_position  );
     } else {
-        std::cout << "numbers does not contain any odd number" << std::endl;
+        fmt::print( "numbers does not contain any odd number" );
     }
 
 
     //Important, copying into outputstream on the fly
-    std::cout << std::endl;
-    std::cout << "numbers : " ;
-    std::ranges::copy(numbers,std::ostream_iterator<int>(std::cout, " "));
+    fmt::println("");
+    fmt::print( "numbers : " );
+    fmt::print("{}\n", fmt::join(numbers | std::views::common, " "));
+    // std::ranges::copy(numbers,std::ostream_iterator<int>(std::cout, " "));
    
     return 0;
 }
