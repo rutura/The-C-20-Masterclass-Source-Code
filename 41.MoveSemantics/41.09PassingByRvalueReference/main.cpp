@@ -1,9 +1,9 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 
 class Item{
     friend std::ostream& operator<<( std::ostream& out, const Item& operand);
+    friend struct fmt::formatter<Item>;
 public : 
     Item() : m_data{new int} {
     }
@@ -11,11 +11,11 @@ public :
     }
     //Copy Members
     Item( const Item& source) : m_data{new int}{
-        std::cout << "Item copy constructor copying data..." << std::endl;
+        fmt::println( "Item copy constructor copying data..." );
         *m_data =(*source.m_data);
     }
     Item& operator=(const Item& right_operand){
-        std::cout << "Item copy assignment operator copying data..." << std::endl;
+        fmt::println( "Item copy assignment operator copying data..." );
         if (&right_operand != this){
             
             *m_data =(*right_operand.m_data);
@@ -25,7 +25,7 @@ public :
     
     //Move Members
     Item( Item&& source){
-        std::cout << "Item move constructor moving data..." << std::endl;
+        fmt::println( "Item move constructor moving data..." );
         //Steal the pointer
         m_data = source.m_data;
         
@@ -33,7 +33,7 @@ public :
         source.m_data = nullptr;
     }
     Item& operator=(Item&& right_operand){
-        std::cout << "Item move assignment operator moving data..." << std::endl;
+        fmt::println( "Item move assignment operator moving data..." );
         if (&right_operand != this){
             
             //Steal the pointer
@@ -52,7 +52,14 @@ std::ostream& operator<<( std::ostream& out, const Item& operand){
     out << "Item : [" << (*operand.m_data) << "]";
     return out;
 }
-
+template<>
+struct fmt::formatter<Item> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Item& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Item: [{}]", (*obj.m_data));
+    }
+};
 
 Item get_value(){
     return Item(22);
@@ -60,10 +67,10 @@ Item get_value(){
 
 
 void do_something( Item&& item){
-    std::cout << "Do something move version called..." << std::endl;
+    fmt::println( "Do something move version called..." );
    //Item internal = item;
     Item internal = std::move(item);
-   std::cout << "internal : " << internal << std::endl;
+   fmt::println( "internal : {}" , internal );
 }
 
 
@@ -76,7 +83,7 @@ int main(){
 
 	//Item item1(std::move(rvalue_ref)); // Move constructor
 
-	std::cout << "-------" << std::endl;
+	fmt::println( "-------" );
 
 	do_something(std::move(rvalue_ref));
 	*/

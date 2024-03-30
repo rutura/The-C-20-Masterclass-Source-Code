@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 double add(double a , double b){
     return a + b;
@@ -17,8 +17,8 @@ int main(){
 
     //
 
-    std::cout << "result : " << result << std::endl;
-    std::cout << "outcome : " << outcome << std::endl;
+    fmt::println( "result : {}", result );
+    fmt::println( "outcome : {}" ,outcome );
    
     return 0;
 }

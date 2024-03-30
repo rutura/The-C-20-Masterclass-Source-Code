@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #include "boxcontainer.h"
 
@@ -15,33 +14,33 @@ int main(){
     BoxContainer<int> box1;
 	populate_box(box1,2);
 
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println( "box1 : {}" , box1 );
 
     BoxContainer<int> box2;
 	
 	box2 = std::move(box1);
 
-	std::cout << "------" << std::endl;
+	fmt::println( "------" );
 
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box1 : {}" , box1 );
+	fmt::println( "box2 : {}" , box2 );
 
 
-	std::cout << "------" << std::endl;
+	fmt::println( "------" );
 
     std::unique_ptr<int> ptr_int = std::make_unique<int>(33);
 
-	std::cout << "*ptr_int : " << *ptr_int << std::endl;
+	fmt::println( "*ptr_int : {}" , *ptr_int );
 
 	std::unique_ptr<int> ptr_int_copy = ptr_int;
 
 
 	if(ptr_int){
-		std::cout << "*ptr_int : " << *ptr_int << std::endl;
+		fmt::println( "*ptr_int : {}" , *ptr_int );
 	}else{
-		std::cout << "ptr_int doesn't contain any valid data" << std::endl;
+		fmt::println( "ptr_int doesn't contain any valid data" );
 	}
-	std::cout << "*ptr_int_copy : " << *ptr_int_copy << std::endl;
+	fmt::println( "*ptr_int_copy : {}" , *ptr_int_copy );
 
 
   

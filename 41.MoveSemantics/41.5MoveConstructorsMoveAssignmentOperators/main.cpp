@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 void populate_box(BoxContainer<int>& box, int modifier){
@@ -18,13 +17,13 @@ int main(){
 
 	BoxContainer<int> box_array[2];
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
 
 	for(size_t i{0} ; i < 2 ; ++i){
 		box_array[i] = make_box(i+1);//Move assignment operator called
 	}
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
    
     return 0;
 }

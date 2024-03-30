@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 double add(double a , double b){
     return a + b;
@@ -13,21 +13,21 @@ int main(){
     int * ptr = &x;
 
     z = (x + y) ;
-    std::cout << "z : " << z << std::endl;
-    //std::cout << "&(x+y) : " << (&(x+y)) << std::endl;
+    fmt::println( "z : {}" , z );
+    //fmt::println( "&(x+y) : {}" , (&(x+y)) );
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     double result = add(10.1,20.2); // The result of add(10.1,20.2), is stored in some memory 
                 //location for a sh ort time, before it's assigned to result, and after it's copied
                 //into result, the memory is reclaimed by the system.
                 //add(10.1,20.2) is (evaluates to) an rvalue
 	
-	//std::cout << "address of add(10.1,20.2) : " << &(add(10.1,20.2)) << std::endl;//Error
-    std::cout << "result is : " << result << std::endl;
+	//fmt::println( "address of add(10.1,20.2) : {}" , &(add(10.1,20.2)) );//Error
+    fmt::println( "result is : {}" , result );
 
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
 
     //Grab the addresses for later use 
 

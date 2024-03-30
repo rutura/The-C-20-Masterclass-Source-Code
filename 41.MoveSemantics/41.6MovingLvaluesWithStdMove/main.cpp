@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 void populate_box(BoxContainer<int>& box, int modifier){
@@ -38,15 +37,15 @@ int main(){
 	BoxContainer<int> box2;
 	populate_box(box2,15);
 	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box1 : {}" , box1 );
+	fmt::println( "box2 : {}" , box2 );
 	
 	swap_data(box1,box2);
 
-  	std::cout << "-----" << std::endl;
+  	fmt::println( "-----" );
 
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
+	fmt::println( "box1 : {}" , box1 );
+	fmt::println( "box2 : {}" , box2 );
 
     return 0;
 }

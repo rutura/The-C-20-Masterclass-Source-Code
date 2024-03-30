@@ -1,7 +1,7 @@
 #ifndef BOX_CONTAINER_H
 #define BOX_CONTAINER_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 template <typename T>
 class BoxContainer
@@ -9,6 +9,8 @@ class BoxContainer
 	friend std::ostream& operator<< <T> (std::ostream&, const BoxContainer<T>&);
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
+	friend struct fmt::formatter<BoxContainer>;
+
 public:
 	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
 	BoxContainer(const BoxContainer<T>& source) = delete;//Copy constructor
@@ -64,7 +66,28 @@ std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
     return out;
 }
 
+template<typename T>
+void format_int_pointer_array(fmt::basic_memory_buffer<char>& out, T const* array, size_t size) {
+	format_to_n(std::back_inserter(out), 1, "[");
+	for (size_t i = 0; i < size; ++i) {
+		format_to_n(std::back_inserter(out), 1, "{}", (array[i]));
+		if (i < size - 1) {
+			format_to_n(std::back_inserter(out), 1,", ");
+		}
+	}
+	format_to_n(std::back_inserter(out), 1, "]");
+}
 
+template<typename T>
+struct fmt::formatter<BoxContainer<T>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const BoxContainer<T>& obj, FormatContext& ctx) {
+		memory_buffer buf;
+		format_int_pointer_array(buf, obj.m_items, obj.size());
+		return format_to(ctx.out(),"BoxContainer: [size: {}, capacity: {}, items: {}]", obj.size(), obj.capacity(), fmt::to_string(buf));
+	}
+};
 //Definitions moved into here
 template <typename T>
 BoxContainer<T>::BoxContainer(size_t capacity)
@@ -79,8 +102,8 @@ BoxContainer<T>::BoxContainer(size_t capacity)
 template <typename T>
 BoxContainer<T>::BoxContainer(const BoxContainer<T>& source)
 {
-	std::cout << "BoxContainer copy constructor called. Copying " 
-			<< source.m_size << " items..." << std::endl;
+	fmt::println( "BoxContainer copy constructor called. Copying "
+			<< source.m_size << " items..." );
 	//Set up a new box
 	m_items = new T[source.m_capacity];
 	m_capacity = source.m_capacity;
@@ -98,7 +121,7 @@ template <typename T>
 BoxContainer<T>::BoxContainer( BoxContainer<T>&& source)
 {
 
-	std::cout << "BoxContainer Move constructor....." << std::endl;
+	fmt::println( "BoxContainer Move constructor....." );
 	// Check for construction from self:
 	if (this == &source)
             return;
@@ -115,14 +138,14 @@ BoxContainer<T>::BoxContainer( BoxContainer<T>&& source)
 template <typename T>
 BoxContainer<T>::~BoxContainer()
 {
-	std::cout << "BoxContainer object with size : " << m_size  <<" destroyed" << std::endl;
+	fmt::println( "BoxContainer object with size : {} destroyed", m_size );
 	delete[] m_items;
 }
 
 
 template <typename T>
 void BoxContainer<T>::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println( "Expanding to {}" , new_capacity );
 	T *new_items_container;
 
 	if (new_capacity <= m_capacity)
@@ -229,8 +252,8 @@ BoxContainer<T> operator +(const BoxContainer<T>& left, const BoxContainer<T>& r
 /*
 template <typename T>
 void BoxContainer<T>::operator =(const BoxContainer<T>& source){
-		std::cout << "BoxContainer copy assignment operator called. Copying " 
-			<< source.m_size << " items..." << std::endl;
+		fmt::println( "BoxContainer copy assignment operator called. Copying "
+			<< source.m_size << " items..." );
 	T *new_items;
 
 	// Check for self-assignment:
@@ -263,8 +286,7 @@ template <typename T>
 void BoxContainer<T>::operator =( BoxContainer<T>&& source){
 
 	
-	std::cout << "BoxContainer move assignment operator called. Moving " 
-			<< source.m_size << " items..." << std::endl;	
+	fmt::println( "BoxContainer move assignment operator called. Moving {} items...", source.m_size );
 	// Check for self assignment
 	if (this == &source)
             return;
