@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 #include <vector>
 #include "boxcontainer.h"
@@ -20,16 +19,16 @@ int main(){
     box1.add(6);
    
     /*
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println( "box1 : {}" , box1 );
     std::ranges::reverse(box1);
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println( "box1 : {}" , box1 );
     */
 
-    std::cout << "box1-reverse : ";
+    fmt::print( "box1-reverse : ");
     for(auto it = box1.end();it!=box1.begin(); ){
-        std::cout << *(--it )<< " ";
+        fmt::print(  "{} ", *(--it ));
     }
-    std::cout << std::endl;
+    fmt::println("");
 
     return 0;
 }

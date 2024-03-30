@@ -1,7 +1,7 @@
 #ifndef BOX_CONTAINER_H
 #define BOX_CONTAINER_H
 
-#include <iostream>
+#include <fmt/format.h>
 #include <concepts>
 
 template <typename T>
@@ -114,6 +114,27 @@ private :
 template <typename T> requires std::is_default_constructible_v<T>
 BoxContainer<T> operator +(const BoxContainer<T>& left, const BoxContainer<T>& right);
 
+template<typename T>
+void format_int_pointer_array(fmt::basic_memory_buffer<char>& out, T const* array, size_t size) {
+	format_to_n(std::back_inserter(out), 1, "[");
+	for (size_t i = 0; i < size; ++i) {
+		format_to_n(std::back_inserter(out), 1, "{}", (array[i]));
+		if (i < size - 1) {
+			format_to_n(std::back_inserter(out), 1,", ");
+		}
+	}
+	format_to_n(std::back_inserter(out), 1, "]");
+}
+template<typename T>
+struct fmt::formatter<BoxContainer<T>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const BoxContainer<T>& obj, FormatContext& ctx) {
+		memory_buffer buf;
+		format_int_pointer_array(buf, obj.m_items, obj.size());
+		return format_to(ctx.out(),"BoxContainer: [size: {}, capacity: {}, items: {}]", obj.size(), obj.capacity(), fmt::to_string(buf));
+	}
+};
 
 
 //Definitions moved into here
@@ -149,7 +170,7 @@ BoxContainer<T>::~BoxContainer()
 
 template <typename T> requires std::is_default_constructible_v<T>
 void BoxContainer<T>::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println( "Expanding to {}",   new_capacity);
 	T *new_items_container;
 
 	if (new_capacity <= m_capacity)

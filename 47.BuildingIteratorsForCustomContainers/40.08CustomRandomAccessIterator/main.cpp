@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 #include <vector>
 #include "boxcontainer.h"
@@ -17,9 +16,9 @@ int main(){
     box1.add(9);
     box1.add(6);
    
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println( "box1 : {}" , box1 );
     std::ranges::sort(box1.begin(),box1.end());
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println( "box1 : {}" , box1 );
 
     return 0;
 }

@@ -1,11 +1,13 @@
-#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <ranges>
+#include <fmt/format.h>
 
 
 template <typename T>
 class VectorWrapper{
+  friend struct fmt::formatter<VectorWrapper>;
+
 public: 
     //Iterator methods
     std::vector<T>::iterator begin() { return m_items.begin(); }
@@ -34,6 +36,18 @@ private :
     std::vector<T> m_items;
 };
 
+template<typename T>
+struct fmt::formatter<VectorWrapper<T>> {
+  constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+  template<typename FormatContext>
+  auto format(const VectorWrapper<T>& obj, FormatContext& ctx) {
+    return format_to(ctx.out(),"VectorWrapper: [size: {}, capacity: {}, items: {}]", obj.m_items.size(), obj.m_items.capacity(), fmt::join(obj.m_items | std::views::transform([](const T& elem) {
+            return fmt::format("{}", elem);
+        }), " "));
+  }
+};
+
+
 int main(){
 
 	VectorWrapper<std::string> greeting;
@@ -45,20 +59,20 @@ int main(){
     greeting.add("all");
     greeting.add("doing?");
     
-    std::cout << "greeting : " << greeting << std::endl;
+    fmt::println( "greeting : {}", greeting );
 
-    std::cout << "Range based for loop : " << std::endl;
+    fmt::println( "Range based for loop : " );
     for(auto i : greeting){
-        std::cout << i << " ";
+        fmt::print( "{} ", i);
     }
-    std::cout << std::endl;
+    fmt::println("");
 
 
-    std::cout << "taking only 2 : " << std::endl;
+    fmt::println( "taking only 2 : " );
     for(auto i : greeting | std::views::take(2)){
-        std::cout << i << " ";
+        fmt::print( "{} ", i);
     }
-    std::cout << std::endl;
+    fmt::println("");
    
     return 0;
 }

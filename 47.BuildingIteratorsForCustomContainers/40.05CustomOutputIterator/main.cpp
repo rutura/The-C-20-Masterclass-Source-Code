@@ -1,5 +1,4 @@
-#include <iostream>
-#include <algorithm>
+#include <ranges>
 #include <vector>
 #include "boxcontainer.h"
 
@@ -12,6 +11,18 @@ std::ostream& operator<<( std::ostream& out,const  std::vector<T>& vec){
     out << "]";
     return out;
 }
+
+template <typename T>
+struct fmt::formatter<std::vector<T>> {
+  constexpr auto parse(format_parse_context& ctx) { return ctx.begin(); }
+
+  template <typename FormatContext>
+  auto format(const std::vector<T>& vec, FormatContext& format_context) {
+    return format_to(format_context.out(), "[{}]", fmt::join(vec | std::views::transform([](const T& elem) {
+        return fmt::format("{}", elem);
+    }), " "));
+  }
+};
 
 
 int main(){
@@ -28,7 +39,7 @@ int main(){
     box1.add(9);
     box1.add(6);
    
-    std::cout << "box : " << box1 << std::endl;
+    fmt::println( "box : {}" , box1 );
 
     //Destination box
     BoxContainer<int> box2;
@@ -36,9 +47,9 @@ int main(){
         box2.add(0);
     }
  
-    std::cout << "box2-1 : " << box2 << std::endl;
+    fmt::println( "box2-1 : {}" , box2 );
     std::ranges::copy(box1,box2.begin());
-    std::cout << "box2-2 : " << box2 << std::endl;
+    fmt::println( "box2-2 : {}" , box2 );
 
     return 0;
 }

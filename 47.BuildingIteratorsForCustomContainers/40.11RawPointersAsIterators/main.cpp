@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 #include <vector>
 #include <ranges>
@@ -8,9 +7,9 @@
 template <typename T>
 void print(const BoxContainer<T>&  c){
     for(auto i : c){ // Computation happens here.
-        std::cout << i << " ";
+        fmt::print(  "{} ", i);
     }
-    std::cout << std::endl;
+    fmt::println("");
 }
 
 int main(){
@@ -29,14 +28,14 @@ int main(){
     const BoxContainer<int> copy(vi);
 
     //Printing a const container
-    std::cout << "data : ";
+    fmt::print( "data : ");
     for (auto it = copy.begin(); it!=copy.end(); ++it){
-        std::cout << (*it) << " ";
+        fmt::print(  "{} ", (*it));
     }
-    std::cout << std::endl;
+    fmt::println("");
 
     //Printing throgh a function
-    std::cout << "copy : ";
+    fmt::print( "copy : ");
     print(copy);
 
 
@@ -44,17 +43,17 @@ int main(){
     //std::ranges::sort(copy); // Compiler error. Can't sort a const collection
     std::ranges::sort(vi);
 
-    std::cout << "vi : ";
+    fmt::print( "vi : ");
     print(vi);
 
 
-    std::cout << "view taking only 3 : " ;
+    fmt::print( "view taking only 3 : " );
     for(auto i : std::views::take(vi,3)){
-        std::cout << i << " " ;
+        fmt::print(  "{} ", i) ;
     }
-    std::cout << std::endl;
+    fmt::println("");
     
-    std::cout << "End!" << std::endl;
+    fmt::print( "End!");
 
    
 
