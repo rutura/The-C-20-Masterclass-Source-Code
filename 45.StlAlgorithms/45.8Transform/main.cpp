@@ -1,15 +1,15 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <algorithm>
 #include <vector>
 
 template<typename T>
 void print_collection( const T& collection){
     
-    std::cout << " Collection [" ;
+    fmt::print( " Collection [" );
     for(const auto& elt : collection){
-        std::cout << " " << elt ;
+        fmt::print( " {}", elt) ;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
 }
 
 
@@ -18,8 +18,8 @@ int main(){
     //Original collection
     std::vector<int> input = {5, 7, 4, 2, 8, 6, 1, 9, 0, 3,11,45,6,23}; 
     std::vector<int> output{11,22,33};
-    std::cout << "output size : " << output.size() << std::endl;
-    std::cout << "output capacity : " << output.capacity() << std::endl;
+    fmt::println( "output size : {}" , output.size() );
+    fmt::println( "output capacity : {}" , output.capacity() );
 
     print_collection(input);
     print_collection(output);
@@ -31,11 +31,11 @@ int main(){
     std::transform(input.begin(),input.end(),std::back_inserter(output),[](int n){return n*2;});
 
     print_collection(output);
-    std::cout << "output size : " << output.size() << std::endl;
-    std::cout << "output capacity : " << output.capacity() << std::endl;
+    fmt::println( "output size : {}" , output.size() );
+    fmt::println( "output capacity : {}" , output.capacity() );
 
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
     
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <algorithm>
 #include <vector>
 
@@ -12,12 +12,12 @@ int main(){
     auto result = std::find(std::begin(collection), std::end(collection), n);
  
     if (result != std::end(collection)) {
-        std::cout << "collection contains: " << n << std::endl;
+        fmt::println( "collection contains: {}" , n );
     } else {
-        std::cout << "collection does not contain: " << n << std::endl;
+        fmt::println( "collection does not contain: {}" , n );
     }
 
-    std::cout << "------------" << std::endl;
+    fmt::println( "------------" );
 
     auto odd = [](int x){
         if( (x%2) != 0)
@@ -28,9 +28,9 @@ int main(){
     auto odd_n_position = std::find_if(std::begin(collection),std::end(collection),odd);
     
     if (odd_n_position != std::end(collection)) {
-        std::cout << "collection contains at least one odd number : " << *odd_n_position  << std::endl;
+        fmt::println( "collection contains at least one odd number : {}" , *odd_n_position  );
     } else {
-        std::cout << "collection does not contain any odd number" << std::endl;
+        fmt::println( "collection does not contain any odd number" );
     }
     
     return 0;

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <algorithm>
 #include <set>
 #include <vector>
@@ -17,12 +17,12 @@ int main(){
 
     //std::all_of , lambda function predicate
     if (std::all_of(std::begin(collection), std::end(collection), [](int i){ return i % 2 == 0; })) {
-        std::cout << "(std::all_of) :  All numbers in collection are even" << std::endl;
+        fmt::println( "(std::all_of) :  All numbers in collection are even" );
     }else{
-        std::cout << "(std::all_of) : Not all numbers in collection are even" << std::endl;
+        fmt::println( "(std::all_of) : Not all numbers in collection are even" );
     }
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
 
     //std::any_of ,functor as predicate 
     class DivisibleBy
@@ -35,18 +35,18 @@ int main(){
     };
  
     if (std::any_of(std::begin(collection),std::end(collection), DivisibleBy(7))) {
-        std::cout << "(std::any_of) : At least one number is divisible by 7" << std::endl;
+        fmt::println( "(std::any_of) : At least one number is divisible by 7" );
     }else{
-        std::cout << "(std::any_of) : None of the numbers is divisible by 7" << std::endl;
+        fmt::println( "(std::any_of) : None of the numbers is divisible by 7" );
     }
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     //std::none_of , function pointer as predicate
     if (std::none_of(std::begin(collection), std::end(collection), is_odd)) {
-        std::cout << "(std::none_of) :  None of the numbers is odd" << std::endl;
+        fmt::println( "(std::none_of) :  None of the numbers is odd" );
     }else{
-        std::cout << "(std::none_of) : At least one number is odd" << std::endl;
+        fmt::println( "(std::none_of) : At least one number is odd" );
     }
 
    

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <algorithm>
 #include <vector>
 #include <list>
@@ -6,6 +6,7 @@
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
 public : 
 
     Book(int year, std::string title) 
@@ -29,7 +30,6 @@ public :
     }
    
     
-public : 
     int m_year;
     std::string m_title;
 };
@@ -38,17 +38,23 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     out << "Book [" << operand.m_year << ", " << operand.m_title << "]";
     return out;
 }
-
-
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{}, {}]", obj.m_year,obj.m_title);
+    }
+};
 
 template<typename T>
 void print_collection( const T& collection){
     
-    std::cout << " Collection [" ;
+    fmt::print( " Collection [" );
     for(const auto& elt : collection){
-        std::cout << " " << elt ;
+        fmt::print(" {}" , elt );
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
 }
 
 
@@ -58,39 +64,39 @@ int main(){
     //Directly without predicate
     std::vector<int> collection = {5, 7, 4, 2, 8, 6, 1, 9, 0, 3}; 
     
-    std::cout << "collection(unsorted) : ";
+    fmt::print( "collection(unsorted) : ");
     print_collection(collection);
     
     std::sort(std::begin(collection),std::end(collection));
     
-    std::cout << "collection(sorted) : ";
+    fmt::print( "collection(sorted) : ");
     print_collection(collection);
     
     
-    std::cout << "---------------------------" << std::endl;
+    fmt::print( "---------------------------" );
 
     //With custom compare function
     collection = {5, 7, 4, 2, 8, 6, 1, 9, 0, 3}; 
     
-    std::cout << "collection(unsorted) : ";
+    fmt::print( "collection(unsorted) : ");
     print_collection(collection);
     
     //std::sort(std::begin(collection),std::end(collection),std::less<int>());
     //std::sort(std::begin(collection),std::end(collection),std::greater<int>());
     std::sort(std::begin(collection),std::end(collection),[](int x, int y){return x < y;});
     
-    std::cout << "collection(sorted) : ";
+    fmt::print( "collection(sorted) : ");
     print_collection(collection);
     
     
-    std::cout << "--------------------------" << std::endl;
+    fmt::print( "--------------------------" );
 
     //Sorting collections of custom items
     std::vector<Book> books {Book(1734,"Cooking Food"),
                     Book(2000,"Building Computers"),Book(1995,"Farming for Beginners")};
                     
                     
-    std::cout << "books(before sort) : " << std::endl;
+    fmt::print( "books(before sort) : " );
     print_collection(books);
     
     //std::sort(std::begin(books),std::end(books));
@@ -107,7 +113,7 @@ int main(){
   
     std::sort(std::begin(books),std::end(books),cmp);
    
-    std::cout << "books(after sort) : " << std::endl;
+    fmt::print( "books(after sort) : " );
     print_collection(books);
    
     return 0;
