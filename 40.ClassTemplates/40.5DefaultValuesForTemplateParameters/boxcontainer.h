@@ -1,7 +1,7 @@
 #ifndef BOX_CONTAINER_H
 #define BOX_CONTAINER_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 
 template <typename T = int , size_t maximum = 10>
@@ -9,6 +9,8 @@ class BoxContainer
 {
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
+	friend struct fmt::formatter<BoxContainer>;
+
 public:
 	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
 	BoxContainer(const BoxContainer& source);
@@ -58,7 +60,28 @@ inline std::ostream& operator<<(std::ostream& out, const BoxContainer<T,maximum>
     return out;
 }
 
+template<typename T>
+void format_int_pointer_array(fmt::basic_memory_buffer<char>& out, T const* array, size_t size) {
+	format_to_n(std::back_inserter(out), 1, "[");
+	for (size_t i = 0; i < size; ++i) {
+		format_to_n(std::back_inserter(out), 1, "{}", (array[i]));
+		if (i < size - 1) {
+			format_to_n(std::back_inserter(out), 1,", ");
+		}
+	}
+	format_to_n(std::back_inserter(out), 1, "]");
+}
 
+template<typename T, size_t maximum>
+struct fmt::formatter<BoxContainer<T, maximum>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const BoxContainer<T, maximum>& obj, FormatContext& ctx) {
+		memory_buffer buf;
+		format_int_pointer_array(buf, obj.m_items, obj.size());
+		return format_to(ctx.out(),"BoxContainer: [size: {}, capacity: {}, items: {}]", obj.size(), obj.capacity(), fmt::to_string(buf));
+	}
+};
 //Definitions moved into here
 
 template <typename T, size_t maximum>
@@ -100,14 +123,14 @@ void BoxContainer<T>::stream_insert(std::ostream& out)const{
 	for(size_t i{0}; i < m_size; ++i){
 		out << m_items[i] << " " ;
 	}
-	std::cout << "]";
+	out << "]";
 }
 */
 
 
 template <typename T, size_t maximum>
 void BoxContainer<T,maximum>::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println( "Expanding to {}" , new_capacity );
 	T *new_items_container;
 
 	if (new_capacity <= m_capacity)
@@ -135,7 +158,7 @@ template <typename T, size_t maximum>
 void BoxContainer<T,maximum>::add(const T& item){
 	
 	if(m_size == maximum){
-		std::cout << "Maximum capacity reched. Not adding item" << std::endl;
+		fmt::println( "Maximum capacity reched. Not adding item" );
 		return;
 	}
 	

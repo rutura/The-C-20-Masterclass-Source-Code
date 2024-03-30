@@ -1,7 +1,7 @@
 #ifndef BOX_CONTAINER_H
 #define BOX_CONTAINER_H
 
-#include <iostream>
+#include <fmt/format.h>
 
 
 template <typename T , size_t maximum>
@@ -9,6 +9,8 @@ class BoxContainer
 {
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
+	friend struct fmt::formatter<BoxContainer>;
+
 public:
 	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
 	BoxContainer(const BoxContainer<T,maximum>& source);
@@ -58,7 +60,16 @@ inline std::ostream& operator<<(std::ostream& out, const BoxContainer<T,maximum>
     return out;
 }
 
-
+template<typename T, size_t maximum>
+struct fmt::formatter<BoxContainer<T, maximum>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const BoxContainer<T, maximum>& obj, FormatContext& ctx) {
+		memory_buffer buf;
+		format_int_pointer_array(buf, obj.m_items, obj.size());
+		return format_to(ctx.out(),"BoxContainer: [size: {}, capacity: {}, items: {}]", obj.size(), obj.capacity(), fmt::to_string(buf));
+	}
+};
 //Definitions moved into here
 
 template <typename T, size_t maximum>
@@ -107,7 +118,7 @@ void BoxContainer<T>::stream_insert(std::ostream& out)const{
 
 template <typename T, size_t maximum>
 void BoxContainer<T,maximum>::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println( "Expanding to {}", new_capacity);
 	T *new_items_container;
 
 	if (new_capacity <= m_capacity)
@@ -135,7 +146,7 @@ template <typename T, size_t maximum>
 void BoxContainer<T,maximum>::add(const T& item){
 	
 	if(m_size == maximum){
-		std::cout << "Maximum capacity reched. Not adding item" << std::endl;
+		fmt::println( "Maximum capacity reched. Not adding item");
 		return;
 	}
 	

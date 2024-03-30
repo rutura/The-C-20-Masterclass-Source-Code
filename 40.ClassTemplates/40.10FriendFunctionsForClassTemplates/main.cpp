@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 template<typename T>
@@ -21,7 +21,7 @@ public :
          m_var = param;
      }
      void do_something(const T a, T b){
-         std::cout << "Doing something with " << a << " and " << b << std::endl;
+         fmt::println( "Doing something with {} and {}", a, b );
      }
 private : 
      T m_var;
@@ -29,8 +29,7 @@ private :
 
 template <typename T>
 void some_func(TemplateClass<T>  param){
-    std::cout << "Inside some_func , accessing private data of TemplateClass : "
-        << param.m_var << std::endl;
+    fmt::println( "Inside some_func , accessing private data of TemplateClass : {}", param.m_var );
 }
 
 

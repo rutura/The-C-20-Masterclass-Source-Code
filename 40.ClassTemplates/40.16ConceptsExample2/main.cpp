@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <concepts>
 
 template <typename T>
@@ -17,7 +17,7 @@ int main(){
 
     static_assert(Number<int>);
     //auto result = add(20.1, 20);
-    //std::cout << "result :  " << result << std::endl;
+    //fmt::println( "result :  {}" , result );
    
     return 0;
 }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 int main(){
@@ -19,12 +18,11 @@ int main(){
 	int_box.add(55); // Maximum capacity is the default : 10
     */
 
-   /*
+	/*
 	BoxContainer <double> double_box; // Defaults to <double,10>
 	double_box.add(11.1);
-    std::cout << "double box : " << double_box << std::endl;
+    fmt::println( "double box : {}" , double_box );
     */
-
 
 	BoxContainer <char,5> char_box; // Defaults are overriden
 	char_box.add('H');
@@ -32,8 +30,8 @@ int main(){
 	char_box.add('l');
 	char_box.add('l');
 	char_box.add('o');
-	std::cout << "char_box : " << char_box << std::endl;
+	fmt::println( "char_box : {}" , char_box );
 	char_box.add('o');
-	std::cout << "char_box : " << char_box << std::endl;
+	fmt::println( "char_box : {}" , char_box );
     return 0;
 }

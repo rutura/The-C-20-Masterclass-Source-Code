@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 
@@ -14,10 +13,10 @@ int main(){
 	int_box.add(9);
 	int_box.add(8);
 	
-	std::cout << "int_box : " << int_box << std::endl;
-	std::cout << "int_box.max : " << int_box.get_max() << std::endl;
+	fmt::println( "int_box : {}" , int_box );
+	fmt::println( "int_box.max : {}" , int_box.get_max() );
 
-    std::cout << "-------------" << std::endl;
+    fmt::println( "-------------" );
 
 	BoxContainer<const char*> char_ptr_box;
 	
@@ -25,8 +24,8 @@ int main(){
 	char_ptr_box.add("Kiwi");
 	char_ptr_box.add("Banana");
     char_ptr_box.add("Zeus");
-	std::cout << "char_ptr_box : " << char_ptr_box << std::endl;
-	std::cout << "char_ptr_box : " << char_ptr_box.get_max() << std::endl;
+	fmt::println( "char_ptr_box : {}" , char_ptr_box );
+	fmt::println( "char_ptr_box : {}" , char_ptr_box.get_max() );
     
 
     return 0;

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <type_traits>
 #include "boxcontainer.h"
 
@@ -6,6 +5,7 @@ template <typename T>
 class Point{
 	    static_assert(std::is_arithmetic_v<T>,
         "Coordinates of Point can only be numbers.");
+	friend struct fmt::formatter<Point>;
 public : 
 	Point() = default;
 	Point(T x, T y)  
@@ -23,18 +23,27 @@ private :
 };
 
 
+template<typename T>
+struct fmt::formatter<Point<T>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const Point<T>& obj, FormatContext& ctx) {
+		return format_to(ctx.out(), "Point [ x: {}, y: {}]", obj.m_x, obj.m_y );
+	}
+};
+
 
 int main(){
 
 	Point<int> point_int(10,20);
-	std::cout << "point_int : " << point_int << std::endl;
+	fmt::println( "point_int : {}" , point_int );
 	
 	Point<double> point_double(11.1,12.2);
-	std::cout << "point_double : " << point_double << std::endl;
+	fmt::println( "point_double : {}" , point_double );
 
     /*
 	Point<std::string> point_string("Hello","World");
-    std::cout << "point_string : " << point_string << std::endl;
+    fmt::println( "point_string : {}" , point_string );
     */
 
 
@@ -42,7 +51,7 @@ int main(){
 	point_box.add(point_int);
 	point_box.add(Point<int>(40,50));
 	
-	std::cout << "point_box : " << point_box << std::endl;
+	fmt::println( "point_box : {}" , point_box );
 
 
 

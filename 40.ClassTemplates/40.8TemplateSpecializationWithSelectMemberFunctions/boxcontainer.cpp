@@ -3,7 +3,7 @@
 template <> 
 const char* BoxContainer<const char*>::get_max() const
 {
-	std::cout << "Specialized method called to get max on const char*" << std::endl;
+	fmt::println( "Specialized method called to get max on const char*" );
    size_t max_index = 0;
    
    for(size_t i{}; i < m_size ; ++i){

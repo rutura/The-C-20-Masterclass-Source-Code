@@ -1,8 +1,7 @@
 #ifndef BOX_CONTAINER_H
 #define BOX_CONTAINER_H
 
-#include <iostream>
-#include <cstring>
+#include <fmt/format.h>
 
 template <typename T = int, typename V = int>
 class BoxContainer 
@@ -10,7 +9,7 @@ class BoxContainer
 	
 	static const size_t DEFAULT_CAPACITY = 5;  
 	static const size_t EXPAND_STEPS = 5;
-	
+	friend struct fmt::formatter<BoxContainer>;
 public:
 	BoxContainer(size_t capacity = DEFAULT_CAPACITY);
 
@@ -72,6 +71,27 @@ inline std::ostream& operator<<(std::ostream& out, const BoxContainer<T,V>& oper
     return out;
 }
 
+template<typename T>
+void format_int_pointer_array(fmt::basic_memory_buffer<char>& out, T const* array, size_t size) {
+	format_to_n(std::back_inserter(out), 1, "[");
+	for (size_t i = 0; i < size; ++i) {
+		format_to_n(std::back_inserter(out), 1, "{}", (array[i]));
+		if (i < size - 1) {
+			format_to_n(std::back_inserter(out), 1,", ");
+		}
+	}
+	format_to_n(std::back_inserter(out), 1, "]");
+}
+template<typename T, typename V>
+struct fmt::formatter<BoxContainer<T, V>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const BoxContainer<T, V>& obj, FormatContext& ctx) {
+		memory_buffer buf;
+		format_int_pointer_array(buf, obj.m_items, obj.size());
+		return format_to(ctx.out(),"BoxContainer: [size: {}, capacity: {}, items: {}]", obj.size(), obj.capacity(), fmt::to_string(buf));
+	}
+};
 
 //Definitions moved into here
 
@@ -121,7 +141,7 @@ void BoxContainer<T>::stream_insert(std::ostream& out)const{
 
 template <typename T, typename V>
 void BoxContainer<T,V>::expand(size_t new_capacity){
-	std::cout << "Expanding to " << new_capacity << std::endl;
+	fmt::println("Expanding to {}",  new_capacity );
 	T *new_items_container;
 
 	if (new_capacity <= m_capacity)
@@ -254,11 +274,10 @@ void BoxContainer<T,V>::operator =(const BoxContainer<T,V>& source){
 
 
 // Specializing get_max
-/*
-template <> inline
+/*template <> inline
 const char* BoxContainer<const char*>::get_max() const
 {
-	std::cout << "Specialized method called to get max on const char*" << std::endl;
+	fmt::println( "Specialized method called to get max on const char*");
    size_t max_index = 0;
    
    for(size_t i{}; i < m_size ; ++i){
@@ -270,8 +289,7 @@ const char* BoxContainer<const char*>::get_max() const
    }
    
    return m_items[max_index];
-}
-*/
+}*/
 
 
 //Just declaration Definition in cpp file

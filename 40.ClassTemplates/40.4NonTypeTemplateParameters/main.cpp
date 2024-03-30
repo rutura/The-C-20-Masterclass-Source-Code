@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 template <typename T, T threashold>

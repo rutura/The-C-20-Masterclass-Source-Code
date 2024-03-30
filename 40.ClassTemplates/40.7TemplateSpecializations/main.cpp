@@ -1,4 +1,3 @@
-#include <iostream>
 #include "adder.h"
 
 
@@ -6,9 +5,9 @@ int main(){
 
     Adder<int> adder_int;
 	adder_int.do_something();
-    std::cout << adder_int.add(10,20) << std::endl;
+    fmt::println( "{}", adder_int.add(10,20) );
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     //Char*
     char str1[20] {"Hello"};
@@ -16,7 +15,7 @@ int main(){
     
     Adder<char*> adder_c_str;
 	//adder_c_str.do_something();
-    std::cout << adder_c_str.add(str1,str2) << std::endl;
+    fmt::println( "{}", adder_c_str.add(str1,str2) );
    
     return 0;
 }

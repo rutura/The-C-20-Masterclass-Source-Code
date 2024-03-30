@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 
@@ -11,7 +10,7 @@ int main(){
     int_box.add(10);
     int_box.add(15);
 
-    std::cout << "int_box : " << int_box << std::endl;
+    fmt::println( "int_box : {}", int_box );
    
     return 0;
 }

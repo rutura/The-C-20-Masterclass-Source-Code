@@ -1,10 +1,10 @@
-#include <iostream>
-#include <concepts>
 #include "boxcontainer.h"
 
 template <typename T>
 requires std::is_arithmetic_v<T>
 class Point{
+	friend struct fmt::formatter<Point>;
+
 public : 
 	Point() = default;
 	Point(T x, T y)  
@@ -20,6 +20,15 @@ public :
 private : 
 	T m_x;
 	T m_y;
+};
+
+template<typename T>
+struct fmt::formatter<Point<T>> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const Point<T>& obj, FormatContext& ctx) {
+		return format_to(ctx.out(), "Point [ x: {}, y: {}]", obj.m_x, obj.m_y );
+	}
 };
 
 struct  Dog

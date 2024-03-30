@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <cstring>
 
 // Regular class template
@@ -10,7 +10,7 @@ public:
     }
 	T add(T x, T y);
 	void do_something(){
-		std::cout << "Doing something..." << std::endl;
+		fmt::println( "Doing something..." );
 	}
 };
 

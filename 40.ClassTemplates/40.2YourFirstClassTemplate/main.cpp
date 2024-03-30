@@ -1,10 +1,9 @@
-#include <iostream>
 #include "boxcontainer.h"
-
 
 
 class Point{
     friend std::ostream& operator<<(std::ostream& out, const Point& operand);
+	friend struct fmt::formatter<Point>;
     public : 
     Point(double x, double y) : m_x(x) , m_y(y){
         
@@ -24,43 +23,48 @@ std::ostream& operator<<(std::ostream& out, const Point& operand){
     return out;
 }
 
+template<>
+struct fmt::formatter<Point> {
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const Point& obj, FormatContext& ctx) {
+		return format_to(ctx.out(), "Point [x: {}, y: {}]", obj.m_x, obj.m_y);
+	}
+};
+
 
 int main(){
 
 	//int
-	std::cout << "BoxContainer of int : " << std::endl;
+	fmt::println( "BoxContainer of int : " );
 	BoxContainer<int> int_box;
 	int_box.add(33);
 	int_box.add(44);
-	std::cout << "int_box : " << int_box << std::endl;
+	fmt::println( "int_box : {}" , int_box );
 	
 	//double
-	std::cout << std::endl;
-	std::cout << "BoxContainer of double : " << std::endl;
+	fmt::println( "BoxContainer of double : " );
 	BoxContainer<double> double_box;
 	double_box.add(100.11);
 	double_box.add(200.22);
-	std::cout << "double_box : " << double_box << std::endl;
+	fmt::println( "double_box : {}" , double_box );
 	
 	//Point
-	std::cout << std::endl;
-	std::cout << "BoxContainer of Point : " << std::endl;
+	fmt::println( "BoxContainer of Point : " );
 	BoxContainer<Point> point_box;
 	point_box.add(Point(20.1,20.2));
 	point_box.add(Point(200.22,300.33));
-	std::cout << "point_box : " << point_box << std::endl;
+	fmt::println( "point_box : {}" , point_box );
 	
 	//std::string
-	std::cout << std::endl;
-	std::cout << "BoxContainer of std::string" << std::endl;
+	fmt::println( "BoxContainer of std::string" );
 	BoxContainer<std::string> string_box;
 	string_box.add("Hello");
 	string_box.add("World");
-	std::cout << "string_box : " << string_box << std::endl;
+	fmt::println( "string_box : {}" , string_box );
 	
 	//char
-	std::cout << std::endl;
-	std::cout << "BoxContainer of char" << std::endl;
+	fmt::println( "BoxContainer of char" );
 	BoxContainer<char> char_box;
 	char_box.add('H');
 	char_box.add('e');
@@ -68,64 +72,59 @@ int main(){
 	char_box.add('l');
 	char_box.add('o');
 	char_box.add('o');
-	std::cout << "char_box : " << char_box << std::endl;
+	fmt::println( "char_box : {}" , char_box );
 
 	//------------------------------------------------------
 
-    std::cout << std::endl;
-	std::cout << "Trying out all the methods: " << std::endl;
+	fmt::println( "Trying out all the methods: " );
 	
 	BoxContainer<int> int_box1;
 	int_box1.add(10);
 	int_box1.add(21);
 	int_box1.add(44);
 	
-	std::cout << "int_box1 : " << int_box1 << std::endl;
+	fmt::println( "int_box1 : {}" , int_box1 );
 	
 	int_box1.add(10);
 	int_box1.add(55);
 	int_box1.add(10);
-	std::cout << "int_box1 : " << int_box1 << std::endl;
+	fmt::println( "int_box1 : {}" , int_box1 );
 	
 	int_box1.remove_item(55);
-	std::cout << "int_box1 : " << int_box1 << std::endl;
+	fmt::println( "int_box1 : {}" , int_box1 );
 	
 	size_t removed = int_box1.remove_all(10);
-	std::cout << removed  << " items removed" << std::endl;
-	std::cout << "int_box1 : " << int_box1 << std::endl;
+	fmt::println( "{} items removed", removed );
+	fmt::println( "int_box1 : {}" , int_box1 );
 	
 	//Copy construct
-	std::cout << std::endl;
-	std::cout << "Copy construction" << std::endl;
+	fmt::println( "Copy construction" );
 	BoxContainer<int> int_box2(int_box);
-	std::cout << "int_box : " << int_box << std::endl;
-	std::cout << "int_box2 : " << int_box2 << std::endl;
+	fmt::println( "int_box : {}" , int_box );
+	fmt::println( "int_box2 : {}" , int_box2 );
 	
 	//Copy assign
-	std::cout << std::endl;
-	std::cout << "Copy assignment" << std::endl;
+	fmt::println( "Copy assignment" );
 	int_box2 = int_box1;
-	std::cout << "int_box1 : " << int_box1  << std::endl;
-	std::cout << "int_box2 : " << int_box2 << std::endl;
+	fmt::println( "int_box1 : {}" , int_box1  );
+	fmt::println( "int_box2 : {}" , int_box2 );
 	
-	std::cout << std::endl;
-	std::cout << "operator+= : " << std::endl;
+	fmt::println( "operator+= : " );
 	int_box2 += int_box; 
-	std::cout << "int_box : " << int_box  << std::endl;
-	std::cout << "int_box2 : " << int_box2 << std::endl;
+	fmt::println( "int_box : {}" , int_box  );
+	fmt::println( "int_box2 : {}" , int_box2 );
 	
 	
-	std::cout << std::endl;
-	std::cout << "operator+" << std::endl;
+	fmt::println( "operator+" );
 	BoxContainer<int> int_box3;
 	int_box3.add(100);
 	int_box3.add(200);
 	
 	BoxContainer<int> int_box4;
 	int_box4 = int_box2 + int_box3;
-	std::cout << "int_box4 : " << int_box4 << std::endl;
+	fmt::println( "int_box4 : {}" , int_box4 );
 
-	std::cout << "END." << std::endl;
+	fmt::println( "END." );
 
 
     return 0;
