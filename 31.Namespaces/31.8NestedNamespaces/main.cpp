@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 namespace Hello{
     unsigned int age{23};
@@ -7,15 +7,15 @@ namespace Hello{
         int local_var{44};
         
         void say_something(){
-            std::cout << "Hello there " << std::endl;
-            std::cout << "The age is : " << age << std::endl;
+            fmt::println( "Hello there " );
+            fmt::println( "The age is : {}" , age );
         }
     }
     
     void do_something(){
         //Here we don't have direct access to local_var, we have to go 
         //through the namespace.
-        std::cout << "Using local_var : " << World::local_var << std::endl;
+        fmt::println( "Using local_var : {}" , World::local_var );
     }
 }
 

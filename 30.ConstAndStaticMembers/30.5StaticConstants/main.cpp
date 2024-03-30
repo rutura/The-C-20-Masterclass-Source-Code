@@ -1,13 +1,13 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "cylinder.h"
 
 
 
 int main(){
     Cylinder cylinder1(3.3,10.0);
-    std::cout << "Volume of cylinder : " << cylinder1.volume() << std::endl;
-    std::cout << "Cylinder default color : " << Cylinder::default_color << std::endl;
-    std::cout << "Cylinder default color : " << cylinder1.default_color << std::endl;
+    fmt::println( "Volume of cylinder : {}" , cylinder1.volume() );
+    fmt::println( "Cylinder default color : {}" , Cylinder::default_color );
+    fmt::println( "Cylinder default color : {}" , cylinder1.default_color );
 	
     return 0;
 }

@@ -1,10 +1,10 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 
 int main(){
     /*
-    Lambda function signature : 
+    Lambda function signature :
                                 [capture list] (parameters) ->return type{
                                         // Function body
                                 }
@@ -13,7 +13,7 @@ int main(){
    //Declaring a lambda function and calling it through a name
    /*
    auto func = [](){
-       std::cout << "Hello World!" << std::endl;
+       fmt::println( "Hello World!" );
    };
    func();
    func();
@@ -23,7 +23,7 @@ int main(){
     //Declare a lambda function and call it directly
     /*
     [](){
-       std::cout << "Hello World!" << std::endl;
+       fmt::println( "Hello World!" );
     }();
     */
 
@@ -32,13 +32,13 @@ int main(){
 
     /*
     [](double a, double b){
-       std::cout << "a + b : " << (a + b)  << std::endl;
+       fmt::println( "a + b : " , (a + b)  );
     }(10.0,50.0);
     */
 
    /*
     auto func1 = [](double a, double b){
-       std::cout << "a + b : " << (a + b)  << std::endl;
+       fmt::println( "a + b : " , (a + b)  );
     };
 
     func1(10,20);
@@ -52,14 +52,14 @@ int main(){
         return a + b;
     }(10,60);
 
-    //std::cout << "result : " << result << std::endl;
-    std::cout << "result : " << [](double a, double b){
+    //fmt::println( "result : " , result );
+    fmt::println( "result : " , [](double a, double b){
         return a + b;
-    }(10,60) << std::endl;
+    }(10,60) );
     */
 
 
-   /*
+/*
     auto func1 = [](double a, double b){
         return a + b;
     };
@@ -67,10 +67,10 @@ int main(){
     auto result1 = func1(23,7);
     auto result2 = func1(9,45);
 
-    std::cout << "result1 : " << result1 << std::endl;
-    std::cout << "result2 : " << result2 << std::endl;
-    std::cout  <<"direct call : " << func1(5,2) << std::endl;
-    */
+    fmt::println( "result1 : " , result1 );
+    fmt::println( "result2 : " , result2 );
+    fmt::println( "direct call : " , func1(5,2) );
+*/
 
     //Explicitly specify the return type
     auto func3 = [](double a, double b)-> int{
@@ -87,13 +87,13 @@ int main(){
     auto result3 = func3(a,b);
     auto result4 = func4(a,b);
 
-    std::cout << "result3 : " << result3 << std::endl;
-    std::cout << "result4 : " << result4 << std::endl;
-    std::cout << "sizeof(result3) : " << sizeof(result3) << std::endl; // 4
-    std::cout << "sizeof(result4) : " << sizeof(result4) << std::endl; // 8
+    fmt::println( "result3 : {}" , result3 );
+    fmt::println( "result4 : {}" , result4 );
+    fmt::println( "sizeof(result3) : {}" , sizeof(result3) ); // 4
+    fmt::println( "sizeof(result4) : {}" , sizeof(result4) ); // 8
 
 
-   std::cout << "Done!" << std::endl;
+   fmt::println( "Done!" );
    
     return 0;
 }

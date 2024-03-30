@@ -1,5 +1,5 @@
 
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 class Number
 {
@@ -21,7 +21,7 @@ public:
         return (static_cast <double> (m_wrapped_int));
     }
     explicit operator Point() const{
-        std::cout << "Custom conversion from Number to Point" << std::endl;
+        fmt::println( "Custom conversion from Number to Point" );
         return Point(static_cast<double>(m_wrapped_int),
                         static_cast<double>(m_wrapped_int));
     }

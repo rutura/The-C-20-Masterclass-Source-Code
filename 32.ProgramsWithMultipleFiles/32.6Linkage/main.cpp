@@ -1,9 +1,9 @@
-#include <iostream>
+#include <fmt/format.h>
 
 //No linkage
 void some_function(){
     int age {34}; // No linkage
-    std::cout << "age : " << age << " &age : " << &age << std::endl;
+    fmt::println( "age : {}{}{}" , age , " &age : " , fmt::ptr(&age ));
 }
 
 const double distance{45.8}; // Internal linkage
@@ -17,19 +17,19 @@ extern void print_item_count();
 
 int main(){
 
-    /*
-    std::cout << "distance(main) : " << distance << "  &distance : " << &distance <<std::endl;
+/*
+    fmt::println( "distance(main) : {}{}{}" , distance , "  &distance : " , fmt::ptr(&distance) );
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----" );
 
     print_distance();
+*/
 
-    */
 
-    std::cout << "item_count(main) : " << item_count << " &item_count : "
-        << &item_count << std::endl;
+    fmt::println( "item_count(main) : {}{}{}" , item_count , " &item_count : "
+        , fmt::ptr(&item_count ));
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----" );
     print_item_count();
 
    

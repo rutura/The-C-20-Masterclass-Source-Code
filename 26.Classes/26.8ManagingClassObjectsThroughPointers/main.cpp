@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "cylinder.h"
 
 int main(){
@@ -10,14 +10,14 @@ int main(){
     //Managing a stack object through pointers
     Cylinder* p_cylinder1 = &cylinder1;
 
-    //std::cout << "volume : " << (*p_cylinder1).volume() << std::endl;
-    std::cout << "volume : " << p_cylinder1->volume() << std::endl;
+//    fmt::println("volume : {}" , (*p_cylinder1).volume() );
+    fmt::println( "volume : {}" , p_cylinder1->volume() );
 
     //Create a cylinder heap object through the new operator
     Cylinder* p_cylinder2 = new Cylinder(100,2); // Heap
 
-    std::cout << "volume(clylinder2) : " << p_cylinder2->volume() << std::endl;
-    std::cout << "base_rad(cylinder2) : " << p_cylinder2->get_base_radius() << std::endl;
+    fmt::println( "volume(clylinder2) : {}" , p_cylinder2->volume() );
+    fmt::println( "base_rad(cylinder2) : {}" , p_cylinder2->get_base_radius() );
 
 
 

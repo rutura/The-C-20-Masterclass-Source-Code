@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 const double PI {3.1415926535897932384626433832795};
 
@@ -40,13 +40,13 @@ class Cylinder {
 
 int main(){
     Cylinder cylinder1(10,10);
-    std::cout << "volume : " << cylinder1.volume() << std::endl;
+    fmt::println( "volume : {}" , cylinder1.volume() );
 
     //Modify our object
     cylinder1.set_base_radius(100);
     cylinder1.set_height(10);
 
-    std::cout << "volume : " << cylinder1.volume() << std::endl;
+    fmt::println( "volume : {}" , cylinder1.volume() );
 
 
     return 0;

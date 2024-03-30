@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -11,8 +11,8 @@ int main(){
     int b{63};
 
     auto result = func(a,b);
-    std::cout << "result : " << result << std::endl;
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl;
+    fmt::println( "result : {}" , result );
+    fmt::println( "sizeof(result) : {}" , sizeof(result) );
     
     
     return 0;

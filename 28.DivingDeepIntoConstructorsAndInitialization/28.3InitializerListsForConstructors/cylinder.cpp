@@ -1,12 +1,12 @@
 #include "cylinder.h"
-#include <iostream>
+#include <fmt/format.h>
 
 //Memberwise copy initialization
 /*
 Cylinder::Cylinder(double rad_param,double height_param){
     base_radius = rad_param;
     height = height_param;
-    std::cout <<"Two param constructor called" << std::endl;
+    fmt::println("Two param constructor called" );
 }
 */
 

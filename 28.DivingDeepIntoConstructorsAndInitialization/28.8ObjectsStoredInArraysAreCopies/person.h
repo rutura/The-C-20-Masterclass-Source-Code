@@ -1,7 +1,7 @@
 #ifndef PERSON_H
 #define PERSON_H
 
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 class Person
@@ -33,12 +33,12 @@ public:
 
 	//Utilities
 	void print_info(){
-		std::cout << "Person object at : " << this 
-			<<" [ Last_name : " << last_name 
-			<< ", First_name :  " << first_name 
-			<< " ,age : " << *age 
-			<< " , age address : " << age 
-			<< " ]" << std::endl;
+		fmt::println( "Person object at : {}{}{}{}{}{}{}{}{}{}" , fmt::ptr(this)
+			," [ Last_name : " , last_name
+			, ", First_name :  " , first_name
+			, " ,age : " , *age
+			, " , age address : " , fmt::ptr(age)
+			, " ]" );
 	}
 };
 

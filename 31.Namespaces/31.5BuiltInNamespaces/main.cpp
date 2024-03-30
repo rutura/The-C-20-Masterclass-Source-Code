@@ -1,10 +1,10 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 int main(){
     
-    std::cout << "Hello World" << std::endl;
+    fmt::println( "Hello World" );
     std::string message{"Hello World"};
-    std::cout << message << std::endl;
+    fmt::println( "{}",message );
     return 0;
 }

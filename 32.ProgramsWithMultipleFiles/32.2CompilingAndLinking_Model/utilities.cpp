@@ -1,5 +1,4 @@
 //Implementations
-/*
 double add( double a, double b){
 	return a + b;
 }
@@ -7,4 +6,3 @@ double add( double a, double b){
 double multiply(double a, double b){
 	return a * b;
 }
-*/

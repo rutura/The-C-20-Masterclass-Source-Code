@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 template <typename ReturnType = double , typename T, typename P>
@@ -17,8 +17,8 @@ int main(){
     double b{9.5};
 
     auto result = minimum <int,double,int> (a,b);
-    std::cout << "result : " << result << std::endl;
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl;//4
+    fmt::println( "result : {}" , result );
+    fmt::println( "sizeof(result) : {}" , sizeof(result) );//4
    
     return 0;
 }

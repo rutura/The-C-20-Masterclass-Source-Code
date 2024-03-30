@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 template <typename T, typename P> 
 decltype(auto) maximum(T a, P b){
@@ -11,8 +11,8 @@ int main(){
     double y{45.9};
 
     auto result = maximum(x,y);
-    std::cout << "max : " << result << std::endl;
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl;
+    fmt::println( "max : {}" , result );
+    fmt::println( "sizeof(result) : {}" , sizeof(result) );
    
     return 0;
 }

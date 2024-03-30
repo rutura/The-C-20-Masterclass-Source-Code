@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Dog{
@@ -8,8 +8,8 @@ class Dog{
         ~Dog();
 
         void print_info(){
-            std::cout << "Dog (" << this << ") : [ name : " << name 
-                << " breed : " << breed << " age : " << *p_age << "]" << std::endl;
+            fmt::println( "Dog ({}{}{}{}{}{}{}{}" , fmt::ptr(this) , ") : [ name : " , name
+                , " breed : " , breed , " age : " , *p_age , "]" );
         }
 
         //Setters
@@ -57,12 +57,12 @@ Dog::Dog(std::string_view name_param, std::string_view breed_param, int  age_par
     breed = breed_param;
     p_age = new int;
     *p_age = age_param;
-    std::cout << "Dog constructor called for " << name << " at " << this << std::endl;
+    fmt::println( "Dog constructor called for {}{}{}" , name , " at " , fmt::ptr(this ));
 }
 
 Dog::~Dog(){
     delete p_age;
-    std::cout << "Dog destructor called for " << name << " at " << this <<  std::endl;
+    fmt::println( "Dog destructor called for {}{}{}" , name , " at " , fmt::ptr(this ));
 }
 
 int main(){
@@ -86,7 +86,7 @@ int main(){
     dog1.print_info();
    
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
    //Destructor
     return 0;
 }

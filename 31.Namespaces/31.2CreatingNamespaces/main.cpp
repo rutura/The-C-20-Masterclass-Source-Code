@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 const double adjustment{0.724};
 
@@ -36,7 +36,7 @@ namespace Adjust
 int main(){
 
    double result = No_Adjust::div(12,3);
-   std::cout << "result : " << result << std::endl;
+   fmt::println( "result : {}" , result );
     return 0;
 }
 

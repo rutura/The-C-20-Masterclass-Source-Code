@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 namespace{
     double add(double a, double b); // Declaration
@@ -8,7 +8,7 @@ namespace{
 int main(){
 
     double result = add(10.2,20.2);
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
    
     return 0;
 }

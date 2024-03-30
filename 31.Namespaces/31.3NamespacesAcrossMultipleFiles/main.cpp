@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 #include "line.h"
 #include "cylinder.h"
@@ -11,15 +11,15 @@ int main(){
     p1.print_info();
     p2.print_info();
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     Geom::Line l1(p1,p2);
     l1.print_info();
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     Geom::Cylinder c1(1.4,10);
-    std::cout << "c1.volume : " << c1.volume() << std::endl;
+    fmt::println( "c1.volume : {}" , c1.volume() );
 
 
     return 0;

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "dog.h"
 
@@ -16,17 +16,17 @@ int main(){
 	shared_ptr_dog_arr_1[1] = Dog("Fluzzy");
 
 	//Read int array
-	std::cout << std::endl;
-	std::cout << "Reading data from arrays" << std::endl;
-	std::cout << "Reading shared_ptr_int_arr_1: " << std::endl;
+	fmt::println( "\n" );
+	fmt::println( "Reading data from arrays" );
+	fmt::println( "Reading shared_ptr_int_arr_1: " );
 	for(size_t i{0}; i < 10 ; ++i){
-		std::cout << "shared_ptr_int_arr_1[" << i << "] : " << shared_ptr_int_arr_1[i] << std::endl;
+		fmt::println( "shared_ptr_int_arr_1[{}{}{}" , i , "] : " , shared_ptr_int_arr_1[i] );
 	}
 	
-	std::cout << std::endl;
-	std::cout << "Reading shared_ptr_dog_arr_1: " << std::endl;
+	fmt::println( "\n" );
+	fmt::println( "Reading shared_ptr_dog_arr_1: " );
 	for(size_t i{0}; i < 10 ; ++i){
-		std::cout << "shared_ptr_dog_arr_1[" << i << "] : " << shared_ptr_dog_arr_1[i].get_name() << std::endl;
+		fmt::println( "shared_ptr_dog_arr_1[{}{}{}" , i , "] : " , shared_ptr_dog_arr_1[i].get_name() );
 	}
    
     return 0;

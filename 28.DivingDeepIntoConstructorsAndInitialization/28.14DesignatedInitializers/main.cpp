@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 struct Component
 {
@@ -8,7 +8,7 @@ struct Component
 };
 
 void print_component(const Component& c){
-    std::cout << "Component [ x : " << c.x << ", y: " << c.y << " ,z : " << c.z << "] " << std::endl;
+    fmt::println( "Component [ x : {}{}{}{}{}{}" , c.x , ", y: " , c.y , " ,z : " , c.z , "] ");
 }
 
 

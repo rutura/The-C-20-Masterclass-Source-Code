@@ -1,5 +1,5 @@
 
-#include <iostream>
+#include <fmt/format.h>
 
 int& adjust( int& input);
 int sum(int x , int y);
@@ -11,8 +11,8 @@ int main(int argc, char **argv){
 	int b{12};
 
 	int summation  =  sum( a , b);
-	std::cout << "sum : " 
-		<< summation << std::endl;
+	fmt::println( "sum : {}"
+		, summation );
 
 	return 0;
 }

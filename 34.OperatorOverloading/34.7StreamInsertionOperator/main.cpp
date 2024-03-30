@@ -1,13 +1,13 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 
 int main(){
 
     Point p1(10,20);
     Point p2(3,4);
-    //p1.print_info();
+    p1.print_info();
 
-    std::cout << p1 << p2 << std::endl;
+//    fmt::println("{}{}", p1 , p2 );
    
     return 0;
 }

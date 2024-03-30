@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "person.h"
 
 
@@ -33,10 +33,10 @@ int main(){
     /*
    // weight = 5; // Assignment
 
-    std::cout << weight << std::endl;
+    fmt::println("{}", weight );
 
     double result = add(10,20.5);
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
     */
 
    Person p1("John Snow",27);

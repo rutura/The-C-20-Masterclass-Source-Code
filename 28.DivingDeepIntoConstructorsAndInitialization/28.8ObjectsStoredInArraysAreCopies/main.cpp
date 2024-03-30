@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "person.h"
 
 
@@ -11,14 +11,14 @@ int main(){
     p2.print_info();
     p3.print_info();
 
-    std::cout << "----" << std::endl;
+    fmt::println( "----" );
 
     Person students[] {p1,p2,p3};
     for(size_t i{}; i < std::size(students); ++i){
         students[i].print_info();
     }
 
-    std::cout << "----" << std::endl;
+    fmt::println( "----" );
     for(Person& p : students){
         p.print_info();
     }

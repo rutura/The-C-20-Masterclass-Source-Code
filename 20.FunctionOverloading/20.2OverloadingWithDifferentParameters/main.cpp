@@ -1,33 +1,33 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int max(int a, int b){
-    std::cout << "int overload called" << std::endl;
+    fmt::println( "int overload called" );
     return (a>b)? a : b; 
 }
 
 double max(double a, double b){
-    std::cout << "double overload called" << std::endl;
+    fmt::println( "double overload called" );
     return (a>b)? a : b; 
 }
 
 double max(int a, double b){
-    std::cout << "(int,double) overload called" << std::endl;
+    fmt::println( "(int,double) overload called" );
     return (a>b)? a : b; 
 }
 
 double max(double a, int b){
-    std::cout << "(double,int) overload called" << std::endl;
+    fmt::println( "(double,int) overload called" );
     return (a>b)? a : b; 
 }
 
 double max(double a, int b,int c){
-    std::cout << "(double,int,int) overload called" << std::endl;
+    fmt::println( "(double,int,int) overload called" );
     return a;
 }
 
 std::string_view  max(std::string_view a, std::string_view b){
-    std::cout << "(string_view,string_view) overload called" << std::endl;
+    fmt::println( "(string_view,string_view) overload called" );
      return (a>b)? a : b;
 }
 

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "dog.h"
 
@@ -13,8 +13,8 @@ int main(){
         dog1.print_dog();
 
     }
-    std::cout << "Hitting outside scope" << std::endl;
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Hitting outside scope" );
+    fmt::println( "Done!" );
     */
 
 
@@ -26,8 +26,8 @@ int main(){
         int * p_int1 = new int(100);
         
         p_dog2->print_dog();
-        std::cout << "Integer is : " << *p_int1 << std::endl;
-        std::cout << "Integer lives at address : " << p_int1 << std::endl;
+        fmt::println( "Integer is : {}" , *p_int1 );
+        fmt::println( "Integer lives at address : {}" , fmt::ptr(p_int1 ));
         
         //If you go out of scope withoug releasing (deleting) p_dog2 and
         // p_int1 you'll have leaked memory
@@ -55,11 +55,11 @@ int main(){
         up_dog_5->print_dog(); // Calling function with -> operator
         //Assign to fundamental type
         * up_int2 = 500;
-        std::cout << "Integer is : " << *up_int2 << std::endl; // dereferencing
-        std::cout << "Integer lives at address : " << up_int2.get() << std::endl;
+        fmt::println( "Integer is : {}" , *up_int2 ); // dereferencing
+        fmt::println( "Integer lives at address : {}" , fmt::ptr(up_int2.get() ));
 
     }
-    std::cout << "Hitting the outside scope" << std::endl; 
+    fmt::println( "Hitting the outside scope" );
     */
 
 
@@ -72,8 +72,8 @@ int main(){
      
     std::unique_ptr<int> p_int3 = std::make_unique<int>(30);
     *p_int3 =67;
-    std::cout << "Value pointed to by p_int3 is :"  << *p_int3 << std::endl;
-    std::cout << "p_int pointing at address :" << p_int3.get() << std::endl;
+    fmt::println( "Value pointed to by p_int3 is :{}"  , *p_int3 );
+    fmt::println( "p_int pointing at address :{}" , fmt::ptr(p_int3.get() ));
     */
 
 //----------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ int main(){
     std::unique_ptr<Dog> up_dog_8 = std::make_unique<Dog>("Dog8");
     up_dog_8->print_dog();
     //Can get the wrapped pointer address : useful for older raw pointer APIs
-    std::cout << "Dog8 memory address: " << up_dog_8.get() << std::endl;
+    fmt::println( "Dog8 memory address: {}" ,fmt::ptr(up_dog_8.get() ));
 
     // Copies and Assignments are not allowed with unique ptr
     //std::unique_ptr<Dog> up_dog_9 = up_dog_8; // Error.This also does some kind of copy
@@ -99,24 +99,24 @@ int main(){
         std::unique_ptr<Dog> up_dog_12 = std::move(up_dog_11); // Now up_dog_12 manages Dog11
                                                     // and up_dog_11 points to nothing(nullptr)
         up_dog_12->print_dog();
-        std::cout << "Dog12 memory address : " << up_dog_12.get() << std::endl;
+        fmt::println( "Dog12 memory address : {}" , fmt::ptr(up_dog_12.get() ));
     
-        std::cout << "up_dog_11 is now nullptr : " << up_dog_11.get() << std::endl;	
+        fmt::println( "up_dog_11 is now nullptr : {}" ,fmt::ptr( up_dog_11.get() ));
         if(up_dog_11){
-            std::cout << "Pointer11 pointing to something valid" << std::endl;
+            fmt::println( "Pointer11 pointing to something valid" );
         }else{
-            std::cout << "Pointer11 point to nullpter" << std::endl;
+            fmt::println( "Pointer11 point to nullpter" );
         }	
     
     }
-    std::cout << "Hitting the outside scope" << std::endl;
+    fmt::println( "Hitting the outside scope" );
     */
 
 //----------------------------------------------------------------------------------
     //Can reset unique_ptr : releases memory and sets the pointer to nullptr
     //If you comment out the reset line, the destructor is called after the doing
     //something print out, if it's not commented out, we reset the pointer and the
-    //destructor is called before the line : std::cout << "Doing something" << std::endl; SHOW THIS.
+    //destructor is called before the line : fmt::println( "Doing something" ); SHOW THIS.
     
 	
     std::unique_ptr<Dog> up_dog_13 = std::make_unique<Dog>("Dog13");
@@ -124,9 +124,9 @@ int main(){
     
     //Can use unique pointer in if statement to see if it points somewhere valid
     if(up_dog_13){
-        std::cout << "up_dog_13 points somewhere valid : " << up_dog_13.get() << std::endl;
+        fmt::println( "up_dog_13 points somewhere valid : {}",fmt::ptr(  up_dog_13.get() ));
     }else{
-        std::cout << "up_dog_13 points is null : " << up_dog_13.get() << std::endl;
+        fmt::println( "up_dog_13 points is null : {}" ,fmt::ptr( up_dog_13.get() ));
     }
 
  

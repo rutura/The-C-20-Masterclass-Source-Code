@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "scores.h"
 
 
@@ -18,12 +18,12 @@ int main(){
 
     math.print_info(); 
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
    
 
     //Const objecst
     const Scores geo("Geography");
-    std::cout << "geo [5] : " << geo[5] << std::endl;
+    fmt::println( "geo [5] : {}" , geo[5] );
 
 
 

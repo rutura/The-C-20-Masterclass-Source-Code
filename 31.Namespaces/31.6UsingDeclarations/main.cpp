@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 #include "line.h"
 #include "cylinder.h"
@@ -10,7 +10,7 @@ using namespace Geom;
 
 
 double add(double a, double b){
-    std::cout << "::add" << std::endl;
+    fmt::println( "::add" );
     return a + b + 0.555;
 }
 
@@ -25,28 +25,28 @@ int main(){
     p1.print_info();
     p2.print_info();
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     Line l1(p1,p2);
     l1.print_info();
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     Cylinder c1(1.4,10);
-    std::cout << "c1.volume : " << c1.volume() << std::endl;
+    fmt::println( "c1.volume : {}" , c1.volume() );
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     Math_Weighted::add(10,20);
 
-    std::cout << "---" << std::endl;
+    fmt::println( "---" );
 
     //using std::cout;
     ///using std::endl;
     using namespace std; // NOT RECOMMENDED!
 
 
-    cout << "Hello World" << std::endl;
+    fmt::println( "Hello World" );
 
 
 

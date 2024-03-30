@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 inline int max(int a, int b){
     if(a> b){
@@ -13,14 +13,14 @@ int main(){
     int a{15};
     int b{8};
 
-    //std::cout << "max : " << max(a,b) << std::endl;
+//    fmt::println("max : {}" , max(a,b) );
 
     //What the compiler might do to inline your function call
-    std::cout << "max : " ;
+    fmt::print( "max : ") ;
     if(a> b){
-       std::cout << a << std::endl;
+       fmt::println("{}", a );
     }else{
-        std::cout << b << std::endl;
+        fmt::println( "{}",b );
     }
 
    

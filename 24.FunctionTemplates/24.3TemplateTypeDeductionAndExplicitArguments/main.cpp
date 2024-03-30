@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 template <typename T> T maximum( T a, T b){
@@ -16,8 +16,8 @@ int main(){
 
     //Explicit template arguments
 
-    auto max = maximum<double>(a,f);
-    std::cout << "max : " << max << std::endl;
+    auto max = maximum<double>(c,d);
+    fmt::println( "max : {}" , max );
    
     return 0;
 }

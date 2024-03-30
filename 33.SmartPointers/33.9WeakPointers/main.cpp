@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <memory>
 #include "dog.h"
 #include "person.h"
@@ -15,21 +15,21 @@ int main(){
     */
 
     // No * , or -> operators you would expect from regular pointers
-    //std::cout << "weak_ptr_dog_1 use count : " << weak_ptr_dog_1.use_count() << std::endl;
+    //fmt::println( "weak_ptr_dog_1 use count : {}" , weak_ptr_dog_1.use_count() );
     /*
-    std::cout << "Dog name : " << weak_ptr_dog_1->get_name() << std::endl; // Compiler error : No -> operator
-    std::cout << "Pointed to value : " << *weak_ptr_int_1 << std::endl; // Compiler error : No * operator
-    std::cout << "Pointed to address : " << weak_ptr_dog_1.get() << std::endl; // No get method
+    fmt::println( "Dog name : {}" , weak_ptr_dog_1->get_name() ); // Compiler error : No -> operator
+    fmt::println( "Pointed to value : {}" , *weak_ptr_int_1 ); // Compiler error : No * operator
+    fmt::println( "Pointed to address : {}" , weak_ptr_dog_1.get() ); // No get method
     */
 
 
 	// To use a weak ptr you have to turn it into a shared_ptr with the lock method
     /*
-	std::cout << std::endl;
+	fmt::println("\n");
     std::shared_ptr<Dog> weak_turned_shared = weak_ptr_dog_1.lock();
-    std::cout << "weak_turned_shared use count : " << weak_turned_shared.use_count() << std::endl;
-    std::cout << "Dog name : " << weak_turned_shared->get_name() << std::endl;
-	std::cout << "Dog name : " << shared_ptr_dog_1->get_name() << std::endl;
+    fmt::println( "weak_turned_shared use count : {}" , weak_turned_shared.use_count() );
+    fmt::println( "Dog name : {}" , weak_turned_shared->get_name() );
+	fmt::println( "Dog name : {}" , shared_ptr_dog_1->get_name() );
     */
 
 

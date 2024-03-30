@@ -23,7 +23,7 @@ Person::Person(const std::string& last_name_param, const std::string& first_name
 Person::Person(const Person& source_p) 
     : Person(source_p.get_last_name(),source_p.get_first_name(),*(source_p.get_age()))
 {
-    std::cout << "Copy constructor called for " << last_name <<  std::endl;
+    fmt::println( "Copy constructor called for {}" , last_name );
 
 }
 

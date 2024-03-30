@@ -1,6 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Point
@@ -19,7 +19,7 @@ public:
 	~Point() = default;
 
 	void print_info(){
-		std::cout << "Point [ x : " << m_x << ", y : " << m_y << "]" << std::endl;
+		fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
 	}
 
 private: 

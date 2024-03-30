@@ -11,9 +11,9 @@ namespace Geom{
         Line(const Point& start, const Point& end); 
         
         void print_info()const{
-            std::cout << "Line from " << std::endl;
+            fmt::println( "Line from " );
             m_start.print_info();
-            std::cout << "to : " << std::endl;
+            fmt::println( "to : " );
             m_end.print_info();
         }
     private : 

@@ -1,10 +1,10 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 class Print{
     public : 
     void operator()(const std::string& name) const{
-        std::cout << "The name is : " << name << std::endl;
+        fmt::println( "The name is : " , name );
     }
 
     std::string operator()(const std::string& last_name,
@@ -23,7 +23,7 @@ int main(){
     Print print;
     print("John");
     do_something(print);
-    std::cout << print("Daniel","Gray") << std::endl;
+    fmt::println( "{}",print("Daniel","Gray") );
    
     return 0;
 }

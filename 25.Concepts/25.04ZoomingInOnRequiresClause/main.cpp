@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <concepts>
 
 template <typename T>
@@ -36,8 +36,8 @@ int main(){
     //auto s = x + y;
 
     auto result  = add(x,y);
-    std::cout << "result : " << result << std::endl;
-    std::cout << "sizeof(result) : " << sizeof(result) << std::endl;
+    fmt::println( "result : {}" , result );
+    fmt::println( "sizeof(result) : {}"  ,sizeof(result) );
 
    
     return 0;

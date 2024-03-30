@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <cstring>
 
 template <typename T> T maximum(T a,T b){
@@ -21,14 +21,14 @@ int main(){
 	double d{23.4};
 	std::string e{"hello"};
 	std::string f{"world"};
-	
+
 	auto max_int = maximum(a,b); // int type deduced
 	auto max_double = maximum(c,d);// double type deduced
 	auto max_str = maximum(e,f) ;// string type deduced
-	
-	std::cout << "max_int : " << max_int << std::endl;
-	std::cout << "max_double : " << max_double << std::endl;
-	std::cout << "max_str : " << max_str << std::endl;
+
+	fmt::println("max_int : {}" , max_int );
+	fmt::println("max_double : {}" , max_double );
+	fmt::println("max_str : {}" , max_str );
     */
 
     //
@@ -38,7 +38,7 @@ int main(){
 	//This won't do what you would expect : BEWARE!
 
     const char* result = maximum(g,h);
-	std::cout << "max(const char*) : " << result << std::endl;
+	fmt::println( "max(const char*) : {}" , result );
    
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
 template <typename T>
@@ -16,7 +16,7 @@ int main(){
     int* p_y{&y};
 
     auto result = maximum(p_x,p_y);
-    std::cout << "result : " << *result << std::endl;
+    fmt::println( "result : {}" , *result );
    
     return 0;
 }

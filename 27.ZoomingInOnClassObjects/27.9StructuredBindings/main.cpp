@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Point
@@ -9,7 +9,7 @@ public :
 };
 
 void print_point(const Point p){
-    std::cout << "Point [ x : " << p.x << ", y : " << p.y << "]" << std::endl;
+    fmt::println( "Point [ x : {}{}{}{}" , p.x , ", y : " , p.y , "]" );
 }
 
 
@@ -24,20 +24,20 @@ int main(){
 
     auto [a,b] = point1;
 
-    std::cout << "a : " << a << std::endl;
-    std::cout << "b : " << b << std::endl;
+    fmt::println( "a : {}" , a );
+    fmt::println( "b : {}" , b );
 
     point1.x = 44.1;
     point1.y = 55.2;
 
     print_point(point1);
 
-    std::cout << "a : " << a << std::endl;
-    std::cout << "b : " << b << std::endl;
+    fmt::println( "a : {}" , a );
+    fmt::println( "b : {}" , b );
 
     auto func = [=](){
-        std::cout << "a (captured) : " << a << std::endl;
-        std::cout << "b (captured) : " << b << std::endl;
+        fmt::println( "a (captured) : {}" , a );
+        fmt::println( "b (captured) : {}" , b );
     };
     func();
 

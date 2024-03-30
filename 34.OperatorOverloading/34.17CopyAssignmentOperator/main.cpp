@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "point.h"
 
 int main(){
@@ -8,25 +8,25 @@ int main(){
     Point p2(20,20,20);
     Point p77(3,3,3);
 
-    std::cout << "p1 : " << p1 << std::endl;
-    std::cout << "p2 : " << p2 << std::endl;
+    fmt::println( "p1 : {}" , fmt::ptr(&p1 ));
+    fmt::println( "p2 : {}" , fmt::ptr(&p2 ));
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----" );
 
     //Assignment
     //p1 = p2 = p77;
     //p1.operator=(p2).operator=(p77);
     p1.operator=(p2.operator=(p77));
 
-    std::cout << "p1 : " << p1 << std::endl;
-    std::cout << "p2 : " << p2 << std::endl;
+    fmt::println( "p1 : {}" ,fmt::ptr(& p1 ));
+    fmt::println( "p2 : {}",fmt::ptr(& p2 ));
 
     //Change data
     p1.set_data(55);
 
-    std::cout << "-----------" << std::endl;
-    std::cout << "p1 : " << p1 << std::endl;
-    std::cout << "p2 : " << p2 << std::endl;
+    fmt::println( "-----------" );
+    fmt::println( "p1 : {}" ,fmt::ptr(& p1 ));
+    fmt::println( "p2 : {}" ,fmt::ptr(& p2 ));
    
 
    //
@@ -34,17 +34,17 @@ int main(){
    Point p3(30,30,30);
    Point p4 = p3;
 
-   std::cout << "p3 : " << p3 << std::endl;
-   std::cout << "p4 : " << p4 << std::endl;
+   fmt::println( "p3 : {}" ,fmt::ptr(& p3 ));
+   fmt::println( "p4 : {}" ,fmt::ptr(& p4) );
 
    p3.set_data(77);
 
-   std::cout << "-----" << std::endl;
-   std::cout << "p3 : " << p3 << std::endl;
-   std::cout << "p4 : " << p4 << std::endl;
+   fmt::println( "-----" );
+   fmt::println( "p3 : {}" ,fmt::ptr(& p3 ));
+   fmt::println( "p4 : {}" ,fmt::ptr(& p4 ));
 
 
-   std::cout << "Done!" << std::endl;
+   fmt::println( "Done!" );
    */
 
     

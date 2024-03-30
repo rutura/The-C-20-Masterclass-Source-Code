@@ -2,7 +2,7 @@
 #define DOG_H
 
 #include <string>
-#include <iostream>
+#include <fmt/format.h>
 class Dog
 {
 public:
@@ -19,7 +19,7 @@ public:
     }
 	
 	void print_info() const{
-		std::cout << "Dog [ name : " << dog_name << " ]" <<  std::endl;
+		fmt::println("Dog [ name : {}{}" , dog_name , " ]" );
 	}
     
 private:

@@ -6,7 +6,7 @@ class Integer
 public:
 	explicit Integer(int value);
 	Integer(){
-		std::cout << "Default constructor for Integer called" << std::endl;
+		fmt::println( "Default constructor for Integer called" );
 	}
 	~Integer();
 	

@@ -1,10 +1,10 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "utilities.h"
 
 int main(){
 
     double result = add(10.5,20.8);
-    std::cout << "result : " << result << std::endl;
+    fmt::println( "result : {}" , result );
     
     return 0;
 }

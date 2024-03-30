@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -6,13 +6,13 @@ int main(){
     //Capture everything by value
     /*
      int c{42};
-     
+
      auto func = [=](){
-         std::cout << "Inner value : " << c << std::endl;
+         fmt::println("Inner value : {}" , c );
      };
-     
+
      for(size_t i{} ; i < 5 ;++i){
-         std::cout << "Outer value : " << c << std::endl;
+         fmt::println("Outer value : {}" , c );
          func();
          ++c;
      }
@@ -24,12 +24,12 @@ int main(){
      int d{5};
      
      auto func = [&](){
-         std::cout << "Inner value : " << c << std::endl;
-         std::cout << "Inner value(d) : " << d << std::endl;
+         fmt::println( "Inner value : {}" , c );
+         fmt::println( "Inner value(d) : {}" , d );
      };
      
      for(size_t i{} ; i < 5 ;++i){
-         std::cout << "Outer value : " << c << std::endl;
+         fmt::println( "Outer value : {}" , c );
          func();
          ++c;
      }
