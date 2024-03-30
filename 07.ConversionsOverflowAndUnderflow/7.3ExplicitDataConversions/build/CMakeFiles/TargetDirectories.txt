@@ -1,3 +1,0 @@
-/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/07.ConversionsOverflowAndUnderflow/7.3ExplicitDataConversions/build/CMakeFiles/rooster.dir
-/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/07.ConversionsOverflowAndUnderflow/7.3ExplicitDataConversions/build/CMakeFiles/edit_cache.dir
-/home/koech/Documents/LearnQt/The-C-20-Masterclass-Source-Code/07.ConversionsOverflowAndUnderflow/7.3ExplicitDataConversions/build/CMakeFiles/rebuild_cache.dir
