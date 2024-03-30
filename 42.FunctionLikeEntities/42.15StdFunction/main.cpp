@@ -1,4 +1,3 @@
-#include <iostream>
 #include <functional>
 #include "boxcontainer.h"
 
@@ -66,27 +65,26 @@ int main(){
 
     //Function pointer
     my_modifier = encrypt;
-    std::cout << "A encrypted becomes : " << my_modifier('A') << std::endl; // D
+    fmt::println( "A encrypted becomes : {}" , my_modifier('A') ); // D
 
     //Functor
     Decrypt decrypt;
     my_modifier = decrypt;
-    std::cout << "D decrypted becomes : " << my_modifier('D') << std::endl;
+    fmt::println( "D decrypted becomes : {}" , my_modifier('D') );
 
 
     //Lambda function
     my_modifier = [](const char& param){
         return static_cast<char> (param + 3);
     };
-    std::cout << "A encrypted becomes : " << my_modifier('A') << std::endl; // D
+    fmt::println( "A encrypted becomes : {}" , my_modifier('A') ); // D
 
 
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
 
     //Storing function like entities in a collection
-    std::cout << std::endl;
-    std::cout << "Collection of function like entities : " << std::endl;
+    fmt::println( "Collection of function like entities : " );
     
     BoxContainer<std::function<char(const char&)>> func_entities;
     func_entities.add(encrypt); // Function pointer
@@ -96,16 +94,14 @@ int main(){
     });
     
     for(size_t i{}; i < func_entities.size() ; ++i){
-        std::cout << "result " << i << ". D transformed becomes : " << 
-                func_entities.get_item(i)('D') << std::endl;
+        fmt::println( "result {}. D transformed becomes : {}" , i, func_entities.get_item(i)('D') );
     }
 
 
-    std::cout <<"--------" << std::endl;
+    fmt::println("--------" );
 
     //std::function as callback 
-    std::cout << std::endl;
-    std::cout << "Modifying the quote : " << std::endl;
+    fmt::println( "Modifying the quote : " );
     BoxContainer<std::string> quote;
     quote.add("The");
     quote.add("sky");
@@ -113,27 +109,22 @@ int main(){
     quote.add("blue");
     quote.add("my");
     quote.add("friend");
-    std::cout << "Initial : " <<  quote << std::endl;
-    std::cout << "Encrypted : " << modify(quote,encrypt) << std::endl;
-    std::cout << "Decrypted : " << modify(quote,decrypt) << std::endl;
+    fmt::println( "Initial : {}" ,  quote );
+    fmt::println( "Encrypted : {}" , modify(quote,encrypt) );
+    fmt::println( "Decrypted : {}" , modify(quote,decrypt) );
 
 
-    std::cout << "----------" << std::endl;
+    fmt::println( "----------" );
 
-    std::cout << std::endl;
-    std::cout << "Gettting the best : " << std::endl;
+    fmt::println( "Gettting the best : " );
     
     auto  greater_lexicographically = [](const std::string& str1, const std::string& str2){
     return (str1>str2);
     };
     
-    std::cout << "larger in size : " << get_best(quote,larger_in_size) << std::endl;
-    std::cout << "greater lexicographicaly : " 
-            << get_best(quote,greater_lexicographically) << std::endl;
+    fmt::println( "larger in size : {}" , get_best(quote,larger_in_size) );
+    fmt::println( "greater lexicographicaly : {}" , get_best(quote,greater_lexicographically) );
 
 
-
-  
-    
     return 0;
 }

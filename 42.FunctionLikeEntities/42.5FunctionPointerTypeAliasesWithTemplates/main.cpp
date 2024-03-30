@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 //Templated type alias
@@ -52,14 +51,12 @@ int main(){
     quote.add("my");
     quote.add("friend");
     
-    std::cout << std::endl;
-    std::cout << "Gettting the best : " << std::endl;
-    std::cout << "larger in size : " << get_best(quote,larger_in_size) << std::endl;
-    std::cout << "greater lexicographicaly : " 
-            << get_best(quote,greater_lexicographically) << std::endl;
+    fmt::println( "Gettting the best : " );
+    fmt::println( "larger in size : {}" , get_best(quote,larger_in_size) );
+    fmt::println( "greater lexicographicaly : {}" , get_best(quote,greater_lexicographically) );
 
 
-    std::cout << "------------" << std::endl;
+    fmt::println( "------------" );
 
     BoxContainer<int> ints;
     ints.add(10);
@@ -68,8 +65,8 @@ int main(){
     ints.add(23);
     ints.add(4);
 
-    //std::cout << "larger int : " << get_best(ints,larger_int) << std::endl;
-    std::cout << "smaller int : " << get_best(ints,smaller) << std::endl;
+    //fmt::println( "larger int : {}" , get_best(ints,larger_int) );
+    fmt::println( "smaller int : {}" , get_best(ints,smaller) );
          
     return 0;
 }

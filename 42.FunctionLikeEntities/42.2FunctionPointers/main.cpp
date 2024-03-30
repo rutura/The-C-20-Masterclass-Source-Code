@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 double add(double a, double b){
     return a+b;
@@ -23,7 +23,7 @@ int main(){
     double(*f_ptr) (double , double) = nullptr;
 
 
-    std::cout << "add(10,30) : " << f_ptr(10,30) << std::endl;
+    fmt::println( "add(10,30) : {}", f_ptr(10,30) );
     
     return 0;
 }

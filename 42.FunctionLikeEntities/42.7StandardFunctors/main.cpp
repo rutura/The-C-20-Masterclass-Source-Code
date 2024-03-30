@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <functional>
 #include "boxcontainer.h"
 
@@ -43,14 +43,13 @@ int main(){
     std::minus<int> substracter;
     std::greater<int> compare_greater;
     
-    std::cout << std::boolalpha;
-    std::cout << " 10 + 7 : " << adder(10,7) << std::endl; //17
+    fmt::println( " 10 + 7 : {}" , adder(10,7) ); //17
     
-    std::cout << "10 - 7 : "  << substracter(10,7) << std::endl;//3
+    fmt::println( "10 - 7 : {}", substracter(10,7));//3
     
-    std::cout << " 10 > 7 : " << compare_greater(10,7) << std::endl;//true
+    fmt::println( " 10 > 7 : {}" , compare_greater(10,7) );//true
     
-    std::cout << "---------------------------------" << std::endl;
+    fmt::println( "---------------------------------" );
 
 
     BoxContainer<std::string> quote;
@@ -64,20 +63,17 @@ int main(){
     
     std::greater<std::string> string_comparator{};
     
-    std::cout << "quote : " << quote << std::endl;
+    fmt::println( "quote : {}" , quote );
     //Built in functor
-    std::cout << "greater string : " <<
-            get_best(quote,string_comparator) << std::endl;
+    fmt::println( "greater string : {}" ,get_best(quote,string_comparator) );
     //Custom function pointer
-    std::cout << "greater string : " 
-            << get_best(quote,custom_greater<std::string>) << std::endl;
+    fmt::println( "greater string : {}" , get_best(quote,custom_greater<std::string>) );
     //Custom functor
     Greater<std::string> greater_string_custom_functor;
-    std::cout << "greater string : "
-        << get_best(quote,greater_string_custom_functor) << std::endl;
+    fmt::println( "greater string :{} ", get_best(quote,greater_string_custom_functor) );
 
 
-    std::cout << "---------------------------------" << std::endl;
+    fmt::println( "---------------------------------" );
 
    BoxContainer<int> ints;
     ints.add(10);
@@ -91,14 +87,11 @@ int main(){
     std::greater<int> int_comparator{};
     Greater<int> greater_int_custom_functor;
     
-    std::cout << "ints : " << ints << std::endl;
-    std::cout << "greater int : "
-        << get_best(ints,int_comparator) << std::endl; 
-    std::cout << "greater int : "
-        << get_best(ints , custom_greater<int>) << std::endl;
-    std::cout << "greater int : "
-        << get_best(ints,greater_int_custom_functor) << std::endl;
-    std::cout << "lesser int : " << get_best(ints,std::less<int>{}) << std::endl;
+    fmt::println( "ints : {}" , ints );
+    fmt::println( "greater int :{} ", get_best(ints,int_comparator) );
+    fmt::println( "greater int :{} ", get_best(ints , custom_greater<int>) );
+    fmt::println( "greater int :{} ", get_best(ints,greater_int_custom_functor) );
+    fmt::println( "lesser int : {}" , get_best(ints,std::less<int>{}) );
     
     return 0;
 }

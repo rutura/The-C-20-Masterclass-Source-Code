@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 
@@ -57,26 +56,25 @@ int main(){
     };
 
     //Modifying through callbacks.
-    std::cout << "Initial : " << str << std::endl;
-    std::cout << "Encrypted : " <<  modify(str,encrypt) << std::endl;
-    std::cout << "Decrypted : " << modify(str,decrypt) << std::endl;
+    fmt::println( "Initial : {}" , str );
+    fmt::println( "Encrypted : {}" ,  modify(str,encrypt) );
+    fmt::println( "Decrypted : {}" , modify(str,decrypt) );
 
-    std::cout << "---------" << std::endl;
+    fmt::println( "---------" );
 
     //Passing lambda functions directly
-    std::cout << "Initial : " << str << std::endl;
-    std::cout << "Encrypted : " <<  modify(str,[](const char& param){ // Callback function
+    fmt::println( "Initial : {}" , str );
+    fmt::println( "Encrypted : {}" ,  modify(str,[](const char& param){ // Callback function
         return static_cast<char> (param + 3);
-    }) << std::endl;
-    std::cout << "Decrypted : " << modify(str,[](const char& param){ // Callback function
+    }) );
+    fmt::println( "Decrypted : {}" , modify(str,[](const char& param){ // Callback function
         return static_cast<char> (param - 3);
-    }) << std::endl;
+    }) );
 
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
 
-    std::cout << std::endl;
-    std::cout << "strings stored in BoxContainer : " << std::endl;
+    fmt::println( "strings stored in BoxContainer : " );
     BoxContainer<std::string> quote;
     quote.add("The");
     quote.add("sky");
@@ -84,12 +82,12 @@ int main(){
     quote.add("blue");
     quote.add("my");
     quote.add("friend");
-    std::cout << "Initial : " <<  quote << std::endl;
-    std::cout << "Encrypted : " << modify(quote,encrypt) << std::endl;
-    std::cout << "Decrypted : " << modify(quote,decrypt) << std::endl;
+    fmt::println( "Initial : {}" ,  quote );
+    fmt::println( "Encrypted : {}" , modify(quote,encrypt) );
+    fmt::println( "Decrypted : {}" , modify(quote,decrypt) );
 
 
-    std::cout << "--------" << std::endl;
+    fmt::println( "--------" );
 
    auto larger_in_size = [] (const std::string& str1, const std::string& str2){
                             if(str1.size() > str2.size())
@@ -102,11 +100,9 @@ int main(){
                                         return (str1>str2);
                                     };
 
-    std::cout << std::endl;
-    std::cout << "Gettting the best : " << std::endl;
-    std::cout << "larger in size : " << get_best(quote,larger_in_size) << std::endl;
-    std::cout << "greater lexicographicaly : " 
-            << get_best(quote,greater_lexicographically) << std::endl;
+    fmt::println( "Gettting the best : " );
+    fmt::println( "larger in size : {}" , get_best(quote,larger_in_size) );
+    fmt::println( "greater lexicographicaly : {}" , get_best(quote,greater_lexicographically) );
     
     return 0;
 }

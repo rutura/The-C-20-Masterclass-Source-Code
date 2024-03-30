@@ -1,4 +1,3 @@
-#include <iostream>
 #include "boxcontainer.h"
 
 char encrypt(const char& param){ // Callback function
@@ -73,9 +72,9 @@ int main(){
 
     std::string msg{"Hello"};
     modify(msg,encrypt);
-    std::cout << "outcome : " << msg << std::endl;
+    fmt::println( "outcome : {}" , msg );
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
 
     BoxContainer<std::string> quote;
     quote.add("The");
@@ -84,18 +83,17 @@ int main(){
     quote.add("blue");
     quote.add("my");
     quote.add("friend");
-    std::cout << "Initial : " <<  quote << std::endl;
-    std::cout << "Encrypted : " << modify(quote,encrypt) << std::endl;
-    std::cout << "Decrypted : " << modify(quote,decrypt) << std::endl;
+    fmt::println( "Initial : {}" ,  quote );
+    fmt::println( "Encrypted : {}" , modify(quote,encrypt) );
+    fmt::println( "Decrypted : {}" , modify(quote,decrypt) );
 
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     str_comparator callback{larger_in_size};
 
-    std::cout << "larger in size : " << get_best(quote,callback) << std::endl;
-    std::cout << "greater lexicographicaly : " 
-            << get_best(quote,greater_lexicographically) << std::endl;
+    fmt::println( "larger in size : {}" , get_best(quote,callback) );
+    fmt::println( "greater lexicographicaly : {}" , get_best(quote,greater_lexicographically) );
 
 
    

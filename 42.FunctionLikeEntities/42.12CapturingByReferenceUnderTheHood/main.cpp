@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -12,19 +12,17 @@ int main(){
     //Capturing a few variables by reference
     auto func = [&a,&b] (int c, int d){
         ++a; // Modifying member vars allowed by default.
-        std::cout << "Captured values : ";
-        std::cout << " a : " << a ;
-        std::cout << " b : " << b ;
+        fmt::println( "Captured values : ");
+        fmt::println( " a : {}" , a );
+        fmt::println( " b : {}" , b );
         
-        std::cout << std::endl;
-        std::cout << "Parameters : ";
-        std::cout << " c : " << c;
-        std::cout << " d : " << d;
-        std::cout << std::endl;
+        fmt::println( "Parameters : ");
+        fmt::println( " c : {}" , c);
+        fmt::println( " d : {}" , d);
     };
 
     func(10,20);
-    std::cout << "a : " << a << std::endl;
+    fmt::println( "a : {}" , a );
     
     return 0;
 }

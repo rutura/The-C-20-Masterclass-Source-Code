@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 int main(){
@@ -12,19 +12,18 @@ int main(){
 
     //Capturing  everything by value 
     auto func = [=] (int c, int d)  {
-        std::cout << "Captured values : " << std::endl;
-        std::cout << "a : " << a << std::endl;
-        std::cout << "b : " << b  << std::endl;
+        fmt::println( "Captured values : " );
+        fmt::println( "a : {}" , a );
+        fmt::println( "b : {}" , b  );
         
-        std::cout << std::endl;
-        
-        std::cout << "Parameters : " << std::endl;
-        std::cout << "c : " << c << std::endl;
-        std::cout << "d : " << d << std::endl;
+
+        fmt::println( "Parameters : " );
+        fmt::println( "c : {}" , c );
+        fmt::println( "d : {}" , d );
     };
     func(10,20);
 
-    std::cout << "----" << std::endl;
+    fmt::println( "----" );
     func(20,30);
    
     return 0;

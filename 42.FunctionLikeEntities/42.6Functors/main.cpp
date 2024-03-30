@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include "encrypt.h"
 #include "decrypt.h"
 
@@ -27,29 +27,27 @@ int main(){
 
     std::string str {"Hello"};
     
-    std::cout << std::endl;
-    std::cout << "Modifying string through function pointers : " << std::endl;
-    std::cout << "Initial : " << str << std::endl;
-    std::cout << "Encrypted : " <<  modify(str,encrypt) << std::endl;
-    std::cout << "Decrypted : " << modify(str,decrypt) << std::endl;
+    fmt::println( "Modifying string through function pointers : " );
+    fmt::println( "Initial : {}" , str );
+    fmt::println( "Encrypted : {}" ,  modify(str,encrypt) );
+    fmt::println( "Decrypted : {}" , modify(str,decrypt) );
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
 
     //Using functors
     Encrypt encrypt_functor;
     Decrypt decrypt_functor;
     
-    std::cout << "encrypt_functor : " << encrypt_functor('A') << std::endl; // D
-    std::cout << "decrypt_functor : " << decrypt_functor('D') << std::endl;// A
+    fmt::println( "encrypt_functor : {}" , encrypt_functor('A') ); // D
+    fmt::println( "decrypt_functor : {}" , decrypt_functor('D') );// A
 
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----" );
 
-    std::cout << std::endl;
-    std::cout << "Modifying string through functors : " << std::endl;
-    std::cout << "Initial : " << str << std::endl;
-    std::cout << "Encrypted : " <<  modify(str,encrypt_functor) << std::endl;
-    std::cout << "Decrypted : " << modify(str,decrypt_functor) << std::endl;
+    fmt::println( "Modifying string through functors : " );
+    fmt::println( "Initial : {}" , str );
+    fmt::println( "Encrypted : {}" ,  modify(str,encrypt_functor) );
+    fmt::println( "Decrypted : {}" , modify(str,decrypt_functor) );
    
     return 0;
 }

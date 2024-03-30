@@ -1,5 +1,3 @@
-#include <iostream>
-#include <concepts>
 #include "boxcontainer.h"
 
 //A functor can  take parameters and internally 
@@ -40,14 +38,12 @@ int main(){
     doubles.add(30.3);
     doubles.add(15);
     
-    std::cout << "doubles : " << doubles << std::endl;
-    std::cout <<"range_sum : "
-        <<  range_sum(doubles,IsInRange<double>(10.0,15.5)) << std::endl; // 10.1
-    std::cout << "range_sum : "
-        <<  range_sum(doubles,IsInRange<double>(10.0,41.5)) << std::endl;// 30.3
+    fmt::println( "doubles : {}" , doubles );
+    fmt::println("range_sum :{} ",  range_sum(doubles,IsInRange<double>(10.0,15.5)) ); // 10.1
+    fmt::println( "range_sum :{} ",  range_sum(doubles,IsInRange<double>(10.0,41.5)) );// 30.3
 
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
     /*
     BoxContainer<std::string> strings;
     strings.add("Hello");
@@ -56,7 +52,7 @@ int main(){
     range_sum(strings,IsInRange<std::string> ("Hello","World"));
     */
 
-   std::cout << "-----" << std::endl;
+   fmt::println( "-----" );
 
     BoxContainer<int> ints;
     ints.add(10);
@@ -66,11 +62,9 @@ int main(){
     ints.add(23);
     ints.add(4);
     
-    std::cout << "ints : " << ints << std::endl;
-    std::cout << "range_sum : "
-        << range_sum(ints,IsInRange<int>(10,20)) << std::endl; // 10
-    std::cout << "range_sum : "
-        <<  range_sum(ints,IsInRange<int>(10,30)) << std::endl; // 33
+    fmt::println( "ints : {}" , ints );
+    fmt::println( "range_sum :{} ", range_sum(ints,IsInRange<int>(10,20)) ); // 10
+    fmt::println( "range_sum :{} ",  range_sum(ints,IsInRange<int>(10,30)) ); // 33
 
    
     return 0;

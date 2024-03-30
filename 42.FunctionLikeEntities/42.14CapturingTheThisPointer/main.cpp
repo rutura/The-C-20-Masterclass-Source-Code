@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Item{
@@ -10,7 +10,7 @@ public :
     void some_member_func(){
 		
         auto func = [this](){
-            std::cout << "member vars :" << m_var1 << "," << m_var2 << std::endl;
+            fmt::println( "member vars : {} , {}" , m_var1,  m_var2 );
         };
         func();
     };
