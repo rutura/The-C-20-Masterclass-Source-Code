@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <coroutine>
 
 
@@ -23,7 +23,7 @@ struct CoroType {
          : m_handle(std::coroutine_handle<promise_type>::from_promise(*p)) {}
     ~CoroType()
      {
-         std::cout << "Handle destroyed..." << std::endl;
+         fmt::println( "Handle destroyed..." );
           m_handle.destroy();
      }
     std::coroutine_handle<promise_type>   m_handle;
@@ -31,7 +31,7 @@ struct CoroType {
 
 
 CoroType do_work() {
-    std::cout << "Starting the coroutine..." << std::endl;
+    fmt::println( "Starting the coroutine..." );
     co_yield 1;
     co_yield 2;
     co_yield 3;
@@ -45,26 +45,25 @@ int main(){
 
     auto task = do_work();
 
-    std::cout << std::endl;
+    fmt::println("");
     task.m_handle.resume(); // This resumes the couroutine. When next suspension point is hit it pauses
-    std::cout << "value : " << task.m_handle.promise().m_value << std::endl;
+    fmt::println( "value : {}" , task.m_handle.promise().m_value );
 
-    std::cout << std::endl;
+    fmt::println("");
     task.m_handle.resume(); // This resumes the couroutine. When next suspension point is hit it pauses
-    std::cout << "value : " << task.m_handle.promise().m_value << std::endl;
+    fmt::println( "value : {}" , task.m_handle.promise().m_value );
 
-    std::cout << std::endl;
+    fmt::println("");
     task.m_handle.resume(); // This resumes the couroutine. When next suspension point is hit it pauses
-    std::cout << std::boolalpha;
-    std::cout << "value : " << task.m_handle.promise().m_value << std::endl;
-    std::cout << "coro done : " << task.m_handle.done() << std::endl;
+    fmt::println( "value : {}" , task.m_handle.promise().m_value );
+    fmt::println( "coro done : {}" , task.m_handle.done() );
 
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
     task.m_handle.resume();
-    std::cout << "coro done : " << task.m_handle.done() << std::endl;
+    fmt::println( "coro done : {}" , task.m_handle.done() );
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
 
     return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <coroutine>
 
 
@@ -19,7 +19,7 @@ struct CoroType {
          : m_handle(std::coroutine_handle<promise_type>::from_promise(*p)) {}
     ~CoroType()
      {
-         std::cout << "Handle destroyed..." << std::endl;
+         fmt::println( "Handle destroyed..." );
           m_handle.destroy();
      }
     std::coroutine_handle<promise_type>   m_handle;
@@ -27,11 +27,11 @@ struct CoroType {
 
 
 CoroType do_work() {
-    std::cout << "Doing first thing... " << std::endl;
+    fmt::println( "Doing first thing... " );
     co_await std::suspend_always{};
-    std::cout << "Doing second thing..." << std::endl;
+    fmt::println( "Doing second thing..." );
     co_await std::suspend_always{};
-    std::cout << "Doing Third thing..." << std::endl;
+    fmt::println( "Doing Third thing..." );
 }
 
 int main(){
@@ -40,24 +40,23 @@ int main(){
 
     //Resume
     task.m_handle();
-    std::cout << std::boolalpha;
-    std::cout << "coro done : " << task.m_handle.done() << std::endl;
+    fmt::println( "coro done : {}" , task.m_handle.done() );
 
 
     //Resume for second time
     task.m_handle.resume();
-    std::cout << "coro done : " << task.m_handle.done() << std::endl;
+    fmt::println( "coro done : {}" , task.m_handle.done() );
 
     //Resume for third time
     task.m_handle.resume();
-    std::cout << "coro done : " << task.m_handle.done() << std::endl;
+    fmt::println( "coro done : {}" , task.m_handle.done() );
 
 
     //Resuming after coroutine has run to completion : BAD!
-   // std::cout << "------" << std::endl;
+   // fmt::println( "------" );
    // task.m_handle.resume();
 
-    std::cout << "Done!" << std::endl;
+    fmt::println( "Done!" );
 
     return 0;
 }
