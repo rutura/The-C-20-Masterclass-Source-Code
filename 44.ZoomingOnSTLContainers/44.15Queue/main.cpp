@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <queue>
 #include <list>
 #include <deque>
@@ -6,6 +6,8 @@
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
+
 public : 
     Book() = default;
     Book(int year, std::string title) 
@@ -27,22 +29,31 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     return out;
 }
 
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
+
 template<typename T, typename Container = std::deque<T>>
 void print_queue(std::queue<T,Container> queue){
     
-    std::cout << " queue of items : [";
+    fmt::print( " queue of items : [");
     while(!queue.empty()){
         T item = queue.front();
-        std::cout << " " << item ;
+        fmt::print( " {}",  item );
         queue.pop();
     }
-    std::cout << "]" << std::endl;
+    fmt::println("]");
     
 }
 
 template<typename T, typename Container = std::deque<T>>
 void clear_queue(std::queue<T,Container>& queue){
-    std::cout << " Clearing queue of size : " << queue.size() << std::endl;
+    fmt::println(" Clearing queue of size : {}", queue.size() );
 
     while(!queue.empty()){
         queue.pop();
@@ -54,79 +65,80 @@ void clear_queue(std::queue<T,Container>& queue){
 int main(){
 
      //Code1 : Creating  pushing and accessing
-    std::cout << "Creating pushing and accessing : " << std::endl;
+    fmt::print( "Creating pushing and accessing : " );
     std::queue<int> numbers1;
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
     
     numbers1.push(10);
     numbers1.push(20);
     numbers1.push(30);
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
     
     numbers1.push(40);
     numbers1.push(50);
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
 
     //Acess
-    std::cout << " numbers1.front() :  " << numbers1.front() << std::endl;
-    std::cout << " numbers1.back() : " << numbers1.back() << std::endl;
+    fmt::print( " numbers1.front() :  {}" , numbers1.front() );
+    fmt::print( " numbers1.back() : {}" , numbers1.back() );
 
     //Code2 : Modify through top : this is because front and back return  a reference
-    std::cout << std::endl;
-    std::cout << "modify top element through front and back :" << std::endl;
+    fmt::println("");
+    fmt::print( "modify top element through front and back :" );
     
-    std::cout << " numbers1 (before modification) : ";
+    fmt::print( " numbers1 (before modification) : ");
     print_queue(numbers1);
     
     numbers1.front() = 500;
     numbers1.back() = 600;
     
-    std::cout << " numbers1 (after modification) : ";
+    fmt::print( " numbers1 (after modification) : ");
     print_queue(numbers1);
 
     //Code3 : poping
-    std::cout << std::endl;
-    std::cout << "poping data : " << std::endl;
+    fmt::println("");
+    fmt::print( "poping data : " );
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
     
     numbers1.pop();
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
     
     numbers1.pop();
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_queue(numbers1);
 
 
     //Code4 : Clearing a queue
-    std::cout << std::endl;
-    std::cout << "clearing a queue : " << std::endl;
+    fmt::println("");
+
+    fmt::print( "clearing a queue : " );
     
-    std::cout << " queue initial size : " << numbers1.size() << std::endl;
+    fmt::print( " queue initial size : {}" , numbers1.size() );
     
-    std::cout << " numbers1 (before) : ";
+    fmt::print( " numbers1 (before) : ");
     print_queue(numbers1);
     
     clear_queue(numbers1);
     
-    std::cout << " queue final size : " << numbers1.size() << std::endl;
-    std::cout << " numbers1(after) : ";
+    fmt::print( " queue final size : {}" , numbers1.size() );
+    fmt::print( " numbers1(after) : ");
     print_queue(numbers1);
 
 
     //Code5 : Queue of user defined types
-    std::cout << std::endl;
-    std::cout << "queue of user defined type :" << std::endl;
+        fmt::println("");
+    fmt::print( "queue of user defined type :" );
     
     std::queue<Book> books;
     
@@ -134,16 +146,16 @@ int main(){
     books.push(Book(2000,"Social Media Marketing"));
     books.push(Book(2020,"How the Pandemic Changed the World"));
     
-    std::cout << " books : ";
+    fmt::print( " books : ");
     print_queue(books);
-    std::cout << " books size : " << books.size() << std::endl;
-    std::cout << " front book : " << books.front() << std::endl;
-    std::cout << " back book : " << books.back() << std::endl;
+    fmt::print( " books size : {}" , books.size() );
+    fmt::print( " front book : {}" , books.front() );
+    fmt::print( " back book : {}" , books.back() );
 
 
     //Code6 Specify underlying container
-    std::cout << std::endl;
-    std::cout << "custom underlying sequence container : " << std::endl;
+        fmt::println("");
+    fmt::print( "custom underlying sequence container : " );
         
     std::queue<int,std::list<int>> numbers3;
     std::queue<int,std::deque<int>> numbers4;
@@ -154,10 +166,10 @@ int main(){
     numbers4.push(5);
     numbers4.push(6);
     
-    std::cout << " numbers3 : ";
+    fmt::print( " numbers3 : ");
     print_queue(numbers3);
 
-    std::cout << " numbers4 : ";
+    fmt::print( " numbers4 : ");
     print_queue(numbers4);
     
    

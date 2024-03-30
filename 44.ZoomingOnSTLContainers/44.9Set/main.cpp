@@ -1,10 +1,11 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <functional>
 #include <set>
 
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
 public : 
     Book(int year, std::string title) 
         : m_year(year),m_title(title)
@@ -22,19 +23,28 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     return out;
 }
 
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
 
 template <typename T>
 void print_collection(const T& collection){
     
     auto it = collection.begin();
     
-    std::cout << " Collection [";
+    fmt::print( " Collection [");
     while(it != collection.end()){
-        std::cout << " " << *it ;
+        fmt::print(" {}" , *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println("]" );
 }
+
 
 //Comparator functor
 class IntComparator {
@@ -56,8 +66,8 @@ int main(){
 
     //Code1 : Building sets
     std::set<int> numbers {11,16,2,912,15,6,15,2}; // Data is ordered internally, no duplicates.
-    std::cout << std::endl;
-    std::cout << "building sets (Need < operator for ordering) : " << std::endl;
+    fmt::println("");
+    fmt::println( "building sets (Need < operator for ordering) : " );
     print_collection(numbers);
 
 
@@ -66,69 +76,68 @@ int main(){
                     Book(1930,"Building Computers"),Book(1995,"Farming for Beginners")};
                     
     print_collection(books);
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
 
 
     //Code2 : Iterators : forward and back, and constant
     
-    std::cout << std::endl;
-    std::cout << "iterators : " << std::endl;
+    fmt::println("");
+    fmt::println( "iterators : " );
     
     auto it = numbers.begin();
-    std::cout << " set of numbers : [" ;
+    fmt::print( " set of numbers : [") ;
     while(it != numbers.end()){
-        std::cout << " " << *it ;
+        fmt::print( "{} " ,  *it) ;
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
     auto it_back = numbers.rbegin();
-    std::cout << " set of numbers (reverse) : [" ;
+    fmt::print( " set of numbers (reverse) : [");
     while(it_back != numbers.rend()){
-        std::cout << " " << *it_back ;
+        fmt::print( " {}" ,  *it_back );
         ++it_back;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
         
     auto it_back_books = books.rbegin();
-    std::cout << " set of books (reverse) : [" ;
+    fmt::print( " set of books (reverse) : [" );
     while(it_back_books != books.rend()){
-        std::cout << " " << *it_back_books ;
+        fmt::print( " {}",  *it_back_books);
         ++it_back_books;        
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
 
 
     //Code3 : Capacity : 
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
     
-    std::cout << std::endl;
-    std::cout << "capacity : " << std::endl;
-    std::cout << " numbers : " ;
+    fmt::println("");
+    fmt::println( "capacity : " );
+    fmt::print( " numbers : ") ;
     print_collection(numbers);
-    std::cout << " set max_size : " << numbers.max_size() << std::endl;
-    std::cout << " set is empty : " << numbers.empty() << std::endl;
-    std::cout << " set size : " << numbers.size() << std::endl;
+    fmt::println( " set max_size : {}" , numbers.max_size() );
+    fmt::println( " set is empty : {}" , numbers.empty() );
+    fmt::println( " set size : {}" , numbers.size() );
 
 
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
     //Modifiers
     
     //Clear
-    std::cout << std::endl;
-    std::cout << "clear :" << std::endl;
+    fmt::println("");
+    fmt::println( "clear :" );
     print_collection(numbers);
     
     numbers.clear();
     
     print_collection(numbers);
-    std::cout << std::boolalpha;
-    std::cout << "numbers is empty : " << numbers.empty() << std::endl;
+    fmt::println( "numbers is empty : {}" , numbers.empty() );
 
 
     //Insert  : returns an std::pair object containing result about the insert operation.
-    std::cout << std::endl;
-    std::cout << "Insert : " <<std::endl;
+    fmt::println("");
+    fmt::println( "Insert : " );
     numbers = {11,12,13,14,15}; 
     print_collection(numbers);
     
@@ -136,32 +145,32 @@ int main(){
     //Will just do nothing and won't give an error though.
     numbers.insert(14);
     
-    std::cout << " After insert 14 : " ;
+    fmt::print( " After insert 14 : " );
     print_collection(numbers);
 
 
     //Can capture the insert result through a returned std::pair object.
 
-    std::cout << "-------" << std::endl;
+    fmt::println( "-------" );
 
     //auto result = numbers.insert(14);
     auto result = numbers.insert(20);
    
-    std::cout << " first : " << *result.first << std::endl;
-    std::cout << " second : " << result.second << std::endl;
+    fmt::println( " first : {}" , *result.first );
+    fmt::println( " second : {}" , result.second );
 
-    std::cout << "------" << std::endl;
+    fmt::println( "------" );
     if(result.second){
-       std::cout << " Insertion of " << *result.first << " successful" << std::endl;
+       fmt::println( " Insertion of {} successful" ,  *result.first  );
     }else{
-       std::cout << " Couldn't insert " << *result.first << " in the set. It's a duplicate!" << std::endl;
+       fmt::println( " Couldn't insert {} in the set. It's a duplicate!",  *result.first );
     }
     print_collection(numbers);
 
 
     //Emplace 
-    std::cout << std::endl;
-    std::cout << "emplace : " << std::endl;
+    fmt::println("");
+    fmt::println( "emplace : " );
     
     print_collection(numbers);
     
@@ -169,26 +178,26 @@ int main(){
     auto result_emplace = numbers.emplace(13);  // Fails
 
     if(result_emplace.second){
-        std::cout << " Emplace of " << *result_emplace.first << " successful" << std::endl;
+        fmt::println( " Emplace of {} successful" ,  *result_emplace.first );
     }else{
-        std::cout << " Emplace of " << *result_emplace.first << " FAILED" << std::endl;
+        fmt::println( " Emplace of {} FAILED " ,  *result_emplace.first );
     }
     
     print_collection(numbers);
 
 
     //Erase
-    std::cout << std::endl;
-    std::cout << "erase : " << std::endl;
+    fmt::println("");
+    fmt::println( "erase : " );
     
     print_collection(numbers);
     
     auto it_erase = std::find(numbers.begin(),numbers.end(),13);
     
     if(it_erase!= numbers.end()){
-        std::cout << "Found 13 !" << std::endl;
+        fmt::println( "Found 13 !" );
     }else{
-        std::cout << "Couldn't find 13 !" << std::endl;
+        fmt::println( "Couldn't find 13 !" );
     }
     
     //Erase the 13
@@ -198,28 +207,28 @@ int main(){
     print_collection(numbers);
 
     //swap
-    std::cout << std::endl;
-    std::cout << "swap : " << std::endl;
+    fmt::println("");
+    fmt::println( "swap : " );
     
     std::set<int> other_numbers {200,400,600};
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
     
     
     numbers.swap(other_numbers);
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
 
 
     //Change comparator
-    std::cout << std::endl;
-    std::cout << "change comparator : " << std::endl;
+    fmt::println("");
+    fmt::println( "change comparator : " );
     
     //std::set<int> numbers1 {11,16,2,9,12,15,6,15,2};  // Use default functor (std::less)
     //std::set<int,std::less<int>> numbers1 {11,16,2,9,12,15,6,15,2};  // Built in functor
@@ -237,11 +246,11 @@ int main(){
     numbers1.insert({11,16,2,9,12,15,6,15,2}); // Lambda function
  
    
-    std::cout << " numbers1 :[ " ;
+    fmt::print( " numbers1 :[ " );
     for(const auto& elt : numbers1){
-        std::cout << " " << elt ;
+        fmt::print( " {}",  elt );
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
    
     return 0;

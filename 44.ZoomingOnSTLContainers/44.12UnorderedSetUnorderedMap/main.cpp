@@ -1,29 +1,26 @@
-#include <iostream>
-#include <set>
-#include <map>
+#include <fmt/format.h>
 #include <unordered_set>
 #include <unordered_map>
 
 template<typename T>
 void show_collection( const T& collection){
     
-    std::cout << " [" ;
+    fmt::print( " [" );
     for(const auto& elt : collection){
-        std::cout << " " << elt ;
+        fmt::print( " {}" , elt );
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
     
 }
 
 template <typename T>
 void show_map_collection( const T& collection){
     
-    std::cout << " [" ;
+    fmt::print( " [" );
     for(const auto& [key,value ]: collection){
-        std::cout << " (" << key << "," << value << ")" ;
+        fmt::print( " ({},{})",  key ,  value  );
     }
-    std::cout << "]" << std::endl;
-    
+    fmt::println( "]");
 }
 
 int main(){
@@ -35,10 +32,10 @@ int main(){
     std::unordered_map<int,int> collection2 {{1,11},{0,12},{4,13},{2,14},{3,15}};
     
     
-    std::cout << "collection1 : " ;
+    fmt::print( "collection1 : " );
     show_collection(collection1);
     
-    std::cout << "collection2 : ";
+    fmt::print( "collection2 : ");
     show_map_collection(collection2);
     
     //The operations are mostly similar to std::set and std::map . The details

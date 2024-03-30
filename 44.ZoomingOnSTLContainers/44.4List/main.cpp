@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <list>
 
 
@@ -7,12 +7,12 @@ void print_collection(const T& collection){
     
     auto it = collection.begin();
     
-    std::cout << " Collection [";
+    fmt::print( " Collection [");
     while(it != collection.end()){
-        std::cout << " " << *it ;
+        fmt::print(" {}" , *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println("]" );
 }
 
 
@@ -21,71 +21,70 @@ int main(){
      std::list<int> numbers = {11,12,13,14,15 }; 
     
     //Code1 : Element access
-    std::cout << "---------------------" << std::endl;
-    std::cout << std::endl;
-    std::cout << "element access : " << std::endl;
+    fmt::println( "---------------------" );
+    fmt::println("");
+    fmt::println( "element access : " );
     
     print_collection(numbers);
     
-    std::cout << " front element : " << numbers.front() << std::endl;
-    std::cout << " back element : " << numbers.back() << std::endl;
+    fmt::println( " front element : {}" , numbers.front() );
+    fmt::println( " back element : {}" , numbers.back() );
     
     
     //Code2 : Iterators : forward and back, and constant
-    std::cout << std::endl;
-    std::cout << "iterators : " << std::endl;
+    fmt::println("");
+    fmt::println( "iterators : " );
     
     auto it = numbers.begin();
     
-    std::cout << " (iterators) list of numbers : [" ;
+    fmt::print( " (iterators) list of numbers : [" );
     while(it != numbers.end()){
-        std::cout << " " << *it ;
+        fmt::print( " {}" , *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
     //Reverse iterators
     auto it_back = numbers.rbegin();
     
-    std::cout << " (iterators) list of numbers (reverse) : [" ;
+    fmt::print( " (iterators) list of numbers (reverse) : [") ;
     while(it_back != numbers.rend()){
-        std::cout << " " << *it_back ;
+        fmt::print( " {}", *it_back );
         ++it_back;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
     
     //Code3 : Capacity
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
     
-    std::cout << std::endl;
-    std::cout << "capacity : " << std::endl;
-    std::cout << " list max_size : " << numbers.max_size() << std::endl;
-    std::cout << " list is empty : " << numbers.empty() << std::endl;
-    std::cout << " list size : " << numbers.size() << std::endl;
+    fmt::println("");
+    fmt::println( "capacity : " );
+    fmt::println( " list max_size : {}" , numbers.max_size() );
+    fmt::println( " list is empty : {}" , numbers.empty() );
+    fmt::println( " list size : {}" , numbers.size() );
     
     
     //Code4 : Modifiers
 
-    std::cout << "---------------------" << std::endl;
-    std::cout << std::endl;
-    std::cout << "modifiers : " << std::endl;
+    fmt::println( "---------------------" );
+    fmt::println("");
+    fmt::println( "modifiers : " );
     
     
     //Clear
-    std::cout << std::endl;
-    std::cout << "clear :" << std::endl;
+    fmt::println("");
+    fmt::println( "clear :" );
     print_collection(numbers);
     
     numbers.clear();
     
     print_collection(numbers);
-    std::cout << std::boolalpha;
-    std::cout << " numbers is empty : " << numbers.empty() << std::endl;
+    fmt::println( " numbers is empty : {}" ,numbers.empty() );
     
     //Insert 
-    std::cout << std::endl;
-    std::cout << "insert : " << std::endl;
+    fmt::println("");
+    fmt::println( "insert : " );
     numbers = {11,12,13,14,15}; 
     
     print_collection(numbers);
@@ -99,8 +98,8 @@ int main(){
     
     
     //Emplace 
-    std::cout << std::endl;
-    std::cout << "emplace : " << std::endl;
+    fmt::println("");
+    fmt::println( "emplace : " );
     
     print_collection(numbers);
     
@@ -114,17 +113,17 @@ int main(){
     
     
     //Erase
-    std::cout << std::endl;
-    std::cout << "erase : " << std::endl;
+    fmt::println("");
+    fmt::println( "erase : " );
     
     print_collection(numbers);
     
     auto it_erase = std::find(numbers.begin(),numbers.end(),333);
     
     if(it_erase!= numbers.end()){
-        std::cout << "Found 333 !" << std::endl;
+        fmt::println( "Found 333 !" );
     }else{
-        std::cout << "Couldn't find 333 !" << std::endl;
+        fmt::println( "Couldn't find 333 !" );
     }
 
     //Erase the 333
@@ -137,8 +136,8 @@ int main(){
     
     //Pop_front and pop_back
     //pop_front
-    std::cout << std::endl;
-    std::cout << "pop_front : " << std::endl;
+    fmt::println("");
+    fmt::println( "pop_front : " );
     
     print_collection(numbers);
     
@@ -147,8 +146,8 @@ int main(){
     print_collection(numbers);
     
     //pop_back
-    std::cout << std::endl;
-    std::cout << "pop_back : " << std::endl;
+    fmt::println("");
+    fmt::println( "pop_back : " );
     
     print_collection(numbers);
     
@@ -159,8 +158,8 @@ int main(){
 
     //Push front and push_back
     //push_front
-    std::cout << std::endl;
-    std::cout << "push_front : " << std::endl;
+    fmt::println("");
+    fmt::println( "push_front : " );
     
     print_collection(numbers);
     
@@ -169,8 +168,8 @@ int main(){
     print_collection(numbers);
     
     //push_back
-    std::cout << std::endl;
-    std::cout << "push_back : " << std::endl;
+    fmt::println("");
+    fmt::println( "push_back : " );
     
     print_collection(numbers);
     
@@ -181,8 +180,8 @@ int main(){
     
     
     //emplace front and back
-    std::cout << std::endl;
-    std::cout << "emplace front (333) and back (444) : " << std::endl;
+    fmt::println("");
+    fmt::println( "emplace front (333) and back (444) : " );
     
     print_collection(numbers);
     
@@ -194,92 +193,92 @@ int main(){
 
 
     //resize : up or down
-    std::cout << std::endl;
-    std::cout << "resize : " << std::endl;
+    fmt::println("");
+    fmt::println( "resize : " );
     
     print_collection(numbers);
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " numbers size : {}" , numbers.size() );
     
     numbers.resize(20);
     
     print_collection(numbers);
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " numbers size : {}" , numbers.size() );
     
     numbers.resize(3); // When you resize down, the elements are lost for good.
                         // if you resize up again,you won't get them back.
     
     print_collection(numbers);
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " numbers size : {}" , numbers.size() );
     
     numbers.resize(20);
     
     print_collection(numbers);
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " numbers size : {}" , numbers.size() );
     
     
     
     //swap
-    std::cout << std::endl;
-    std::cout << "swap : " << std::endl;
+    fmt::println("");
+    fmt::println( "swap : " );
 
     std::list<int> other_numbers {200,400,600};
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
     
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
     
     numbers.swap(other_numbers);
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
     
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
     
     
     
     
     //Other operations
-    std::cout << "---------------------" << std::endl;
-    std::cout << "Other operations : " << std::endl;
+    fmt::println( "---------------------" );
+    fmt::println( "Other operations : " );
     
     //Merge
-    std::cout << std::endl;
-    std::cout << "merge : " << std::endl;
+    fmt::println("");
+    fmt::println( "merge : " );
     
     std::list<int> numbers1 {1,5,6};
     std::list<int> numbers2 {9,2,4};
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
     
     //merge
     numbers1.merge(numbers2);
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
     
     
     
     //splice : move elements from one collection to another
     //          numbers2 is moved into numbers1
-    std::cout << std::endl;
-    std::cout << "splice : " << std::endl;
+    fmt::println("");
+    fmt::println( "splice : " );
     
     numbers1 = {1,5,6,8,3};
     numbers2 = {9,2,4,7,13,11,17};
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
     
     //Find the iterator you want to start splicing from
@@ -288,16 +287,16 @@ int main(){
     if(it_splice!=numbers1.end())
         numbers1.splice(it_splice,numbers2);
         
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
     
     
     
     //Remove
-    std::cout << std::endl;
-    std::cout << "remove : " << std::endl;
+    fmt::println("");
+    fmt::println( "remove : " );
     
     numbers = { 1,100,2,3,10,1,11,-1,12 };
     
@@ -315,8 +314,8 @@ int main(){
     
     
     //reverse
-    std::cout << std::endl;
-    std::cout << "reverse : " << std::endl;
+    fmt::println("");
+    fmt::println( "reverse : " );
     
     numbers = { 1,100,2,3,10,1,11,-1,12 };
     
@@ -329,8 +328,8 @@ int main(){
     
     
     //Unique : Remove contiguous duplicates
-    std::cout << std::endl;
-    std::cout << "unique : " << std::endl;
+    fmt::println("");
+    fmt::println( "unique : " );
     
     numbers = { 1,100,100,2,3,10,1,11,11,-1,12,10,1 };
     
@@ -343,8 +342,8 @@ int main(){
     
     
     //Sort
-    std::cout << std::endl;
-    std::cout << "sort : " << std::endl;
+    fmt::println("");
+    fmt::println( "sort : " );
     
     print_collection(numbers);
     

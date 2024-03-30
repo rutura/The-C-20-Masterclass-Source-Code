@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <forward_list>
 
 template <typename T>
@@ -6,12 +6,12 @@ void print_collection(const T& collection){
     
     auto it = collection.begin();
     
-    std::cout << " Collection [";
+    fmt::print( " Collection [");
     while(it != collection.end()){
-        std::cout << " " << *it ;
+        fmt::print( " {}", *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
 }
 
 
@@ -22,29 +22,25 @@ int main(){
     print_collection(numbers);
     
     //Code1 : Element access
-    std::cout << " front element : " << numbers.front() << std::endl;
+    fmt::println( " front element : {}" , numbers.front() );
 
 
     //Modifiers
     
-    std::cout << "---------------------" << std::endl;
-    std::cout << std::endl;
-    std::cout << "modifiers : " << std::endl;
+    fmt::println( "---------------------" );
+    fmt::println( "modifiers : " );
     
     //Clear
-    std::cout << std::endl;
-    std::cout << "clear :" << std::endl;
+    fmt::println( "clear :" );
     print_collection(numbers);
     
     numbers.clear();
     
     print_collection(numbers);
-    std::cout << std::boolalpha;
 
 
     //Insert after
-    std::cout << std::endl;
-    std::cout << "insert_after : " << std::endl;
+    fmt::println( "insert_after : " );
     numbers = {11,12,13,14,15}; 
     
     print_collection(numbers);
@@ -56,8 +52,7 @@ int main(){
 
 
     //Emplace after : create in place after an iterator
-    std::cout << std::endl;
-    std::cout << "emplace_after : " << std::endl;
+    fmt::println( "emplace_after : " );
     
     print_collection(numbers);
     
@@ -69,17 +64,16 @@ int main(){
 
 
     //Erase_after
-    std::cout << std::endl;
-    std::cout << "erase_after : " << std::endl;
+    fmt::println( "erase_after : " );
     
     print_collection(numbers);
     
     auto it_erase = std::find(numbers.begin(),numbers.end(),13);
     
     if(it_erase!= numbers.end()){
-        std::cout << " Found 13 !" << std::endl;
+        fmt::println( " Found 13 !" );
     }else{
-        std::cout << " Couldn't find 13 !" << std::endl;
+        fmt::println( " Couldn't find 13 !" );
     }
 
     //Erase the 14
@@ -89,8 +83,7 @@ int main(){
 
 
     //pop_front
-    std::cout << std::endl;
-    std::cout << "pop_front : " << std::endl;
+    fmt::println( "pop_front : " );
     
     print_collection(numbers);
     
@@ -100,8 +93,7 @@ int main(){
 
 
     //resize : up or down
-    std::cout << std::endl;
-    std::cout << "resize : " << std::endl;
+    fmt::println( "resize : " );
     
     print_collection(numbers);
     
@@ -121,73 +113,69 @@ int main(){
 
    
     //swap
-    std::cout << std::endl;
-    std::cout << "swap : " << std::endl;
+    fmt::println( "swap : " );
     
     std::forward_list<int> other_numbers {200,400,600};
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
     
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
     
     
     numbers.swap(other_numbers);
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_collection(numbers);
     
-    std::cout << " other_numbers :";
+    fmt::print( " other_numbers :");
     print_collection(other_numbers);
 
     //Other operations
-    std::cout << std::endl;
-    std::cout << "merge : " << std::endl;
+    fmt::println( "merge : " );
     
     std::forward_list<int> numbers1 {1,5,6};
     std::forward_list<int> numbers2 {9,2,4};
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
 
     //merge
     numbers1.merge(numbers2);
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : ");
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
 
 
     //splice_after : moving a range of elements from one container to another
-    std::cout << std::endl;
-    std::cout << "splice_after : " << std::endl;
+    fmt::println( "splice_after : " );
     
     numbers1 = {1,5,6,8,3};
     numbers2 = {9,2,4,7,13,11,17};
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
 
     numbers1.splice_after(numbers1.before_begin(),numbers2,numbers2.before_begin(),numbers2.cend());
     
-    std::cout << " numbers1 : " ;
+    fmt::print( " numbers1 : " );
     print_collection(numbers1);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_collection(numbers2);
 
     //Remove
-    std::cout << std::endl;
-    std::cout << "remove : " << std::endl;
+    fmt::println( "remove : " );
     
     numbers = { 1,100,2,3,10,1,11,-1,12 };
     
@@ -204,8 +192,7 @@ int main(){
 
 
     //reverse
-    std::cout << std::endl;
-    std::cout << "reverse : " << std::endl;
+    fmt::println( "reverse : " );
     
     numbers = { 1,100,2,3,10,1,11,-1,12 };
     
@@ -218,8 +205,7 @@ int main(){
 
     //Unique : Removes contiguous duplicates
     //Removes duplicated 100 and 11, but doesn't remove 1
-    std::cout << std::endl;
-    std::cout << "unique : " << std::endl;
+    fmt::println( "unique : " );
     
     numbers = { 1,100,100,2,3,10,1,11,11,-1,12,10,1 };
     
@@ -231,8 +217,7 @@ int main(){
 
 
     //Sort
-    std::cout << std::endl;
-    std::cout << "sort : " << std::endl;
+    fmt::println( "sort : " );
     
     print_collection(numbers);
     

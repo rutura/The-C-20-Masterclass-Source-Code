@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <functional>
 #include <map>
 
@@ -17,6 +17,8 @@ bool compare_ints(int left, int right){
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
+
 public : 
     Book() = default;
     Book(int year, std::string title) 
@@ -38,19 +40,40 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     return out;
 }
 
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
+
+template <typename T>
+void print_collection(const T& collection){
+
+    auto it = collection.begin();
+
+    fmt::print( " Collection [");
+    while(it != collection.end()){
+        fmt::print(" {}" , *it );
+        ++it;
+    }
+    fmt::println("]" );
+}
 
 template <typename T,typename K>
  void print_map(const std::map<T,K> & map){
     
     auto it = map.begin();
     
-    std::cout << " map of elements : [" ;
+    fmt::print( " map of elements : [" );
     while(it != map.end()){
         
-        std::cout << " [" << it->first << "," << it->second << "]" ;
+        fmt::print( " [{}, {}]", it->first ,  it->second);
         ++it;
     }
-    std::cout << " ]" << std::endl;
+    fmt::println( " ]");
 }
 
 
@@ -60,12 +83,12 @@ int main(){
 
     //Code1 : Building maps : Notice that things are stored by key by default
     // regardless of the order you put them in the collection in .
-    std::cout << std::endl;
-    std::cout << "Creating maps : " << std::endl;
+    fmt::println("");
+    fmt::println( "Creating maps : " );
     
     std::map<int,int> numbers {{1,11},{0,12},{4,13},{2,14},{3,15}};
     
-    std::cout << " numbers : " ;
+    fmt::print( " numbers : ") ;
     print_map(numbers);
     
     //Map of custom types : Need to implement operator<
@@ -74,38 +97,38 @@ int main(){
                             {0,Book(1930,"Building Computers")},
                             {1,Book(1995,"Farming for Beginners")}
                         };
-    std::cout << " books : " ;
+    fmt::print( " books : " );
     print_map(books);
     
-    std::cout << "--------------------------------------" << std::endl;
+    fmt::println( "--------------------------------------" );
     
     //Code2 : Element access with regular loops
     //A std::map can be though of as a collection of std::pair's
-    std::cout << std::endl;
-    std::cout << "Looping around printing stuff : " << std::endl;
-    std::cout << std::endl;
-    std::cout << " printing books with regular range based for loop [] syntax (C++17) :" << std::endl;
+    fmt::println("");
+    fmt::println( "Looping around printing stuff : " );
+    fmt::println("");
+    fmt::println( " printing books with regular range based for loop [] syntax (C++17) :" );
     for(const auto&[key,value] : books){
-        std::cout << "  book [ " << key << " ]:" << value << std::endl;
+        fmt::println( "  book [{}]: {}",  key,  value );
     }
     
-    std::cout << std::endl;
-    std::cout << " Traverse map with C++11 loop syntax : " << std::endl;;
+    fmt::println("");
+    fmt::println( " Traverse map with C++11 loop syntax : " );;
     for(const auto& elt : books){
-        std::cout << "  book [" << elt.first << " ] : " << elt.second << std::endl;
+        fmt::println( "  book [{}]:{}",  elt.first ,  elt.second );
     }
     
-    std::cout << std::endl;
-    std::cout << " traverse map with loop (with explicit types) : " << std::endl;
+    fmt::println("");
+    fmt::println( " traverse map with loop (with explicit types) : " );
     for(const std::pair<int,Book>& elt : books){
-        std::cout << "  book [" << elt.first << " ] : " << elt.second << std::endl;
+        fmt::println( "  book [{}, {}]",  elt.first,  elt.second );
     }
     
-    std::cout << "--------------------------------------" << std::endl;
+    fmt::println( "--------------------------------------" );
 
     //Keys can be anything
-    std::cout << std::endl;
-    std::cout << "keys can be anything : std::string in this case (stored by key) : " << std::endl;
+    fmt::println("");
+    fmt::println( "keys can be anything : std::string in this case (stored by key) : " );
     
     std::map<std::string, std::string> address_book;
     
@@ -115,28 +138,28 @@ int main(){
     address_book["Henry King"] = "Muhanga, SM St 128 #3";
     
     for(const auto&[key,value] : address_book){
-        std::cout <<" " <<  key << " lives at address : " << value << std::endl;
+        fmt::println(" {} lives at address {}",   key ,  value );
     }
     
-    std::cout << "--------------------------------------" << std::endl;
+    fmt::println( "--------------------------------------" );
     
     //Iterators
-    std::cout << std::endl;
-    std::cout << "Iterators : " << std::endl;
+    fmt::println("");
+    fmt::println( "Iterators : " );
     
     auto it_access = numbers.begin();
     
-    std::cout << " numbers (forward iterators) : [";
+    fmt::print( " numbers (forward iterators) : [");
     while(it_access!=numbers.end()){
-        std::cout << " " << numbers[it_access->first];
+        fmt::print( " {}", numbers[it_access->first]);
         ++it_access;
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
     
     
-    std::cout << std::endl;
-    std::cout << "modifying elements through iterators : " << std::endl;
+    fmt::println("");
+    fmt::println( "modifying elements through iterators : " );
     
     //Iterate forward over numbers
     print_map(numbers);
@@ -150,55 +173,53 @@ int main(){
     print_map(numbers);
     
     //Iterate over books in reverse
-    std::cout << std::endl;
-    std::cout << "(iterators) set of books (reverse) :"  << std::endl;
+    fmt::println("");
+    fmt::println( "(iterators) set of books (reverse) :"  );
     
     auto it_back_books = books.rbegin();
     while(it_back_books != books.rend()){
             //Will require you to add a default constructor to Book.
             //This is an implementation detail of std::map. If we cut out the line
             //using operator[] the requirement for the default constructor goes away.
-        std::cout << " " << it_back_books->first <<  " - " << books[it_back_books->first]  << std::endl;
+        fmt::println( " {} - {}",  it_back_books->first,  books[it_back_books->first]  );
         ++it_back_books;        
     }
     
     
     
     //Code4 : Capacity : 
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
     
-    std::cout << std::endl;
-    std::cout << std::boolalpha;
-    std::cout << "capacity : " << std::endl;
+    fmt::println("");
+    fmt::println( "capacity : " );
     
-    std::cout << " numbers : ";
+    fmt::print( " numbers : ");
     print_map(numbers);
-    std::cout << " map max_size : " << numbers.max_size() << std::endl;
-    std::cout << " map is empty : " << numbers.empty() << std::endl;
-    std::cout << " map size : " << numbers.size() << std::endl;
+    fmt::println( " map max_size : {}" , numbers.max_size() );
+    fmt::println( " map is empty : {}" , numbers.empty() );
+    fmt::println( " map size : {}" , numbers.size() );
     
-    std::cout << "---------------------" << std::endl;
+    fmt::println( "---------------------" );
     
     //Modifiers
     
     //Clear
-    std::cout << std::endl;
-    std::cout << "clear :" << std::endl;
+    fmt::println("");
+    fmt::println( "clear :" );
     
-    std::cout << " numbers : " ;
+    fmt::print( " numbers : " );
     print_map(numbers);
     
     numbers.clear();
     
-    std::cout << " numbers : " ;
+    fmt::print( " numbers : ");
     print_map(numbers);
-    std::cout << std::boolalpha;
-    std::cout << " numbers is empty : " << numbers.empty() << std::endl;
+    fmt::println( " numbers is empty : {}",  numbers.empty() );
     
     
     //Insert  : return an std::pair object containing result about the insert operation.
-    std::cout << std::endl;
-    std::cout << "insert : " << std::endl;
+    fmt::println("");
+    fmt::println( "insert : " );
     
     
     numbers = {{0,11},{1,12},{2,13},{3,14},{4,15}}; 
@@ -210,59 +231,58 @@ int main(){
     
     //numbers.insert({5,16});//Works
     
-    std::cout << "After insert {2,44} : " ;
-    //std::cout << "After insert {5,16} : " ;
+    fmt::print( "After insert [2,44] : ") ;
+    //fmt::println( "After insert {5,16} : " ;
     print_map(numbers);
     
     //Can capture the insert result through a returned std::pair object.
     auto result = numbers.insert({6,17});
    
-   std::cout << " result.second : " << result.second << std::endl;
+   fmt::println( " result.second : ", result.second );
    
    if(result.second){
-       std::cout << " Insertion successful" << std::endl;
+       fmt::println( " Insertion successful" );
    }else{
-       std::cout << " Couldn't inser in the set. It's a duplicate!" << std::endl;
+       fmt::println( " Couldn't inser in the set. It's a duplicate!" );
    }
    print_map(numbers);
    
    
    
     //Emplace 
-    std::cout << std::endl;
-    std::cout << "emplace : " << std::endl;
+    fmt::println("");
+    fmt::println( "emplace : " );
     
-    std::cout << " before emplace : " ;
+    fmt::print( " before emplace : " );
     print_map(numbers);
     
     auto result_emplace = numbers.emplace(std::make_pair(7,18));
     
     if(result_emplace.second){
-        std::cout << " Emplace  successful" << std::endl;
+        fmt::println( " Emplace  successful" );
     }else{
-        std::cout << " Emplace  FAILED" << std::endl;
+        fmt::println( " Emplace  FAILED" );
 
     }
     
-    std::cout << " after emplace : ";
+    fmt::print( " after emplace : ");
     print_map(numbers);
     
     
     
 
     //Erase
-    std::cout << std::endl;
-    std::cout << "erase : " << std::endl;
+    fmt::println("");
+    fmt::println( "erase : " );
     
     print_map(numbers);
     
     auto it_erase = numbers.find(3); // Find element with key 3
     
     if(it_erase!= numbers.end()){
-        std::cout << " Found element with key " << it_erase->first <<
-            " ! : " << it_erase->second  << std::endl;
+        fmt::println( " Found element with key {} ! : {}",  it_erase->first ,  it_erase->second  );
     }else{
-        std::cout << " Couldn't find element with key 3 !" << std::endl;
+        fmt::println( " Couldn't find element with key 3 !" );
     }
     
     //Erase the element with key 3
@@ -277,8 +297,8 @@ int main(){
     //Changing comparators : There are many ways this can be done, but I am 
     //going to give you a few variations to get you started.
 
-    std::cout << std::endl;
-    std::cout << "Changing comparators : " << std::endl;
+    fmt::println("");
+    fmt::println( "Changing comparators : " );
     
     //std::map<int,int> numbers2 {{1,11},{0,12},{4,13},{2,14},{3,15}};//Default
     //std::map<int,int,std::less<int>> numbers2 {{1,11},{0,12},{4,13},{2,14},{3,15}};//Built in functor
@@ -300,11 +320,11 @@ int main(){
     numbers2.insert({{1,11},{0,12},{4,13},{2,14},{3,15}});
 
     
-    std::cout << "numbers2 : [ ";
+    fmt::print( "numbers2 : [ ");
     for(const auto& [key,value] : numbers2){
-        std::cout << " (" << key << "," << value << ")";
+        fmt::print( " ({}, {})", key , value );
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
  
     return 0;
 }

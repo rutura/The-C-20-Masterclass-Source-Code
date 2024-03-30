@@ -1,17 +1,17 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <deque>
 
 class Item{
 public : 
     Item() :m_var(0){
-        std::cout << "Item default constructor called" << std::endl;
+        fmt::println( "Item default constructor called" );
     }
     Item(int var) : m_var(var){
-       // std::cout << "Item constructor called for: " << m_var << std::endl;
+       // fmt::println( "Item constructor called for: {}", m_var );
     }
     
     Item(const Item& source) : m_var{source.m_var}{
-        //std::cout << "Item copy constructor called for :" << m_var << std::endl;
+        // fmt::println( "Item copy constructor called for : {}" , m_var );
     }
     
     int get() const{
@@ -25,18 +25,26 @@ std::ostream& operator << (std::ostream& out, const Item & item){
     out << "Item [ value : " << item.get() << "]";
     return out;
 }
+template<>
+struct fmt::formatter<Item> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin();}
+    template<typename FormatContext>
+    auto format(const Item& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Item [ value: {}]", obj.get());
+    }
+};
 
 template <typename T>
 void print_collection(const T& collection){
     
     auto it = collection.begin();
     
-    std::cout << " Collection [";
+    fmt::print( " Collection [");
     while(it != collection.end()){
-        std::cout << " " << *it ;
+        fmt::print(" {}" , *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println("]" );
 }
 
 
@@ -48,94 +56,88 @@ int main(){
     
     std::deque<Item> items {Item(22),Item(33),Item(44),Item(55)};
     
-    std::cout << "numbers : " ;
+    fmt::print( "numbers : " );
     print_collection(numbers);
     
-    std::cout << "items : " ;
+    fmt::print( "items : " );
     print_collection(items);
 
 
     //Code1 : Element access
     //Access elements : [], at(), front() and back()
-    std::cout << std::endl;
-    std::cout << "Element access : " << std::endl;
-    std::cout << "numbers[3] : " << numbers[3] << std::endl; // No bound check
-    std::cout << "numbers.at(3) : " << numbers.at(3) << std::endl; // Bound check
+    fmt::println( "Element access : " );
+    fmt::println( "numbers[3] : {}" , numbers[3] ); // No bound check
+    fmt::println( "numbers.at(3) : {}" , numbers.at(3) ); // Bound check
     
-    std::cout << "numbers[30] (Undefined behavior):" <<  numbers[30] << std::endl;// No bounds check, undefined behavior, junk value or even crash.
-    //std::cout << "numbers.at(30) (throws expception): " << numbers.at(30) << std::endl;
+    fmt::println( "numbers[30] (Undefined behavior): {}" ,  numbers[30] );// No bounds check, undefined behavior, junk value or even crash.
+    //fmt::println( "numbers.at(30) (throws expception): {}" , numbers.at(30) );
     
-    std::cout << "numbers.front() : " << numbers.front() << std::endl;
-    std::cout << "numbers.back() :" << numbers.back() << std::endl;
+    fmt::println( "numbers.front() : {}" , numbers.front() );
+    fmt::println( "numbers.back() :{}" , numbers.back() );
     
     //Data method : Deque has no data method
 
     //Iterators
-    std::cout << "-----------------------" << std::endl;
+    fmt::println( "-----------------------" );
     
-    std::cout << std::endl;
-    std::cout << "Iterators : " << std::endl;
+    fmt::println( "Iterators : " );
     //begin() and end()
     auto it = numbers.begin();
     
-    std::cout << "Deque(With iterators) : [ ";
+    fmt::print( "Deque(With iterators) : [ ");
     while(it!=numbers.end()){
-        std::cout << " " << *it ;
+        fmt::print( " {}" , *it );
         ++it;
     }
-    std::cout << " ]" << std::endl;
+    fmt::println( " ]" );
 
 
     //Reverse traversal with rbebin and rend
     
     auto it_reverse = numbers.rbegin(); // non const iterator
     
-    std::cout << "Deque(Reverse traversal with iterators) : [ ";
+    fmt::print( "Deque(Reverse traversal with iterators) : [ ");
     while(it_reverse!=numbers.rend()){
-        std::cout << " " << *it_reverse ;
+        fmt::println( " {}" , *it_reverse );
         ++it_reverse; // Increments towards the first element of the array.
     }
-    std::cout << " ]" << std::endl;    
+    fmt::println( " ]" );
     
-    std::cout << "-----------------------" << std::endl;
+    fmt::println( "-----------------------" );
 
 
     //Capacity
-    std::cout << std::endl;
-    std::cout << "capacity : " << std::endl;
-    std::cout << "numbers size : " << numbers.size() << std::endl;
-    std::cout << "numbers max_size : " << numbers.max_size() << std::endl;
-    std::cout << std::boolalpha; // Force output of bool as true or false instead of 1 or 0
-    std::cout << "numbers is empty : " << numbers.empty() << std::endl;
+    fmt::println( "capacity : " );
+    fmt::println( "numbers size : {}" , numbers.size() );
+    fmt::println( "numbers max_size : {}" , numbers.max_size() );
+    fmt::println( "numbers is empty : {}" , numbers.empty() );
     
     numbers.push_back(20);
-    std::cout << "after pushing 20 to back : " << std::endl;
+    fmt::println( "after pushing 20 to back : " );
     print_collection(numbers);
-    std::cout << "numbers size : " << numbers.size() << std::endl;
+    fmt::println( "numbers size : {}" , numbers.size() );
     
-    std::cout << "-----------------------" << std::endl;
+    fmt::println( "-----------------------" );
 
     //Code4 : Modifiers
-    std::cout << std::endl;
-    
-    std::cout << "clear : " << std::endl;
+
+    fmt::println( "clear : " );
     print_collection(numbers);
     
     //Clear
     numbers.clear();
     
     print_collection(numbers);
-    std::cout << "numbers size : " << numbers.size() << std::endl;
+    fmt::println( "numbers size : {}" , numbers.size() );
     
     numbers ={10,20,30,40,50,60};
     
-    std::cout << "after reassignment : " << std::endl;
+    fmt::println( "after reassignment : " );
     print_collection(numbers);
 
 
     //Insert : element inserted in front of it_pos
-    std::cout << std::endl;
-    std::cout << "insert : " << std::endl;
+    fmt::println( "insert : " );
     auto it_pos = numbers.begin() + 2;
     
     print_collection(numbers);
@@ -149,8 +151,7 @@ int main(){
 
 
     //Emplace 
-    std::cout << std::endl;
-    std::cout << "emplace : " << std::endl;
+    fmt::println( "emplace : " );
     print_collection(numbers);
     
     auto it_item_pos = numbers.begin() + 2;
@@ -161,8 +162,7 @@ int main(){
 
 
     //Erase
-    std::cout << std::endl;
-    std::cout << "erase : " << std::endl;
+    fmt::println( "erase : " );
     print_collection(numbers);
     
     numbers.erase(numbers.begin() + 4);
@@ -175,8 +175,7 @@ int main(){
 
 
     //Emplace_back
-    std::cout << std::endl;
-    std::cout << "emplace_back : " << std::endl;
+    fmt::println( "emplace_back : " );
     print_collection(numbers);
     
     numbers.emplace_back(10);
@@ -186,8 +185,7 @@ int main(){
     print_collection(numbers);
 
     //Pop back
-    std::cout << std::endl;
-    std::cout << "pop_back : " << std::endl;
+    fmt::println( "pop_back : " );
     print_collection(numbers);
     
     numbers.pop_back();
@@ -201,17 +199,16 @@ int main(){
 
 
     //Resize
-    std::cout << std::endl;
-    std::cout << "resize : " << std::endl;
-    std::cout << " resize (Before) : " << std::endl;
+    fmt::println( "resize : " );
+    fmt::println( " resize (Before) : " );
     print_collection(numbers);
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " numbers size : " , numbers.size() );
     
     numbers.resize(30);
     
     print_collection(numbers);
-    std::cout << " after resize : " << std::endl;
-    std::cout << " numbers size : " << numbers.size() << std::endl;
+    fmt::println( " after resize : " );
+    fmt::println( " numbers size : " , numbers.size() );
     
     //Can even resize down
     numbers.resize(10);
@@ -219,26 +216,25 @@ int main(){
 
 
     //Swap
-    std::cout << std::endl;
-    std::cout << "swap : " << std::endl;
+    fmt::println( "swap : " );
     
     std::deque<Item> other_items = {Item(100),Item(200),Item(300)};
     
-    std::cout << "items : " ;
+    fmt::print( "items : " );
     print_collection(items);
     
-    std::cout << "other_items : " ;
+    fmt::print( "other_items : " );
     print_collection(other_items);
     
     //items.swap(other_items);
     other_items.swap(items);
     
-    std::cout << "after swap : " << std::endl;
+    fmt::println( "after swap : " );
     
-    std::cout << "items : " ;
+    fmt::print( "items : " );
     print_collection(items);
     
-    std::cout << "other_items : " ;
+    fmt::print( "other_items : " );
     print_collection(other_items); 
     
   

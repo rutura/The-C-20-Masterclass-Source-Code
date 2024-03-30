@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <stack>
 #include <vector>
 #include <list>
@@ -7,6 +7,8 @@
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
+
 public : 
     Book() = default;
     Book(int year, std::string title) 
@@ -28,6 +30,16 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     return out;
 }
 
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
+
+
 template<typename T, typename Container = std::deque<T>>
 void print_stack(std::stack<T,Container> stack){
 
@@ -36,13 +48,13 @@ void print_stack(std::stack<T,Container> stack){
 
 
     //Notice that we're working on a copy here. IMPORTANT
-    std::cout << "stack of elements : [";
+    fmt::print( "stack of elements : [");
     while(!stack.empty()){
         T item = stack.top();
-        std::cout << " " << item ;
+        fmt::print( " {}",  item );
         stack.pop(); // Poping from a copy doesn't affect the original. We're good here.
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]");
 }
 
 template <typename T, typename Container = std::deque<T>>
@@ -50,7 +62,7 @@ void clear_stack(std::stack<T,Container>& stack){
 //template <typename T>
 //void clear_stack(std::stack<T>& stack){
 
-    std::cout << "Clearing stack of size : " << stack.size() << std::endl;
+    fmt::println( "Clearing stack of size : {}",  stack.size());
     while(!stack.empty()){
         stack.pop();
     }
@@ -61,61 +73,61 @@ int main(){
     //Code1 : Creating std::stacks and storing data in
     std::stack<int> numbers1;
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_stack(numbers1); // empty
     
     numbers1.push(10);
     numbers1.push(20);
     numbers1.push(30);
     
-    std::cout << "numbers1 : ";
+    fmt::print( "numbers1 : ");
     print_stack(numbers1); // 30 20 10 : FILO
 
     numbers1.push(40);
     numbers1.push(50);
     
-    std::cout << "numbers1 : ";
+    fmt::print( "numbers1 : ");
     print_stack(numbers1); // 50 40 30 20 10  : FILO
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----" );
 
     //Accessing elements
-    std::cout << "top : " << numbers1.top() << std::endl;
+    fmt::println( "top : {}" ,  numbers1.top());
     //Pop off the top
     print_stack(numbers1);
     numbers1.pop();
     print_stack(numbers1);
-    std::cout << "top : " << numbers1.top() << std::endl;
+    fmt::println( "top : {}", numbers1.top());
     
     //We can organize these calls to top and pop into a function 
     // that can nicely show the contents of a stack. That's what print_stack does
 
-    std::cout << "-----" << std::endl;
+    fmt::println( "-----");
 
     //Code2 : Modifying the top element through the reference returned by top()
     //top() returns a reference. We can use that to modify the underlying 
     //element in the stack
-    std::cout << "numbers1 : ";
+    fmt::print( "numbers1 : ");
     print_stack(numbers1); 
     
     numbers1.top() = 55;
     
-    std::cout << "numbers1 : ";
+    fmt::print( "numbers1 : ");
     print_stack(numbers1); 
 
 
     //Code3 : Clearing a stack
-    std::cout << std::endl;
-    std::cout << "clearing a stack : " << std::endl;
+    fmt::print("");
+    fmt::println( "clearing a stack : " );
     
-    std::cout << "stack initial size : " << numbers1.size() << std::endl;
-    std::cout << "numbers1 (before) : ";
+    fmt::println( "stack initial size : {}" , numbers1.size() );
+    fmt::print( "numbers1 (before) : ");
     print_stack(numbers1);
     
     clear_stack(numbers1);
     
-    std::cout << "stack final size : " << numbers1.size() << std::endl;
-    std::cout << "numbers1(after) : ";
+    fmt::println( "stack final size : {}" , numbers1.size() );
+    fmt::print( "numbers1(after) : ");
     print_stack(numbers1);
 
 
@@ -125,9 +137,9 @@ int main(){
     books.push(Book(2000,"Social Media Marketing"));
     books.push(Book(2020,"How the Pandemic Changed the World"));
     
-    std::cout << "books : ";
+    fmt::print( "books : ");
     print_stack(books);
-    std::cout << "books size : " << books.size() << std::endl;
+    fmt::println( "books size : {}" , books.size() );
 
 
     //Custom underlying sequence container
@@ -146,13 +158,13 @@ int main(){
     numbers4.push(10);
 
 
-    std::cout << " numbers4 : ";
+    fmt::print( " numbers4 : ");
     print_stack(numbers4); // OK 
 
-    std::cout << " numbers3 : ";
+    fmt::print( " numbers3 : ");
     print_stack(numbers3); // Compiler error
 
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_stack(numbers2); // Compiler error
 
     return 0;

@@ -1,10 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <queue>
 
 
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
+
 public : 
     Book() = default;
     Book(int year, std::string title) 
@@ -27,7 +29,14 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     out << "Book [" << operand.m_year << ", " << operand.m_title << "]";
     return out;
 }
-
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
 
 
 //template <typename T>
@@ -38,12 +47,12 @@ template<typename T,
                     typename Compare = std::less<typename Container::value_type>>  
 void print_priority_queue(std::priority_queue<T,Container,Compare> p_queue){ 
     
-    std::cout << "priority queue of elements : [";
+    fmt::print( "priority queue of elements : [");
     while(!p_queue.empty()){
-        std::cout << " " << p_queue.top() ;
+        fmt::print( " {}",  p_queue.top() );
         p_queue.pop();
     }
-    std::cout << "]" << std::endl;
+    fmt::println( "]" );
     
 }
 
@@ -56,7 +65,7 @@ template<typename T,
                     typename Compare = std::less<typename Container::value_type>>  
 void clear_queue(std::priority_queue<T,Container,Compare>& p_queue){ 
     
-    std::cout << "Clearing priority queue of size : " << p_queue.size() << std::endl;
+    fmt::print( "Clearing priority queue of size : {}" ,p_queue.size() );
     while(!p_queue.empty()){
         p_queue.pop();
     }
@@ -70,75 +79,75 @@ int main(){
     //Code1 : Creating  pushing and accessing
     std::priority_queue<int> numbers1; // The greatest has higher priority
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
     
     numbers1.push(10);
     numbers1.push(8);
     numbers1.push(12);
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
     
     numbers1.push(11);
     numbers1.push(3);
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
     
     //Acess
-    std::cout << " numbers1.top() :  " << numbers1.top() << std::endl;
+    fmt::println( " numbers1.top() :  {}",  numbers1.top() );
 
 
     //Code2 : Can't through top to modify top element : this is
     //because top() returns  a CONST reference.
-    std::cout << std::endl;
-    std::cout << "modify top element through top():" << std::endl;
+    fmt::println("");
+    fmt::println( "modify top element through top():" );
     
-    std::cout << " numbers1 (before modification) : ";
+    fmt::print( " numbers1 (before modification) : ");
     print_priority_queue(numbers1);
     
     //numbers1.top() = 500; // Compiler error
 
-    std::cout << " numbers1 (after modification) : ";
+    fmt::print( " numbers1 (after modification) : ");
     print_priority_queue(numbers1);
 
 
     //Code3 : poping : Pops the highest priority element
-    std::cout << std::endl;
-    std::cout << "poping data : " << std::endl;
+    fmt::println("");
+    fmt::println( "poping data : " );
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
     
     numbers1.pop();
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
     
     numbers1.pop();
     
-    std::cout << " numbers1 : ";
+    fmt::print( " numbers1 : ");
     print_priority_queue(numbers1);
 
     //Code4 : Clearing a priority queue
-    std::cout << std::endl;
-    std::cout << "clearing a priority queue : " << std::endl;
+    fmt::println("");
+    fmt::println( "clearing a priority queue : " );
     
-    std::cout << " priority queue initial size : " << numbers1.size() << std::endl;
-    std::cout << " numbers1 (before) : ";
+    fmt::println( " priority queue initial size : {}" , numbers1.size() );
+    fmt::print( " numbers1 (before) : ");
     print_priority_queue(numbers1);
     
     clear_queue(numbers1);
     
-    std::cout << " priority_queue final size : " << numbers1.size() << std::endl;
-    std::cout << " numbers1(after) : ";
+    fmt::print( " priority_queue final size : {}" , numbers1.size() );
+    fmt::print( " numbers1(after) : ");
     print_priority_queue(numbers1);
 
 
     //Code5 : priority_queue of user defined types
-    std::cout << std::endl;
-    std::cout << "priority queue of user defined type :" << std::endl;
+    fmt::println("");
+    fmt::print( "priority queue of user defined type :" );
     
     std::priority_queue<Book> books;
     
@@ -152,15 +161,15 @@ int main(){
     books.push(Book(1990,"Converging Lines of Modern Economy"));
     books.push(Book(1998,"Driving Current Triggered Transistors"));
     
-    std::cout << "books : ";
+    fmt::print( "books : ");
     print_priority_queue(books);
-    std::cout << "books size : " << books.size() << std::endl;
-    std::cout << "top book : " << books.top() << std::endl;
+    fmt::println( "books size : {}" , books.size() );
+    fmt::println( "top book : {}" , books.top() );
 
 
    //Code6 : specify a custom comparator and/or underlying container
-    std::cout << std::endl;
-    std::cout << "changing the comparator and underlying container : " << std::endl;
+    fmt::println("");
+    fmt::print( "changing the comparator and underlying container : " );
     
     //std::priority_queue<int, std::vector<int>, std::less<int> > numbers2; // Default. 
                                        // Works with single template parameter functions
@@ -180,7 +189,7 @@ int main(){
     numbers2.push(8);
     numbers2.push(12);
     
-    std::cout << " numbers2 : ";
+    fmt::print( " numbers2 : ");
     print_priority_queue(numbers2);
     
    

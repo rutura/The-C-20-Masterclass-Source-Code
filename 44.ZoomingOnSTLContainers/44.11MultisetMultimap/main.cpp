@@ -1,10 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <set> // multiset
 #include <map> //multimap
 
 
 class Book{
     friend std::ostream& operator<< (std::ostream& out, const Book& operand);
+    friend struct fmt::formatter<Book>;
+
 public : 
     Book() = default;
     Book(int year, std::string title) 
@@ -25,20 +27,27 @@ std::ostream& operator<< (std::ostream& out, const Book& operand){
     out << "Book [" << operand.m_year << ", " << operand.m_title << "]";
     return out;
 }
-
+template<>
+struct fmt::formatter<Book> {
+    constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+    template<typename FormatContext>
+    auto format(const Book& obj, FormatContext& ctx) {
+        return format_to(ctx.out(), "Book [{},{}]", obj.m_year, obj.m_title);
+    }
+};
 
 template <typename T>
  void print_multiset(const std::multiset<T> & m_set){
     
     auto it = m_set.begin();
     
-    std::cout << "multiset of elements : [" ;
+    fmt::print( "multiset of elements : [" );
     while(it != m_set.end()){
         
-        std::cout << " " << *it ;
+        fmt::print( " {}", *it );
         ++it;
     }
-    std::cout << "]" << std::endl;
+   fmt::println("]");
 }
 
 
@@ -47,13 +56,13 @@ template <typename T,typename K>
     
     auto it = m_map.begin();
     
-    std::cout << "multimap of elements : [" ;
+   fmt::print("multimap of elements : [");
     while(it != m_map.end()){
         
-        std::cout << " [" << it->first << "," << it->second << "]" ;
+        fmt::println( " [{},{}]", it->first , it->second );
         ++it;
     }
-    std::cout << "]" << std::endl;
+    fmt::println("]");
 }
 
 int main(){
@@ -64,14 +73,14 @@ int main(){
                     Book(1930,"Building Computers"),Book(1734,"Farming for Beginners")};
                     
            
-    std::cout << "numbers : ";
+    fmt::print( "numbers : ");
     print_multiset(numbers);
     
-    std::cout << "books : " ;
+    fmt::print( "books : " );
     print_multiset(books);
     
-    std::cout << std::endl;
-    std::cout << "multimap : " << std::endl;
+    fmt::println("");
+    fmt::println( "multimap : " );
     
     
     std::multimap<int,std::string> office_numbers = {std::make_pair(101,"Daniel Gray"),
@@ -82,7 +91,7 @@ int main(){
                         std::make_pair(102,"Zuba Loy"),
                         };
                     
-    std::cout << "office_numbers : " ;
+    fmt::print( "office_numbers : " );
     print_multimap(office_numbers);
     
     
@@ -92,7 +101,7 @@ int main(){
                 std::make_pair(1,Book(1995,"Farming for Beginners"))
         };
         
-    std::cout << "other_books : ";
+    fmt::print( "other_books : ");
     print_multimap(other_books);
     
     
