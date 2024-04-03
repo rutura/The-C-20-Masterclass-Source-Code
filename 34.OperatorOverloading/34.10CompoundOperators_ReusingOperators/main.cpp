@@ -9,16 +9,16 @@ int main() {
     auto p1_plus_p2 = p1 + p2;
     auto p2_minus_p3 = p2 - p3;
 
-    fmt::println("p1 + p2: {}", fmt::ptr(&p1_plus_p2)); // (30, 30)
-    fmt::println("p2 - p3: {}", fmt::ptr(&p2_minus_p3)); // (15, 15)
+    fmt::println("p1 + p2: {}", p1_plus_p2); // (30, 30)
+    fmt::println("p2 - p3: {}", p2_minus_p3); // (15, 15)
 
     fmt::println("------");
 
     p1 += p2;
     p2 -= p3;
 
-    fmt::println("point1: {}",  fmt::ptr(&p1)); // (30, 30)
-    fmt::println("point2: {}", fmt::ptr(& p2)); // (15, 15)
+    fmt::println("point1: {}",  p1); // (30, 30)
+    fmt::println("point2: {}",  p2); // (15, 15)
 
     return 0;
 }

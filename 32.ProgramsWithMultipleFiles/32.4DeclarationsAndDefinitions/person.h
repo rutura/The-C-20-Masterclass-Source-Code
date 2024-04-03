@@ -10,7 +10,7 @@ public :
 	Person(const std::string& names_param, int age_param);
 	
 	void print_info()const{
-		fmt::println( "name : {}{}{}" , full_name , " , age : " , age );
+		fmt::println( "name : {}, age: {}" , full_name , age );
 	}
 private : 
 	std::string full_name;

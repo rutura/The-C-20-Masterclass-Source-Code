@@ -1,6 +1,9 @@
 #include <fmt/format.h>
 
-
+/**
+* fmt output formatting, decimal specifier
+reference: https://fmt.dev/latest/syntax.html
+*/
 int main(){
 
     const unsigned int red_mask {0xFF000000};

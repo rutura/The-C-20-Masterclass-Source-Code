@@ -23,7 +23,7 @@ public:
   }
 
   void print_info()const{
-    fmt::println( "Point  [ m_x : {}{}{}{}" , m_x , ", m_y : " , m_y , "]" );
+    fmt::println( "Point  [ m_x : {}, m_y: {}]" , m_x , m_y );
   }
 
 public : 

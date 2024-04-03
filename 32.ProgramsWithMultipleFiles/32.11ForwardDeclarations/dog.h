@@ -12,7 +12,7 @@ public:
 	~Dog();
 	
 	void print_info() const{
-		fmt::println( "Dog [ name : {}{}" , name , "]" );
+		fmt::println( "Dog [ name : {}]" , name );
 	}
 private : 
 	std::string name{};

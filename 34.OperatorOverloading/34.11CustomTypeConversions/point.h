@@ -12,7 +12,7 @@ class Point
 	friend Point operator-(const Point& left , const Point& right);
 	friend Point& operator+=(Point& left, const Point& right);
 	friend Point& operator-=(Point& left, const Point& right);
-	
+	friend struct fmt::formatter<Point>;
 public:
 	Point() = default;
 	Point(double x, double y) : 
@@ -22,10 +22,6 @@ public:
 	explicit Point(const Number& n);
 	*/
 	~Point() = default;
-
-	void print_info(){
-		fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
-	}
 
 private: 
 	double length() const;   // Function to calculate distance from the point(0,0)
@@ -62,6 +58,16 @@ inline Point operator-(const Point& left , const Point& right){
 	Point p(left);
 	return p-=right;
 }
+
+template<>
+struct fmt::formatter<Point>
+{
+  constexpr auto parse(format_parse_context& ctx){ return ctx.begin(); }
+  template<typename FormatContext>
+  auto format(const Point& obj, FormatContext& ctx){
+    return format_to(ctx.out(), "Point [x: {}, y: {}]",obj.m_x, obj.m_y);
+  }
+};
 
 
 #endif // POINT_H

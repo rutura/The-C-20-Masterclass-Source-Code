@@ -3,7 +3,7 @@
 #include "number.h"
 
 void do_something_with_point(const Point& p){
-    fmt::println( "point : {}" , fmt::ptr(& p ));
+    fmt::println( "point : {}" , p );
 }
 
 

@@ -44,6 +44,10 @@ private :
     int m_wrapped_int{0};
 };
 
+/*
+ - fmt output stream overloading for Point of int
+ - Reference: https://fmt.dev/latest/api.html
+ */
 template <>
 struct fmt::formatter<Number> : nested_formatter<int> {
 	auto format(Number n, format_context& ctx) const {

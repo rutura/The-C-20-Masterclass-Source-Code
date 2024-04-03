@@ -8,16 +8,13 @@ class Point
 {
 	friend std::ostream& operator<<(std::ostream& os, const Point& p);
 	friend std::istream& operator>>(std::istream& is, Point& p);
+	friend struct fmt::formatter<Point>;
 public:
 	Point() = default;
 	Point(double x, double y) : 
 		m_x(x), m_y(y){
 	}
 	~Point() = default;
-
-	void print_info(){
-		fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
-	}
 
 	/*
 	std::ostream& operator<< (std::ostream& os){
@@ -54,4 +51,13 @@ inline std::istream& operator>>(std::istream& is, Point& p){
 
 }
 
+template<>
+struct fmt::formatter<Point>
+{
+  constexpr auto parse(format_parse_context& ctx){ return ctx.begin(); }
+  template<typename FormatContext>
+  auto format(const Point& obj, FormatContext& ctx){
+    return format_to(ctx.out(), "Point [x: {}, y: {}]",obj.m_x, obj.m_y);
+  }
+};
 #endif // POINT_H

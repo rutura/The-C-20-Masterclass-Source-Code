@@ -29,7 +29,10 @@ private :
 	double m_x{};
 	double m_y{};
 };
-
+/*
+ - fmt output stream overloading for Point of double
+ - Reference: https://fmt.dev/latest/api.html
+ */
 template <>
 struct fmt::formatter<Point> : nested_formatter<double> {
 	auto format(Point p, format_context& ctx) const {

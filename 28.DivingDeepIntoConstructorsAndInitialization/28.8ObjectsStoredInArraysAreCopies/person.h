@@ -32,14 +32,10 @@ public:
 	int* get_age() const{ return age;};
 
 	//Utilities
-	void print_info(){
-		fmt::println( "Person object at : {}{}{}{}{}{}{}{}{}{}" , fmt::ptr(this)
-			," [ Last_name : " , last_name
-			, ", First_name :  " , first_name
-			, " ,age : " , *age
-			, " , age address : " , fmt::ptr(age)
-			, " ]" );
-	}
+  void print_info(){
+    fmt::println( "Person object at : {} [ Last_name: {}, First_name: {}, age: {}, age address: {}]" , fmt::ptr(this) , last_name, first_name , *age , fmt::ptr(age)
+    );
+  }
 };
 
 #endif // PERSON_H

@@ -9,10 +9,10 @@ int main() {
     auto n21 = (2 + n1);
     auto n1_42 = 42 - n1;
 
-    fmt::println("n1: {}", fmt::ptr(&n1));
-    fmt::println("n1 + 2: {}", fmt::ptr(&(n12)));
-    fmt::println("2 + n1: {}",fmt::ptr(&(n21)));
-    fmt::println("42 - n1: {}", fmt::ptr(&(n1_42)));
+    fmt::println("n1: {}", n1);
+    fmt::println("n1 + 2: {}", n12);
+    fmt::println("2 + n1: {}",n21);
+    fmt::println("42 - n1: {}", n1_42);
 
     return 0;
 }

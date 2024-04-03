@@ -28,6 +28,10 @@ private :
 
 };
 
+/**
+* Player obj fmt's output overload
+- reference: https://fmt.dev/latest/api.html
+*/
 template<>
 struct fmt::formatter<Player> {
     constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }

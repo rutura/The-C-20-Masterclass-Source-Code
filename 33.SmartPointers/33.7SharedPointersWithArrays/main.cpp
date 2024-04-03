@@ -20,13 +20,13 @@ int main(){
 	fmt::println( "Reading data from arrays" );
 	fmt::println( "Reading shared_ptr_int_arr_1: " );
 	for(size_t i{0}; i < 10 ; ++i){
-		fmt::println( "shared_ptr_int_arr_1[{}{}{}" , i , "] : " , shared_ptr_int_arr_1[i] );
+		fmt::println( "shared_ptr_int_arr_1[{}] : {}" , i , shared_ptr_int_arr_1[i] );
 	}
 	
 	fmt::println( "\n" );
 	fmt::println( "Reading shared_ptr_dog_arr_1: " );
 	for(size_t i{0}; i < 10 ; ++i){
-		fmt::println( "shared_ptr_dog_arr_1[{}{}{}" , i , "] : " , shared_ptr_dog_arr_1[i].get_name() );
+		fmt::println( "shared_ptr_dog_arr_1[{}] : {}" , i  , shared_ptr_dog_arr_1[i].get_name() );
 	}
    
     return 0;

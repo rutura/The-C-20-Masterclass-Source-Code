@@ -1,6 +1,24 @@
 #include <fmt/format.h>
 #include <bitset>
 
+/**
+* fmt output formatting and alignment
+* - Reference: https://fmt.dev/latest/syntax.html
+  Aligning the text and specifying a width:
+
+      fmt::format("{:<30}", "left aligned");
+      // Result: "left aligned                  "
+      fmt::format("{:>30}", "right aligned");
+      // Result: "                 right aligned"
+      fmt::format("{:^30}", "centered");
+      // Result: "           centered           "
+      fmt::format("{:*^30}", "centered");  // use '*' as a fill char
+      // Result: "***********centered***********"
+  Dynamic width:
+
+      fmt::format("{:<{}}", "left aligned", 30);
+      // Result: "left aligned
+*/
 int main(){
 
     int COLUMN_WIDTH {20};

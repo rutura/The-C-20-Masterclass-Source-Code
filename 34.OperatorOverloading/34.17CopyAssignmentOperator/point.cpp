@@ -8,7 +8,7 @@ double Point::length() const{
 
 Point::Point(const Point &p)
 {
-    fmt::println( "Copy constructor called to copy point {}" , fmt::ptr(&p) );
+    fmt::println( "Copy constructor called to copy point {}" , p );
     if(this != &p){
 		delete p_data;
 		p_data = new int(*(p.p_data));

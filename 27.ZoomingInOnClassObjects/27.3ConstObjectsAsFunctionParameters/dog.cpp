@@ -31,8 +31,6 @@
      }
 
      //Utility functions
-     void Dog::print_info(){
-         fmt::println( "Dog ({}{}{}{}{}{}{}{}" , fmt::ptr(this) , ") : [ name : " , this->m_name
-                , ", breed : " , this->m_breed
-                , ", age : " , this->m_age , "]" );
+void Dog::print_info(){
+       fmt::println( "Dog ({}): [ name: {}, bread: {}, age: {}]" , fmt::ptr(this) , this->m_name, this->m_breed,  this->m_age );
      }

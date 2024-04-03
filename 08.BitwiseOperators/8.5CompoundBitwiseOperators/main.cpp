@@ -1,7 +1,14 @@
 #include <fmt/format.h>
 #include <bitset>
 
+/**
+* fmt output formatting and alignment - dynamic width
+* - Reference: https://fmt.dev/latest/syntax.html
+  Dynamic width:
 
+      fmt::format("{:<{}}", "left aligned", 30);
+      // Result: "left aligned
+*/
 int main(){
 
 	const int COLUMN_WIDTH {20};

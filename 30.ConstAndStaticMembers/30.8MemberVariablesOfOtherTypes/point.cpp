@@ -12,7 +12,7 @@ Point::Point(double x, double y)
 	:	p_i5(new Integer(5)),
 		m_x(x) , m_y(y) 
 {
-	fmt::println( "Constructing Point [ m_x : {}{}{}{}" , m_x , ", m_y : " , m_y , "]" );
+	fmt::println( "Constructing Point [ m_x : {}, m_y: {} ]" , m_x  , m_y  );
     ++m_point_count;
 }
 

@@ -8,7 +8,6 @@ int main(){
 
     std::cin >> p2;//
 
-//    fmt::println( "p2 : {}" , p2 );
-    p2.print_info();
+    fmt::println( "p2 : {}" , p2 );
     return 0;
 }

@@ -11,7 +11,7 @@ namespace Geom{
         Point();
         Point( double x, double y);
         void print_info()const{
-            fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
+            fmt::println( "Point [ x : {}, y:{}]" , m_x , m_y );
         }
         ~Point();
     private : 

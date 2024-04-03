@@ -7,7 +7,7 @@ struct Point
 };
 
 void print_point(const Point& p){
-    fmt::println( "Point [ x : {}{}{}{}" , p.x , " , y : " , p.y , "]" );
+    fmt::println( "Point [ x: {}, y: {}]" , p.x  , p.y );
 }
 
 

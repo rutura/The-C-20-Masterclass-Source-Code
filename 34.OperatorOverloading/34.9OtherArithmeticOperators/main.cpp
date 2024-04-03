@@ -11,9 +11,9 @@ int main(){
     Point p3{p1 + p2};
     Point p4{p2 - Point(5,5)};
     
-    fmt::println( "point1 : {}" ,  fmt::ptr(&p1 )); // (10,10)
-    fmt::println( "point3 : {}" , fmt::ptr(&p3 )); // (30,30)
-    fmt::println( "point4 : {}" , fmt::ptr(&p4 )); // (15,15)
+    fmt::println( "point1 : {}" ,  p1 ); // (10,10)
+    fmt::println( "point3 : {}" , p3 ); // (30,30)
+    fmt::println( "point4 : {}" , p4 ); // (15,15)
 
     return 0;
 }

@@ -1,5 +1,9 @@
 #include <fmt/format.h>
 
+/**
+* reference: https://fmt.dev/latest/syntax.html
+
+*/
 const unsigned char mask_bit_0 {0b00000001} ;//Bit0
 const unsigned char mask_bit_1 {0b00000010} ;//Bit1
 const unsigned char mask_bit_2 {0b00000100} ;//Bit2

@@ -1,7 +1,9 @@
 #include <fmt/format.h>
 #include <bitset>
 
-
+/**
+* Printing binary representation of decimals (base 2)
+*/
 int main(){
 
 	unsigned short int value {0xff0u};

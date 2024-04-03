@@ -16,7 +16,7 @@ private :
 class Cat{
 public : 
     void print_dog_info(const Dog& d) const{
-        fmt::println( "Dog [ name : {}{}{}{}" , d.m_name , ", age : " , d.m_age , "]" );
+        fmt::println( "Dog [ name : {}, age: {}] " , d.m_name  , d.m_age );
     }
 
 };

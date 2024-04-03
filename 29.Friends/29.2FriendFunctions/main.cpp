@@ -16,13 +16,13 @@ private :
 };
 
 void debug_dog_info(const Dog& d){
-    fmt::println( "Dog [ name : {}{}{}{}" , d.m_name , ", age : " , d.m_age , "]" );
+    fmt::println( "Dog [ name : {}, age: {} ] " , d.m_name ,  d.m_age );
 }
 
 void debug_dog_info(){
     Dog dog1("Milou",3);
     dog1.m_name = "Fluffy";
-    fmt::println( "Dog [ name : {}{}{}{}" , dog1.m_name , ", age : " , dog1.m_age , "]" );
+    fmt::println( "Dog [ name : {}, age: {} ] " , dog1.m_name , dog1.m_age );
 
 }
 

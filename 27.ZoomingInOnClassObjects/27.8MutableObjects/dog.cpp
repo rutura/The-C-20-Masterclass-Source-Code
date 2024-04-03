@@ -10,8 +10,5 @@
      //Utility functions
      void Dog::print_info() const {
          ++m_print_info_count;
-         fmt::println( "Dog ({}{}{}{}{}{}{}{}{}{}" , fmt::ptr(this) , ") : [ name : " , this->m_name
-                , ", breed : " , this->m_breed
-                , ", age : " , this->m_age
-                 , ",print_count : " , m_print_info_count , "]" );
+         fmt::println( "Dog ({}): [ name: {}, breed: {}, age: {}, print_count: {}]" , fmt::ptr(this) ,  this->m_name , this->m_breed, this->m_age, m_print_info_count );
      }

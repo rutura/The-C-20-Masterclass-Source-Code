@@ -55,7 +55,7 @@ public:
 	
 	//Utilities
 	void print_info()const{
-			fmt::println( "Point [ x : {}{}{}{}" , *x , ", y: " , (*y) , "]" );
+			fmt::println( "Point [ x : {}, y: {}]" , *x , (*y) );
 	}
 };
 

@@ -22,7 +22,8 @@ public:
 	}
 
 	void print_info(){
-		fmt::println( "Point [ x : {}{}{}{}" , m_x , ", y : " , m_y , "]" );
+	  fmt::println( "Point [ x : {}, y: {}] " , m_x  , m_y  );
+
 	}
 private: 
 	double length() const;   // Function to calculate distance from the point(0,0)

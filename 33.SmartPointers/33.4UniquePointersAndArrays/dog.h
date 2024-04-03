@@ -19,7 +19,7 @@ public:
     }
 	
 	void print_info() const{
-		fmt::println( "Dog [ name : {}{}" , dog_name , " ]" );
+		fmt::println( "Dog [ name : {}]" , dog_name  );
 	}
     
 private:

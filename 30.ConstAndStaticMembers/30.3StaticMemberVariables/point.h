@@ -19,7 +19,7 @@ public:
   }
 
   void print_info()const{
-    fmt::println( "Point  [ &m_x : {}{}{}{}" , fmt::ptr(&m_x) , ", &m_y : " , fmt::ptr(&m_y) , "]" );
+    fmt::println( "Point  [ &m_x : {}, &m_y: {} " , fmt::ptr(&m_x) , fmt::ptr(&m_y)  );
   }
   
 private:

@@ -5,7 +5,7 @@ Person::Person(std::string name) : m_name{name}
 }
 
 void Person::adopt_dog( std::unique_ptr<Dog> dog){
-    fmt::println( "{}{}{}",m_name , " just adopted the dog " , dog->get_name() );
+    fmt::println( "{} just adopted the dog {}",m_name, dog->get_name() );
 }
 
 

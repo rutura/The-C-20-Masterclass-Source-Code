@@ -10,7 +10,7 @@ int main(){
 
     p1 = c1;
 
-    fmt::println( "p1 : {}" , fmt::ptr(&p1 ));
+    fmt::println( "p1 : {}" , p1);
     
 
     return 0;

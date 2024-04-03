@@ -3,7 +3,7 @@
 //No linkage
 void some_function(){
     int age {34}; // No linkage
-    fmt::println( "age : {}{}{}" , age , " &age : " , fmt::ptr(&age ));
+    fmt::println( "age : {}, &age: {}" , age , fmt::ptr(&age ));
 }
 
 const double distance{45.8}; // Internal linkage
@@ -18,7 +18,7 @@ extern void print_item_count();
 int main(){
 
 /*
-    fmt::println( "distance(main) : {}{}{}" , distance , "  &distance : " , fmt::ptr(&distance) );
+    fmt::println( "distance(main) : {}, &distannce:{} " , distance , fmt::ptr(&distance) );
 
     fmt::println( "-----" );
 
@@ -26,8 +26,7 @@ int main(){
 */
 
 
-    fmt::println( "item_count(main) : {}{}{}" , item_count , " &item_count : "
-        , fmt::ptr(&item_count ));
+    fmt::println( "item_count(main) : {}, &item_count: {}" , item_count , fmt::ptr(&item_count ));
 
     fmt::println( "-----" );
     print_item_count();

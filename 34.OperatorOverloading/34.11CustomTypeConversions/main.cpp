@@ -7,7 +7,7 @@ double sum(double a, double b){
     return a + b;
 }
 void use_point(const Point& p){
-    fmt::println( "Printing the point from use_point func : {}" , fmt::ptr(&p ));
+    fmt::println( "Printing the point from use_point func : {}" ,p );
 }
 
 int main(){

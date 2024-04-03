@@ -1,7 +1,10 @@
 #include <fmt/format.h>
 #include <bitset>
 
-
+/**
+* Reference: https://fmt.dev/latest/syntax.html
+* - fmt format specifiers for different bases
+*/
 int main(){
 
     unsigned short int data {15};

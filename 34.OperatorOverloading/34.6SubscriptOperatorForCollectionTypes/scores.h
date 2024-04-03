@@ -30,9 +30,9 @@ class Scores{
 
 
     void print_info()const{
-        fmt::println( "{}{}",m_course_name , " : [ ");
+        fmt::print( "{} : [",m_course_name );
         for(size_t i{}; i < 20; ++i){
-            fmt::print( "{}{}",m_scores[i] , " ");
+            fmt::print( "{}  ",m_scores[i] );
         }
         fmt::println( "]" );
     }

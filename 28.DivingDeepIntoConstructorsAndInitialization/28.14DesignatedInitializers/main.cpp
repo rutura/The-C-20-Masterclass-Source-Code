@@ -7,9 +7,10 @@ struct Component
     double z;
 };
 
-void print_component(const Component& c){
-    fmt::println( "Component [ x : {}{}{}{}{}{}" , c.x , ", y: " , c.y , " ,z : " , c.z , "] ");
+void print_point(const Point& p){
+  fmt::println( "Point [ x: {}, y: {}]" , p.x  , p.y );
 }
+
 
 
 

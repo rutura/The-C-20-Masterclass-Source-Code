@@ -22,6 +22,10 @@ private :
     int practice_certificate_id{0};
 };
 
+/**
+* Nurse obj fmt's output overload
+- reference: https://fmt.dev/latest/api.html
+*/
 template<>
 struct fmt::formatter<Nurse> {
     constexpr auto parse(format_parse_context& ctx) {return ctx.begin(); }

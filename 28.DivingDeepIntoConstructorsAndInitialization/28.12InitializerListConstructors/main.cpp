@@ -11,15 +11,15 @@ public:
         fmt::println("list size : {}" , list.size() );
         
         for(size_t i{} ;  i < list.size(); ++i){
-            fmt::println("elt [{}{}{}" , i , "]  :" , *(list.begin() + i) );
+            fmt::println("elt [{}]: {}" , i , *(list.begin() + i) );
         }
          */
        x = *(list.begin());
        y = *(list.begin() + 1);
     }
 
-    void print_point() const {
-        fmt::println( "Point [ x : {}{}{}{}" , x , ", y : " , y , "]" );
+  void print_info()const{
+      fmt::println( "Point [ x : {}, y: {}]" , *x , (*y) );
     }
  private : 
     double x;
