@@ -4,13 +4,13 @@ import math;
 
 int main()
 {
-    //Point is not visible. We can't create its instance
-    //math::Point p(1, 2);
+  // Point is not visible. We can't create its instance
+  // math::Point p(1, 2);
 
-    auto p = math::generateRandomPoint();
-    //print p
-    fmt::println( "{}" , p);
-    // std::cout << p << std::endl;
-    fmt::println("x: {}", p.getX() );
-    // std::cout << "x: " << p.getX() << std::endl;
+  auto p = math::generateRandomPoint();
+  // print p
+  fmt::println("{}", p);
+  // std::cout << p << std::endl;
+  fmt::println("x: {}", p.getX());
+  // std::cout << "x: " << p.getX() << std::endl;
 }

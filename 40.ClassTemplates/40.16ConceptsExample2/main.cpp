@@ -1,23 +1,19 @@
-#include <fmt/format.h>
 #include <concepts>
+#include <fmt/format.h>
 
-template <typename T>
-concept Number = (std::integral<T> || std::floating_point<T>) 
-                 && !std::same_as<T, bool>
-                 && !std::same_as<T, char>;
-
-
-template <Number T, Number  U>
-auto add ( T a, U b){
-    return a + b;
-}
+template<typename T>
+concept Number = (std::integral<T> || std::floating_point<T>)&&!std::same_as<T, bool> && !std::same_as<T, char>;
 
 
-int main(){
+template<Number T, Number U> auto add(T a, U b) { return a + b; }
 
-    static_assert(Number<int>);
-    //auto result = add(20.1, 20);
-    //fmt::println( "result :  {}" , result );
-   
-    return 0;
+
+int main()
+{
+
+  static_assert(Number<int>);
+  // auto result = add(20.1, 20);
+  // fmt::println( "result :  {}" , result );
+
+  return 0;
 }

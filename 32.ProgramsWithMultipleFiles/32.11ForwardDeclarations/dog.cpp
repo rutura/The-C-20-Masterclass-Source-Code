@@ -1,10 +1,5 @@
 #include "dog.h"
 
-Dog::Dog(const std::string& name) : name(name)
-{
-}
+Dog::Dog(const std::string &name) : name(name) {}
 
-Dog::~Dog()
-{
-}
-
+Dog::~Dog() {}

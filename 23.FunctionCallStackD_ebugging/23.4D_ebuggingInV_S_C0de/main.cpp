@@ -1,32 +1,33 @@
 
 #include <fmt/format.h>
 
-int& adjust( int& input);
-int sum(int x , int y);
+int &adjust(int &input);
+int sum(int x, int y);
 
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
 
-	int a{10};
-	int b{12};
+  int a{ 10 };
+  int b{ 12 };
 
-	int summation  =  sum( a , b);
-	fmt::println( "sum : {}"
-		, summation );
+  int summation = sum(a, b);
+  fmt::println("sum : {}", summation);
 
-	return 0;
+  return 0;
 }
 
-int& adjust( int& input){
-	int adjustment{2};
-	input += adjustment;
-	return input;
+int &adjust(int &input)
+{
+  int adjustment{ 2 };
+  input += adjustment;
+  return input;
 }
 
-int sum(int x , int y){
+int sum(int x, int y)
+{
 
-	int result = x + y;
-	adjust(result);
-	return result;
+  int result = x + y;
+  adjust(result);
+  return result;
 }
-

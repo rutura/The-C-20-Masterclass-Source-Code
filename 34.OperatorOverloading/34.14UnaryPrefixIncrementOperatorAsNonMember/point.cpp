@@ -1,16 +1,11 @@
-#include <cmath>
 #include "point.h"
+#include <cmath>
 
 
-double Point::length() const{
-    return sqrt(pow(m_x - 0, 2) +  pow(m_y - 0, 2) * 1.0); 
+double Point::length() const { return sqrt(pow(m_x - 0, 2) + pow(m_y - 0, 2) * 1.0); }
+
+void operator++(Point &operand)
+{
+  ++(operand.m_x);
+  ++(operand.m_y);
 }
-
-void operator++(Point& operand){
-	++(operand.m_x);
-	++(operand.m_y);
-}
-
-
-
-

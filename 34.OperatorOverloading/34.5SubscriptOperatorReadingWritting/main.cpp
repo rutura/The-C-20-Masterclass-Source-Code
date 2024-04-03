@@ -1,17 +1,18 @@
-#include <fmt/format.h>
 #include "point.h"
+#include <fmt/format.h>
 
 
-int main(){
+int main()
+{
 
-    Point p1(10,20);
+  Point p1(10, 20);
 
-    p1.print_info();
+  p1.print_info();
 
-    //Changing the data
-    p1[0] = 35.6;
-    p1[1] = 23.9;
+  // Changing the data
+  p1[0] = 35.6;
+  p1[1] = 23.9;
 
-    p1.print_info();
-    return 0;
+  p1.print_info();
+  return 0;
 }

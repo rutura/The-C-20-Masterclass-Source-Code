@@ -5,19 +5,18 @@
 class Shape
 {
 public:
-    Shape();
-    Shape(std::string_view description);
-    ~Shape();
+  Shape();
+  Shape(std::string_view description);
+  ~Shape();
+
 public:
-     void draw( )const{
-        fmt::println( "Shape::draw() called for : {}", m_description );
-    }
-private : 
-     void func() const {
-        fmt::println( "Shape::func() called for : {}" , m_description );
-    }
+  void draw() const { fmt::println("Shape::draw() called for : {}", m_description); }
+
+private:
+  void func() const { fmt::println("Shape::func() called for : {}", m_description); }
+
 protected:
-    std::string m_description;
+  std::string m_description;
 };
 
-#endif // SHAPE_H
+#endif// SHAPE_H

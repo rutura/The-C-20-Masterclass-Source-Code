@@ -1,22 +1,23 @@
 #include <fmt/format.h>
 
-namespace Level1{
-    namespace Level2{
-        namespace Level3{
-            const double weight{33.33};
-        }
-    }
-}
+namespace Level1 {
+namespace Level2 {
+  namespace Level3 {
+    const double weight{ 33.33 };
+  }
+}// namespace Level2
+}// namespace Level1
 
 
-int main(){
+int main()
+{
 
-    //Namespace aliases
-    namespace Data = Level1::Level2::Level3;
+  // Namespace aliases
+  namespace Data = Level1::Level2::Level3;
 
-    //std::cout << "weight : " << Level1::Level2::Level3::weight << std::endl;
-    fmt::println( "weight : {}" , Data::weight );
-    fmt::println( "weight : {}" , Data::weight );
-    
-    return 0;
+  // std::cout << "weight : " << Level1::Level2::Level3::weight << std::endl;
+  fmt::println("weight : {}", Data::weight);
+  fmt::println("weight : {}", Data::weight);
+
+  return 0;
 }

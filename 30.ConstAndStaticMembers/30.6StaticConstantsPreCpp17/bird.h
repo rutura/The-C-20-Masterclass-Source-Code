@@ -3,8 +3,8 @@
 
 class Bird
 {
-  public:
-    static const float BIRD_WEIGHT_CONSTANT;
+public:
+  static const float BIRD_WEIGHT_CONSTANT;
 };
 
-#endif // BIRD_H
+#endif// BIRD_H

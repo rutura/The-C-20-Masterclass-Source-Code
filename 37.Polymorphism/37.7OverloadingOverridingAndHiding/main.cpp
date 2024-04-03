@@ -1,12 +1,13 @@
-#include "shape.h"
 #include "circle.h"
+#include "shape.h"
 
-int main(){
+int main()
+{
 
-    Shape * shape_ptr = new Circle(10,"Circle1");
-    // shape_ptr->draw(45,"Red");
-    shape_ptr->draw(45);
+  Shape *shape_ptr = new Circle(10, "Circle1");
+  // shape_ptr->draw(45,"Red");
+  shape_ptr->draw(45);
 
-    delete shape_ptr;
-    return 0;
+  delete shape_ptr;
+  return 0;
 }

@@ -1,14 +1,15 @@
 #include <fmt/format.h>
 
 
-int main(){
-   
-   constexpr bool condition {false};
+int main()
+{
 
-   if constexpr (condition){
-       fmt::println( "Condition is true" );
-   }else{
-       fmt::println( "Condition is false" );
-   }
-    return 0;
+  constexpr bool condition{ false };
+
+  if constexpr (condition) {
+    fmt::println("Condition is true");
+  } else {
+    fmt::println("Condition is false");
+  }
+  return 0;
 }

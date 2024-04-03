@@ -1,10 +1,11 @@
 #include "dog.h"
 
-int main(){
+int main()
+{
 
-   Animal * p_animal = new Dog;
+  Animal *p_animal = new Dog;
 
-   delete p_animal;
-  
-    return 0;
+  delete p_animal;
+
+  return 0;
 }

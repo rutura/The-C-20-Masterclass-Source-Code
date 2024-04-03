@@ -1,6 +1,6 @@
 #include <fmt/format.h>
 
-//Intersting fact #1
+// Intersting fact #1
 /*
 class Plane final{
     Plane()=default;
@@ -8,12 +8,13 @@ class Plane final{
 
 //This will trigger a compiler error
 class FigherJet : public Plane{
-    
+
 };
 */
 
-int main(){
+int main()
+{
 
-    fmt::println( "Hello" );
-    return 0;
+  fmt::println("Hello");
+  return 0;
 }

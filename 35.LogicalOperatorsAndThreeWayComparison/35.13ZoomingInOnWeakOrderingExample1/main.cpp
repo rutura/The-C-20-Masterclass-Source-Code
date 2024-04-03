@@ -1,44 +1,40 @@
 #include <fmt/format.h>
 #include <string>
 
-class ComparableString {
+class ComparableString
+{
 public:
-    ComparableString(const std::string& str): m_str{ str }{}
+  ComparableString(const std::string &str) : m_str{ str } {}
 
-    std::weak_ordering operator<=>(const ComparableString& right_side) const{
+  std::weak_ordering operator<=>(const ComparableString &right_side) const
+  {
 
-        if (m_str.size() == right_side.m_str.size()) {
-            return std::weak_ordering::equivalent;
-        }
-        else if (m_str.size() > right_side.m_str.size()) {
-            return std::weak_ordering::greater;
-        }
-        else {
-            return std::weak_ordering::less;
-        }
-
+    if (m_str.size() == right_side.m_str.size()) {
+      return std::weak_ordering::equivalent;
+    } else if (m_str.size() > right_side.m_str.size()) {
+      return std::weak_ordering::greater;
+    } else {
+      return std::weak_ordering::less;
     }
+  }
 
-    bool operator==(const ComparableString& right_side) const{
-        return ( m_str.size() == right_side.m_str.size());
-    }
+  bool operator==(const ComparableString &right_side) const { return (m_str.size() == right_side.m_str.size()); }
 
 private:
-    std::string m_str;
+  std::string m_str;
 };
 
 
+int main()
+{
 
+  ComparableString cmp_str1("Fog");
+  ComparableString cmp_str2("Dogy");
 
-int main(){
+  fmt::println("cmp_str1 > cmp_str2 : {}", (cmp_str1 > cmp_str2));
+  fmt::println("cmp_str1 < cmp_str2 : {}", (cmp_str1 < cmp_str2));
 
-	ComparableString cmp_str1("Fog");
-	ComparableString cmp_str2("Dogy");
-	
-	fmt::println( "cmp_str1 > cmp_str2 : {}" , (cmp_str1 > cmp_str2) );
-	fmt::println( "cmp_str1 < cmp_str2 : {}" , (cmp_str1 < cmp_str2) );
+  fmt::println("cmp_str1 == cmp_str2 : {}", (cmp_str1 == cmp_str2));
 
-	fmt::println( "cmp_str1 == cmp_str2 : {}" , (cmp_str1 == cmp_str2) );
-    
-    return 0;
+  return 0;
 }

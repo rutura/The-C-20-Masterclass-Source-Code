@@ -1,23 +1,24 @@
 #include <fmt/format.h>
 
 
-int main(){
+int main()
+{
 
-	//Declare pointer and reference
+  // Declare pointer and reference
 
-    double double_value {12.34};
-    double& ref_double_value {double_value}; // Reference to double_value
-    double* p_double_value {&double_value}; //Pointer to double_value
-	
-	//Reading
-	fmt::println( "double_value : " << double_value );
-	fmt::println( "ref_double_value : " << ref_double_value );
-	fmt::println( "p_double_value : " << p_double_value );
-	fmt::println( "*p_double_value : " << *p_double_value );
-	
-	//Writting through pointer
-	*p_double_value = 15.44;
-	
+  double double_value{ 12.34 };
+  double &ref_double_value{ double_value };// Reference to double_value
+  double *p_double_value{ &double_value };// Pointer to double_value
+
+  // Reading
+  fmt::println("double_value : " << double_value);
+  fmt::println("ref_double_value : " << ref_double_value);
+  fmt::println("p_double_value : " << p_double_value);
+  fmt::println("*p_double_value : " << *p_double_value);
+
+  // Writting through pointer
+  *p_double_value = 15.44;
+
     fmt::println( std::endl;
 	fmt::println( "double_value : " << double_value );
 	fmt::println( "ref_double_value : " << ref_double_value );

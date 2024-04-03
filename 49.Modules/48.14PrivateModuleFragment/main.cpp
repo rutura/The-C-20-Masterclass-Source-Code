@@ -9,7 +9,7 @@ import math;
 
 int main()
 {
-    //Add 10 to 20 and print the result using the math module
-    fmt::println("10 + 20 = {}", math::add(10, 20) );
-    // std::cout << "10 + 20 = " << math::add(10, 20) << std::endl;
+  // Add 10 to 20 and print the result using the math module
+  fmt::println("10 + 20 = {}", math::add(10, 20));
+  // std::cout << "10 + 20 = " << math::add(10, 20) << std::endl;
 }

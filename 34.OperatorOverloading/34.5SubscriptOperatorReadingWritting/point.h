@@ -1,32 +1,29 @@
 #ifndef POINT_H
 #define POINT_H
-#include <fmt/format.h>
 #include <cassert>
+#include <fmt/format.h>
 
 class Point
 {
 public:
-	Point() = default;
-	Point(double x, double y) : 
-		m_x(x), m_y(y){
-	}
-	~Point() = default;
+  Point() = default;
+  Point(double x, double y) : m_x(x), m_y(y) {}
+  ~Point() = default;
 
-	double& operator[](size_t index) {
-		assert( (index == 0) || (index == 1));
-		return (index==0)? m_x : m_y;
-	}
+  double &operator[](size_t index)
+  {
+    assert((index == 0) || (index == 1));
+    return (index == 0) ? m_x : m_y;
+  }
 
-	void print_info(){
-	  fmt::println( "Point [ x : {}, y: {}] " , m_x  , m_y  );
+  void print_info() { fmt::println("Point [ x : {}, y: {}] ", m_x, m_y); }
 
-	}
-private: 
-	double length() const;   // Function to calculate distance from the point(0,0)
+private:
+  double length() const;// Function to calculate distance from the point(0,0)
 
-private : 
-	double m_x{}; // 0
-	double m_y{}; // 1
+private:
+  double m_x{};// 0
+  double m_y{};// 1
 };
 
-#endif // POINT_H
+#endif// POINT_H

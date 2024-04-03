@@ -1,48 +1,44 @@
-#include <fmt/format.h>
 #include "person.h"
+#include <fmt/format.h>
 
 
-//Declaration and definition
+// Declaration and definition
 double weight;
 
-//Functions : Declaration and defintion
+// Functions : Declaration and defintion
 /*
 double add(double a, double b){
     return a + b;
 }
 */
 
-//Declaration
+// Declaration
 double add(double a, double b);
 
 
-
-//Declaration and definition
-struct Point{
-    double m_x;
-    double m_y;
+// Declaration and definition
+struct Point
+{
+  double m_x;
+  double m_y;
 };
 
 
+int main()
+{
+  /*
+ // weight = 5; // Assignment
 
+  fmt::println("{}", weight );
 
+  double result = add(10,20.5);
+  fmt::println( "result : {}" , result );
+  */
 
+  Person p1("John Snow", 27);
+  p1.print_info();
 
-
-int main(){
-    /*
-   // weight = 5; // Assignment
-
-    fmt::println("{}", weight );
-
-    double result = add(10,20.5);
-    fmt::println( "result : {}" , result );
-    */
-
-   Person p1("John Snow",27);
-   p1.print_info();
-  
-    return 0;
+  return 0;
 }
 
 /*

@@ -8,15 +8,12 @@ int max(int a, int b){
 */
 
 
-int max( int a,  int b);
+int max(int a, int b);
 
-int main(){
+int main() { return 0; }
 
-   
-    return 0;
-}
-
-int max( int a,  int b){
-    ++a;
-    return (a > b)? a : b;
+int max(int a, int b)
+{
+  ++a;
+  return (a > b) ? a : b;
 }

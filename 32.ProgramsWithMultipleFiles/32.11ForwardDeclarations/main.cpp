@@ -4,13 +4,14 @@
 #include "farm.h"
 
 
-int main(){
+int main()
+{
 
-    Dog dog1("Fluffy");
+  Dog dog1("Fluffy");
 
-    Farm farm1;
-    farm1.use_dog(dog1);
+  Farm farm1;
+  farm1.use_dog(dog1);
 
-    
-    return 0;
+
+  return 0;
 }

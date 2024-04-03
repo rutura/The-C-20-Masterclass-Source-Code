@@ -1,16 +1,17 @@
-#include <fmt/format.h>
 #include "point.h"
+#include <fmt/format.h>
 
 
-int main(){
+int main()
+{
 
-   // fmt::println( "Point count : {}" , Point::get_point_count() );
+  // fmt::println( "Point count : {}" , Point::get_point_count() );
 
-    Point p1{6,7};
+  Point p1{ 6, 7 };
 
-   // fmt::println( "Point count : {}" , p1.get_point_count() );
-    p1.print_info(p1) ;
+  // fmt::println( "Point count : {}" , p1.get_point_count() );
+  p1.print_info(p1);
 
- 
-    return 0;
+
+  return 0;
 }

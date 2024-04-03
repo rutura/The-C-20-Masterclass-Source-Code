@@ -1,31 +1,32 @@
 #include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-	//Print I love C++ 10 times
-    /*
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    fmt::println( "I love C++" );
-    */
+  // Print I love C++ 10 times
+  /*
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  */
 
 
-    const size_t COUNT{100};
-    size_t i{0}; // Iterator declaration
+  const size_t COUNT{ 100 };
+  size_t i{ 0 };// Iterator declaration
 
-    while(i < COUNT ){ // Test
-       fmt::println( "{} : I love C++", i );
+  while (i < COUNT) {// Test
+    fmt::println("{} : I love C++", i);
 
-       ++i; // Incrementation 
-    }
-    fmt::println( "Loop done!" );
-   
-    return 0;
+    ++i;// Incrementation
+  }
+  fmt::println("Loop done!");
+
+  return 0;
 }

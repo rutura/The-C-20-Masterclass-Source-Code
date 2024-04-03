@@ -1,38 +1,39 @@
-#include <fmt/format.h>
 #include <cassert>
+#include <fmt/format.h>
 
-struct Point{
-public: 
-    Point( std::initializer_list<double> list){
-        //static_assert( (list.size() == 2));
-        assert(list.size() == 2); // If the size of the list is not 2, terminate the program with an error
-        /*
-        fmt::println("Initalizer list constructor called" );
-        fmt::println("list size : {}" , list.size() );
-        
-        for(size_t i{} ;  i < list.size(); ++i){
-            fmt::println("elt [{}]: {}" , i , *(list.begin() + i) );
-        }
-         */
-       x = *(list.begin());
-       y = *(list.begin() + 1);
-    }
+struct Point
+{
+public:
+  Point(std::initializer_list<double> list)
+  {
+    // static_assert( (list.size() == 2));
+    assert(list.size() == 2);// If the size of the list is not 2, terminate the program with an error
+    /*
+    fmt::println("Initalizer list constructor called" );
+    fmt::println("list size : {}" , list.size() );
 
-  void print_info()const{
-      fmt::println( "Point [ x : {}, y: {}]" , *x , (*y) );
+    for(size_t i{} ;  i < list.size(); ++i){
+        fmt::println("elt [{}]: {}" , i , *(list.begin() + i) );
     }
- private : 
-    double x;
-    double y;
+     */
+    x = *(list.begin());
+    y = *(list.begin() + 1);
+  }
+
+  void print_info() const { fmt::println("Point [ x : {}, y: {}]", *x, (*y)); }
+
+private:
+  double x;
+  double y;
 };
 
 
+int main()
+{
 
-int main(){
+  Point p1{ 22.4, 34.9 };
+  p1.print_point();
 
-    Point p1{22.4,34.9};
-    p1.print_point();
-   
-   
-    return 0;
+
+  return 0;
 }

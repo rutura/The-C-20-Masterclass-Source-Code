@@ -6,12 +6,13 @@
 
 */
 
-//One line comment
-#include <iostream>
+// One line comment
 #include <fmt/format.h>
+#include <iostream>
 
-int main(){
+int main()
+{
 
-    fmt::print("Hello World!");
-    return 0;
+  fmt::print("Hello World!");
+  return 0;
 }

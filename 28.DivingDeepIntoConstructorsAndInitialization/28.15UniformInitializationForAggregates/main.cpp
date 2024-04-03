@@ -1,36 +1,36 @@
 #include <fmt/format.h>
 #include <string>
 
-class Point{
+class Point
+{
 public:
-    Point(double x, double y) : m_x{x},m_y{y}{
-        fmt::println( "Point constructor called" );
-    }
- private : 
-    double m_x ;
-    double m_y;
+  Point(double x, double y) : m_x{ x }, m_y{ y } { fmt::println("Point constructor called"); }
+
+private:
+  double m_x;
+  double m_y;
 };
 
 struct Person
 {
-    std::string m_name;
-    unsigned int m_age ;
+  std::string m_name;
+  unsigned int m_age;
 };
 
 
+int main()
+{
 
-int main(){
+  Point p1{ 10.9, 39.3 };// Uniform initialization : () or {}
 
-    Point p1{10.9,39.3}; // Uniform initialization : () or {}
+  // Struct
+  //  {}
+  // Person person1 {"Daniel",35};
 
-    //Struct
-        // {}
-   // Person person1 {"Daniel",35};
+  //()
+  Person p2("John", 41.7);
 
-        //()
-    Person p2("John",41.7);
+  int students[](1, 2, 3, 4.7, 5, 6, 7);
 
-    int students[] (1,2,3,4.7,5,6,7);
-    
-    return 0;
+  return 0;
 }

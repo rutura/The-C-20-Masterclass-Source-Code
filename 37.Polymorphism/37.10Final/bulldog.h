@@ -4,17 +4,16 @@
 class BullDog : public Dog
 {
 public:
-    BullDog();
-    virtual ~BullDog();
-    
-    
-    //Will throw a compiler error
-    /*
-   virtual void run() const override{
-       fmt::println( "Bulldog::run() called" );
-   }
-   */
+  BullDog();
+  virtual ~BullDog();
 
+
+  // Will throw a compiler error
+  /*
+ virtual void run() const override{
+     fmt::println( "Bulldog::run() called" );
+ }
+ */
 };
 
-#endif // BULL_DOG_H
+#endif// BULL_DOG_H

@@ -1,8 +1,8 @@
+#include <concepts>
 #include <fmt/format.h>
 #include <type_traits>
-#include <concepts>
 
-//Syntax1
+// Syntax1
 /*
 template <typename T>
 concept MyIntegral = std::is_integral_v<T>;
@@ -13,37 +13,34 @@ MyIntegral auto add( MyIntegral auto a, MyIntegral auto b) {
 */
 
 
-template <typename T>
-concept Multipliable =  requires(T a, T b) {
-	a * b; // Just makes sure the syntax is valid
+template<typename T> concept Multipliable = requires(T a, T b)
+{
+  a *b;// Just makes sure the syntax is valid
 };
 
 
-template <typename T>
-concept Incrementable = requires (T a) {
-	a+=1;
-	++a;
-	a++;
+template<typename T> concept Incrementable = requires(T a)
+{
+  a += 1;
+  ++a;
+  a++;
 };
 
-template <typename T>
-requires Incrementable<T>
-T add (T a, T b){
-    return a + b;
-}
+template<typename T> requires Incrementable<T> T add(T a, T b) { return a + b; }
 
 
-int main(){
+int main()
+{
 
-    double x{6};
-    double y{7};
+  double x{ 6 };
+  double y{ 7 };
 
-    //std::string x{"Hello"};
-    //std::string y{"World"};
+  // std::string x{"Hello"};
+  // std::string y{"World"};
 
-    add(x,y);
+  add(x, y);
 
-    fmt::println( "Done!");
-    
-    return 0;
+  fmt::println("Done!");
+
+  return 0;
 }
