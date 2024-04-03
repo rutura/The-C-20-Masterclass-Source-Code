@@ -1,7 +1,7 @@
 module;
-
+#include <fmt/format.h>
 export module math;
-import <iostream>;
+// import <iostream>;
 import <cmath>;
 
 //A class representing Point in the 2d space with x and y coordinates.
@@ -9,16 +9,16 @@ import <cmath>;
 export namespace math {
 	class Point
 	{
-
+		friend struct fmt::formatter<Point>;
 	public:
 		Point(int x, int y) : x(x), y(y) {}
 
 		//Output stream operator to print the point to std::cout.
-		friend std::ostream& operator<<(std::ostream& os, const Point& p)
+		/*friend std::ostream& operator<<(std::ostream& os, const Point& p)
 		{
 			os << "Point(" << p.x << ", " << p.y << ")";
 			return os;
-		}
+		}*/
 		int getX() const { return x; }
 		int getY() const { return y; }
 	private:
@@ -29,15 +29,16 @@ export namespace math {
 	//A class that using Point to create a line.
 	class Line
 	{
+		friend struct fmt::formatter<Line>;
 	public:
 		Line(Point start, Point end) : start(start), end(end) {}
 
 		//Output stream operator to print the line to std::cout.
-		friend std::ostream& operator<<(std::ostream& os, const Line& l)
+		/*friend std::ostream& operator<<(std::ostream& os, const Line& l)
 		{
 			os << "Line(" << l.start << ", " << l.end << ")";
 			return os;
-		}
+		}*/
 
 	private:
 		Point start;
@@ -59,4 +60,25 @@ namespace math {
 	}
 }
 
+template<>
+struct fmt::formatter<math::Point>
+{
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const math::Point& obj, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "Point({},{})", obj.x, obj.y);
+	}
+};
+
+template<>
+struct fmt::formatter<math::Line>
+{
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const math::Line& obj, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "Line({},{})", obj.start, obj.end);
+	}
+};
 

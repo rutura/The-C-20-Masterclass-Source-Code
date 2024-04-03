@@ -1,4 +1,5 @@
-import <iostream>;
+#include <fmt/format.h>
+// import <iostream>;
 import math;
 
 int main()
@@ -8,6 +9,8 @@ int main()
 
     auto p = math::generateRandomPoint();
     //print p
-    std::cout << p << std::endl;
-    std::cout << "x: " << p.getX() << std::endl;
+    fmt::println( "{}" , p);
+    // std::cout << p << std::endl;
+    fmt::println("x: {}", p.getX() );
+    // std::cout << "x: " << p.getX() << std::endl;
 }

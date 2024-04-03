@@ -1,14 +1,15 @@
 module;
 #include <random>
+#include <fmt/format.h>
 export module math;
 
-import <iostream>;
+// import <iostream>;
 
 
 namespace math {
 	//A class to represent a Point in 2D space with x and y coordinates together with getters and setters
 	class Point {
-	private:
+		friend struct fmt::formatter<Point>;
 		double x;
 		double y;
 	public:
@@ -18,10 +19,10 @@ namespace math {
 		}
 
 		//An outuput stream operator to print the point
-		friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+		/*friend std::ostream& operator<<(std::ostream& os, const Point& p) {
 			os << "(" << p.x << ", " << p.y << ")";
 			return os;
-		}
+		}*/
 		double getX() { return x; }
 		double getY() { return y; }
 		void setX(double x) { this->x = x; }
@@ -43,3 +44,14 @@ namespace math {
 		return Point(distXY(genXY), distXY(genXY));
 	}
 }
+
+template<>
+struct fmt::formatter<math::Point>
+{
+	constexpr auto parse(format_parse_context& ctx){return ctx.begin(); }
+	template<typename FormatContext>
+	auto format(const math::Point& obj, FormatContext& ctx)
+	{
+		return format_to(ctx.out(), "point({},{})", obj.x, obj.y);
+	}
+};
