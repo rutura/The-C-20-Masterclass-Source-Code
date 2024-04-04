@@ -1,5 +1,6 @@
 #include <algorithm>
-import <iostream>;
+#include <fmt/format.h>
+// import <iostream>;
 import BoxContainer;
 
 int main()
@@ -15,7 +16,9 @@ int main()
     box1.add(9);
     box1.add(6);
 
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println("box1 : {}",  box1);
+    // std::cout << "box1 : " << box1 << std::endl;
     std::ranges::sort(box1.begin(), box1.end());
-    std::cout << "box1 : " << box1 << std::endl;
+    fmt::println("box1 : {}" , box1 );
+    // std::cout << "box1 : " << box1 << std::endl;
 }

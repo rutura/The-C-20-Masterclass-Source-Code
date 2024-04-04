@@ -2,10 +2,9 @@ module;
 // Global module fragment
 #include <cstring> // C function includes must show up here
 #include <string>
+#include <fmt/format.h>
 
 export module math_stuff; // Module declaration
-//Module preamble
-import <iostream>;
 
 //Module purview
 export{
@@ -18,10 +17,10 @@ export{
 		std::string dest;
 		dest = "Hello ";
 		dest.append(name);
-		std::cout << dest << std::endl;
+		fmt::println("{}", dest);
 	}
 }
 
 export void print_name_length(const char* c_str_name) {
-	std::cout << "Length : " << std::strlen(c_str_name) << std::endl;
+	fmt::println("Length : {}",  std::strlen(c_str_name));
 }

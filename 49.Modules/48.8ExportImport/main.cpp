@@ -1,4 +1,5 @@
-import <iostream>;
+// import <iostream>;
+#include <fmt/format.h>
 import Line;
 
 int main()
@@ -8,6 +9,8 @@ int main()
 
     Line line{ p1, p2 };
 
-    std::cout << "p1 [" << p1.x() << "," << p1.y() << "]\n";
-    std::cout << "p2 [" << p2.x() << "," << p2.y() << "]\n";
+    fmt::println("p1 [{}, {}]" ,p1.x(),  p1.y());
+    // std::cout << "p1 [" << p1.x() << "," << p1.y() << "]\n";
+    fmt::println("p2 [{}, {}]",  p2.x() ,  p2.y());
+    // std::cout << "p2 [" << p2.x() << "," << p2.y() << "]\n";
 }
