@@ -1,5 +1,8 @@
-#include <iostream>
-
+#include <fmt/format.h>
+/**
+ * Cppreference:
+ * constinit: https://en.cppreference.com/w/cpp/language/constinit
+ */
 const int val1 {33};
 constexpr int val2{34};
 int val3 {35}; // Run time value
@@ -19,15 +22,15 @@ int main(){
 
     //constinit double height{1.72};
 
-    std::cout << "age : " << age << std::endl;
-    std::cout << "age1 : " << age1 << std::endl;
-    std::cout << "age2 : " << age2 << std::endl;
+    fmt::println("Age: {}", age);
+    fmt::println("Age 1: {}", age1);
+    fmt::println("Age 2: {}", age2);
     
     age =33; // Can change a const init variable
-    std::cout << "age : " << age << std::endl;
-    
+    fmt::println("Age: {}", age);
+
     //Combining const and constinit
-    std::cout << "weight : " << weight << std::endl;
+    fmt::println("Weight: {}", weight);
     //weight = 44.44; // Compiler error
     
     return 0;

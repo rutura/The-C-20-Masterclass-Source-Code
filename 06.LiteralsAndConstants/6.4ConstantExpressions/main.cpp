@@ -1,6 +1,12 @@
-#include <iostream>
+#include <fmt/format.h>
 
-
+/*
+ * - Added mathematical constants
+ * - Changed the output stream to fmt's
+ * cppreference:
+ * Mathematical reference: https://en.cppreference.com/w/cpp/numeric/constants
+ * constexpr: https://en.cppreference.com/w/cpp/language/constexpr
+ */
 int main(){
 
 	constexpr int SOME_LIB_MAJOR_VERSION {1237};
@@ -10,9 +16,8 @@ int main(){
 	constexpr double PI {3.14};
 
     //eye_count = 4;
-	
-	std::cout << "eye count : " << eye_count << std::endl;
-	std::cout << "PI : " << PI << std::endl;
+	fmt::println("eye count: {}", eye_count);
+	fmt::println("PI: {}", PI);
 
 
 	//int leg_count {2}; // Non constexpr
@@ -32,9 +37,13 @@ int main(){
    // int age = 5;
    // static_assert( age == 5);
 
-    std::cout << "App doing its thing..." << std::endl;
+	fmt::println("App doing its thing...");
 
-
-   
+	/*
+	 * Mathematical constants
+	 */
+	using namespace std::numbers;
+	fmt::println("e_v: {}, log2e_v: {}, log10e_v: {}", e_v, log2e_v, log10e_v);
+	fmt::println("phi_v: {}, egamma_v: {}, inv_sqrt3_v: {}", phi_v, egamma_v, inv_sqrt3_v);
     return 0;
 }
