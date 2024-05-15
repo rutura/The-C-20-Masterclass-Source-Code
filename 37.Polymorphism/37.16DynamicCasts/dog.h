@@ -4,20 +4,16 @@
 class Dog : public Feline
 {
 public:
-    Dog() = default;
-    Dog(std::string_view fur_style, std::string_view description);
-    virtual ~Dog();
-    
-    virtual void bark() const{
-        std::cout << "Dog::bark called : Woof!" << std::endl;
-    }
+  Dog() = default;
+  Dog(std::string_view fur_style, std::string_view description);
+  virtual ~Dog();
 
-	void do_some_dog_thingy(){
-		std::cout << "Doing some dog thingy...,speed : " << m_speed << std::endl;
-	}
+  virtual void bark() const { fmt::println("Dog::bark called : Woof!"); }
 
-private : 
-    double m_speed{};
+  void do_some_dog_thingy() { fmt::println("Doing some dog thingy...,speed : {}", m_speed); }
+
+private:
+  double m_speed{};
 };
 
-#endif // DOG_H
+#endif// DOG_H

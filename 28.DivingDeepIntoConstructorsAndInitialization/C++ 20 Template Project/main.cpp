@@ -1,4 +1,4 @@
-#include <iostream>
+#include <fmt/format.h>
 
 consteval int get_value(){
     return 3;
@@ -6,6 +6,6 @@ consteval int get_value(){
 
 int main(){
     constexpr int value = get_value();
-    std::cout << "value : " << value << std::endl;
+    fmt::println( "value : {}" , value);
     return 0;
 }

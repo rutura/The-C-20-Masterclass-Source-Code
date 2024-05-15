@@ -1,66 +1,53 @@
-#include <iostream>
 #include <bitset>
+#include <fmt/format.h>
+
+/**
+ * Printing binary representation of decimals (base 2)
+ */
+int main()
+{
+
+  unsigned short int value{ 0xff0u };
+
+  fmt::println("Size of short int : {}", sizeof(short int));//  16 bits
+
+  fmt::println("value: {:016b}, dec : {}", std::bitset<16>(value).to_ulong(), value);
+
+  // Shift left by one bit
+  value = static_cast<unsigned short int>(value << 1);
+  fmt::println("value: {:016b}, , dec : {}", std::bitset<16>(value).to_ulong(), value);
+
+  // Shift left by one bit
+  value = static_cast<unsigned short int>(value << 1);
+  fmt::println("value: {:016b}, dec : {}", std::bitset<16>(value).to_ulong(), value);
+
+  // Shift left by one bit
+  value = static_cast<unsigned short int>(value << 1);
+  fmt::println("value :{:016b}, dec : {} ", std::bitset<16>(value).to_ulong(), value);
 
 
-int main(){
+  // Shift left by one bit
+  value = static_cast<unsigned short int>(value << 1);
+  fmt::println("value: {:016b}, , dec : {}", std::bitset<16>(value).to_ulong(), value);
 
-	unsigned short int value {0xff0u};
+  // Shift left by one bit
+  value = static_cast<unsigned short int>(value << 1);
+  fmt::println("value: {:016b}, dec : {}", std::bitset<16>(value).to_ulong(), value);
 
-	std::cout << "Size of short int " << sizeof(short int) <<  std::endl;//  16 bits
-	
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
-
-    //Shift left by one bit
-    value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
-
-    //Shift left by one bit
-    value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
-
-    //Shift left by one bit
-    value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+  // Shift right by one bit
+  value = static_cast<unsigned short int>(value >> 1);
+  fmt::println("value: {:016b}, dec : {}", std::bitset<16>(value).to_ulong(), value);
 
 
-    //Shift left by one bit
-    value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
-
-    //Shift left by one bit
-    value = static_cast<unsigned short int>(value << 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
-
-    //Shift right by one bit
-    value = static_cast<unsigned short int>(value >> 1);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+  // Shift by multiple bits in one go
+  // Shift right by four bits
+  value = static_cast<unsigned short int>(value >> 4);
+  fmt::println("value: {:016b}, dec : {}", std::bitset<16>(value).to_ulong(), value);
 
 
-    //Shift by multiple bits in one go
-    //Shift right by four bits 
-    value = static_cast<unsigned short int>(value >> 4);
-    std::cout << "value : " << std::bitset<16>(value) 
-    << ", dec : " << value << std::endl;
+  //
+  fmt::println("value: {:016b}", (value >> 1));
 
 
-
-    //
-    std::cout << "value : " << (value >> 1) << std::endl;
-
-
-
-
-
-
-
-
-   
-    return 0;
+  return 0;
 }

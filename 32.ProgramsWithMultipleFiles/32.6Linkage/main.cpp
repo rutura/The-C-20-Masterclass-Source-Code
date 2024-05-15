@@ -1,38 +1,37 @@
-#include <iostream>
+#include <fmt/format.h>
 
-//No linkage
-void some_function(){
-    int age {34}; // No linkage
-    std::cout << "age : " << age << " &age : " << &age << std::endl;
+// No linkage
+void some_function()
+{
+  int age{ 34 };// No linkage
+  fmt::println("age : {}, &age: {}", age, fmt::ptr(&age));
 }
 
-const double distance{45.8}; // Internal linkage
+const double distance{ 45.8 };// Internal linkage
 
-int item_count {6}; // External linkage
-
+int item_count{ 6 };// External linkage
 
 
 extern void print_distance();
 extern void print_item_count();
 
-int main(){
+int main()
+{
 
-    /*
-    std::cout << "distance(main) : " << distance << "  &distance : " << &distance <<std::endl;
+  /*
+      fmt::println( "distance(main) : {}, &distannce:{} " , distance , fmt::ptr(&distance) );
 
-    std::cout << "-----" << std::endl;
+      fmt::println( "-----" );
 
-    print_distance();
+      print_distance();
+  */
 
-    */
 
-    std::cout << "item_count(main) : " << item_count << " &item_count : "
-        << &item_count << std::endl;
+  fmt::println("item_count(main) : {}, &item_count: {}", item_count, fmt::ptr(&item_count));
 
-    std::cout << "-----" << std::endl;
-    print_item_count();
+  fmt::println("-----");
+  print_item_count();
 
-   
-    
-    return 0;
+
+  return 0;
 }

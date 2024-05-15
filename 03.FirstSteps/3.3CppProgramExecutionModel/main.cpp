@@ -7,22 +7,21 @@
 
 #include <fmt/format.h>
 
-int f_add(int a, int b){
-    return a + b;
-}
+int f_add(int a, int b) { return a + b; }
 
-int main(){
+int main()
+{
 
-    int a = 10;
-    int b = 5;
-    int c;
+  int a = 10;
+  int b = 5;
+  int c;
 
-    fmt::println("Statement 1");
-    fmt::println("Statement 2");
-    c = f_add(a, b);
-    fmt::println("c = {}", c);
-    fmt::println("Statement 3");
-    fmt::println("Statement 4");
- 
+  fmt::println("Statement 1");
+  fmt::println("Statement 2");
+  c = f_add(a, b);
+  fmt::println("c = {}", c);
+  fmt::println("Statement 3");
+  fmt::println("Statement 4");
+
   return 0;
 }

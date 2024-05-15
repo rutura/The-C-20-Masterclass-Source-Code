@@ -25,7 +25,8 @@ private:
 	int val{};
 };
 
-int main(){
+int main()
+{
 
 	//Implicit cast will add up the doubles,
 	//then turn result into int for assignment

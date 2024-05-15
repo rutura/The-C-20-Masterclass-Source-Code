@@ -1,11 +1,12 @@
-#include <iostream>
 #include "player.h"
+#include <fmt/format.h>
 
 
-int main(){
+int main()
+{
 
-    Player p1("Basketball","John","Snow");
-    std::cout << "player : " << p1 << std::endl;
-   
-    return 0;
+  Player p1("Basketball", "John", "Snow");
+  fmt::println("player : {}", p1);
+
+  return 0;
 }

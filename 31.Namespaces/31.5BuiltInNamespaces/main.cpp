@@ -1,10 +1,11 @@
-#include <iostream>
+#include <fmt/format.h>
 #include <string>
 
-int main(){
-    
-    std::cout << "Hello World" << std::endl;
-    std::string message{"Hello World"};
-    std::cout << message << std::endl;
-    return 0;
+int main()
+{
+
+  fmt::println("Hello World");
+  std::string message{ "Hello World" };
+  fmt::println("{}", message);
+  return 0;
 }

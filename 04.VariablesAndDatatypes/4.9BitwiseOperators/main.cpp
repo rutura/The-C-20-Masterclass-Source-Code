@@ -6,7 +6,8 @@
 
 #include <bitset>
 
-int main() {
+int main()
+{
   // Printing integers in binary
   unsigned short int data {15};
 
@@ -131,81 +132,83 @@ int main() {
     
 
 
-    //Set a few bits : make them 1's regardless of what's in there
 
-	//SETTING BITS
-    //Setting : |= with mask of the bit
-	
-    //Set bit 1
-    fmt::println("Setting bit in position 1:");
-	var |= mask_bit_1;
-    fmt::println("var: {:032b}", var);
+  //Set a few bits : make them 1's regardless of what's in there
 
-         
-	//Set bit 5
-    fmt::println("Setting bit in position 5: ");
-	var |= mask_bit_5;
-    fmt::println("var: {:032b}", var);
+      //SETTING BITS
+  //Setting : |= with mask of the bit
 
-    
-	//RESETTING BITS : set to 0
-    //Resetting : &= (~mask)
-	
-	//Reset bit 1
-    fmt::println("Resetting bit in position 1: ");
-    var &= (~mask_bit_1);
-    fmt::println("var: {:032b}", var);
+  //Set bit 1
+  fmt::println("Setting bit in position 1:");
+      var |= mask_bit_1;
+  fmt::println("var: {:032b}", var);
 
-	//Reset bit 5
-    fmt::println("Resetting bit in position: 1");
-    var &= (~mask_bit_5);
-    fmt::println("var: {:032b}", var);
 
-    
-	//Set all bits
-    fmt::print("Setting all bits: ");
-    var |= ( mask_bit_0 | mask_bit_1 | mask_bit_2 | mask_bit_3 |
-             mask_bit_4 | mask_bit_5 | mask_bit_6 | mask_bit_7);
-    fmt::println("var: {:032b}", var);
+      //Set bit 5
+  fmt::println("Setting bit in position 5: ");
+      var |= mask_bit_5;
+  fmt::println("var: {:032b}", var);
 
-	//Reset bits at pos 0,2,4,6
-	fmt::println("Reset bits at pos 0,2,4,6: "); 
-    var &= ~(mask_bit_0 | mask_bit_2 | mask_bit_4 | mask_bit_6);
-    fmt::println("var: {:032b}", var);
 
-	//Check state of a bit
-	fmt::println("Checking the state of each bit position (on/off): ");
-    fmt::println("bit0 is {}", static_cast<bool>(var & mask_bit_0));
-    fmt::println("bit1 is {}", static_cast<bool>(var & mask_bit_1));
-    fmt::println("bit2 is {}", static_cast<bool>(var & mask_bit_2));
-    fmt::println("bit3 is {}", static_cast<bool>(var & mask_bit_3));
-    fmt::println("bit4 is {}", static_cast<bool>(var & mask_bit_4));
-    fmt::println("bit5 is {}", static_cast<bool>(var & mask_bit_5));
+      //RESETTING BITS : set to 0
+  //Resetting : &= (~mask)
 
-    fmt::println("bit6 is {}", static_cast<bool>(var & mask_bit_6));
-    fmt::println("bit6 is {}", (var & mask_bit_6) >> 6 );
+      //Reset bit 1
+  fmt::println("Resetting bit in position 1: ");
+  var &= (~mask_bit_1);
+  fmt::println("var: {:032b}", var);
 
-    fmt::println("bit7 is {}", static_cast<bool>(var & mask_bit_7));
-    fmt::println("bit7 is {}", (var & mask_bit_7) >> 7 );
+      //Reset bit 5
+  fmt::println("Resetting bit in position: 1");
+  var &= (~mask_bit_5);
+  fmt::println("var: {:032b}", var);
 
-	//Toggle bits
-	//Toggle : var ^ mask
-	
-	//Toggle bit 0
-	fmt::println("Toggle bit 0: ");
-    var ^= mask_bit_0;
-    fmt::println("var: {:032b}", var);
 
-    
-    //Toggle bit7 
-	fmt::println("Toggle bit 7: ");
-    var ^= mask_bit_7;
-    fmt::println("var: {:032b}", var);
-    
-	//Toggle multiple bits in one go : the 4 higher bits
-	fmt::println("Toggle multiple bits in one go : the 4 higher bits: ");
-    var ^= (mask_bit_7 | mask_bit_6 | mask_bit_5 | mask_bit_4);
-    fmt::println("var: {:032b}", var);
+      //Set all bits
+  fmt::print("Setting all bits: ");
+  var |= ( mask_bit_0 | mask_bit_1 | mask_bit_2 | mask_bit_3 |
+           mask_bit_4 | mask_bit_5 | mask_bit_6 | mask_bit_7);
+  fmt::println("var: {:032b}", var);
 
+      //Reset bits at pos 0,2,4,6
+      fmt::println("Reset bits at pos 0,2,4,6: ");
+  var &= ~(mask_bit_0 | mask_bit_2 | mask_bit_4 | mask_bit_6);
+  fmt::println("var: {:032b}", var);
+
+      //Check state of a bit
+      fmt::println("Checking the state of each bit position (on/off): ");
+  fmt::println("bit0 is {}", static_cast<bool>(var & mask_bit_0));
+  fmt::println("bit1 is {}", static_cast<bool>(var & mask_bit_1));
+  fmt::println("bit2 is {}", static_cast<bool>(var & mask_bit_2));
+  fmt::println("bit3 is {}", static_cast<bool>(var & mask_bit_3));
+  fmt::println("bit4 is {}", static_cast<bool>(var & mask_bit_4));
+  fmt::println("bit5 is {}", static_cast<bool>(var & mask_bit_5));
+
+  fmt::println("bit6 is {}", static_cast<bool>(var & mask_bit_6));
+  fmt::println("bit6 is {}", (var & mask_bit_6) >> 6 );
+
+  fmt::println("bit7 is {}", static_cast<bool>(var & mask_bit_7));
+  fmt::println("bit7 is {}", (var & mask_bit_7) >> 7 );
+
+      //Toggle bits
+      //Toggle : var ^ mask
+
+      //Toggle bit 0
+      fmt::println("Toggle bit 0: ");
+  var ^= mask_bit_0;
+  fmt::println("var: {:032b}", var);
+
+
+  //Toggle bit7
+      fmt::println("Toggle bit 7: ");
+  var ^= mask_bit_7;
+  fmt::println("var: {:032b}", var);
+
+      //Toggle multiple bits in one go : the 4 higher bits
+      fmt::println("Toggle multiple bits in one go : the 4 higher bits: ");
+  var ^= (mask_bit_7 | mask_bit_6 | mask_bit_5 | mask_bit_4);
+  fmt::println("var: {:032b}", var);
+
+  
   return 0;
 }

@@ -19,7 +19,8 @@ private:
 	double val {20.5f};
 };
 
-int main(){
+int main()
+{
 
 	//		. The compiler applies implicit conversions
 	// 			when types are different in 

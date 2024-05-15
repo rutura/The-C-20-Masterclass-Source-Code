@@ -1,72 +1,59 @@
-#include <iostream>
-#include <iomanip>
 #include <bitset>
+#include <fmt/format.h>
+
+/**
+* fmt output formatting and alignment - dynamic width
+* - Reference: https://fmt.dev/latest/syntax.html
+  Dynamic width:
+
+      fmt::format("{:<{}}", "left aligned", 30);
+      // Result: "left aligned
+*/
+int main()
+{
+
+  const int COLUMN_WIDTH{ 20 };
+
+  fmt::println("Compound bitwise assignment operators");
+
+  unsigned char sandbox_var{ 0b00110100 };// 8 bits : positive numbers only
+
+  // Print out initial value
+  fmt::println("Initial value :  ");
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
+
+  // Compound left shift
+  fmt::println("Shift left 2 bit positions in place :  ");
+  sandbox_var <<= 2;
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
+
+  // Compound right shift
+  fmt::println("Shift right 4 bit positions in place :  ");
+  sandbox_var >>= 4;
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
+
+  // Compound OR with 0000 0010 to have all lower 4 bits turned on
+  fmt::println("Compound OR with 0000 0010 :  ");
+  sandbox_var |= 0b00001111;
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
 
 
-int main(){
-
-	const int COLUMN_WIDTH {20};
-
-	std::cout << std::endl;
-	std::cout << "Compound bitwise assignment operators" << std::endl;
-	
-	unsigned char sandbox_var{0b00110100}; // 8 bits : positive numbers only
-	
-	//Print out initial value
-	std::cout << std::endl;
-	std::cout << "Initial value :  " << std::endl;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
-	
-	//Compound left shift
-	std::cout << std::endl;
-	std::cout << "Shift left 2 bit positions in place :  " << std::endl;
-	sandbox_var <<= 2;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
+  // Compound AND with 0000 1100 to turn off the 2 lowest bits
+  fmt::println("Compound AND with 0000 1100 :  ");
+  sandbox_var &= 0b000000000;
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
 
 
-    //Compound right shift
-	std::cout << std::endl;
-	std::cout << "Shift right 4 bit positions in place :  " << std::endl;
-	sandbox_var >>= 4;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
+  // XOR with 00000011 to turn on the 4 lowest bits again
+  fmt::println("Compound XOR with 0000 0011 :  ");
+  sandbox_var ^= 0b00000011;
+  fmt::println(
+    "{:>{}} sandbox_var : {:>{}}", " ", COLUMN_WIDTH / 2, std::bitset<8>(sandbox_var).to_string(), COLUMN_WIDTH);
 
-	//Compound OR with 0000 0010 to have all lower 4 bits turned on 
-	std::cout << std::endl;
-	std::cout << "Compound OR with 0000 0010 :  " << std::endl;
-	sandbox_var |= 0b00001111;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
-
-
-	//Compound AND with 0000 1100 to turn off the 2 lowest bits
-	std::cout << std::endl;
-	std::cout << "Compound AND with 0000 1100 :  " << std::endl;
-	sandbox_var &= 0b000000000;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
-
-
-	//XOR with 00000011 to turn on the 4 lowest bits again
-	std::cout << std::endl;
-	std::cout << "Compound XOR with 0000 0011 :  " << std::endl;
-	sandbox_var ^= 0b00000011;
-    std::cout << std::setw(COLUMN_WIDTH) << "sandbox_var : "
-		<< std::setw(COLUMN_WIDTH) << std::bitset<8>(sandbox_var) << std::endl;
-    std::cout << std::endl;
-
-
-   
-
-
-	
-    
-    return 0;
+  return 0;
 }

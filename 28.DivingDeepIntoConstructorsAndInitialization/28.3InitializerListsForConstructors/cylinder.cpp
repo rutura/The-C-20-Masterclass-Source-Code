@@ -1,41 +1,26 @@
 #include "cylinder.h"
-#include <iostream>
+#include <fmt/format.h>
 
-//Memberwise copy initialization
+// Memberwise copy initialization
 /*
 Cylinder::Cylinder(double rad_param,double height_param){
     base_radius = rad_param;
     height = height_param;
-    std::cout <<"Two param constructor called" << std::endl;
+    fmt::println("Two param constructor called" );
 }
 */
 
 
-//Initializer lists
-Cylinder::Cylinder(double rad_param, double height_param)
-      : base_radius(rad_param),
-         height(height_param)
-{
-
-}
+// Initializer lists
+Cylinder::Cylinder(double rad_param, double height_param) : base_radius(rad_param), height(height_param) {}
 
 
-double Cylinder::volume(){
-    return PI * base_radius * base_radius * height;
-}
+double Cylinder::volume() { return PI * base_radius * base_radius * height; }
 
-//Setter and getter methods
-double Cylinder::get_base_radius(){
-    return base_radius;
-}
-double Cylinder::get_height(){
-    return height;
-}
+// Setter and getter methods
+double Cylinder::get_base_radius() { return base_radius; }
+double Cylinder::get_height() { return height; }
 
-void Cylinder::set_base_radius(double rad_param){
-    base_radius = rad_param;
-}
+void Cylinder::set_base_radius(double rad_param) { base_radius = rad_param; }
 
-void Cylinder::set_height(double height_param){
-    height = height_param;
-}
+void Cylinder::set_height(double height_param) { height = height_param; }

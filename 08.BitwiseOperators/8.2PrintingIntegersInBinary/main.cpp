@@ -1,15 +1,19 @@
-#include <iostream>
 #include <bitset>
+#include <fmt/format.h>
 
+/**
+ * Reference: https://fmt.dev/latest/syntax.html
+ * - fmt format specifiers for different bases
+ */
+int main()
+{
 
-int main(){
+  unsigned short int data{ 15 };
 
-    unsigned short int data {15};
+  fmt::println("data (dec) : {0:#d}", data);
+  fmt::println("data (oct) : {0:#o}", data);
+  fmt::println("data (hex) : {0:#x}", data);
+  fmt::println("data (bin) : {:016b}", std::bitset<16>(data).to_ulong());
 
-    std::cout << "data (dec) : " <<std::showbase <<  std::dec << data << std::endl;
-    std::cout << "data (oct) : " <<std::showbase <<  std::oct << data << std::endl;
-    std::cout << "data (hex) : " <<std::showbase <<  std::hex << data << std::endl;
-    std::cout << "data (bin) : " << std::bitset<16>(data) << std::endl;
-   
-    return 0;
+  return 0;
 }

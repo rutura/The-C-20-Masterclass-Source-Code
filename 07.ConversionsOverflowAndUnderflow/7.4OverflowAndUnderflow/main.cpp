@@ -1,10 +1,11 @@
 #include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-    //Overflow 
+  // Overflow
 
-    unsigned char data {250};
+  unsigned char data{ 250 };
 
     ++data;
     fmt::println("data : {}" , static_cast<int>(data) );
@@ -25,7 +26,7 @@ int main(){
     fmt::println("data : {}" , static_cast<int>(data) ); // 256
 
 
-    data = 1;
+  data = 1;
 
     --data;
     fmt::println("data : {}" , static_cast<int>(data) );
@@ -33,6 +34,6 @@ int main(){
     --data;
     fmt::println("data : {}" , static_cast<int>(data) );
 
-   
-    return 0;
+
+  return 0;
 }

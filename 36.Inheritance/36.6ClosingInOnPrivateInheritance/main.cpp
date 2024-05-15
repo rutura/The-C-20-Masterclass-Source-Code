@@ -1,17 +1,14 @@
-#include <iostream>
-#include "person.h"
-#include "engineer.h"
 #include "civilengineer.h"
+#include "engineer.h"
 
-int main(){
+int main()
+{
 
-    Engineer eng1;
+  Engineer eng1;
 
-    CivilEngineer ce1;
+  CivilEngineer ce1;
 
-    std::cout << "Done" << std::endl;
+  fmt::println("Done");
 
-  
-   
-    return 0;
+  return 0;
 }

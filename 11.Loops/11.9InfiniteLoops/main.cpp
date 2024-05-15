@@ -1,35 +1,36 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
-int main(){
-   
-
-   //Infinite loop : for loop
-   /*
-   for(size_t i{};true ; ++i){
-       std::cout << i <<  " : I love C++" << std::endl;
-   }
-   */
-
-    //Infinite loop : while loop
-    /*
-    size_t i{0};
-
-    while(true){
-        std::cout << i  << " : I love C++" << std::endl;
-        ++i;
-    }
-    */
+int main()
+{
 
 
-    //Infinite loop : do while loop
+  // Infinite loop : for loop
+  /*
+  for(size_t i{};true ; ++i){
+      fmt::println( "{} : I love C++", i);
+  }
+  */
 
-    size_t i{0};
+  // Infinite loop : while loop
+  /*
+  size_t i{0};
 
-    do{
-        std::cout << i  << " : I love C++" << std::endl;
-        ++i;
-    }while(true);
-    
-    return 0;
+  while(true){
+  fmt::println( "{} : I love C++", i);
+      ++i;
+  }
+  */
+
+
+  // Infinite loop : do while loop
+
+  size_t i{ 0 };
+
+  do {
+    fmt::println("{} : I love C++", i);
+    ++i;
+  } while (true);
+
+  return 0;
 }

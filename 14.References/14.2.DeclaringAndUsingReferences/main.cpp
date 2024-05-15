@@ -1,63 +1,62 @@
-#include <iostream>
+#include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-    int int_data{33};
-    double double_data{55};
+  int int_data{ 33 };
+  double double_data{ 55 };
 
-    //References
-    int& ref_int_data{int_data};
-    double& ref_double_data{double_data};
+  // References
+  int &ref_int_data{ int_data };
+  double &ref_double_data{ double_data };
 
-    //Print stuff out
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
+  // Print stuff out
+  fmt::println("int_data : {}", int_data);
+  fmt::println("&int_data : {}", fmt::ptr(&int_data));
+  fmt::println("double_data : {}", double_data);
+  fmt::println("&double_data : {}", fmt::ptr(&double_data));
 
-    std::cout << "=======================" << std::endl;
+  fmt::println("=======================");
 
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
+  fmt::println("ref_int_data : {}", ref_int_data);
+  fmt::println("&ref_int_data : {}", fmt::ptr(&ref_int_data));
+  fmt::println("ref_double_data : {}", ref_double_data);
+  fmt::println("&ref_double_data : {}", fmt::ptr(&ref_double_data));
 
-    int_data = 111;
-    double_data = 67.2;
-
-
-    //Print stuff out
-    std::cout << std::endl;
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
-
-    std::cout << "=======================" << std::endl;
-
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
+  int_data = 111;
+  double_data = 67.2;
 
 
-    ref_int_data = 1012;
-    ref_double_data = 1000.45;
+  // Print stuff out
+  fmt::println("int_data : {}", int_data);
+  fmt::println("&int_data : {}", fmt::ptr(&int_data));
+  fmt::println("double_data : {}", double_data);
+  fmt::println("&double_data : {}", fmt::ptr(&double_data));
+
+  fmt::println("=======================");
+
+  fmt::println("ref_int_data : {}", ref_int_data);
+  fmt::println("&ref_int_data : {}", fmt::ptr(&ref_int_data));
+  fmt::println("ref_double_data : {}", ref_double_data);
+  fmt::println("&ref_double_data : {}", fmt::ptr(&ref_double_data));
 
 
-   //Print stuff out
-    std::cout << std::endl;
-    std::cout << "int_data : " << int_data << std::endl;
-    std::cout << "&int_data : " << &int_data << std::endl;
-    std::cout << "double_data : " << double_data << std::endl;
-    std::cout << "&double_data : " << &double_data << std::endl;
+  ref_int_data = 1012;
+  ref_double_data = 1000.45;
 
-    std::cout << "=======================" << std::endl;
 
-    std::cout << "ref_int_data : " << ref_int_data << std::endl;
-    std::cout << "&ref_int_data : " << &ref_int_data << std::endl;
-    std::cout << "ref_double_data : " << ref_double_data << std::endl;
-    std::cout << "&ref_double_data : " << &ref_double_data << std::endl;
-    
-    return 0;
+  // Print stuff out
+  fmt::println("int_data : {}", int_data);
+  fmt::println("&int_data : {}", fmt::ptr(&int_data));
+  fmt::println("double_data : {}", double_data);
+  fmt::println("&double_data : {}", fmt::ptr(&double_data));
+
+  fmt::println("=======================");
+
+  fmt::println("ref_int_data : {}", ref_int_data);
+  fmt::println("&ref_int_data : {}", fmt::ptr(&ref_int_data));
+  fmt::println("ref_double_data : {}", ref_double_data);
+  fmt::println("&ref_double_data : {}", fmt::ptr(&ref_double_data));
+
+  return 0;
 }

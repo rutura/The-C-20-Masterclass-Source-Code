@@ -1,43 +1,35 @@
-#include <iostream>
 #include "exceptions.h"
+#include <fmt/format.h>
 
 
-void do_something(size_t i){
-      if(i == 2){
-          throw CriticalError("i is 2");
-      }
-      
-      if(i == 3){
-          throw SmallError("i is 3");
-      }
-	  
-      if(i == 4){
-          throw Warning("i is 4");
-      }
-      std::cout << "Doing something at iteration : " << i << std::endl;
+void do_something(size_t i)
+{
+  if (i == 2) { throw CriticalError("i is 2"); }
+
+  if (i == 3) { throw SmallError("i is 3"); }
+
+  if (i == 4) { throw Warning("i is 4"); }
+  fmt::println("Doing something at iteration : {}", i);
 }
 
 
-int main(){
+int main()
+{
 
-   for(size_t i{0}; i < 5 ; ++i){
-        
-      try{
-          do_something(i);
-      }
-      catch(CriticalError& ex){
-          std::cout << "CriticalError Exception cought : " << ex.what() << std::endl;
-      }
-      catch(SmallError& ex){
-          std::cout << "SmallError Exception cought : " << ex.what() << std::endl;
-      }
-      catch(Warning& ex){
-          std::cout << "Warning Exception cought : " << ex.what() << std::endl;
-      }  
-      catch(SomethingIsWrong& ex){
-          std::cout << "SomethingIsWrong Exception cought : " << ex.what() << std::endl;
-      }    
+  for (size_t i{ 0 }; i < 5; ++i) {
+
+    try {
+      do_something(i);
+    } catch (CriticalError &ex) {
+      fmt::println("CriticalError Exception cought : {}", ex.what());
+    } catch (SmallError &ex) {
+      fmt::println("SmallError Exception cought : {}", ex.what());
+    } catch (Warning &ex) {
+      fmt::println("Warning Exception cought : {}", ex.what());
+    } catch (SomethingIsWrong &ex) {
+      fmt::println("SomethingIsWrong Exception cought : {}", ex.what());
     }
-   
-    return 0;
+  }
+
+  return 0;
 }

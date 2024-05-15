@@ -1,23 +1,25 @@
-#include <iostream>
 #include "square.h"
+#include <fmt/format.h>
 
-//Is square1 > to square2 ? true or false
-bool compare( const Square& square1 ,const Square& square2){
-    return (square1.surface() > square2.surface()) ? true : false;
+// Is square1 > to square2 ? true or false
+bool compare(const Square &square1, const Square &square2)
+{
+  return (square1.surface() > square2.surface()) ? true : false;
 }
 
-int main(){
+int main()
+{
 
-    Square s1(100.0);
-    Square s2(20.0);
+  Square s1(100.0);
+  Square s2(20.0);
 
-    std::cout << std::boolalpha;
-    std::cout << "s1 > s2 : " << compare(s1,s2) << std::endl; // false
+  //    fmt::println( "{}",fmt::ptr(std::boolalpha));
+  fmt::println("s1 > s2 : {}", compare(s1, s2));// false
 
-    //Implicit conversions
-    std::cout << "s1 > 45.9 : " << compare(s1,45.9) << std::endl; // false
+  Square s3(45.9);
+  // Implicit conversions
+  fmt::println("s1 > 45.9 : {}", compare(s1, s3));// false
 
 
-   
-    return 0;
+  return 0;
 }

@@ -1,8 +1,7 @@
-#include <iostream>
-
+#include <fmt/format.h>
 
 // Tools
-const int Pen{ 10 }; 
+const int Pen{ 10 };
 const int Marker{ 20 };
 const int Eraser{ 30 };
 const int Rectangle{ 40 };
@@ -10,31 +9,27 @@ const int Circle{ 50 };
 const int Ellipse{ 60 };
 
 
-int main(){
+int main()
+{
 
-    int tool {Eraser};
+  int tool{ Eraser };
 
-    if (tool == Pen) {
-        std::cout << "Active tool is pen" << std::endl;
-        //Do the actual painting
-    }
-    else if (tool == Marker) {
-        std::cout << "Active tool is Marker" << std::endl;
-    }
-    else if (tool == Eraser) {
-        std::cout << "Active tool is Eraser" << std::endl;
-    }
-    else if (tool == Rectangle) {
-        std::cout << "Active tool is Rectangle" << std::endl;
-    }
-    else if (tool == Circle) {
-        std::cout << "Active tool is Circle" << std::endl;
-    }
-    else if (tool == Ellipse) {
-        std::cout << "Active tool is Ellipse" << std::endl;
-    }
+  if (tool == Pen) {
+    fmt::println("Active tool is pen");
+    // Do the actual painting
+  } else if (tool == Marker) {
+    fmt::println("Active tool is Marker");
+  } else if (tool == Eraser) {
+    fmt::println("Active tool is Eraser");
+  } else if (tool == Rectangle) {
+    fmt::println("Active tool is Rectangle");
+  } else if (tool == Circle) {
+    fmt::println("Active tool is Circle");
+  } else if (tool == Ellipse) {
+    fmt::println("Active tool is Ellipse");
+  }
 
-    std::cout << "Moving on" << std::endl;
-    
-    return 0;
+  fmt::println("Moving on");
+
+  return 0;
 }

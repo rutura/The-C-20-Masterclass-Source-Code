@@ -1,26 +1,28 @@
-#include <iostream>
+#include <fmt/format.h>
 
-class Item{
-public : 
-    Item(){}
-    ~Item()  {
-        try{
-            throw 0;
-        }catch(int ex){
-            throw;
-        }
+class Item
+{
+public:
+  Item() {}
+  ~Item()
+  {
+    try {
+      throw 0;
+    } catch (int ex) {
+      throw;
     }
-    
+  }
 };
 
 
-int main(){
- 		try{
-			Item item;	
-		}catch(int ex){
-			std::cout << "main() : Catching int exception" << std::endl;
-		} 
+int main()
+{
+  try {
+    Item item;
+  } catch (int ex) {
+    fmt::println("main() : Catching int exception");
+  }
 
-        std::cout << "END." << std::endl; 
-    return 0;
+  fmt::println("END.");
+  return 0;
 }

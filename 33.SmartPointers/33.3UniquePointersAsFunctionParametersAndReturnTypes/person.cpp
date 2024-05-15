@@ -1,16 +1,11 @@
 #include "person.h"
 #include "dog.h"
-Person::Person(std::string name) : m_name{name}
+Person::Person(std::string name) : m_name{ name } {}
+
+void Person::adopt_dog(std::unique_ptr<Dog> dog)
 {
-}
-
-void Person::adopt_dog( std::unique_ptr<Dog> dog){
-    std::cout << m_name << " just adopted the dog " << dog->get_name() << std::endl;
+  fmt::println("{} just adopted the dog {}", m_name, dog->get_name());
 }
 
 
-Person::~Person()
-{
-   
-}
-
+Person::~Person() {}

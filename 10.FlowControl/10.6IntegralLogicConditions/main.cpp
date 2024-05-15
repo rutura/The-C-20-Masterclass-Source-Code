@@ -1,21 +1,19 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
-int main(){
+int main()
+{
 
-    int condition {-5};
+  int condition{ -5 };
 
-    bool bool_condition = condition;
-    std::cout << std::boolalpha;
+  bool bool_condition = condition;
 
 
-    if(bool_condition){
-        std::cout << "We have a " << bool_condition << " in our variable " << std::endl; // different from 0
-    }else
-    {
-        std::cout << "We have " << bool_condition << " in our variable" << std::endl; // zero
-    }
-    
-    
-    return 0;
+  if (bool_condition) {
+    fmt::println("We have a {} in our variable", bool_condition);// different from 0
+  } else {
+    fmt::println("We have a {} in our variable", bool_condition);// zero
+  }
+
+  return 0;
 }

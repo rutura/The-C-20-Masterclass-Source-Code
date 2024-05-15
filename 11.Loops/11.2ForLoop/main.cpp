@@ -1,85 +1,84 @@
-#include <iostream>
+#include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-	//Print I love C++ 10 times : The bad way
-    /*
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    */
+  // Print I love C++ 10 times : The bad way
+  /*
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  fmt::println( "I love C++" );
+  */
 
-   //for loop : the good way
-    /*
-   for( unsigned int i{0} ; i < 10000 ;++i){
-       //Whatever we want the loop to run
-       std::cout << i <<  " : I love C++" << std::endl;
-   }
-   std::cout << "Loop done!" << std::endl;
-   */
+  // for loop : the good way
+  /*
+ for( unsigned int i{0} ; i < 10000 ;++i){
+     //Whatever we want the loop to run
+     fmt::println("{} : I love C++", i );
+ }
+ fmt::println( "Loop done!" );
+ */
 
-  //Use size_t : a representation of some unsigned int for positive numbers [sizes]
+  // Use size_t : a representation of some unsigned int for positive numbers [sizes]
   /*
   for(size_t i{0} ; i < 10 ; ++i){
-      std::cout << i << " : I love C++" << std::endl;
+      fmt::println( " {} : I love C++", i );
   }
-  std::cout << "Loop done!" << std::endl;
+  fmt::println( "Loop done!" );
   */
-    /*
-    //sizeof(size_t)
-    std::cout << "sizeof(size_t) : " << sizeof(size_t) << std::endl;
-    */
+  /*
+  //sizeof(size_t)
+  fmt::println( "sizeof(size_t) : {}" , sizeof(size_t) );
+  */
 
 
-    //Scope of the iterator
-    /*
-    for(size_t i{0} ; i < 10 ; ++i){
-        std::cout << i << " : I love C++" << std::endl;
-    }
-    std::cout << "Loop done!" << std::endl;
-    // std::cout << "i : " << i << std::endl;Compiler error : i is not in scope
-    */
+  // Scope of the iterator
+  /*
+  for(size_t i{0} ; i < 10 ; ++i){
+      fmt::println( "{} : I love C++", i );
+  }
+  fmt::println( "Loop done!" );
+  // fmt::println( "i : {}", i ); //Compiler error : i is not in scope
+  */
 
 
-   //Iterator declared outside the loop
-   /*
-    size_t i{0}; // Iterator defined outside
+  // Iterator declared outside the loop
+  /*
+   size_t i{0}; // Iterator defined outside
 
-    for(i ; i < 10 ; ++i){
-        std::cout << i << " : I love C++" << std::endl;
-    }
-    std::cout << "Loop done!" << std::endl;
-    std::cout << "i : " << i << std::endl;
-    */
-
-
-    //Leave out the iterator declaration part
-    /*
-    size_t i{0}; // Iterator defined outside
-
-    for(  ; i < 10 ; ++i){
-        std::cout << i << " : I love C++" << std::endl;
-    }
-    std::cout << "Loop done!" << std::endl;
-    std::cout << "i : " << i << std::endl;
-    */
+   for(i ; i < 10 ; ++i){
+       fmt::println( " {}: I love C++", i );
+   }
+   fmt::println( "Loop done!" );
+   fmt::println( "i : {}",  i );
+   */
 
 
-   //Don't hard code values : BAD!
+  // Leave out the iterator declaration part
+  /*
+  size_t i{0}; // Iterator defined outside
 
-    const size_t COUNT{100};
+  for(  ; i < 10 ; ++i){
+      fmt::println( " {}: I love C++", i );
+  }
+  fmt::println( "Loop done!" );
+  fmt::println( "i : {}",  i );
+  */
 
-    for(size_t i{0} ; i < COUNT ; ++i){
-        std::cout << i << " : I love C++" << std::endl;
-    }
-    std::cout << "Loop done!" << std::endl;
-   
-    return 0;
+
+  // Don't hard code values : BAD!
+
+  const size_t COUNT{ 100 };
+
+  for (size_t i{ 0 }; i < COUNT; ++i) { fmt::println(" {}: I love C++", i); }
+  fmt::println("Loop done!");
+
+  return 0;
 }

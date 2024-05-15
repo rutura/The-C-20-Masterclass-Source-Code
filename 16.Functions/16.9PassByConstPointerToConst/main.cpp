@@ -1,22 +1,24 @@
-#include <iostream>
+#include <fmt/format.h>
 
-int dog_count{2};
+int dog_count{ 2 };
 
-void say_age(const int* const age); // Declaration
+void say_age(const int *const age);// Declaration
 
-int main(){
+int main()
+{
 
-    int age{23}; // Local
-    std::cout << "age (before call) : " << age << "&age : " << &age << std::endl; //23
-    say_age(&age); // Argument
-    std::cout << "age (after call) : " << age << "&age : " << &age <<  std::endl; //24
+  int age{ 23 };// Local
+  fmt::println("age (before call) : {} &age : {}", age, fmt::ptr(&age));// 23
+  say_age(&age);// Argument
+  fmt::println("age (after call) : {} &age : {}", age, fmt::ptr(&age));// 24
 
-    return 0;
+  return 0;
 }
 
 
-void say_age(const int* const age){ // Parameter
-    //++(*age); //
-    std::cout <<  "Hello , you are " << *age << " years old! &age : " << &age <<  std::endl;//24
-    //age = & dog_count;
+void say_age(const int *const age)
+{// Parameter
+  //++(*age); //
+  fmt::println("Hello , you are {} years old! &age : {}", *age, fmt::ptr(&age));// 24
+  // age = & dog_count;
 }

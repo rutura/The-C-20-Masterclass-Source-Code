@@ -1,20 +1,21 @@
-#include <iostream>
 #include "point.h"
+#include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-    Point p1(10,10);
-    std::cout << "p1 : " << p1 << std::endl;
+  Point p1(10, 10);
+  fmt::println("p1 : {}", p1);
 
-   // ++p1;
-   p1.operator++();
+  // ++p1;
+  p1.operator++();
 
-    std::cout << "p1 : " << p1 << std::endl; // 11
+  fmt::println("p1 : {}", p1);// 11
 
-    for(size_t i{}; i < 20 ; ++i){
-        ++p1;
-        std::cout << "p1 : " << p1 << std::endl;
-    }
-    
-    return 0;
+  for (size_t i{}; i < 20; ++i) {
+    ++p1;
+    fmt::println("p1 : {}", p1);
+  }
+
+  return 0;
 }

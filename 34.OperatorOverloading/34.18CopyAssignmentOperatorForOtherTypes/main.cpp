@@ -1,17 +1,18 @@
-#include <iostream>
-#include "point.h"
 #include "car.h"
+#include "point.h"
+#include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-    
-    Point p1(10,10,10);
-    Car c1("red",200.0);
 
-    p1 = c1;
+  Point p1(10, 10, 10);
+  Car c1("red", 200.0);
 
-    std::cout << "p1 : " << p1 << std::endl;
-    
+  p1 = c1;
 
-    return 0;
+  fmt::println("p1 : {}", p1);
+
+
+  return 0;
 }

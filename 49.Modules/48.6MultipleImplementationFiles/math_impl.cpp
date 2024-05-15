@@ -2,14 +2,11 @@ module;
 
 module math_stuff;
 
-//Preamble
+// Preamble
 
-//Implementations
-double add(double a, double b) {
-	return a + b;
-}
+// Implementations
+double add(double a, double b) { return a + b; }
 
 
-
-//Point constructor
-Point::Point(double x, double y) : m_x(x), m_y(y) {};
+// Point constructor
+Point::Point(double x, double y) : m_x(x), m_y(y){};

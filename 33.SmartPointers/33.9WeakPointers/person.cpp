@@ -1,13 +1,9 @@
 #include "person.h"
-#include <iostream>
+#include <fmt/format.h>
 
-Person::Person(std::string name) : m_name{name}
+Person::Person(std::string name) : m_name{ name }
 {
-    std::cout << "Constructor for person  " << m_name << " called." << std::endl;
+  fmt::println("Constructor for person  {} called ", m_name, " called.");
 }
 
-Person::~Person()
-{
-    std::cout << "Destructor for person  " << m_name << " called." << std::endl;
-}
-
+Person::~Person() { fmt::println("Destructor for person  {} called ", m_name, " called."); }

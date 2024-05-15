@@ -25,20 +25,21 @@
 
 */
 
-#include <fmt/format.h>
 #include <bitset>
+#include <fmt/format.h>
 
-//Declare the function
-void represent_float(float& num);
+// Declare the function
+void represent_float(float &num);
 
 void print_type_ranges();
 
-int main() {
+int main()
+{
   // Integers
-  int number1 = 15;          // Decimal
-  int number2 = 017;         // Octal
-  int number3 = 0x0F;        // Hexadecimal
-  int number4 = 0b00001111;  // Binary
+  int number1 = 15;// Decimal
+  int number2 = 017;// Octal
+  int number3 = 0x0F;// Hexadecimal
+  int number4 = 0b00001111;// Binary
 
   fmt::println("number1 : {}", number1);
   fmt::println("number2 : {}", number2);
@@ -46,7 +47,7 @@ int main() {
   fmt::println("number4 : {}", number4);
 
   // Signed integers
-  signed char number5 = 0b11111111;  // Binary
+  signed char number5 = 0b11111111;// Binary
   fmt::println("number5 : {}", number5);
 
   // Floating point types
@@ -63,42 +64,39 @@ int main() {
   return 0;
 }
 
-void print_type_ranges() {
+void print_type_ranges()
+{
   // Ranges
-  fmt::println("The range for short is from {} to {}",
-               std::numeric_limits<short>::min(),
-               std::numeric_limits<short>::max());
+  fmt::println(
+    "The range for short is from {} to {}", std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
   fmt::println("The range for unsigned short is from {} to {}",
-               std::numeric_limits<unsigned short>::min(),
-               std::numeric_limits<unsigned short>::max());
-  fmt::println("The range for int is from {} to {}",
-               std::numeric_limits<int>::min(),
-               std::numeric_limits<int>::max());
+    std::numeric_limits<unsigned short>::min(),
+    std::numeric_limits<unsigned short>::max());
+  fmt::println("The range for int is from {} to {}", std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
   fmt::println("The range for unsigned int is from {} to {}",
-               std::numeric_limits<unsigned int>::min(),
-               std::numeric_limits<unsigned int>::max());
-  fmt::println("The range for long is from {} to {}",
-               std::numeric_limits<long>::min(),
-               std::numeric_limits<long>::max());
-  fmt::println("The range for float is from {} to {}",
-               std::numeric_limits<float>::min(),
-               std::numeric_limits<float>::max());
+    std::numeric_limits<unsigned int>::min(),
+    std::numeric_limits<unsigned int>::max());
+  fmt::println(
+    "The range for long is from {} to {}", std::numeric_limits<long>::min(), std::numeric_limits<long>::max());
+  fmt::println(
+    "The range for float is from {} to {}", std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   fmt::println("The range(with lowest) for float is from {} to {}",
-               std::numeric_limits<float>::lowest(),
-               std::numeric_limits<float>::max());
+    std::numeric_limits<float>::lowest(),
+    std::numeric_limits<float>::max());
   fmt::println("The range(with lowest) for double is from {} to {}",
-               std::numeric_limits<double>::lowest(),
-               std::numeric_limits<double>::max());
+    std::numeric_limits<double>::lowest(),
+    std::numeric_limits<double>::max());
   fmt::println("The range(with lowest) for long double is from {} to {}",
-               std::numeric_limits<long double>::lowest(),
-               std::numeric_limits<long double>::max());
+    std::numeric_limits<long double>::lowest(),
+    std::numeric_limits<long double>::max());
   fmt::println("int is signed: {}", std::numeric_limits<int>::is_signed);
   fmt::println("int digits: {}", std::numeric_limits<int>::digits);
 }
 
-void represent_float(float& num) {
+void represent_float(float &num)
+{
   // Bit manipulation to get the binary representation
-  uint32_t* numBits = reinterpret_cast<uint32_t*>(&num);
+  uint32_t *numBits = reinterpret_cast<uint32_t *>(&num);
 
   // Extracting sign, exponent, and mantissa
   int sign = (*numBits >> 31) & 1;

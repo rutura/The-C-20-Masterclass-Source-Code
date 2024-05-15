@@ -1,16 +1,17 @@
-#include <iostream>
 #include "utility.h"
+#include <fmt/format.h>
 
- inline int age{12};
+inline int age{ 12 };
 
- inline void some_function(){
-	std::cout << "age : " << age << std::endl;
-	std::cout << "&age : " << &age << std::endl;
+inline void some_function()
+{
+  fmt::println("age : {}", age);
+  fmt::println("&age : {}", fmt::ptr(&age));
 }
 
-void print_age_utility1(){
-    std::cout << "Printing from utility1 : " << std::endl;
-    some_function();
-    std::cout << std::endl;
+void print_age_utility1()
+{
+  fmt::println("Printing from utility1 : ");
+  some_function();
+  fmt::println("\n");
 }
-

@@ -1,90 +1,85 @@
-#include <iostream>
+#include <fmt/format.h>
 
-int main(){
+int main()
+{
 
-    const size_t COUNT {5};
+  const size_t COUNT{ 5 };
 
-    /*
-    // For loops
-	
-	
-	std::cout << "Incrementing for loop : " << std::endl;
-    for (size_t i{} ; i < COUNT ; ++i){
-        std::cout << "i  : " << i << std::endl;
-    }
-	
-	
-	std::cout << std::endl;
-	std::cout << "Decrementing for loop : " << std::endl;
-	
-    for(size_t i{COUNT} ; i > 0 ; --i){
-        std::cout << "i : " << i << std::endl;
-    }
-    */
-
-    //Range based for loops can't be made to run in reverse order
+  /*
+  // For loops
 
 
-    //While loop
-    /*
-    //Incrementing while
-	std::cout << std::endl;
-	std::cout << "Incrementing while" << std::endl;
-	
-    size_t i{0};
-    
-    while( i < COUNT){
-        std::cout << "i : " << i << std::endl;
-        ++i;
-    }
-    
-    //Decrementing while
-	std::cout << std::endl;
-	std::cout << "Decrementing while : " << std::endl;
-    i = COUNT;
-    
-    while( i > 0){
-        std::cout << "i : " << i << std::endl;
-        --i;
-    }
-    */
-
-   //Do while loop
-    /*
-	//Incrementing do while
-    std::cout << std::endl;
-	std::cout << "Incrementing do while" << std::endl;
-    size_t i = 0;
-    
-    do {
-        std::cout << "i : " << i << std::endl;
-        ++i;
-        
-    }while ( i < COUNT);
-    
-    
-    //Decrementing do while
-	std::cout << std::endl;
-	std::cout << "Decrementing do while" << std::endl;
-    i = COUNT;
-    
-    do {
-        std::cout << "i : " << i << std::endl;
-        --i;
-    }while ( i > 0);
-    */
+      fmt::println( "Incrementing for loop : " );
+  for (size_t i{} ; i < COUNT ; ++i){
+      fmt::println( "i  : {}", i );
+  }
 
 
-   //Infinite loop
-    //Decrementing do while
-	std::cout << std::endl;
-	std::cout << "Decrementing do while" << std::endl;
-    unsigned int i = COUNT;
-    
-    do {
-        std::cout << "i : " << i << std::endl;
-        --i;
-    }while ( i >= 0);
+      fmt::println( "Decrementing for loop : " );
 
-    return 0;
+  for(size_t i{COUNT} ; i > 0 ; --i){
+      fmt::println( "i : {}", i );
+  }
+  */
+
+  // Range based for loops can't be made to run in reverse order
+
+
+  // While loop
+  /*
+  //Incrementing while
+      fmt::println( "Incrementing while" );
+
+  size_t i{0};
+
+  while( i < COUNT){
+      fmt::println( "i : {}", i );
+      ++i;
+  }
+
+  //Decrementing while
+      fmt::println( "Decrementing while : " );
+  i = COUNT;
+
+  while( i > 0){
+      fmt::println( "i : {}", i );
+      --i;
+  }
+  */
+
+  // Do while loop
+  /*
+      //Incrementing do while
+      fmt::println( "Incrementing do while" );
+  size_t i = 0;
+
+  do {
+      fmt::println( "i : {}", i );
+      ++i;
+
+  }while ( i < COUNT);
+
+
+  //Decrementing do while
+      fmt::println( "Decrementing do while" );
+  i = COUNT;
+
+  do {
+      fmt::println( "i : {}", i );
+      --i;
+  }while ( i > 0);
+  */
+
+
+  // Infinite loop
+  // Decrementing do while
+  fmt::println("Decrementing do while");
+  unsigned int i = COUNT;
+
+  do {
+    fmt::println("i : {}", i);
+    --i;
+  } while (i >= 0);
+
+  return 0;
 }

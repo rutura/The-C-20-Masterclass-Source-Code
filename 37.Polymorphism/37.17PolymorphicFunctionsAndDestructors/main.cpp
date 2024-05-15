@@ -1,67 +1,51 @@
-#include <iostream>
+#include <fmt/format.h>
 
 
 class Base
 {
 public:
-    Base()
-    {
-        std::cout << "Base constructor called" << std::endl;
-    }
-    virtual ~Base(){
-        std::cout << "Base destructor called" << std::endl;
-    }
-    virtual void setup()
-    {
-        std::cout << "Base::setup() called" << std::endl;
-        m_value = 10;
-    }
-    virtual void clean_up(){
-        std::cout << "Base::clean_up() called" << std::endl;
-    }
-    int get_value()
-    {
-        return m_value;
-    }
+  Base() { fmt::println("Base constructor called"); }
+  virtual ~Base() { fmt::println("Base destructor called"); }
+  virtual void setup()
+  {
+    fmt::println("Base::setup() called");
+    m_value = 10;
+  }
+  virtual void clean_up() { fmt::println("Base::clean_up() called"); }
+  int get_value() { return m_value; }
+
 protected:
-    int m_value;
+  int m_value;
 };
 
 class Derived : public Base
 {
 public:
-    Derived()
-        : Base()
-    {
-        std::cout << "Derived constructor called" << std::endl;
-    }
-    virtual ~Derived(){
-        std::cout << "Derived destructor called" << std::endl;
-    }
+  Derived() : Base() { fmt::println("Derived constructor called"); }
+  virtual ~Derived() { fmt::println("Derived destructor called"); }
 
-    virtual void setup() override
-    {
-        std::cout << "Derived::setup() called" << std::endl;
-        m_value = 100;
-    }
-    virtual void clean_up() override{
-        std::cout << "Derived::clean_up() called" << std::endl;
-    }
+  virtual void setup() override
+  {
+    fmt::println("Derived::setup() called");
+    m_value = 100;
+  }
+  virtual void clean_up() override { fmt::println("Derived::clean_up() called"); }
 };
 
 
-int main(){
+int main()
+{
 
-    Base * p_base = new Derived;
+  Base *p_base = new Derived;
 
-    p_base->setup();
+  p_base->setup();
 
-    auto value = p_base->get_value();
-    std::cout << "value : " << value <<  std::endl; // 100
+  auto value = p_base->get_value();
+  fmt::println("value : {}", value);// 100
 
-    p_base->clean_up();
+  p_base->clean_up();
 
-    delete p_base;
-   
-    return 0;
+  delete p_base;
+
+  return 0;
 }

@@ -1,25 +1,23 @@
-#include <iostream>
+#include <fmt/format.h>
 
-//Global namespace
-double add(double a, double b){
-    return a + b;
+// Global namespace
+double add(double a, double b) { return a + b; }
+
+namespace My_Thing {
+double add(double a, double b) { return a + b - 1; }
+
+void do_something()
+{
+  double result = ::add(5, 6);
+  fmt::println("result : {}", result);
 }
 
-namespace My_Thing{
-    double add(double a, double b){
-        return a + b - 1;
-    }
-    
-    void do_something(){
-        double result = ::add(5,6);
-        std::cout << "result : " << result << std::endl;
-    }
-    
-}
+}// namespace My_Thing
 
 
-int main(){
-    My_Thing::do_something();
-  
-    return 0;
+int main()
+{
+  My_Thing::do_something();
+
+  return 0;
 }
