@@ -8,17 +8,14 @@
 
 int main() {
   // Printing integers in binary
-  /*
   unsigned short int data {15};
 
   fmt::println("data (dec) : {0:d}", data);
   fmt::println("data (oct) : {0:o}", data);
   fmt::println("data (hex) : {0:x}", data);
   fmt::println("data (bin) : {:016b}", std::bitset<16>(data).to_ulong());
-  */
 
   // Shift operators
-  /*
   unsigned short int value {0xff0u};
 
   fmt::println("Size of short int {0}", sizeof(short int));//  16 bits
@@ -53,12 +50,10 @@ int main() {
   //Shift right by four bits
   value = static_cast<unsigned short int>(value >> 4);
   fmt::println("(7)bin value : {:016b}, decimal value: {} ", value,value);
-  */
 
   //--------------------------------------------------------------------------------------------------------------------
 
     // Logical bitwise operators
-  /*
   int COLUMN_WIDTH {20};
    unsigned int value1 {0x3}; // 0000 0011
    unsigned int value2 {0x5}; // 0000 0101
@@ -82,11 +77,8 @@ int main() {
    //XOR
    fmt::println("Bitwise XOR :");
    fmt::println("value1 ^ value2: {:032b}", value1 ^ value2);
-   */
 
   // Compound bitwise opearators
-  /*
-  const int COLUMN_WIDTH{20};
 
   fmt::println("Compound bitwise assignment operators");
   unsigned int sandbox_var{0b00110100};  // 8 bits : positive numbers only
@@ -119,13 +111,11 @@ int main() {
   fmt::println("Compound XOR with 0000 0011 :  ");
   sandbox_var ^= 0b00000011;
   fmt::println("sandbox_var: {:032b}", sandbox_var);
-  */
 
     //Masks
 	//Highlight position for bit of interest with a 1
 	//Mask other positions with 0
-    /*
-	
+
     const unsigned int mask_bit_0 {0b00000001} ;//Bit0
     const unsigned int mask_bit_1 {0b00000010} ;//Bit1
     const unsigned int mask_bit_2 {0b00000100} ;//Bit2
@@ -217,6 +207,5 @@ int main() {
     var ^= (mask_bit_7 | mask_bit_6 | mask_bit_5 | mask_bit_4);
     fmt::println("var: {:032b}", var);
 
-    */
   return 0;
 }
