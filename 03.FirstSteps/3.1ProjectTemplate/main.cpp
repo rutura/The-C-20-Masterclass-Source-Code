@@ -3,6 +3,12 @@
     . Uses the CMake presets file from endless sky and modifies it to work with the cl compiler
     . Uses vcpkg as a dependency manager
     . Sets up vs code to have a status bar
+    . Build instructions: 
+        . Bare hands with CMake: 
+            . cmake -S . -B build
+            . cmake --build build
+
+        . With CMake presets: 
 
 */
 
