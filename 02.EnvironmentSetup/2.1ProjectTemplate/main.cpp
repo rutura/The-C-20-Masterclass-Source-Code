@@ -19,6 +19,6 @@
 int main()
 {
 
-  fmt::print("Hello World!");
+  fmt::println("Hello World!");
   return 0;
 }
