@@ -75,7 +75,8 @@
 		- Output tabular data through stream formatting
 		- Output tabular date through std::format.
 
-6. Literals, constants and compile time programming. [ADJUSTED] Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
+6. Literals, constants and compile time programming. [ADJUSTED]
+		 Reference : https://github.com/federico-busato/Modern-CPP-Programming/blob/master/05.Basic_Concepts_IV.pdf. See the title relevant to this.
     1. Literals
     2. Constants
     3. constexpr
