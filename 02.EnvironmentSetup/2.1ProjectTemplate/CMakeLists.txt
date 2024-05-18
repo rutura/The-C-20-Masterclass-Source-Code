@@ -1,5 +1,5 @@
 #The root CMakeLists.txt file.
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
@@ -11,5 +11,5 @@ set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(rooster main.cpp)
+add_executable(rooster main.cpp utilities.h utilities.cpp)
 target_link_libraries(rooster PRIVATE fmt::fmt)
