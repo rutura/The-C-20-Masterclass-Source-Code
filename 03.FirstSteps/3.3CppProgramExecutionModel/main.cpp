@@ -2,6 +2,7 @@
     . Exploring the C++ program execution model
     . Reference the lecture on execution model in v 1.0 of the course.
     . Same content as v 1.0 in the course but updated to use the fmt library.
+    . We keep everything in the main.cpp file for simplicity.
 
 */
 
