@@ -5,9 +5,8 @@
 
 */
 
-#include <fmt/format.h>
+import utilities;
 
-int f_add(int a, int b) { return a + b; }
 
 int main()
 {
@@ -16,12 +15,12 @@ int main()
   int b = 5;
   int c;
 
-  fmt::println("Statement 1");
-  fmt::println("Statement 2");
+  print_msg("Statement 1");
+  print_msg("Statement 2");
   c = f_add(a, b);
-  fmt::println("c = {}", c);
-  fmt::println("Statement 3");
-  fmt::println("Statement 4");
+  print_number(c);
+  print_msg("Statement 3");
+  print_msg("Statement 4");
 
   return 0;
 }
