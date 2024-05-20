@@ -14,28 +14,18 @@
                     . gcc 14 and up
                     . clang 16 and up
                     . latest visual c++
+        . Be carefult about the opengl dependencies that vcpkg will complain about in the output .
+        . Note that even if we don't have access to xserver we can still build the 
+            binary successfuly. We simply and run it and see a GUI.
         . In this course, we will run it on windows 
 
 */
-
-#include <SFML/Graphics.hpp>
+import utilities;
 
 int main()
 {
-  sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-  sf::CircleShape shape(100.f);
-  shape.setFillColor(sf::Color::Green);
-
-  while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) window.close();
-    }
-
-    window.clear(sf::Color::Red);
-    window.draw(shape);
-    window.display();
-  }
+  print_msg("starting out...");
+  app();
 
   return 0;
 }
