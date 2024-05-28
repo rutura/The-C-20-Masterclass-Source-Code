@@ -1,7 +1,7 @@
 /*
     . Topics: 
-        . If, switch and ternary operator
-        . Loops: for, while, do while
+        . Loops: for, while, do-while
+        . ATTENTION: Use the debugger to step through the loops.
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
