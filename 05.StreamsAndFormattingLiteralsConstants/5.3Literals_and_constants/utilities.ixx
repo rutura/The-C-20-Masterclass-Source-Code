@@ -5,6 +5,8 @@ module;
 export module utilities; // Name doesn't have to match the .ixx file
 
 //Module purview
+
+/*
 const int val1 {33};
 constexpr int val2{34};
 int val3 {35}; // Run time value
@@ -18,10 +20,30 @@ constinit int age2{ age1 };// Initializing with age would lead to a compiler err
 
 const constinit double weight{ 33.33 };
 // constexpr constinit double scale_factor{3.11};// Can't combine constexpr and constinit
+*/
+
+//4.constexpr functions
+constexpr int add(int a, int b){
+	return a + b;
+}
+
+//5.consteval
+consteval int multiply(int a, int b){
+	return a * b;
+}
+
+//6.constinit
+constinit int age{ add(3,4) }; // Ok. age is in the global scope and is initiallized with a compile time value
+//Can change the value in a constinit variable. See body of do_work().
+//We just can't do it here because this is a declaration and not a definition.
+const constinit double height{1.72}; // const and constinit can be combined
+
+int randomizer = 5;
+//constinit int  car_count{add(3,randomizer)}; // Error. randomizer is not a compile time value
 
 export void do_work(){
 
-	//Literals
+	//1.Literals
 	/*
 	// 2 Bytes
   	short short_var{ -32768 };//  No special literal type for short
@@ -101,7 +123,8 @@ export void do_work(){
 	fmt::println("The string literal is : {}", string_literal);
 	*/
 
-	//Constants
+
+	//2.Constants
 	/*
 	const int age {34};
     const float height {1.67f};
@@ -113,8 +136,9 @@ export void do_work(){
     fmt::println("Age:{}, Height:{}, Years: {}", age, height, years);
 	*/
 
-	//Constant expressions
+	//3.constexpr variables
 	/*
+	//constexpr variables are always evaluated at compile time. constexpr implies const
 	constexpr int SOME_LIB_MAJOR_VERSION {1237};
 	
 	constexpr int eye_count {2};
@@ -126,40 +150,56 @@ export void do_work(){
 	fmt::println("PI: {}", PI);
 
 
-  	// int leg_count {2}; // Non constexpr
-  	//  leg_count is not known at compile time
-  	// constexpr int arm_count{leg_count}; // Error
+  	//int leg_count {2}; // Non constexpr. leg_count is not known at compile time
+  	//constexpr int arm_count{leg_count}; // Error
 
 
-  	constexpr int room_count{ 10 };
-  	constexpr int door_count{ room_count };// OK
+  	//constexpr int room_count{ 10 };
+  	//constexpr int door_count{ room_count + 2};// OK. Can use constexpr to initialize another constexpr
 
-  	const int table_count{ 5 };
-  	constexpr int chair_count{ table_count * 5 };// Works
+  	//const int table_count{ 5 };
+  	//constexpr int chair_count{ table_count * 5 };// Works. Can use const to initialize constexpr
 
 
-  	// static_assert( SOME_LIB_MAJOR_VERSION == 123);
+  	//static_assert( SOME_LIB_MAJOR_VERSION == 123);
 
-  	// int age = 5;
-  	// static_assert( age == 5);
-
-	fmt::println("App doing its thing...");
+  	//int age = 5;
+  	//static_assert( age == 5); // Error. age is not a constant expression. Can't be used in static_assert.
 	*/
 
 
-	//constinit
-	// constinit double height{1.72};
+	//4.constexpr functions: computations can be carried out at compile time.
+	//constexpr functions can be evaluated at compile time, if all the arguments are known at compile time
+	//Not all functions can be constexpr. There are limitations that we won't list at this point in the course.
+	//constexpr functions are evaluated at run time if: 
+	// . They call run-time (non constexpr) functions
+	// . They contain references to run-time global variables.
+	/*
 
-    fmt::println("Age: {}", age);
-    fmt::println("Age 1: {}", age1);
-    fmt::println("Age 2: {}", age2);
-    
-    age =33; // Can change a const init variable
-    fmt::println("Age: {}", age);
+	auto value1{add(3, 4)}; // Evaluated at compile time. 3 and 4 are literals.
 
-    //Combining const and constinit
-    fmt::println("Weight: {}", weight);
-    //weight = 44.44; // Compiler error
+	int factor{2}; // Run time value. Not known at compile time.
+	auto value2{add(3, factor)}; // Evaluated at run time
+	*/
+
+    //5.consteval : C++20. Guarantees that the function is evaluated at compile time.
+	//If compile time evaluation is not possible, the compiler will throw an error.
+
+	/*
+	auto value3{multiply(3, 4)}; // Evaluated at compile time. 3 and 4 are literals.
+	int factor1{2}; // Run time value. Not known at compile time.
+	auto value4{multiply(3, factor1)}; // Error. factor1 is not known at compile time.
+	*/
 
 
+	//6.constinit : C++20. Guarantees that the variable is initialized at compile time.
+	//Initialization with a run-time value will lead to a compiler error.
+
+	//constinit double height{1.72}; //Error: 'height': 'constinit' only allowed on a variable declaration with static or thread storage duration
+	//constinit int age{ add(3,4) }; // Error: 'age': 'constinit' only allowed on a variable declaration with static or thread storage duration
+									 // These errors mean that constinit variables are only allowed in the global scope.
+	//age = 30; // Can change a constinit variable
+	//height = 1.8; // Error. height is now const.
+
+	fmt::println("Age: {}, Height: {}", age, height);
 }
