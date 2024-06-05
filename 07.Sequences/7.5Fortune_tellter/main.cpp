@@ -1,15 +1,13 @@
 /*
-    . Exploring built in arrays
-    . Topics: 
-        . Declaration and initialization
-        . Size of an array
-        . Array of characters
-        . Array bounds
-        . Random number generation old style
-        . Random number generation modern C++
-        . Multi-dimensional array
-        . Multi-dimensional array of characters
-        
+    .  Fortune teller example 
+        . version 1:
+            . Stores predictions in independent raw arrays.
+        . version 2:
+            . Stores predictions in a single 2d array.
+        . version 3:
+            . Uses a marsene twister to generate random numbers.
+            . also shows that the generator can be stored in the global scope.
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -37,13 +35,8 @@
 import utilities;
 
 int main() {
-    //declaration_and_initialization();
-    //size_of_an_array();
-    //array_of_characters();
-    //array_bounds();
-    //random_num_old_style();
-    //random_num_modern_cplusplus();
-    //multi_dim_array();
-    multi_dim_array_of_characters();
+    //fortune_teller_version_1();
+    //fortune_teller_version_2();
+    //fortune_teller_version_3();
     return 0; 
 }
