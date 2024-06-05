@@ -5,6 +5,7 @@ module;
 #include <ctime>
 #include <random>
 #include <iostream>
+#include <vector>
 //Global module fragment : #include , preprocessor directives
 export module utilities; // Name doesn't have to match the .ixx file
 
@@ -241,3 +242,94 @@ export void fortune_teller_version_3(){
     fmt::println("That's all I have for you today dear. Best wishes");
 }
 
+export void fortune_teller_version_4(){
+
+    std::vector<std::string> predictions{
+        "a lot of kinds running in the backyard!",
+        "a lot of empty beer bootles on your work table.",
+        "you Partying too much with kids wearing weird clothes.",
+        "you running away from something really scary",
+        "clouds gathering in the sky and an army standing ready for war",
+        "dogs running around in a deserted empty city",
+        "a lot of cars stuck in a terrible traffic jam",
+        "you sitting in the dark typing lots of lines of code on your dirty computer",
+        "you yelling at your boss. And oh no! You get fired!",
+        "you laughing your lungs out. I've never seen this before.",
+        ", huum, I don't see anything",
+        "you drinking wine",
+        "you, running away from a bear"
+    };
+
+    bool end{ false };
+
+    const int max_length{ 15 };
+    char name[max_length]{};
+
+    fmt::print("What's your name dear: ");
+
+    std::cin.getline(name, max_length);// Get input with spaces
+
+    while (!end) {
+        fmt::println("Oh dear {}, I see ", name);
+
+        std::uniform_int_distribution<size_t> dist(0, predictions.size() - 1);
+        size_t rand_num = dist(gen);
+
+        fmt::println("{}", predictions[rand_num]);
+
+        fmt::println("Do you want me to try again ? (Y | N) : ");
+
+        char go_on;
+        std::cin >> go_on;
+
+        end = ((go_on == 'Y') || (go_on == 'y')) ? false : true;
+    }
+
+    fmt::println("That's all I have for you today dear. Best wishes");   
+}
+
+//This version contains suggestions from ChatGPT
+export void fortune_teller_version_5() {
+    std::vector<std::string> predictions{
+        "a lot of kinds running in the backyard!",
+        "a lot of empty beer bottles on your work table.",
+        "you partying too much with kids wearing weird clothes.",
+        "you running away from something really scary",
+        "clouds gathering in the sky and an army standing ready for war",
+        "dogs running around in a deserted empty city",
+        "a lot of cars stuck in a terrible traffic jam",
+        "you sitting in the dark typing lots of lines of code on your dirty computer",
+        "you yelling at your boss. And oh no! You get fired!",
+        "you laughing your lungs out. I've never seen this before.",
+        ", huum, I don't see anything",
+        "you drinking wine",
+        "you, running away from a bear"
+    };
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dist(0, predictions.size() - 1);
+
+    bool end = false;
+    std::string name;
+
+    fmt::print("What's your name dear: ");
+    std::getline(std::cin, name);
+
+    while (!end) {
+        fmt::print("Oh dear {}, I see ", name);
+
+        size_t rand_num = dist(gen);
+        fmt::println("{}", predictions[rand_num]);
+
+        fmt::print("Do you want me to try again? (Y | N): ");
+
+        char go_on;
+        std::cin >> go_on;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the input buffer
+
+        end = !(go_on == 'Y' || go_on == 'y');
+    }
+
+    fmt::println("That's all I have for you today dear. Best wishes.");
+}
