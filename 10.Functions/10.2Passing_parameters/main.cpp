@@ -91,13 +91,30 @@ void say_age(const int *age)    //The value pointed to is constant
 */
 
 //Pass by const pointer to const
-
+/*
 int dog_count{ 10 };// Global
 void say_age(const int *const age)
 {
     //++(*age); // The value pointed to is const.
     fmt::println("Hello , you are {} years old! &age : {}", *age, fmt::ptr(&age));// 24
     //age = & dog_count; // The pointer itself is const, you can't make it point somewhere else.
+}
+*/
+
+//Pass by reference
+/*
+void say_age(int &age)
+{
+  ++age;
+  fmt::println("Hello, you are {} years old! &age: {}", age, fmt::ptr(&age));// 24
+}
+*/
+
+//Pass by const reference
+void say_age(const int &age)
+{
+  //++age;
+  fmt::println("Hello, you are {} years old! &age: {}", age, fmt::ptr(&age));// 24
 }
 
 int main() {
@@ -143,4 +160,19 @@ int main() {
     say_age(&age);// Argument
     fmt::println("age (after call): {} &age: {}", age, fmt::ptr(&age));
     */
+
+    //Pass by reference
+    /*
+    int age{ 23 };// Local
+    fmt::println("age (before call): {} &age: {}", age, fmt::ptr(&age));
+    say_age(age);// Argument
+    fmt::println("age (after call): {} &age: {}", age, fmt::ptr(&age));
+    */
+
+    //Pass by const reference
+    int age{ 23 };// Local
+    fmt::println("age (before call) : {} &age : {}", age, fmt::ptr(&age));
+    say_age(age);// Argument
+    fmt::println("age (after call) : {} &age : {}", age, fmt::ptr(&age));
+
 }
