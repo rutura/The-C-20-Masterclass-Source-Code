@@ -1,0 +1,120 @@
+Todo: 
+	. NOTE: CAN SEPARATE EACH CONCEPT INTO ITS OWN MODULE FILE FOR ORGANIZATION.
+	. Functions
+	. 11. Custom Types: 
+		1. Enums and type aliases.
+		2. Blueprints with classes: 
+			. Your first class
+			. Constructors and destructors
+			. Objects and sizes of objects
+			. Defaulted constructors
+			. Classes across multiple files
+			. Order of constructor and destructor call
+			
+		3. Class members and their access: 
+			. setters and getters
+			. getters that double as setters
+			. managing class objects through pointers.
+			. The this pointer
+		
+		4. Classes, objects and const
+			. const objects
+			. const objects as function parameters
+			. const member functions
+			. mutable objects
+			
+		5. Constructors up close
+			. default parameters for constructors
+			. Initializer lists for constructors
+			. explicit constructors
+			. Constructor delegation
+			. Copy constructors
+			. Objects stored in arrays are copies
+			. Move constructors
+			. Deleted constructors
+			
+		6. Initialization: 
+			. Aggregate initialization
+			. Designated initializers
+			. Uniform initialization for aggregates
+		7. Friends: 
+			. Friend functions
+			. Friend classes
+		8. Static members
+			. Static member variables
+			. Inline static member variables
+			. Static constants (pre 17 and after)
+			. Member variables of type self
+			. Member variables of other types
+			. Static member functions
+			. Nested classes
+			. In class member initialization.
+			
+	. 12. Namespaces
+		1. The basics
+			. Creating namespaces
+			. Namespaces across multiple files
+			. Default global namespace
+			. Built in namespaces
+			. Using declarations
+			. Anonymous namespaces
+			. Nested namespaces
+			. Namespace aliases
+		2. Namespaces and modules
+			. Explore this.
+			
+	. 13. Programs with multiple files
+		. KEEP AS IS. JUST REORGANIZE.
+		
+	. 14. Smart Pointers 
+		. KEEP AS IS. JUST REORGANIZE.
+		
+	. 15. Operator overloading
+		. KEEP AS IS. JUST BREAK UP IN MODULE FILES
+		
+	. 16. Logical operators and the. Three way comparison infrastructure
+		. KEEP AS IS. JUST BREAK UP IN MODULE FILES.
+		
+	. 17. Inheritance
+	
+	. 18. Polymorphism
+	
+	. 19. Exceptions
+	
+	. 20. Practice: BoxContainer
+	
+	. 21. Template Metaprogramming
+	
+	. 22. Move Semantics
+	
+	. 23. Function like entities
+	
+	. 24. Stl containers and iterators
+	
+	. 25. Zooming in on stl containers
+	
+	. 26. Stl algorithms
+	
+	. 27. Ranges library C++20
+	
+	. 28. Building iterators for custom types
+	
+	. 29. Coroutines
+	
+	. 30. Modules (may remove).
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
