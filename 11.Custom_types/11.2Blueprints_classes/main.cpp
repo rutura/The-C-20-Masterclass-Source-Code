@@ -4,6 +4,7 @@
         . Using constructors
         . Defaulted constructors
         . Setters and getters
+        . Class across multiple files
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -29,10 +30,12 @@
 
 // One line comment
 import utilities;
+import cylinder;
 
 int main() {
     //your_first_class();
     //using_constructors();
     //defaulted_constructors();
-    setters_and_getters();
+    //setters_and_getters();
+    class_x_multiple_files();
 }

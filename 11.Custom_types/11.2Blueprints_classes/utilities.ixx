@@ -1,6 +1,7 @@
 module;
 #include <string_view>
 #include <fmt/format.h>
+
 //Global module fragment : #include , preprocessor directives
 export module utilities; // Name doesn't have to match the .ixx file
 
@@ -75,6 +76,7 @@ private:
 
 
 //Setters and getters
+/*
 class Cylinder
 {
 public:
@@ -101,6 +103,7 @@ private:
   double base_radius{ 1 };
   double height{ 1 };
 };
+*/
 
 
 //Module purview
@@ -147,6 +150,7 @@ export void defaulted_constructors(){
 
 
 //Setters and getters
+/*
 export void setters_and_getters(){
 	Cylinder cylinder1(10, 10);
 	fmt::println("volume : {}", cylinder1.volume());
@@ -156,4 +160,13 @@ export void setters_and_getters(){
 	cylinder1.set_height(10);
 
 	fmt::println("volume : {}", cylinder1.volume());
+}
+*/
+
+
+//Class across multiple files
+export void class_x_multiple_files(){
+    Cylinder cylinder1(10, 10);
+    fmt::println("volume : {}", cylinder1.volume());
+
 }
