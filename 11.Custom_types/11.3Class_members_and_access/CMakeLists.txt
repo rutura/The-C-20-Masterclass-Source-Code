@@ -17,6 +17,6 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
-        utilities.ixx dog.ixx
+        utilities.ixx dog.ixx cylinder.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

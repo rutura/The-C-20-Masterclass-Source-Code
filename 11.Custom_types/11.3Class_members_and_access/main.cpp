@@ -30,5 +30,7 @@
 import utilities;
 
 int main() {
-    getters_as_setters();
+    //getters_as_setters();
+    //manage_objects_through_pointers();
+    the_this_pointer();
 }
