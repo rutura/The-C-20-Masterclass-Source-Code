@@ -6,6 +6,7 @@
         . Setters and getters
         . Class across multiple files
         . Order of constructor and destructor calls
+        . Nested classes
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -39,5 +40,6 @@ int main() {
     //defaulted_constructors();
     //setters_and_getters();
     //class_x_multiple_files();
-    order_of_constr_destr_calls();
+    //order_of_constr_destr_calls();
+    nested_classes();
 }

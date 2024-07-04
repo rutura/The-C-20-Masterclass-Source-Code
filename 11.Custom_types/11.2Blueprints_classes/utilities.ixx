@@ -3,6 +3,7 @@ module;
 #include <fmt/format.h>
 
 import cylinder;
+import outer;
 
 //Global module fragment : #include , preprocessor directives
 export module utilities; // Name doesn't have to match the .ixx file
@@ -207,4 +208,9 @@ export void order_of_constr_destr_calls(){
     Dog dog2("Dogyy2", "Shepherd", 3);
     Dog dog3("Dogyy3", "Shepherd", 5);
     Dog dog4("Dogyy4", "Shepherd", 1);
+}
+
+export void nested_classes(){
+    Outer outer1(10, 20.1);
+    outer1.do_something();
 }
