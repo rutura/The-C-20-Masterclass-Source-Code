@@ -12,12 +12,13 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp point_impl.cpp)
+add_executable(${PROJECT_NAME} main.cpp point_impl.cpp person_impl.cpp)
 
 target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         point.ixx
+        person.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
