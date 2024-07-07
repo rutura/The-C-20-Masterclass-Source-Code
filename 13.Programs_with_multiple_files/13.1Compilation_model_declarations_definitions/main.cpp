@@ -27,6 +27,9 @@
                 . g++ -fmodules-ts main.cpp point.o point_impl.o person.o person_impl.o utilities.o -o rooster.exe
             . Definitions are resolved at link time. Leave them out and you get linker errors.
                 . undefined reference to ...
+
+        . #3: One Definition Rule
+            . 
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build

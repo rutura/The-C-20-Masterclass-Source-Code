@@ -6,6 +6,9 @@ module;
 
 export module person;
 
+//Trigger ODR on the add function
+//export double add(double a, double b);
+
 // Declaration and definition
 export class Person
 {

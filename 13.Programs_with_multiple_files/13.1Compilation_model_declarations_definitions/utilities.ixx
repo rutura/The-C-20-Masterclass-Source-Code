@@ -27,6 +27,13 @@ struct D_Vector
   double m_y;
 };
 
+//Trigger ODR
+/*
+struct Point{
+	
+};
+*/
+
 export void use_point(){
 	Point p(10,10);
 	auto distance = p.distance_from_origin();
