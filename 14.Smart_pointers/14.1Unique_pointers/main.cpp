@@ -12,10 +12,6 @@
 
         .#3: Unique pointers and arrays.
 
-
-
-
-
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
