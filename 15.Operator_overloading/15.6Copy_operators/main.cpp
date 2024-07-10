@@ -1,9 +1,13 @@
 /*
-    . A C++ starter project using CMake and bringing in fmt right out of the box.
-    . Uses the CMake presets file from endless sky and modifies it to work with the cl compiler
-    . Uses vcpkg as a dependency manager
-    . Sets up vs code to have a status bar
-    . You also need ninja installed on your system.
+    . Copy operators
+        .#1: Copy assignment operator
+
+        .#2: Assignment from other types
+            . ATTENTION: 
+                . the point custom module is importing car, so we'll face the same
+                    problem that gcc 14 has. It somehow doesn't like that. Will try
+                    other compilers and see how they fare on this.
+        
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -31,5 +35,5 @@
 import utilities;
 
 int main() {
-  print_msg("Hello world!");
+    copy_constructor();
 }
