@@ -1,16 +1,9 @@
 /*
-    . Prefix and postfix operators: 
-        .#1: unary prefix operator+ as member
-
-        .#2: unary prefix operator+ as non member
-            . inline and non inline.
-
-        .#3: unary postfix operator+ (member, non-member)
-
-
-
-
-
+    . A C++ starter project using CMake and bringing in fmt right out of the box.
+    . Uses the CMake presets file from endless sky and modifies it to work with the cl compiler
+    . Uses vcpkg as a dependency manager
+    . Sets up vs code to have a status bar
+    . You also need ninja installed on your system.
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -38,7 +31,5 @@
 import utilities;
 
 int main() {
-    //unary_prefix_operator_as_member();
-    //unary_prefix_plus_operator_as_non_member();
-    //postfix_plus_operator();
+  print_msg("Hello world!");
 }
