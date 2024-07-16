@@ -4,6 +4,9 @@
             . see the inh_basics.ixx file.
 
         .#2: Protected members
+            . see the protected_members.ixx file.
+            . if the name of the namespace matches the name of the function,
+                you get redefinition errors. Keep this in mind in utilities.ixx.
 
         .#3: Playing with base class access specifiers
             . public, protected and private inheritance
