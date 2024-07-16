@@ -1,6 +1,7 @@
 /*
     . Exploring inheritance: 
         .#1: Inheritance basics
+            . see the inh_basics.ixx file.
 
         .#2: Protected members
 
@@ -42,8 +43,7 @@
 import utilities;
 
 int main() {
-    //inheritance_basics();
-    //protected_members();
-    //base_class_access_specifiers();
-    //private_inheritance_up_close(); // GCC doesn't like this.
+
+    inheritance_basics();
+
 }
