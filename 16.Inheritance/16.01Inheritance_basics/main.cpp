@@ -4,7 +4,7 @@
             . see the inh_basics.ixx file.
 
         .#2: Protected members
-            . see the protected_members.ixx file.
+            . see the protected_members.ixx
             . if the name of the namespace matches the name of the function,
                 you get redefinition errors. Keep this in mind in utilities.ixx.
 
@@ -13,9 +13,8 @@
             . public, protected and private inheritance
 
         .#4: Deep into private inheritance
-            . see engineer.ixx
-            . GCC doesn't like the use of namespaces there. 
-            . Try this on other compilers.
+            . see priv_inh.ixx 
+            . Try this out on GCC and Clang
 
 
 
@@ -49,6 +48,7 @@ int main() {
 
     //inheritance_basics();
     //protected_members_func();
-    base_access_specifiers();
+    //base_access_specifiers();
+    zooming_on_private_inheritance();
 
 }

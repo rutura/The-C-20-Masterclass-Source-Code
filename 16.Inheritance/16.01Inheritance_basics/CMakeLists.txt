@@ -21,5 +21,6 @@ target_sources(${PROJECT_NAME}
         inh_basics.ixx
         protected_members.ixx
         base_acc_spec.ixx 
+        priv_inh.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

@@ -9,6 +9,7 @@ export module utilities;
 import inh_basics;
 import protected_members;
 import base_acc_spec;
+import priv_inh;
 
 //Module purview
 export void print_msg(std::string_view msg) {
@@ -49,4 +50,10 @@ export void base_access_specifiers(){
 	// engineer1.m_full_name = "Olivier Godson"; // Compiler error
 	// engineer1.m_age = 55; // Compiler error
 	// engineer1.m_address = "dsakfd;aslfjd;laskf"; // Compiler error
+}
+
+export void zooming_on_private_inheritance(){
+	priv_inh::Engineer eng1;
+	priv_inh::CivilEngineer ce1;
+	fmt::println("Done");
 }
