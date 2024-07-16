@@ -9,8 +9,8 @@
                 you get redefinition errors. Keep this in mind in utilities.ixx.
 
         .#3: Playing with base class access specifiers
+            . see the base_acc_spec.ixx file.
             . public, protected and private inheritance
-            . see person.ixx file.
 
         .#4: Deep into private inheritance
             . see engineer.ixx
