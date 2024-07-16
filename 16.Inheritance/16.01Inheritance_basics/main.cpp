@@ -48,6 +48,7 @@ import utilities;
 int main() {
 
     //inheritance_basics();
-    protected_members_func();
+    //protected_members_func();
+    base_access_specifiers();
 
 }
