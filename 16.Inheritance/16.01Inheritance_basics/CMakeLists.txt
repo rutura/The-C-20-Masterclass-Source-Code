@@ -19,5 +19,6 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         inh_basics.ixx
+        protected_members.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

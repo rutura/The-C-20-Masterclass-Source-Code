@@ -44,6 +44,7 @@ import utilities;
 
 int main() {
 
-    inheritance_basics();
+    //inheritance_basics();
+    protected_members_func();
 
 }
