@@ -15,7 +15,8 @@
         .#4: Deep into private inheritance
             . see priv_inh.ixx 
             . Try this out on GCC and Clang
-
+        .#5: Resurecting members back in context
+            . see resurect.ixx
 
 
     . Build instructions: 
