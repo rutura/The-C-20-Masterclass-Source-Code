@@ -10,6 +10,7 @@ import inh_basics;
 import protected_members;
 import base_acc_spec;
 import priv_inh;
+import resurect;
 
 //Module purview
 export void print_msg(std::string_view msg) {
@@ -56,4 +57,11 @@ export void zooming_on_private_inheritance(){
 	priv_inh::Engineer eng1;
 	priv_inh::CivilEngineer ce1;
 	fmt::println("Done");
+}
+
+export void resurect_members_back_in_context(){
+	resurect::Engineer eng1;
+	resurect::CivilEngineer ce1;
+	fmt::println("Done");
+
 }

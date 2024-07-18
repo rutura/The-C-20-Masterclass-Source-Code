@@ -22,5 +22,6 @@ target_sources(${PROJECT_NAME}
         protected_members.ixx
         base_acc_spec.ixx 
         priv_inh.ixx
+        resurect.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

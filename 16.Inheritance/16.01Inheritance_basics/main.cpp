@@ -49,6 +49,7 @@ int main() {
     //inheritance_basics();
     //protected_members_func();
     //base_access_specifiers();
-    zooming_on_private_inheritance();
+    //zooming_on_private_inheritance();
+    resurect_members_back_in_context();
 
 }
