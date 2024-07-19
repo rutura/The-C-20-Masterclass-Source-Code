@@ -4,6 +4,12 @@
 
         .#2: Final and override are not keywords
 
+        .#3: Polymorphic functions and access specifiers
+
+        .#4: Non polymorphic functions and access specifiers
+
+        .#5: Virtual functions with default arguments
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -33,4 +39,8 @@ import utilities;
 int main() {
   //final_keyword_demo();
   //final_override_not_keywords_demo();
+  //poly_func_and_acc_spec_demo();
+  //non_polymorphic_func_and_acc_spec_demo();
+  virt_func_default_arg_demo();
+
 }

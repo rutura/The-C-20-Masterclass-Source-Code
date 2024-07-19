@@ -20,5 +20,8 @@ target_sources(${PROJECT_NAME}
         utilities.ixx
         final.ixx
         final_override_not_keywords.ixx 
+        poly_func_and_acc_spec.ixx 
+        no_poly_and_acc_spec.ixx 
+        virt_func_default_arg.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
