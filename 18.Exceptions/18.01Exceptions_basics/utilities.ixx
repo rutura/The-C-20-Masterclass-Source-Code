@@ -8,6 +8,7 @@ export module utilities;
 import try_catch_blocks;
 import need_for_exceptions;
 import exceptions_diff_levels;
+import multiple_handlers_for_exception;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -172,4 +173,14 @@ export void exceptions_diff_levels_demo(){
 
 	fmt::println("END.");
 
+}
+
+export void multiple_handlers_for_exception_demo(){
+	
+	try {
+		multiple_handlers_for_exception::f1();
+	} catch (int ex) {
+		fmt::println("Handling execution in main()");
+	}
+	fmt::println("main() finishing up");
 }
