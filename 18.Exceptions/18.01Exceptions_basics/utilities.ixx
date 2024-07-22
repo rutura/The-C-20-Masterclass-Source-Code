@@ -9,6 +9,7 @@ import try_catch_blocks;
 import need_for_exceptions;
 import exceptions_diff_levels;
 import multiple_handlers_for_exception;
+import nested_try_blocks;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -183,4 +184,14 @@ export void multiple_handlers_for_exception_demo(){
 		fmt::println("Handling execution in main()");
 	}
 	fmt::println("main() finishing up");
+}
+
+
+export void nested_try_blocks_demo(){
+	try {
+		nested_try_blocks::some_function();
+	} catch (std::string &ex) {
+		fmt::println("Main catch block , cought : {}", ex);
+	}
+	fmt::println("END.");
 }
