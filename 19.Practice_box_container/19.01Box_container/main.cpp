@@ -1,6 +1,8 @@
 /*
     . BoxContainer project: 
         .#1: Constructing and destructing
+
+        .#2: Adding items
         . 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -29,5 +31,6 @@
 import utilities;
 
 int main() {
-    constructing_destructing_demo();
+    //constructing_destructing_demo();
+    //adding_items_demo();
 }
