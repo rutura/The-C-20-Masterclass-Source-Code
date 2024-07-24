@@ -34,5 +34,6 @@ import utilities;
 int main() {
     //constructing_destructing_demo();
     //adding_items_demo();
-    removing_items_demo();
+    //removing_items_demo();
+    other_operators_demo();
 }

@@ -8,6 +8,7 @@ export module utilities;
 import box_container;
 import box_container_it_2;
 import box_container_it_3;
+import box_container_it_4;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -114,4 +115,66 @@ export void removing_items_demo(){
 	box1.remove_all(11);
 	std::cout << "box1 : " << box1 << std::endl;
 	
+}
+
+//#4
+export void other_operators_demo(){
+	//Operator+=
+	iteration_4::BoxContainer box1;
+	box1.add(1);
+	box1.add(2);
+	box1.add(3);
+	
+	std::cout << "box1 : " << box1 << std::endl;
+	
+	iteration_4::BoxContainer box2;
+	box2.add(10);
+	box2.add(20);
+	box2.add(30);
+	
+	std::cout << "box2 : " << box2 << std::endl;
+	
+	std::cout << std::endl;
+	std::cout << "operator+= : " << std::endl;
+	box2+= box1;
+	std::cout << "box2 : " << box2 << std::endl;
+	box2.add(50);
+	std::cout << "box2 : " << box2 << std::endl;
+
+	std::cout << "--------------------------" << std::endl;
+	
+//----------------------------------------------------
+	
+	//Operator+
+	std::cout << std::endl;
+	std::cout << "operator+ : " << std::endl;
+	
+	std::cout << "box1 : " << box1 << std::endl;
+	std::cout << "box2 : " << box2 << std::endl;
+	
+	iteration_4::BoxContainer box3;
+	box3.add(81);
+	box3.add(82);
+	
+	std::cout << "box3 : " << box3 << std::endl;
+	
+	std::cout << "box1 + box3 : " << (box1 + box3) << std::endl;
+
+	std::cout << "--------------------------" << std::endl;
+	
+//----------------------------------------------------
+
+	//Operator=
+	std::cout << std::endl;
+	std::cout << "operator= : " << std::endl;
+	
+	std::cout << "box1 : " << box1 << std::endl;
+	std::cout << "box2 : " << box2 << std::endl;
+	std::cout << "box3 : " << box3 << std::endl;
+	
+	box3 = box2;
+	
+	std::cout << "box1 : " << box1 << std::endl;
+	std::cout << "box2 : " << box2 << std::endl;
+	std::cout << "box3 : " << box3 << std::endl;
 }
