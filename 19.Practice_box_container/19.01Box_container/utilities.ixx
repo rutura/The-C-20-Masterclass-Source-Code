@@ -9,6 +9,7 @@ import box_container;
 import box_container_it_2;
 import box_container_it_3;
 import box_container_it_4;
+import box_container_it_5;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -177,4 +178,33 @@ export void other_operators_demo(){
 	std::cout << "box1 : " << box1 << std::endl;
 	std::cout << "box2 : " << box2 << std::endl;
 	std::cout << "box3 : " << box3 << std::endl;
+}
+
+
+//#5
+export void storing_different_types_demo(){
+
+	iteration_5::DoubleContainer double_box1;
+	double_box1.add(11.2);
+	double_box1.add(33.5);
+	
+	std::cout << "double_box1 : " << double_box1 << std::endl;
+	
+	iteration_5::IntContainer int_box1;
+	int_box1.add(10);
+	int_box1.add(20);
+	
+	std::cout << "int_box1 : " << int_box1 << std::endl;
+	
+	iteration_5::CharContainer char_box1;
+	char_box1.add('H');
+	char_box1.add('e');
+	char_box1.add('l');
+	char_box1.add('l');
+	char_box1.add('o');
+	
+	std::cout << "char_box1 : " << char_box1 << std::endl;
+
+    char_box1.remove_all('l');
+	std::cout << "char_box1 : " << char_box1 << std::endl;
 }

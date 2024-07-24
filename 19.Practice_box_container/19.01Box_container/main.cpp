@@ -5,6 +5,10 @@
         .#2: Adding items
 
         .#3: Removing items 
+
+        .#4: Other operators
+
+        .#5: Storing different types
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -35,5 +39,6 @@ int main() {
     //constructing_destructing_demo();
     //adding_items_demo();
     //removing_items_demo();
-    other_operators_demo();
+    //other_operators_demo();
+    storing_different_types_demo();
 }
