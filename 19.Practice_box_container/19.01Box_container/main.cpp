@@ -3,7 +3,8 @@
         .#1: Constructing and destructing
 
         .#2: Adding items
-        . 
+
+        .#3: Removing items 
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -33,4 +34,5 @@ import utilities;
 int main() {
     //constructing_destructing_demo();
     //adding_items_demo();
+    removing_items_demo();
 }

@@ -21,5 +21,6 @@ target_sources(${PROJECT_NAME}
         stream_insertable.ixx
         box_container.ixx 
         box_container_it_2.ixx 
+        box_container_it_3.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
