@@ -1,6 +1,10 @@
 /*
     . Functors: 
         .#1: functor basics
+            . Show functors and compare with raw function pointers
+            . Layout overloads working with function pointers and separate functors ( Encrypt and Decrypt)
+            . We haven't learnt about templates yet, but tease them with a generic modify function, that
+                brings the number of modify functions down to one.
 
 
     . Build instructions: 
