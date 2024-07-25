@@ -76,6 +76,13 @@ export void callback_functions_demo(){
 	fmt::println("-------");
 
 	fmt::println("larger in size : {}", callback_functions::get_best(quote, 
+						callback_functions::larger_in_size));
+	
 	fmt::println("greater lexicographicaly : {}", callback_functions::get_best(quote, 
 						callback_functions::greater_lexicographically));
+
+	//Type aliases
+	callback_functions::str_comparator callback {callback_functions::larger_in_size};
+	fmt::println("larger in size (type alias) : {}", callback_functions::get_best(quote, 
+						callback));
 }

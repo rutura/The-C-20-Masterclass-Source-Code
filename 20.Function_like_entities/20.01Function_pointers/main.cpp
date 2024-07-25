@@ -2,6 +2,8 @@
     . Function pointers and callbacks: 
         .#1: Function pointers
 
+        .#2: Callback functions and func pointer type aliases
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build

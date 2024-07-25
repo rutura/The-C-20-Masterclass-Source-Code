@@ -90,4 +90,11 @@ namespace callback_functions{
 
     export bool greater_lexicographically(const std::string &str1, const std::string &str2) { return (str1 > str2); }
 
-}   // namespace callback_functions
+    //Type aliases: Remember to export
+    //Using syntax
+    export using str_comparator = bool (*)(const std::string &str1, const std::string &str2);
+
+    //With typedefs
+    //export typedef bool(*str_comparator) (const std::string& str1, const std::string& str2);
+
+}   //namespace callback_functions
