@@ -1,10 +1,7 @@
 /*
-    . Function pointers and callbacks: 
-        .#1: Function pointers
+    . Functors: 
+        .#1: functor basics
 
-        .#2: Callback functions and func pointer type aliases
-            . callback functions
-            . function pointer type aliases
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -33,6 +30,5 @@
 import utilities;
 
 int main() {
-    //function_pointers_demo();
-    callback_functions_demo();
+    functors_demo();
 }
