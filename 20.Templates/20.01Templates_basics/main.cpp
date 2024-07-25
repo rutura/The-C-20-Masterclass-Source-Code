@@ -1,6 +1,8 @@
 /*
     . Template basics in C++
-        . Basic function template
+        .#1: Basic function template
+
+        .#2: Class template basics
         
     . Build instructions: 
         . Bare hands with CMake: 
@@ -29,5 +31,6 @@
 import utilities;
 
 int main() {
-    template_basics_demo();
+    //function_template_basics_demo();
+    class_template_basics_demo();
 }
