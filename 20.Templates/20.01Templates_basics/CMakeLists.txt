@@ -21,5 +21,7 @@ target_sources(${PROJECT_NAME}
         template_basics.ixx
         class_template_basics.ixx 
         template_member_functions.ixx 
+        template_parameter_types.ixx 
+        template_template_parameters.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

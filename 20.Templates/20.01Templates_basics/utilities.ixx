@@ -9,6 +9,8 @@ export module utilities; // Name doesn't have to match the .ixx file
 import template_basics;
 import class_template_basics;
 import template_member_functions;
+import template_parameter_types;
+import template_template_parameters;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -91,4 +93,40 @@ export void template_member_functions_demo(){
 
 	//box1.compare(std::string("10"));	//Error. Can't compare int with string
 	//fmt::print("The result is: {}\n", result5);
+}
+
+export void template_parameter_types_demo(){
+
+	//class template
+	template_parameter_types::Point<int> p1(1, 2);
+	template_parameter_types::Point<int> p2(3, 4);
+	auto p3 = p1 + p2;
+	fmt::print("The point is: ({}, {})\n", p3.get_x(), p3.get_y());
+
+	//function template	
+	auto result1 = template_parameter_types::maximum(11, 2);
+	fmt::print("The result is: {}\n", result1);
+
+	//Defaults
+	auto result2 = template_parameter_types::add(11, 2);
+	fmt::print("The result is: {}\n", result2);
+
+	//Non-type template parameters
+	template_parameter_types::Array<10> arr1;
+	fmt::print("The size is: {}\n", arr1.get_size());
+}
+
+export void template_template_parameters_demo(){
+	
+	template_template_parameters::Container<int> container1;
+	template_template_parameters::Processor<template_template_parameters::Container, int> processor1;
+	processor1.process(container1, 1);
+	processor1.process(container1, 2);
+	processor1.process(container1, 3);
+
+	/*
+	template_template_parameters::Container<std::string> container2;
+	template_template_parameters::Processor<template_template_parameters::Container, std::string> processor2;
+	processor2.process(container2, "Hello");
+	*/
 }
