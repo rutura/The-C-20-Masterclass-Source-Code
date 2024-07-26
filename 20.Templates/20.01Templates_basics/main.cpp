@@ -3,6 +3,8 @@
         .#1: Basic function template
 
         .#2: Class template basics
+
+        .#3: Template member functions
         
     . Build instructions: 
         . Bare hands with CMake: 
@@ -32,5 +34,6 @@ import utilities;
 
 int main() {
     //function_template_basics_demo();
-    class_template_basics_demo();
+    //class_template_basics_demo();
+    template_member_functions_demo();
 }

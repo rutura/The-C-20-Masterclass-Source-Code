@@ -1,12 +1,14 @@
 module;
 
 #include <string_view>
+#include <string>
 #include <fmt/format.h>
 
 export module utilities; // Name doesn't have to match the .ixx file
 
 import template_basics;
 import class_template_basics;
+import template_member_functions;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -59,4 +61,34 @@ export void class_template_basics_demo(){
 	class_template_basics::Point<template_basics::Integer> p8(template_basics::Integer(30), template_basics::Integer(40));
 	auto p9 = p7 + p8;
 	fmt::print("The point is: ({}, {})\n", p9.get_x().get(), p9.get_y().get());
+}
+
+export void template_member_functions_demo(){
+
+	//Class is a template, member uses the class template parameter
+	template_member_functions::Calculator_1<int> calc1; // Calls the default constructor
+	auto result1 = calc1.add(1, 2);
+	fmt::print("The result is: {}\n", result1);
+
+	template_member_functions::Calculator_1<double> calc2; // Calls the default constructor
+	auto result2 = calc2.multiply(1.1, 2.2);
+	fmt::print("The result is: {}\n", result2);
+
+
+	//Class is not a template, member is a function template
+	template_member_functions::Calculator_2 calc3; // Calls the default constructor
+	auto result3 = calc3.add(1, 2);
+	fmt::print("The result is: {}\n", result3);
+
+	auto result4 = calc3.multiply<double>(1.1, 2.2);
+	fmt::print("The result is: {}\n", result4);
+
+
+	//Both class and member are templates
+	template_member_functions::Box<int> box1(10);
+	auto result5 = box1.compare(10.1);
+	fmt::print("The result is: {}\n", result5);
+
+	//box1.compare(std::string("10"));	//Error. Can't compare int with string
+	//fmt::print("The result is: {}\n", result5);
 }
