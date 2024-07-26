@@ -49,11 +49,8 @@ namespace template_template_parameters{
         
         void print() const {
             for (const auto& element : data) {
-                //Print using fmt
                 fmt::print("{} ", element);
             }
-            //std::cout << std::endl;
-            //Use fmt to print a new line character
             fmt::print("\n");
         }
 
