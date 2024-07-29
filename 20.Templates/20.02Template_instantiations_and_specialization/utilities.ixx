@@ -1,5 +1,6 @@
 module;
 #include <string_view>
+#include <iostream>
 #include <fmt/format.h>
 
 export module utilities; 
@@ -8,6 +9,8 @@ import implicit_instantiations;
 import explicit_instantiation_definition;
 import explicit_instantiation_declaration;
 import full_specialization;
+import type_trait_example;
+import single_method_in_class;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -55,3 +58,49 @@ export void full_specialization_demo(){
     fmt::print("Sum: {}\n", full_specialization::add(1, 2));
     fmt::println("Concatenated string: {}", full_specialization::add(a, b));
 }
+
+export void type_trait_example_demo(){
+    fmt::println("Is int: {}", type_trait_example::is_int<int>::value);    // true
+    fmt::println("Is int: {}", type_trait_example::is_int<double>::value); // false
+    fmt::println("Is int: {}", type_trait_example::is_int<char>::value);   // false
+    fmt::println("Is int: {}", type_trait_example::is_int<std::string>::value); // false
+    fmt::println("Is int: {}", type_trait_example::is_int<long int>::value); // false
+}
+
+export void single_method_in_class_demo(){
+    /*
+    single_method_in_class::Adder<int> adder;
+    fmt::print("Sum: {}\n", adder.add(1, 2));
+
+    single_method_in_class::Adder<const char*> adder2;
+    const char* a = "Hello"; //strcat appends to the first parameter. So, we need to have enough space. Here, 20 bytes.
+    const char* b = " World";
+    auto result = adder2.add(a, b);
+    fmt::print("Concatenated string: {}\n", result);
+    delete result;
+    */
+    single_method_in_class::BoxContainer<int> int_box;
+    int_box.add(10);	
+    int_box.add(11);
+    int_box.add(62);
+    int_box.add(330);
+    int_box.add(3);
+    int_box.add(7);
+    int_box.add(9);
+    int_box.add(8);
+    std::cout << "int_box : " << int_box << std::endl;
+    std::cout << "int_box.max : " << int_box.get_max() << std::endl;
+    std::cout << "-------------" << std::endl;
+
+    single_method_in_class::BoxContainer<const char*> char_ptr_box;
+    char_ptr_box.add("Apple");
+    char_ptr_box.add("Kiwi");
+    char_ptr_box.add("Banana");
+    char_ptr_box.add("Zeus");
+    std::cout << "char_ptr_box : " << char_ptr_box << std::endl;
+    std::cout << "char_ptr_box : " << char_ptr_box.get_max() << std::endl;
+}
+
+
+
+

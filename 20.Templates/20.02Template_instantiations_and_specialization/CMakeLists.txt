@@ -22,5 +22,8 @@ target_sources(${PROJECT_NAME}
         explicit_instantiation_definition.ixx 
         explicit_instantiation_declaration.ixx
         full_specialization.ixx 
+        partial_specialization.ixx
+        type_trait_example.ixx 
+        single_method_in_class.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

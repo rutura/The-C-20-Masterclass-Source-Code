@@ -15,6 +15,16 @@
         .#4: Template full specialization 
             . see full_specialization.ixx
 
+        .#5: Template partial specialization
+            . see partial_specialization.ixx
+
+        .#6: Type traits
+            . see type_trait_example.ixx
+
+        #7: Specialize a single method in a class
+            . see single_method_in_class.ixx 
+            . specializing only the get_max function. This keeps all the other functions we had in the BoxContainer class.
+
     
     . Build instructions: 
         . Bare hands with CMake: 
@@ -44,5 +54,7 @@ import utilities;
 
 int main() {
       //explicit_instantiation_declaration_demo();
-      full_specialization_demo();
+      //full_specialization_demo();
+      //type_trait_example_demo();
+      //single_method_in_class_demo();
 }
