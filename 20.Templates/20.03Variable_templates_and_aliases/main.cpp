@@ -2,6 +2,11 @@
     . Variable templates and alias templates: 
         .#1: Variable templates
             . see variable_templates.ixx 
+
+        .#2: Alias templates
+            . We just use using declarations
+            . typedefs are old C++ and we ignore them.
+            
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -29,5 +34,6 @@
 import utilities;
 
 int main() {
-    variable_templates_demo();
+    //variable_templates_demo();
+    template_aliases_demo();
 }

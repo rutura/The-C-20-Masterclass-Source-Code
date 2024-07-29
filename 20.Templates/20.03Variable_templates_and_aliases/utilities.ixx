@@ -5,6 +5,7 @@ module;
 export module utilities; 
 
 import variable_templates;
+import template_aliases;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -24,4 +25,23 @@ export void variable_templates_demo(){
 	auto pi_double_v = variable_templates::PI<double>;
 	auto pi_long_double_v = variable_templates::PI<long double>;
 	fmt::println("Pi: float: {}, double: {}, long double: {}", pi_float_v, pi_double_v, pi_long_double_v);
+}
+
+
+export void template_aliases_demo(){
+	//Using alias template
+	fmt::println("Using alias template");
+	template_aliases::Vec<int> vec{1,2,3,4,5};
+	for(const auto& elem: vec){
+		fmt::print("{} ", elem);
+	}
+	fmt::print("\n");
+
+	template_aliases::StringKeyStore<int> store;
+	store.insert("one", 1);
+	store.insert("two", 2);
+	store.insert("three", 3);
+	fmt::println("Value of one: {}", store.get("one"));
+	fmt::println("Value of two: {}", store.get("two"));
+	fmt::println("Value of three: {}", store.get("three"));
 }

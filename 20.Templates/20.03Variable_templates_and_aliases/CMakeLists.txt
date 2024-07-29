@@ -19,5 +19,6 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         variable_templates.ixx 
+        template_aliases.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
