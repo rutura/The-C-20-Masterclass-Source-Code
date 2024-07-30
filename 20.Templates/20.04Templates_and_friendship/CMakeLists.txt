@@ -25,5 +25,6 @@ target_sources(${PROJECT_NAME}
         templates_and_friendship_05.ixx
         templates_and_friendship_06.ixx  
         templates_and_friendship_07.ixx 
+        templates_and_friendship_08.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
