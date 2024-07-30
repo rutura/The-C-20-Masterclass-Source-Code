@@ -30,6 +30,15 @@
         .#7: Class is a template, friends are templates, and we only want friends whose template paramter matches that 
             of the class to have access to the private members of the class.
             . See templates_and_friendship_07.ixx
+
+        .#8: Stream insertion operator for BoxContainer.
+            . see templates_and_friendship_08.ixx
+            . operator<< is setup as a friend whose template parameter matches that of BoxContainer.
+            . We have to remember to use the <> or <T> in the friend declaration, otherwise, the compiler won't generate the needed template instances.
+            . We have a few options when it comes to this: 
+                . set up the declaration and the definition outside.
+                . put the entire friend declaration and definition inside the class. This doesn't make the friend function a member of the class. It's just a weird syntax that C++ provides.
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -57,5 +66,7 @@
 import utilities;
 
 int main() {
-    templates_and_friendship_01_demo();
+    //templates_and_friendship_01_demo();
+    templates_and_friendship_08_demo() 
+
 }
