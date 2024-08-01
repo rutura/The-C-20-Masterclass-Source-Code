@@ -10,14 +10,13 @@ export module fold_expressions;
 
 namespace fold_expressions{
 
-    // Function add_unary_left_fold
+    // Unary left fold
     // add(1,2,3) becomes ((1 + 2) + 3)
     export template <typename... Args>
     auto add_unary_left_fold(Args... args) {
         return ( ... + args);
     }
 
-    //Function sub_unary_left_fold
     //sub(1,2,3) becomes ((1 - 2) - 3)
     export template <typename... Args>
     auto sub_unary_left_fold(Args... args) {
@@ -26,14 +25,13 @@ namespace fold_expressions{
 
     /************************************************************* */
 
-    // Function add_unary_right_fold
+    //  Unary right fold 
     // add(1,2,3) becomes (1 + (2 + 3))
     export template <typename... Args>
     auto add_unary_right_fold(Args... args) {
         return (args + ...);
     }
 
-    //Function sub_unary_right_fold
     //sub(1,2,3) becomes (1 - (2 - 3))
     export template <typename... Args>
     auto sub_unary_right_fold(Args... args) {
@@ -42,14 +40,13 @@ namespace fold_expressions{
 
     /************************************************************* */
 
-    // Function add_binary_left_fold
+    //  Binary left fold 
     // add(1,2,3) becomes 0 + (1 + (2 + 3))
     export template <typename... Args>
     auto add_binary_left_fold(Args... args) {
         return (0 + ... + args);
     }
 
-    //Function sub_binary_left_fold
     //sub(1,2,3) becomes 0 - (1 - (2 - 3))
     export template <typename... Args>
     auto sub_binary_left_fold(Args... args) {
@@ -58,7 +55,7 @@ namespace fold_expressions{
 
     /************************************************************* */
 
-    // Function add_binary_right_fold
+    //  Binary right fold 
     // add(1,2,3) becomes ((1 + (2 + 3)) + 0)
     export template <typename... Args>
     auto add_binary_right_fold(Args... args) {

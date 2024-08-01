@@ -61,7 +61,6 @@ export void variadic_class_templates_demo(){
 
 export void fold_expressions_demo(){
 	//Trying out fold expressions
-	/*
 	//Unary left fold
 	fmt::println("Unary left fold add 1,2,3: {}", fold_expressions::add_unary_left_fold(1, 2, 3));
 	fmt::println("Unary left fold sub 1,2,3: {}", fold_expressions::sub_unary_left_fold(1, 2, 3));
@@ -77,7 +76,6 @@ export void fold_expressions_demo(){
 	//Binary right fold
 	fmt::println("Binary right fold add 1,2,3: {}", fold_expressions::add_binary_right_fold(1, 2, 3));
 	fmt::println("Binary right fold sub 1,2,3: {}", fold_expressions::sub_binary_right_fold(1, 2, 3));
-	*/
 
 
 	//Trying out empty parameter packs
@@ -86,5 +84,5 @@ export void fold_expressions_demo(){
 	//fmt::println("Unary right fold add: {}", fold_expressions::add_unary_right_fold()); Error
 	//fmt::println("Binary left fold add: {}", fold_expressions::add_binary_left_fold()); 
 	//fmt::println("Binary right fold add: {}", fold_expressions::add_binary_right_fold());
-	fmt::println("Unary left fold add 1: {}", fold_expressions::add_unary_left_fold(1));
+	//fmt::println("Unary left fold add 1: {}", fold_expressions::add_unary_left_fold(1));
 }
