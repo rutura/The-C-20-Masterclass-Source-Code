@@ -1,9 +1,21 @@
 /*
-    . A C++ starter project using CMake and bringing in fmt right out of the box.
-    . Uses the CMake presets file from endless sky and modifies it to work with the cl compiler
-    . Uses vcpkg as a dependency manager
-    . Sets up vs code to have a status bar
-    . You also need ninja installed on your system.
+    . Move semantics: 
+        .#1: Lvalues and rvalues
+            . see move_semantics_01.ixx
+
+        .#2: Rvalue references
+            . see move_semantics_02.ixx
+
+        .#3: Moving temporaries around
+            . see move_semantics_03.ixx
+
+        .#4: Move constructor and move assignment operator
+            . see move_semantics_04.ixx
+
+        .#5: Moving lvalues with std::move
+            . see move_semantics_05.ixx
+
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -31,5 +43,10 @@
 import utilities;
 
 int main() {
-  print_msg("Hello world!");
+  //move_semantics_01_demo();
+  //move_semantics_02_demo();
+  //move_semantics_03_demo();
+  //move_semantics_04_demo();
+  move_semantics_05_demo();
+
 }
