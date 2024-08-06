@@ -1,3 +1,6 @@
+/*
+    This file contains code that tinkers with moving lvalues with std::move
+*/
 module;
 
 #include <iostream>

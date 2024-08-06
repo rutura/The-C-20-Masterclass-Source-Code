@@ -15,6 +15,7 @@ namespace box{
     public:
         BoxContainer(size_t capacity = DEFAULT_CAPACITY);
         BoxContainer(const BoxContainer<T>& source);//Copy constructor
+        //BoxContainer(const BoxContainer<T>& source) = delete; // Copy constructor deleted. Comment out the implementation
         BoxContainer( BoxContainer<T>&& source);//Move constructor
         ~BoxContainer();
 

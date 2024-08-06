@@ -15,6 +15,14 @@
         .#5: Moving lvalues with std::move
             . see move_semantics_05.ixx
 
+        .#6: Invalidate pointers after move
+            . see move_semantics_06.ixx 
+
+        .#7: Move only types
+            . see move_semantics_07.ixx
+
+        .#8: Passing by rvalue reference
+            . see move_semantics_08.ixx
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -47,6 +55,7 @@ int main() {
   //move_semantics_02_demo();
   //move_semantics_03_demo();
   //move_semantics_04_demo();
-  move_semantics_05_demo();
+  //move_semantics_05_demo();
+  move_semantics_06_demo();
 
 }

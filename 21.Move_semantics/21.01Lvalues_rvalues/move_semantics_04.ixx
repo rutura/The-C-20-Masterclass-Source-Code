@@ -1,3 +1,6 @@
+/*
+    This file contains code that demonstrates move constructor and move assignment operator.
+*/
 module;
 
 export module move_semantics_04;

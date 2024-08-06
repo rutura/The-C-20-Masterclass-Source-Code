@@ -1,3 +1,6 @@
+/*
+    This file contains code that demonstrates rvalue references.
+*/
 module;
 
 #include <fmt/format.h>

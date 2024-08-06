@@ -1,3 +1,6 @@
+/*
+    This file contains code that tinkers with moving temporaries around.
+*/
 module;
 
 export module move_semantics_03;

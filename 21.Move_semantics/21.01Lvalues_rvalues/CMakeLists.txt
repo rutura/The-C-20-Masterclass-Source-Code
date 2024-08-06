@@ -24,5 +24,8 @@ target_sources(${PROJECT_NAME}
         boxcontainer.ixx
         move_semantics_04.ixx 
         move_semantics_05.ixx 
+        move_semantics_06.ixx
+        move_semantics_07.ixx 
+        move_semantics_08.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
