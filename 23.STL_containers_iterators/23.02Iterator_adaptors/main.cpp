@@ -1,7 +1,21 @@
 /*
     . Exploring iterator adaptors: 
-        .#1: back_insert_iterator
-        .#2: front_insert_iterator
+
+        .#1: Common iterator adaptors: 
+            . They are: 
+                . back_insert_iterator
+                . front_insert_iterator
+                . insert_iterator
+                . reverse_iterator
+            . see iterator_adaptors_01.ixx 
+
+        .#2: Move iterators
+            . see iterator_adaptors_02.ixx
+            . std::make_move_iterator is a utility that gives us an iterator we can use to move elements from a container to another container.
+
+        .#3: Stream iterators
+            . see iterator_adaptors_03.ixx
+            . std::istream_iterator and std::ostream_iterator are used to read from and write to streams.
 
 
     . Build instructions: 
@@ -31,5 +45,7 @@
 import utilities;
 
 int main() {
-    iterator_adaptors_01_demo();
+    //iterator_adaptors_01_demo();
+    //iterator_adaptors_02_demo();
+    iterator_adaptors_03_demo();
 }

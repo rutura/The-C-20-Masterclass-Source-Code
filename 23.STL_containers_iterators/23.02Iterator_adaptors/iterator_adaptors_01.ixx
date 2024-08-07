@@ -94,25 +94,5 @@ namespace iterator_adaptors_01 {
         });
     }
 
-    export void move_iterator_test(){
-        // Initialize a vector with some string elements
-        std::vector<std::string> vec1 = {"hello", "world"};
-        // An empty vector to move elements into
-        std::vector<std::string> vec2;
-        
-        // Use std::move to move elements from vec1 to vec2
-        // std::back_inserter(vec2) creates a back_insert_iterator for vec2
-        std::move(vec1.begin(), vec1.end(), std::back_inserter(vec2));
-
-        //Output the results with fmt
-        fmt::print("vec2: ");
-        for (const auto& str : vec2) {
-            fmt::print("{} ", str);
-        }
-        fmt::print("\nvec1 (after move): ");
-        for (const auto& str : vec1) {
-            fmt::print("{} ", str);
-        }
-    }
 
 } // namespace iterator_adaptors_01
