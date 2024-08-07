@@ -4,6 +4,21 @@
         .#1: Range algorithms
             see ranges_library_01.ixx
 
+        .#2: Ranges library iterator pair algorithms
+            see ranges_library_02.ixx
+
+        .#3: Projections
+             see ranges_library_03.ixx
+
+        .#4: Views and range adaptors
+            see ranges_library_04.ixx
+
+        .#5: View composition and pipe operator
+            see ranges_library_05.ixx
+
+        .#6: Range factories
+            see ranges_library_06_demo() in utilities.ixx
+
 
 
     . Build instructions: 
@@ -34,5 +49,9 @@ import utilities;
 
 int main() {
     //print_msg("Hello world!");
-    ranges_library_01_demo();
+    //ranges_library_01_demo();
+    //ranges_library_02_demo();
+    //ranges_library_03_demo();
+    //ranges_library_04_demo();
+    ranges_library_06_demo();
 }

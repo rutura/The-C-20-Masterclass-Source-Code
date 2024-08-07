@@ -19,5 +19,9 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         ranges_library_01.ixx 
+        ranges_library_02.ixx 
+        ranges_library_03.ixx 
+        ranges_library_04.ixx 
+        ranges_library_05.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
