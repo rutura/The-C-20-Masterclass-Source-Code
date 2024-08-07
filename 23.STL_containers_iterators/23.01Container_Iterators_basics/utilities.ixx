@@ -10,6 +10,7 @@ export module utilities;
 import containers_iterators_01;
 import containers_iterators_02;
 import containers_iterators_03;
+import containers_iterators_04;
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -136,4 +137,28 @@ export void containers_iterators_03_demo(){
 
 	fmt::print(" Collection : ");
 	for (auto it = std::begin(vi); it != std::end(vi); ++it) { fmt::print("{} ", *it); }
+}
+
+
+export void containers_iterators_04_demo(){
+
+	//Printing a single referenced value.
+	std::vector<int> numbers{ 11, 22, 33, 44, 55, 66, 77 };
+	//Works on vectors
+	containers_iterators_04::print_referenced_value(numbers.begin() + 2);
+
+	//works on arrays
+	std::array<int, 5> arr{ 1, 2, 3, 4, 5 };
+	containers_iterators_04::print_referenced_value(arr.begin() + 2);
+
+
+	//Custom find
+	auto result = containers_iterators_04::custom_find(numbers.begin(), numbers.end(), 33);
+	if (result != numbers.end()) {
+		fmt::println("Found: {}", *result);
+	}
+	else {
+		fmt::println("Not found");
+	}
+
 }

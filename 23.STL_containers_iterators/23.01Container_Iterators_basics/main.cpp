@@ -13,6 +13,9 @@
         .#3: Constant iterators, std::begin, and std::end
             . see containers_iterators_03.ixx
 
+        .#4: Generic container elements: 
+            . see containers_iterators_04.ixx
+
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -43,5 +46,6 @@ import utilities;
 int main() {
     //containers_iterators_01_demo();
     //containers_iterators_02_demo();
-    containers_iterators_03_demo();
+    //containers_iterators_03_demo();
+    containers_iterators_04_demo();
 }

@@ -18,9 +18,6 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        containers_iterators_01.ixx 
-        containers_iterators_02.ixx
-        containers_iterators_03.ixx 
-        containers_iterators_04.ixx 
+        iterator_adaptors_01.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
