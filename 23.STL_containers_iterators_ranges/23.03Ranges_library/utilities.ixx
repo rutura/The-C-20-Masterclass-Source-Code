@@ -340,7 +340,7 @@ export void ranges_library_04_demo(){
 
 	fmt::println("students under 15 : ");
 	ranges_library_04::print(std::views::take_while(class_room, [](const ranges_library_04::Student &s) { return (s.m_age < 15); }));
-
+	
 }
 
 
@@ -405,6 +405,52 @@ export void ranges_library_05_demo(){
 	fmt::print("{}\n", fmt::join(classroom | std::views::keys | std::views::filter(before_M), " "));
 	/*std::ranges::copy(classroom | std::views::keys | std::views::filter(before_M),
 				std::ostream_iterator<std::string>(std::cout, " "));*/
+
+	//Some other views from C++23
+	//std::views::zip (C++23)
+	std::vector<int> v1 = {1, 2, 3};
+    std::vector<std::string> v2 = {"one", "two", "three"};
+
+    auto zipped = std::views::zip(v1, v2);
+
+    fmt::print("std::views::zip:\n");
+    for (const auto& [i, s] : zipped) {
+        fmt::print("({}, {}) ", i, s);
+    }
+    fmt::print("\n\n");
+
+	//std::views::adjacent (C++23)
+    auto adjacent = std::views::adjacent<2>(v1);
+
+    fmt::print("std::views::adjacent:\n");
+    for (const auto& [a, b] : adjacent) {
+        fmt::print("({}, {}) ", a, b);
+    }
+    fmt::print("\n\n");
+
+    // std::views::chunk (C++23)
+    auto chunked = std::views::chunk(v1, 2);
+    fmt::print("std::views::chunk:\n");
+    for (const auto& chunk : chunked) {
+        fmt::print("{{{}}} ", fmt::join(chunk, ", "));
+    }
+    fmt::print("\n\n");
+
+    // std::views::stride (C++23)
+    auto strided = std::views::stride(v1, 2);
+
+    fmt::print("std::views::stride:\n");
+    fmt::print("{}\n\n", fmt::join(strided, ", "));
+
+    // std::views::cartesian_product (C++23)
+    std::vector<char> v3 = {'a', 'b', 'c'};
+    auto cartesian_product = std::views::cartesian_product(v1, v3);
+
+    fmt::print("std::views::cartesian_product:\n");
+    for (const auto& [i, c] : cartesian_product) {
+        fmt::print("({}, {}) ", i, c);
+    }
+    fmt::print("\n");
 }
 
 export void ranges_library_06_demo(){
