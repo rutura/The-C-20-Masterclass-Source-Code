@@ -19,5 +19,11 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         custom_iterators_01.ixx 
+        custom_iterators_04.ixx 
+        custom_iterators_05.ixx 
+        custom_iterators_06.ixx 
+        custom_iterators_07.ixx 
+        custom_iterators_08.ixx
+        custom_iterators_09.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
