@@ -1,6 +1,6 @@
 #include <iostream>
 
-consteval int get_value(){
+constexpr int get_value(){
     return 3;
 }
 
