@@ -1,9 +1,9 @@
 	To do: 
+		. C++ 23 Nuggets
         . Slides
 		. Code formatting
 			. snake_case for variables
 			. CamelCase for class names
-		. C++ 23 Nuggets
 
 		. Can use help: 
 			. Exercises
