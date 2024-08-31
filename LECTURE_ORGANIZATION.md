@@ -1,11 +1,13 @@
 	To do: 
-            . Slides
-		. The non modules branch
+        . Slides
 		. Code formatting
 			. snake_case for variables
 			. CamelCase for class names
 		. C++ 23 Nuggets
-		. Exercises
-		. Make CMake work on Windows, Linux and Mac
-		. Docker containers for GCC and Clang
-		. Trying out Compiler explorer for the code
+
+		. Can use help: 
+			. Exercises
+			. The non modules branch
+			. Make CMake work on Windows, Linux and Mac: The CMake presets file and CMakeLists.txt file.
+			. Docker containers for GCC and Clang
+			. Trying out Compiler with explorer for the code
