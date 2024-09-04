@@ -39,6 +39,7 @@ test-report.xml
 *.db
 
 # IDEs (no support implied)
+*.bkp
 .cache
 .devcontainer
 .vscode
