@@ -24,7 +24,16 @@
         . ninja 1.11 or up
         . vcpkg and setting up the VCPKG_ROOT environment variable
             . how to update vcpkg: https://learn.microsoft.com/en-us/vcpkg/about/faq#how-do-i-update-vcpkg
-        . gdb any version
+        . A debugger: 
+            . eg: gdb, lldb, or the visual studio debugger
+        . Goood to have: 
+            . Git
+
+        . Know where a binary is: 
+            . Linux: which command
+                . eg: which ninja
+            . Windows: Get-command
+                . eg: Get-command ninja
 
     . Philosophy: 
         . All non module looking code should be hidden away in the utilities module.
