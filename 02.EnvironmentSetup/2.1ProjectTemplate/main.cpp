@@ -1,9 +1,6 @@
 /*
     . A C++ starter project using CMake and bringing in fmt right out of the box.
-    . Uses the CMake presets file from endless sky and modifies it to work with the cl compiler
     . Uses vcpkg as a dependency manager
-    . Sets up vs code to have a status bar
-    . You also need ninja installed on your system.
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -14,12 +11,19 @@
             . Select build preset
             . Use the run and debug buttons: We can debug application right from the start.
 
-        . Can also use presets on the command line.
-    . Dependencies: 
-        . gcc 14 or up (can be official container)
-        . cmake 3.29 or up
+        . Note: 
+            . There are other ways to build but we'll focus on these two in the course.
+            . You can use the docker containers that come with the course for a fully reproducible build environment.
+                . one for gcc 14 [link]
+                . one for clang 18 [link]
+
+    . Requirements:
+        . A modern C++ compiler: 
+            . eg: gcc 14, clang 16 or latest msvc. 
+        . cmake 3.30 or up
         . ninja 1.11 or up
         . vcpkg and setting up the VCPKG_ROOT environment variable
+            . how to update vcpkg: https://learn.microsoft.com/en-us/vcpkg/about/faq#how-do-i-update-vcpkg
         . gdb any version
 
     . Philosophy: 
