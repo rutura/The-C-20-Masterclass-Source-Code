@@ -5,6 +5,9 @@
         . Change the color of the circle
         . Change the color of the background
 
+    . Student should do: 
+        . Read the docs about SFML
+
     . NOTE: 
         . This example won't work in containers because they don't have a xserver
             set up. It's possible to set up one but we'll pass for this course.
