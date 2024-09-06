@@ -39,12 +39,13 @@
       }
     },
     {
-      "name": "linux",
-      "displayName": "Linux",
+      "name": "linux-gcc",
+      "displayName": "Linux GCC",
       "description": "Builds with the default host compiler on Linux",
       "inherits": "base",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+        "CMAKE_CXX_COMPILER": "g++"
       },
       "condition": {
         "type": "equals",
@@ -88,7 +89,7 @@
     },
     {
       "name": "cl",
-      "displayName": "cl",
+      "displayName": "Windows cl",
       "description": "Builds with Visual C++ on Windows",
       "inherits": "base",
       "toolset": {
@@ -149,8 +150,8 @@
       }
     },
     {
-      "name": "clang++",
-      "displayName": "Clang++",
+      "name": "linux_clang",
+      "displayName": "Linux Clang++",
       "description": "Builds with the clang++ compiler",
       "inherits": "base",
       "cacheVariables": {
@@ -164,7 +165,6 @@
         "rhs": "Linux"
       }
     }
-    
   ],
   "buildPresets": [
     {
@@ -178,15 +178,15 @@
       "configuration": "Release"
     },
     {
-      "name": "linux-debug",
+      "name": "linux-gcc-debug",
       "displayName": "Debug",
-      "configurePreset": "linux",
+      "configurePreset": "linux-gcc",
       "inherits": "debug"
     },
     {
-      "name": "linux-release",
+      "name": "linux-gcc-release",
       "displayName": "Release",
-      "configurePreset": "linux",
+      "configurePreset": "linux-gcc",
       "inherits": "release"
     },
     {
@@ -226,15 +226,15 @@
       "inherits": "release"
     },
     {
-      "name": "clang++-debug",
+      "name": "linux_clang-debug",
       "displayName": "Debug",
-      "configurePreset": "clang++",
+      "configurePreset": "linux_clang",
       "inherits": "debug"
     },
     {
-      "name": "clang++-release",
+      "name": "linux_clang-release",
       "displayName": "Release",
-      "configurePreset": "clang++",
+      "configurePreset": "linux_clang",
       "inherits": "release"
     }
   ],
