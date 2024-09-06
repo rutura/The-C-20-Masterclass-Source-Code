@@ -29,6 +29,13 @@
         . Goood to have: 
             . Git
 
+        . Editor: 
+            . VS Code: 
+                . The C++ extension
+                . The CMake Tools extension
+                . The CMake extension
+                . NOTE: These are required to give you the best experience.
+
         . Know where a binary is: 
             . Linux: which command
                 . eg: which ninja
@@ -44,5 +51,8 @@
 import utilities;
 
 int main() {
-  print_msg("Hello world!");
+    int value1 = 10;
+    int value2 = 20;
+    
+  print_msg("Hello, World!");
 }
