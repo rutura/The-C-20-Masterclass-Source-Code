@@ -22,8 +22,8 @@
 | 4.2 Integer Modifiers, Characters, Text, Auto | ✔️         | ?                     | ✔️       |         |
 | 4.3 Operations, Math Functions, Weird Integers | ✔️         | ?                      | ✔️       |         |
 | 4.4 Bitwise Operators                     | ✔️         | ?                     | ✔️       |         |
-| 4.5 Bitwise Operator Examples             | ❌         | ❌                     | ❌       |         |
-| 4.6 Challenge                            | ❌         | ❌                     | ❌       |         |
+| 4.5 Bitwise Operator Examples             | ✔️         | ?                     | ✔️       |         |
+| 4.6 Challenge                            | ✔️         | ✔️                     | ✔️       |         |
 
 
 ### Section 5: Streams, Formatting, Literals and Constants
