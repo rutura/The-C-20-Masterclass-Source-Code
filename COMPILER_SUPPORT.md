@@ -21,7 +21,7 @@
 | 4.1 Variables and Data Types              | ✔️         | ?                     | ✔️       |  too much printout       |
 | 4.2 Integer Modifiers, Characters, Text, Auto | ✔️         | ?                     | ✔️       | too much printout        |
 | 4.3 Operations, Math Functions, Weird Integers | ✔️         | ?                      | ✔️       |  too much printout       |
-| 4.4 Bitwise Operators                     | ✔️         | ?                     | ✔️       |         |
+| 4.4 Bitwise Operators                     | ✔️         | ?                     | ✔️       | too much printout        |
 | 4.5 Bitwise Operator Examples             | ✔️         | ?                     | ✔️       | too much printout        |
 | 4.6 Challenge                            | ✔️         | ✔️                     | ✔️       |         |
 
