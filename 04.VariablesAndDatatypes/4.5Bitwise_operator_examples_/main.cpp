@@ -31,14 +31,12 @@ import utilities;
 int main() {
 
   //Example1: masks
-  /*
   //use_options_v0(0, 0, 1, 1, 1, 0, 1, 0);
-  //use_options_v1(mask_bit_2 | mask_bit_3 | mask_bit_4 | mask_bit_6);
-  */
+  use_options_v1(mask_bit_2 | mask_bit_3 | mask_bit_4 | mask_bit_6);
 
 
   //Example2: Packing color information
-  pack_colors();
+  //pack_colors();
 
 
 

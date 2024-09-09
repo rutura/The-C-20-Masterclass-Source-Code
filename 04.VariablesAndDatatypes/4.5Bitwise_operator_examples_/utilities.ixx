@@ -5,14 +5,14 @@ module;
 export module utilities; // Name doesn't have to match the .ixx file
 
 //Module purview
-export const unsigned char mask_bit_0{ 0b00000001 };// Bit0
-export const unsigned char mask_bit_1{ 0b00000010 };// Bit1
-export const unsigned char mask_bit_2{ 0b00000100 };// Bit2
-export const unsigned char mask_bit_3{ 0b00001000 };// Bit3
-export const unsigned char mask_bit_4{ 0b00010000 };// Bit4
-export const unsigned char mask_bit_5{ 0b00100000 };// Bit5
-export const unsigned char mask_bit_6{ 0b01000000 };// Bit6
-export const unsigned char mask_bit_7{ 0b10000000 };// Bit7
+export constexpr unsigned char mask_bit_0{ 0b00000001 };// Bit0
+export constexpr unsigned char mask_bit_1{ 0b00000010 };// Bit1
+export constexpr unsigned char mask_bit_2{ 0b00000100 };// Bit2
+export constexpr unsigned char mask_bit_3{ 0b00001000 };// Bit3
+export constexpr unsigned char mask_bit_4{ 0b00010000 };// Bit4
+export constexpr unsigned char mask_bit_5{ 0b00100000 };// Bit5
+export constexpr unsigned char mask_bit_6{ 0b01000000 };// Bit6
+export constexpr unsigned char mask_bit_7{ 0b10000000 };// Bit7
 
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
@@ -45,10 +45,10 @@ export void use_options_v1(unsigned char flags)
 }
 
 export void pack_colors(){
-  const unsigned int red_mask{ 0xFF000000 };
-  const unsigned int green_mask{ 0x00FF0000 };
-  const unsigned int blue_mask{ 0x0000FF00 };
-  const unsigned int alpha_mask{ 0x000000FF };// Transparency information
+  constexpr unsigned int red_mask{ 0xFF000000 };
+  constexpr unsigned int green_mask{ 0x00FF0000 };
+  constexpr unsigned int blue_mask{ 0x0000FF00 };
+  constexpr unsigned int alpha_mask{ 0x000000FF };// Transparency information
 
 
   unsigned int my_color{ 0xAABCDE00 };
