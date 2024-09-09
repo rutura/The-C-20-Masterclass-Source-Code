@@ -10,8 +10,8 @@
 | Lecture Name                    | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
 |---------------------------------|------------|------------------------|----------|---------|
 | 3.2 First Cpp Program Basics    | ✔️         | ✔️                     | ✔️       |         |
-| 3.3 Cpp Program Execution Model | ❌         | ❌                     | ❌       |         |
-| 3.4 GUI Challenge               | ❌         | ❌                     | ❌       |         |
+| 3.3 Cpp Program Execution Model | ✔️         | ✔️                     | ✔️       |         |
+| 3.4 GUI Challenge               | ✔️         | ✔️                     | ✔️       |         |
 
 
 ### Chapter 4: Variables and Data Types
