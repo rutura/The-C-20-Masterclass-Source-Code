@@ -1,27 +1,30 @@
 ### Section 2: Environment Setup
 
-| Lecture Name          | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
-|-----------------------|------------|------------------------|----------|
-| 2.1 Project Template  | ✔️         | ✔️                     | ✔️       |
+| Lecture Name          | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
+|-----------------------|------------|------------------------|----------|---------|
+| 2.1 Project Template  | ✔️         | ✔️                     | ✔️       |         |
+
 
 ### Chapter 3: First Steps
 
-| Lecture Name                    | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
-|---------------------------------|------------|------------------------|----------|
-| 3.2 First Cpp Program Basics    | ❌         | ❌                     | ❌       |
-| 3.3 Cpp Program Execution Model | ❌         | ❌                     | ❌       |
-| 3.4 GUI Challenge               | ❌         | ❌                     | ❌       |
+| Lecture Name                    | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
+|---------------------------------|------------|------------------------|----------|---------|
+| 3.2 First Cpp Program Basics    | ❌         | ❌                     | ❌       |         |
+| 3.3 Cpp Program Execution Model | ❌         | ❌                     | ❌       |         |
+| 3.4 GUI Challenge               | ❌         | ❌                     | ❌       |         |
+
 
 ### Chapter 4: Variables and Data Types
 
-| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
-|-------------------------------------------|------------|------------------------|----------|
-| 4.1 Variables and Data Types              | ❌         | ❌                     | ❌       |
-| 4.2 Integer Modifiers, Characters, Text, Auto | ❌         | ❌                     | ❌       |
-| 4.3 Operations, Math Functions, Weird Integers | ❌         | ❌                     | ❌       |
-| 4.4 Bitwise Operators                     | ❌         | ❌                     | ❌       |
-| 4.5 Bitwise Operator Examples             | ❌         | ❌                     | ❌       |
-| 4.6 Challenge                            | ❌         | ❌                     | ❌       |
+| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
+|-------------------------------------------|------------|------------------------|----------|---------|
+| 4.1 Variables and Data Types              | ❌         | ❌                     | ❌       |         |
+| 4.2 Integer Modifiers, Characters, Text, Auto | ❌         | ❌                     | ❌       |         |
+| 4.3 Operations, Math Functions, Weird Integers | ❌         | ❌                     | ❌       |         |
+| 4.4 Bitwise Operators                     | ❌         | ❌                     | ❌       |         |
+| 4.5 Bitwise Operator Examples             | ❌         | ❌                     | ❌       |         |
+| 4.6 Challenge                            | ❌         | ❌                     | ❌       |         |
+
 
 ### Section 5: Streams, Formatting, Literals and Constants
 
