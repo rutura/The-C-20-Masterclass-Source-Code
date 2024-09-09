@@ -18,10 +18,10 @@
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
 |-------------------------------------------|------------|------------------------|----------|---------|
-| 4.1 Variables and Data Types              | ❌         | ❌                     | ❌       |         |
-| 4.2 Integer Modifiers, Characters, Text, Auto | ❌         | ❌                     | ❌       |         |
-| 4.3 Operations, Math Functions, Weird Integers | ❌         | ❌                     | ❌       |         |
-| 4.4 Bitwise Operators                     | ❌         | ❌                     | ❌       |         |
+| 4.1 Variables and Data Types              | ✔️         | ?                     | ✔️       |         |
+| 4.2 Integer Modifiers, Characters, Text, Auto | ✔️         | ?                     | ✔️       |         |
+| 4.3 Operations, Math Functions, Weird Integers | ✔️         | ?                      | ✔️       |         |
+| 4.4 Bitwise Operators                     | ✔️         | ?                     | ✔️       |         |
 | 4.5 Bitwise Operator Examples             | ❌         | ❌                     | ❌       |         |
 | 4.6 Challenge                            | ❌         | ❌                     | ❌       |         |
 
