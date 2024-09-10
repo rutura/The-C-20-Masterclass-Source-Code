@@ -32,7 +32,7 @@
 |-------------------------------------------|------------|------------------------|----------|--------------------------------------------|
 | 5.1 Input, Output Streams, and Formatting | ✔️         | ✔️                     | ✔️       | Supported on all compilers                 |
 | 5.2 Format Library                        | ✔️         | ❌                     | ✔️       | GCC 14.2.0 conficts with fmt for some reason|
-| 5.3 Literals and Constants                | ❌         | ❌                     | ❌       | Not supported on any of the compilers      |
+| 5.3 Literals and Constants                | ✔️         | ✔️                     | ✔️       |       |
 
 
 ### Section 6: Flow Control
