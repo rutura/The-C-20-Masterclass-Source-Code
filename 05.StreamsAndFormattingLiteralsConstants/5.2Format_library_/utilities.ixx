@@ -9,7 +9,8 @@ export module utilities; // Name doesn't have to match the .ixx file
 
 export void do_work(){
 
-  	std::cout << fmt::format("Hello, {}!", "world") << std::endl;
+	auto value = fmt::format("Hello, {}!", "world");
+  	std::cout << value << std::endl;
   	fmt::print("Hello, {}!", "world\n");
   	fmt::println("Unformatted table : ");
   	fmt::println("{} {} {}", "Daniel", "Gray", "25");
@@ -105,7 +106,7 @@ export void do_work(){
 
   	fmt::println("-----");
 
-  	// showpos and noshowpos : show or hide the +  sign for positive numbers
+  	//show or hide the +  sign for positive numbers
   	fmt::println("show or hide the +  sign for positive numbers: ");
   	int pos_num{ 34 };
   	int neg_num{ -45 };
@@ -170,7 +171,6 @@ export void do_work(){
 
   	// fixed and scientific : for floating point values
   	// control the precision.
-
   	fmt::println("fixed and scientific: for floating point values: ");
   	double a{ 3.1415926535897932384626433832795 };
   	double b{ 2006.0 };
@@ -180,7 +180,6 @@ export void do_work(){
   	fmt::println("a : {}", a);
   	fmt::println("b : {}", b);
   	fmt::println("c : {}", c);
-
 
   	fmt::println("double values (precision) : ");
   	fmt::println("a: {:.6}", a);

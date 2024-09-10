@@ -28,11 +28,12 @@
 
 ### Section 5: Streams, Formatting, Literals and Constants
 
-| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
-|-------------------------------------------|------------|------------------------|----------|
-| 5.1 Input, Output Streams, and Formatting | ❌         | ❌                     | ❌       |
-| 5.2 Format Library                        | ❌         | ❌                     | ❌       |
-| 5.3 Literals and Constants                | ❌         | ❌                     | ❌       |
+| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment                                    |
+|-------------------------------------------|------------|------------------------|----------|--------------------------------------------|
+| 5.1 Input, Output Streams, and Formatting | ✔️         | ✔️                     | ✔️       | Supported on all compilers                 |
+| 5.2 Format Library                        | ✔️         | ❌                     | ✔️       | GCC 14.2.0 conficts with fmt for some reason|
+| 5.3 Literals and Constants                | ❌         | ❌                     | ❌       | Not supported on any of the compilers      |
+
 
 ### Section 6: Flow Control
 
