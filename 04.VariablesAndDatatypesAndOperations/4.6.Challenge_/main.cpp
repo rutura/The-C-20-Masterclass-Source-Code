@@ -12,6 +12,7 @@
                     . clang 16 and up
                     . latest visual c++
         . Be carefult about the opengl dependencies that vcpkg will complain about in the output .
+			.Install them: apt-get install libx11-dev libxrandr-dev libxcursor-dev libxi-dev libudev-dev 
         . Note that even if we don't have access to xserver we can still build the 
             binary successfuly. We simply can't run it and see a GUI.
         . In this course, we will run it on windows 
