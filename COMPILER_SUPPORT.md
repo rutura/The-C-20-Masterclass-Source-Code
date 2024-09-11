@@ -30,18 +30,19 @@
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment                                    |
 |-------------------------------------------|------------|------------------------|----------|--------------------------------------------|
-| 5.1 Input, Output Streams, and Formatting | ✔️         | ✔️                     | ✔️       | Supported on all compilers                 |
+| 5.1 Input, Output Streams, and Formatting | ✔️         | ✔️                     | ✔️       |                  |
 | 5.2 Format Library                        | ✔️         | ❌                     | ✔️       | GCC 14.2.0 conficts with fmt for some reason|
 | 5.3 Literals and Constants                | ✔️         | ✔️                     | ✔️       |       |
 
 
 ### Section 6: Flow Control
 
-| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
-|-------------------------------------------|------------|------------------------|----------|
-| 6.1 If, Switch, Ternary Operator          | ❌         | ❌                     | ❌       |
-| 6.2 Loops                                 | ❌         | ❌                     | ❌       |
-| 6.3 Challenge                             | ❌         | ❌                     | ❌       |
+| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 | Comment |
+|-------------------------------------------|------------|------------------------|----------|---------|
+| 6.1 If, Switch, Ternary Operator          | ✔️         | ✔️                     | ✔️       |         |
+| 6.2 Loops                                 | ✔️         | ✔️                     | ✔️       |         |
+| 6.3 Challenge                             | ❌         | ❌                     | ❌       |         |
+
 
 ### Section 7: Sequences
 

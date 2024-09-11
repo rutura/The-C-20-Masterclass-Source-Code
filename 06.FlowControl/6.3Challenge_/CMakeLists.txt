@@ -12,11 +12,11 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 find_package(fmt CONFIG REQUIRED)
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
-add_executable(rooster main.cpp)
-target_sources(rooster
+add_executable(Rocket main.cpp)
+target_sources(Rocket
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
 )
 
-target_link_libraries(rooster PRIVATE fmt::fmt sfml-graphics)
+target_link_libraries(Rocket PRIVATE fmt::fmt sfml-graphics)

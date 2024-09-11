@@ -1,21 +1,28 @@
 module;
 #include <string_view>
-#include <fmt/format.h>
+#include <iostream>
+#include <utility>
+//#include <fmt/format.h>
 //Global module fragment : #include , preprocessor directives
 export module utilities; // Name doesn't have to match the .ixx file
 
 //Module purview
 export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
+	//fmt::println("{}",msg);
 }
 
 // Tools
-const int Pen{ 10 };
-const int Marker{ 20 };
-const int Eraser{ 30 };
-const int Rectangle{ 40 };
-const int Circle{ 50 };
-const int Ellipse{ 60 };
+constexpr int Pen{ 10 };
+constexpr int Marker{ 20 };
+constexpr int Eraser{ 30 };
+constexpr int Rectangle{ 40 };
+constexpr int Circle{ 50 };
+constexpr int Ellipse{ 60 };
+
+
+constexpr int Red{ 70 };
+constexpr int Green{ 80 };
+constexpr int Blue{ 90 };
 
 
 bool car()
@@ -40,16 +47,37 @@ bool spouse()
   return false;
 }
 
+//std::unreachable: C++ 23 
+void handleColor(int color) {
+    switch (color) {
+        case Red:
+			//fmt::println("Handling Red");
+			std::cout << "Handling Red" << std::endl;
+            break;
+        case Green:
+			//fmt::println("Handling Green");
+			std::cout << "Handling Green" << std::endl;
+            break;
+        case Blue:
+			//fmt::println("Handling Blue");
+			std::cout << "Handling Blue" << std::endl;
+            break;
+        default:
+            // We expect that all cases are covered, so reaching here should never happen.
+            std::unreachable();
+    }
+}
+
 export void do_work(){
 
 	//1. If and else statements
+	/*
 	int number1{ 75 };
   	int number2{ 60 };
-  	//bool result = (number1 < number2);// Expression yielding the condition
+  	bool result = (number1 < number2);// Expression yielding the condition
 
 
     //Free standing if statement
-	/*
     fmt::println( "free standing if statement" );
   	//if(result){
       	if(result == true){
@@ -60,7 +88,7 @@ export void do_work(){
       	if(!(result == true)){
       	fmt::println( " {}is NOT less than{} " , number1,number2 );
   	}
-  	*/
+	*/
 
 
   	// Using else
@@ -279,4 +307,9 @@ export void do_work(){
     
     fmt::println("max :{} ", max);
 	*/
+
+	//6. std::unreachable: C++ 23 
+	handleColor(Red);
+	handleColor(Green);
+	handleColor(Blue);
 }

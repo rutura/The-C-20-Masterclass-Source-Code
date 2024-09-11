@@ -2,6 +2,7 @@
     . Topics: 
         . If, switch and ternary operator
         . Loops: for, while, do while
+        . std::unreachable (C++ 23)
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
