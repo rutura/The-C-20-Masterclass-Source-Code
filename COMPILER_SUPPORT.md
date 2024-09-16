@@ -48,25 +48,24 @@
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
-| 7.1 Std::array                            | ❌         | ❌                     | ❌       |
-| 7.2 Std::vector                           | ❌         | ❌                     | ❌       |
-| 7.3 Std::string                           | ❌         | ❌                     | ❌       |
-| 7.4 Built-in Array                        | ❌         | ❌                     | ❌       |
-| 7.5 Fortune Teller                        | ❌         | ❌                     | ❌       |
+| 7.1 Std::array                            | ✔️         |✔️                      | ✔️       |
+| 7.2 Std::vector                           | ✔️         |✔️                      | ✔️       |
+| 7.3 Std::string                           | ✔️         | ✔️                     | ✔️       |
+| 7.4 Built-in Array                        | ✔️         | ✔️                     | ✔️       |
+| 7.5 Fortune Teller                        | ✔️         | ✔️                     | ✔️       |
 
 ### Section 8: Pointers, Dynamic Memory and Arrays
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
-| 8.1 Pointers                              | ❌         | ❌                     | ❌       |
-| 8.2 Predictions, Array of Pointer to Char | ❌         | ❌                     | ❌       |
-| 8.3 Pointers and Const                    | ❌         | ❌                     | ❌       |
-| 8.4 Pointers and Arrays                   | ❌         | ❌                     | ❌       |
-| 8.5 Pointer Arithmetic                    | ❌         | ❌                     | ❌       |
-| 8.6 Dynamic Memory Allocation             | ❌         | ❌                     | ❌       |
-| 8.7 Dynamically Allocated Arrays          | ❌         | ❌                     | ❌       |
-| 8.8 Smart Pointers                        | ❌         | ❌                     | ❌       |
-| 8.9 References                            | ❌         | ❌                     | ❌       |
+| 8.1 Pointers                              | ✔️         | ✔️                     | ✔️       |
+| 8.2 Pointers and Const                    | ✔️         | ✔️                     | ✔️       |
+| 8.3 Pointers and Arrays                   | ✔️         | ✔️                     | ✔️       |
+| 8.4 Pointer Arithmetic                    | ✔️         | ✔️                     | ✔️       |
+| 8.5 Dynamic Memory Allocation             | ✔️         | ✔️                     | ✔️       |
+| 8.6 Dynamically Allocated Arrays          | ✔️         | ✔️                     | ✔️       |
+| 8.7 Smart Pointers                        | ✔️         | ✔️                     | ✔️       |
+| 8.8 References                            | ✔️         | ✔️                     | ✔️       |
 
 ### Section 9: Characters and Strings
 
@@ -90,8 +89,15 @@
 | 10.6 Function Overloading                | ❌         | ❌                     | ❌       |
 | 10.7 Lambda Functions                    | ❌         | ❌                     | ❌       |
 
+### Section 11: File IO
 
-### Section 11: Custom Types 
+| Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
+|-------------------------------------------|------------|------------------------|----------|
+| 11.1 Reading and writting text files                     | ❌         | ❌                     | ❌       |
+| 11.2 Reading and writting binary files                  | ❌         | ❌                     | ❌       |
+
+
+### Section 12: Custom Types 
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -104,13 +110,13 @@
 | 11.7 Friends                             | ❌         | ❌                     | ❌       |
 | 11.8 Static Members                       | ❌         | ❌                     | ❌       |
 
-### Section 12: Namespaces
+### Section 13: Namespaces
 
 | Lecture Name                    | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |---------------------------|------------|------------------------|----------|
 | 12.1 Namespace Basics     | ❌         | ❌                     | ❌       |
 
-### Section 13: Programs With Multiple Files
+### Section 14: Programs With Multiple Files
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -118,7 +124,7 @@
 | 13.2 Linkage                             | ❌         | ❌                     | ❌       |
 | 13.3 Inline Variables, Forward Declarations | ❌         | ❌                     | ❌       |
 
-### Section 14: Smart Pointers
+### Section 15: Smart Pointers
 
 | Lecture Name                    | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |---------------------------|------------|------------------------|----------|
@@ -126,7 +132,7 @@
 | 14.2 Shared Pointers      | ❌         | ❌                     | ❌       |
 | 14.3 Weak Pointers        | ❌         | ❌                     | ❌       |
 
-### Section 15: Operator Overloading
+### Section 16: Operator Overloading
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -141,7 +147,7 @@
 | 15.9 Spaceship Operator                 | ❌         | ❌                     | ❌       |
 | 15.10 Weak and Partial Ordering          | ❌         | ❌                     | ❌       |
 
-### Section 16: Inheritance
+### Section 17: Inheritance
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -149,7 +155,7 @@
 | 16.2 Inheritance Constructors, Destructors | ❌         | ❌                     | ❌       |
 | 16.3 Reused Symbols with Inheritance     | ❌         | ❌                     | ❌       |
 
-### Section 17: Polymorphism
+### Section 18: Polymorphism
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -159,7 +165,7 @@
 | 17.4 Polymorphism Casts and Destructors  | ❌         | ❌                     | ❌       |
 | 17.5 Pure Virtual Functions and Abstract Classes | ❌         | ❌                     | ❌       |
 
-### Section 18: Exceptions
+### Section 19: Exceptions
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -168,13 +174,13 @@
 | 18.3 Miscellaneous Exceptions            | ❌         | ❌                     | ❌       |
 | 18.4 Standard Exceptions                 | ❌         | ❌                     | ❌       |
 
-### Section 19: Practice - BoxContainer
+### Section 20: Practice - BoxContainer
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
 | 19.1 Box Container                       | ❌         | ❌                     | ❌       |
 
-### Section 20: Templates
+### Section 21: Templates
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
@@ -188,13 +194,13 @@
 
 
 
-### Section 21: Move Semantics
+### Section 22: Move Semantics
 
 | Lecture Name              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |---------------------------|------------|------------------------|----------|
 | 21.01Lvalues_rvalues      |    ❌      | ❌                     | ❌       |
 
-### Section 22: Function Like Entities
+### Section 23: Function Like Entities
 
 | Lecture Name                      | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-----------------------------------|------------|------------------------|----------|
@@ -203,7 +209,7 @@
 | 22.03lambdas                      | ❌         | ❌                     | ❌       |
 | 22.04_Std_function                | ❌         | ❌                     | ❌       |
 
-### Section 23: STL Containers, Iterators and Ranges
+### Section 24: STL Containers, Iterators and Ranges
 
 | Lecture Name                                         | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |------------------------------------------------------|------------|------------------------|----------|
@@ -213,14 +219,14 @@
 | 23.04Container_classsification_iterators_algorithms |  ❌        | ❌                     | ❌       |
 | 23.05Custom_container_iterators                     |  ❌        |  ❌                    | ❌       |
 
-### Section 24: Modules
+### Section 25: Modules
 
 | Lecture Name              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |---------------------------|------------|------------------------|----------|
 | 24.01More_on_modules      | ❌         | ❌                     | ❌       |
 | 24.03Module_limitations   | ❌         | ❌                     | ❌       |
 
-### Section 25: Coroutines
+### Section 26: Coroutines
 
 | Lecture Name                  | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------|------------|------------------------|----------|
