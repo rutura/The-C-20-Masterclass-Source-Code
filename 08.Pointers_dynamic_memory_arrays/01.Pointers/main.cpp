@@ -1,6 +1,10 @@
 /*
     . Pointers: 
-        . 
+        . Topics: (Each of these may be a lecture)
+            . Pointer basics: declaration and initialization
+            . Pointers and constness
+            . Pointers and arrays
+            . Pointer arithmetic
     . Dependencies: 
         . gcc 14 or up (can be official container)
         . cmake 3.29 or up
@@ -17,5 +21,8 @@
 import utilities;
 
 int main() {
-    do_work();
+    //pointer_basics_demo();
+    //pointer_and_const_demo();
+    //pointers_and_arrays_demo();
+    pointer_arithmetic_demo();
 }
