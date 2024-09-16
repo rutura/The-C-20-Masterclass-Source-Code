@@ -19,7 +19,6 @@
 import utilities;
 
 int main() {
-    unique_pointers();
-    shared_pointers();
-
+    //unique_pointers_demo();
+    shared_pointers_demo();
 }

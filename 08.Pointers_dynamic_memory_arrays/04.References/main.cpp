@@ -22,9 +22,9 @@
 import utilities;
 
 int main() {
-    declaring_and_using_references();
-    compare_pointers_and_references();
-    references_and_const();
+    //declaring_and_using_references();
+    //compare_pointers_and_references();
+    //references_and_const();
     ref_with_range_based_for_loop();
 
 }
