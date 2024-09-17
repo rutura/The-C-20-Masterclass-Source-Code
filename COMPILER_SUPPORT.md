@@ -71,23 +71,23 @@
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
-| 9.1 Manipulating Characters               | ❌         | ❌                     | ❌       |
-| 9.2 Manipulating C-strings                | ❌         | ❌                     | ❌       |
-| 9.3 Manipulating std::string              | ❌         | ❌                     | ❌       |
-| 9.4 Escape Sequences, Raw String Literals | ❌         | ❌                     | ❌       |
-| 9.5 String View                           | ❌         | ❌                     | ❌       |
+| 9.1 Manipulating Characters               | ✔️         | ✔️                     | ✔️       |
+| 9.2 Manipulating C-strings                | ✔️         | ✔️                     | ✔️       |
+| 9.3 Manipulating std::string              | ✔️         | ✔️                     | ✔️       |
+| 9.4 Escape Sequences, Raw String Literals | ✔️         | ✔️                     | ✔️       |
+| 9.5 String View                           | ✔️         | ✔️                     | ✔️       |
 
 ### Section 10: Functions
 
 | Lecture Name                              | Visual C++ | GCC 14.2.0 (iostreams) | Clang 18 |
 |-------------------------------------------|------------|------------------------|----------|
-| 10.1 Function Basics                     | ❌         | ❌                     | ❌       |
-| 10.2 Passing Parameters                  | ❌         | ❌                     | ❌       |
-| 10.3 Sequences and Array Parameters      | ❌         | ❌                     | ❌       |
-| 10.4 Constexpr and Consteval Functions   | ❌         | ❌                     | ❌       |
-| 10.5 Arguments to Main                   | ❌         | ❌                     | ❌       |
-| 10.6 Function Overloading                | ❌         | ❌                     | ❌       |
-| 10.7 Lambda Functions                    | ❌         | ❌                     | ❌       |
+| 10.1 Function Basics                     | ✔️         | ✔️                     | ✔️       |
+| 10.2 Passing Parameters                  | ✔️         | ✔️                     | ✔️       |
+| 10.3 Sequences and Array Parameters      | ✔️         | ✔️                     | ✔️       |
+| 10.4 Constexpr and Consteval Functions   | ✔️         | ✔️                     | ✔️       |
+| 10.5 Arguments to Main                   | ✔️         | ✔️                     |  ✔️      |
+| 10.6 Function Overloading                | ✔️         | ✔️                     |  ✔️      |
+| 10.7 Lambda Functions                    | ✔️         | ✔️                     |  ✔️      |
 
 ### Section 11: File IO
 
