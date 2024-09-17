@@ -11,6 +11,10 @@
         . By Pointer:
             . The function receives a pointer to the value passed to it. 
             . The original value is modified.
+
+        . Default parameters: 
+            . Parameters that have default values. 
+            . They only have to show up in the declaration.
         
     . Build instructions: 
         . Bare hands with CMake: 
@@ -120,8 +124,7 @@ void say_age(const int &age)
 */
 
 //Default parameters: They only have to show up in the declaration.
-void compute(int age = 27, double weight = 72.4, double distance = 12.5)
-{
+void compute(int age = 27, double weight = 72.4, double distance = 12.5){
   fmt::println("Doing computations on age : {} weight :{} and distance :{}  ", age, weight, distance);
 }
 
@@ -130,8 +133,7 @@ void greet_teacher(
         int homeworks = 12,
         int exams = 4,
         double pass_rate = 0.5,
-        std::string_view first_dpmt = "Computer Sce")
-{
+        std::string_view first_dpmt = "Computer Sce"){
   fmt::println("Good morning {} !", name_sv);
   fmt::println("In the past semester, we had {} homeworks, and {} exams. The pass rate was around {} ",
     homeworks,
