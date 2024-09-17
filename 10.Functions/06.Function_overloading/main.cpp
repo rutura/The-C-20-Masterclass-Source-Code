@@ -1,5 +1,13 @@
 /*
     . Function overloading: 
+        . Overoading with different parameters
+        . Overloading with pointer parameters
+        . Overloading with references
+        . Overloading with const parameters
+        . Overloading with const pointer and pointer to const
+        . Overloading with const references
+        . Overloading with default parameters
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -23,7 +31,6 @@
 
 */
 
-// One line comment
 #include <fmt/format.h>
 import utilities;
 

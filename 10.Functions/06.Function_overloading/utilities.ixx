@@ -1,10 +1,10 @@
 module;
+
 #include <string_view>
 #include <fmt/format.h>
-//Global module fragment : #include , preprocessor directives
-export module utilities; // Name doesn't have to match the .ixx file
 
-//Module purview
+export module utilities; 
+
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
 }
@@ -75,14 +75,14 @@ export int max(int *numbers, size_t count)
 */
 
 //Overloading with references
-/*
 // Ambiguous calls
+/*
 export void say_my_name(const std::string &name) { 
-	fmt::println("Your name is (ref) : {}", name); 
+	fmt::println("Your name is (ref): {}", name); 
 }
 
 export void say_my_name(std::string name) {
-	fmt::println("Your name is (non ref) : {}", name); 
+	fmt::println("Your name is (non ref): {}", name); 
 }
 
 // Implicit conversions with references
@@ -91,7 +91,6 @@ export double max(double a, double b)
   fmt::println("double max called");
   return (a > b) ? a : b;
 }
-
 
 // int& max(int& a, int& b){
 export const int &max(const int &a, const int &b)
@@ -104,11 +103,11 @@ export const int &max(const int &a, const int &b)
 
 //Overloading with const parameters
 /*
-// export int max(const int a, const int b)
-// {
-//   fmt::println("const int max called");
-//   return (a > b) ? a : b;
-// }
+export int max(const int a, const int b)
+{
+  fmt::println("const int max called");
+  return (a > b) ? a : b;
+}
 
 export int max(int a, int b)
 {
@@ -132,9 +131,9 @@ export int max(const int *a, const int *b)
   return (*a > *b) ? *a : *b;
 }
 
-// export int min(const int* a, const int* b){
-//     return (*a < *b)? *a : *b;
-// }
+export int min(const int* a, const int* b){
+    return (*a < *b)? *a : *b;
+}
 
 
 export int min(const int *const a, const int *const b)
@@ -170,9 +169,10 @@ export int max(const int &a, const int &b)
 
 
 //Overloading with default parameters
-// Definitions
-// export void print_age(int age ){
-//     fmt::println( "Your age is( int version)  : {}" , age );
-// }
+export void print_age(int age = 18) {
+    fmt::println( "Your age is( int version)  : {}" , age );
+}
 
-export void print_age(long int age) { fmt::println("Your age is (long int version) : {}", age); }
+export void print_age(long int age) {
+    fmt::println("Your age is (long int version) : {}", age); 
+}

@@ -1,10 +1,10 @@
 module;
+
 #include <string_view>
 #include <fmt/format.h>
-//Global module fragment : #include , preprocessor directives
-export module utilities; // Name doesn't have to match the .ixx file
 
-//Module purview
+export module utilities; 
+
 export void print_msg(std::string_view msg) {
 	fmt::println("{}",msg);
 }
@@ -19,13 +19,11 @@ export void declare_and_use_lambda_func(){
 	*/
 
 	// Declaring a lambda function and calling it through a name
-	/*
 	auto func = [](){
 		fmt::println( "Hello World!" );
 	};
 	func();
 	func();
-	*/
 
 
 	// Declare a lambda function and call it directly
@@ -81,6 +79,7 @@ export void declare_and_use_lambda_func(){
 	*/
 
 	// Explicitly specify the return type
+	/*
 	auto func3 = [](double a, double b) -> int { return a + b; };
 
 	auto func4 = [](double a, double b) { return a + b; };
@@ -95,6 +94,7 @@ export void declare_and_use_lambda_func(){
 	fmt::println("result4 : {}", result4);
 	fmt::println("sizeof(result3) : {}", sizeof(result3));// 4
 	fmt::println("sizeof(result4) : {}", sizeof(result4));// 8
+	*/
 
 
 	fmt::println("Done!");
@@ -112,31 +112,36 @@ export void capture_lists(){
 		fmt::println( "a + b : " , a + b );
 	};
 	func();
+	*/
 
 	//Capturing by value
 	int c{42};
 
-	auto func = [c](){
-		fmt::println( "Inner value : {}{}{}" , c , " &inner : " ,fmt::ptr(&c ));
+	// Lambda capturing 'c' by value
+	auto func = [c]() {
+		fmt::println("Inner value: {} &inner: {}", c, fmt::ptr(&c));
 	};
 
-	for(size_t i{} ; i < 5 ;++i){
-		fmt::println( "Outer value : {}{}{}" , c , " &outer : " , fmt::ptr(&c ));
-		func();
-		++c;
-	};
-	*/
-
-	// Capture by reference
-	int c{ 42 };
-
-	auto func = [&c]() { fmt::println("Inner value : {} {}{}", c, " &inner : ", fmt::ptr(&c)); };
-
-	for (size_t i{}; i < 5; ++i) {
-		fmt::println("Outer value : {} {}{}", c, " &outer : ", fmt::ptr(&c));
+	for (size_t i = 0; i < 5; ++i) {
+		fmt::println("Outer value: {} &outer: {}", c, fmt::ptr(&c));
 		func();
 		++c;
 	}
+
+	// Capture by reference
+	/*
+	int c{42};
+	auto func = [&c]() { 
+		fmt::println("Inner value: {} &inner: {}", c, fmt::ptr(&c)); 
+	};
+
+	for (size_t i = 0; i < 5; ++i) {
+		fmt::println("Outer value: {} &outer: {}", c, fmt::ptr(&c));
+		func();
+		++c;
+	}
+	*/
+
 
 }
 
@@ -147,11 +152,11 @@ export void capture_all_lists(){
 	int c{42};
 
 	auto func = [=](){
-		fmt::println("Inner value : {}" , c );
+		fmt::println("Inner value: {}" , c );
 	};
 
 	for(size_t i{} ; i < 5 ;++i){
-		fmt::println("Outer value : {}" , c );
+		fmt::println("Outer value: {}" , c );
 		func();
 		++c;
 	}
@@ -163,12 +168,12 @@ export void capture_all_lists(){
 	int d{ 5 };
 
 	auto func = [&]() {
-		fmt::println("Inner value : {}", c);
-		fmt::println("Inner value(d) : {}", d);
+		fmt::println("Inner value: {}", c);
+		fmt::println("Inner value(d): {}", d);
 	};
 
 	for (size_t i{}; i < 5; ++i) {
-		fmt::println("Outer value : {}", c);
+		fmt::println("Outer value: {}", c);
 		func();
 		++c;
 	}	

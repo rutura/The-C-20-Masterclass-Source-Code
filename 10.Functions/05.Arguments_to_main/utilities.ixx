@@ -24,7 +24,9 @@ export void calculator(int argc, char* argv[]){
 		fmt::println("Program can only be called with 3 arguments like: ");
 		fmt::println("rooster a + b");
 		fmt::println("You called with : ");
-		for (int i{ 0 }; i < argc; ++i) { fmt::print(" {}", argv[i]); }
+		for (int i{ 0 }; i < argc; ++i) {
+			 fmt::print(" {}", argv[i]); 
+		}
 		return;
 	}
 
@@ -42,10 +44,11 @@ export void calculator(int argc, char* argv[]){
 	char c;
 
 	if ((std::strlen(operation) == 1)
-		&& ((operation[0] == '+') || (operation[0] == '-') || (operation[0] == 'x')
-			||// x is for multiplication. * is interpreted
-			// by the shell and disturbing things.
-			(operation[0] == '/'))) {
+				&& (	   (operation[0] == '+') 
+						|| (operation[0] == '-') 
+						|| (operation[0] == 'x')
+						|| (operation[0] == '/'))
+				){
 		c = operation[0];
 	} else {
 		fmt::println("{} is not a valid operation.", operation);

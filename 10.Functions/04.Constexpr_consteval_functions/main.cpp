@@ -1,7 +1,10 @@
 /*
     . constexpr and consteval functions
-        . Demonstrate that the value is computed at compile time in compiler explorer.
-        . consteval enforce that the function is evaluated at compile time. If it can't be evaluated at compile time, it will throw a compiler error.
+        . constexpr function: 
+            . Can be evaluated at compile time or runtime, depending on how it is used. If all inputs are constant expressions, it is evaluated at compile time; otherwise, it is evaluated at runtime.
+
+        . consteval function: 
+            . Must be evaluated only at compile time. If called in a context that cannot guarantee compile-time evaluation, it results in a compilation error.
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build

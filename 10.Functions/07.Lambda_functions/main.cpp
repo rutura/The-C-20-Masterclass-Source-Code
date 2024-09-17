@@ -1,8 +1,16 @@
 /*
     . Lambda functions: 
-        . Declaring and using lambdas
+        . Declaring a lambda function and calling it through a name
+        . Declare a lambda function and call it directly
+        . Lambda function that takes parameters
+        . Lambda function that returns something
+        . Explicitly specify the return type
         . Capture lists
-        . Capture all lists
+
+
+
+
+
     . Build instructions: 
         . Bare hands with CMake: 
             . cmake -S . -B build
@@ -31,15 +39,11 @@ import utilities;
 
 int main() {
     //Declaring and using lambdas
-    /*
-    declare_and_use_lambda_func();
-    */
+    //declare_and_use_lambda_func();
 
     //Capture lists
-    /*
     capture_lists();
-    */
 
     //Capture all lists
-    capture_all_lists();
+    //capture_all_lists();
 }
