@@ -26,15 +26,12 @@
         . ninja 1.11 or up
         . vcpkg and setting up the VCPKG_ROOT environment variable
         . gdb any version
-
-    . Philosophy: 
-        . All non module looking code should be hidden away in the utilities module.
-
 */
 
 // One line comment
-import utilities;
 //#include <fmt/format.h>
+
+#include "utilities.h"
 
 int main() {
       // Integers and number systems

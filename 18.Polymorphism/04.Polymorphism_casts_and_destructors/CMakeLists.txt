@@ -8,19 +8,15 @@ project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
 set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET CXX_MODULES FILES
-        utilities.ixx
-        virtual_destructors.ixx 
-        dynamic_casts.ixx 
-        poly_func_and_destructors.ixx
-        typeid_operator.ixx 
+add_executable(${PROJECT_NAME} main.cpp
+        utilities.h utilities.cpp
+        virtual_destructors.h virtual_destructors.cpp
+        dynamic_casts.h dynamic_casts.cpp
+        poly_func_and_destructors.h
+        typeid_operator.h
 )
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

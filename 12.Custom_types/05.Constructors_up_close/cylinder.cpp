@@ -1,8 +1,6 @@
-module;
+#include "cylinder.h"
 
 #include <fmt/format.h>
-
-module cylinder;
 
 // #1: Constructor default parameters
 /*

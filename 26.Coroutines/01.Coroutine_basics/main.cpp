@@ -38,7 +38,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     //coro_basics_01_demo();

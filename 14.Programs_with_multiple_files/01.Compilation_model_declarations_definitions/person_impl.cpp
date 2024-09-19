@@ -1,8 +1,7 @@
-module;
+#include "person.h"
 
+#include <iostream>
 #include <string>
-
-module person;
 
 // Definition
 int Person::person_count = 8;
@@ -13,5 +12,8 @@ Person::Person(const std::string &names_param, int age_param) : full_name{ names
   ++person_count;
 }
 
+void Person::print_info() const {
+  //fmt::println("name : {}, age: {}", full_name, age);
+  std::cout << "name: " << full_name << ", age: " << age << "\n";
+}
 
-double add(double a, double b) { return a + b; }

@@ -11,12 +11,6 @@
             . Select build preset
             . Use the run and debug buttons: We can debug application right from the start.
 
-        . Note: 
-            . There are other ways to build but we'll focus on these two in the course.
-            . You can use the docker containers that come with the course for a fully reproducible build environment.
-                . one for gcc 14 [link]
-                . one for clang 18 [link]
-
     . Requirements:
         . A modern C++ compiler: 
             . eg: gcc 14, clang 16 or latest msvc. 
@@ -42,13 +36,10 @@
             . Windows: Get-command
                 . eg: Get-command ninja
 
-    . Philosophy: 
-        . All non module looking code should be hidden away in the utilities module.
-
 */
 
-// One line comment
-import utilities;
+
+#include "utilities.h"
 
 int main() {
     int value1 = 10;

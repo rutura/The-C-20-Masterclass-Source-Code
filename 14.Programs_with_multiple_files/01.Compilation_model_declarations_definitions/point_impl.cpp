@@ -1,8 +1,5 @@
-module;
-
+#include "point.h"
 #include <cmath>
-
-module point;
 
 // Default constructor
 Point::Point() : x(0.0), y(0.0) {}

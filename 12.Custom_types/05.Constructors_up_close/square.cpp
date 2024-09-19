@@ -1,9 +1,8 @@
-module;
+#include "square.h"
 
 #include <fmt/format.h>
 #include <string>
 
-module square;
 
 // #3: Explicit constructors
 /*

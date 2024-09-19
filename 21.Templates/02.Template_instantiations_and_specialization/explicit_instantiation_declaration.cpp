@@ -1,6 +1,4 @@
-module;
-
-module explicit_instantiation_declaration;
+#include "explicit_instantiation_declaration.h"
 
 namespace explicit_instantiation_declaration{
 

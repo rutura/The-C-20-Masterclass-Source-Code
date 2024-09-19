@@ -34,7 +34,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     //recursion_demo();

@@ -19,9 +19,9 @@
 
     . Requirements:
         . A modern C++ compiler: 
-            . eg: gcc 14, clang 16 or latest msvc. 
-        . cmake 3.30 or up
-        . ninja 1.11 or up
+            . eg: gcc
+        . cmake
+        . ninja
         . vcpkg and setting up the VCPKG_ROOT environment variable
             . how to update vcpkg: https://learn.microsoft.com/en-us/vcpkg/about/faq#how-do-i-update-vcpkg
         . A debugger: 
@@ -48,10 +48,10 @@
 */
 
 // One line comment
-#include <fmt/format.h>
-#include <vector>
+#include "utilities.h"
 
-import utilities;
+#include <fmt/core.h>
+
 
 int main() {
 // Example data to write

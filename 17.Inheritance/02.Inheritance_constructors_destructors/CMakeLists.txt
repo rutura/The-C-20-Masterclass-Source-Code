@@ -8,20 +8,17 @@ project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
 set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET CXX_MODULES FILES
-        utilities.ixx
-        inh_default_arg_constr.ixx 
-        constr_and_inh.ixx 
-        copy_constr_and_inh.ixx 
-        inherit_base_constructors.ixx 
-        inh_and_destructors.ixx
+add_executable(${PROJECT_NAME}
+        main.cpp
+        constr_and_inh.h constr_and_inh.cpp
+        copy_constr_and_inh.h copy_constr_and_inh.cpp
+        inh_and_destructors.h inh_and_destructors.cpp
+        inh_default_arg_constr.h inh_default_arg_constr.cpp
+        inherit_base_constructors.h inherit_base_constructors.cpp
+        utilities.h utilities.cpp
 )
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

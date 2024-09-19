@@ -29,7 +29,8 @@
         . In this course, we will run it on windows 
 
 */
-import utilities;
+
+#include "utilities.h"
 
 int main()
 {

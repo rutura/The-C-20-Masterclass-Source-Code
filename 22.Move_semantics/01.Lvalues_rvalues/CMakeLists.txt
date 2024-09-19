@@ -8,24 +8,20 @@ project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
 set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET CXX_MODULES FILES
-        utilities.ixx
-        move_semantics_01.ixx
-        move_semantics_02.ixx 
-        move_semantics_03.ixx 
-        boxcontainer.ixx
-        move_semantics_04.ixx 
-        move_semantics_05.ixx 
-        move_semantics_06.ixx
-        move_semantics_07.ixx 
-        move_semantics_08.ixx 
+add_executable(${PROJECT_NAME} main.cpp
+        utilities.h  utilities.cpp
+        move_semantics_01.h
+        move_semantics_02.h
+        move_semantics_03.h
+        boxcontainer.h
+        move_semantics_04.h
+        move_semantics_05.h
+        move_semantics_06.h
+        move_semantics_07.h
+        move_semantics_08.h move_semantics_08.cpp
 )
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

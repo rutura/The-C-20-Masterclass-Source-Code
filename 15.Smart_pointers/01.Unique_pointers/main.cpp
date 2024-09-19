@@ -36,7 +36,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     //unique_pointers();

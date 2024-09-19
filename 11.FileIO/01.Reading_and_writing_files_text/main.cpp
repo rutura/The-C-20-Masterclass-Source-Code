@@ -26,9 +26,9 @@
 
     . Requirements:
         . A modern C++ compiler: 
-            . eg: gcc 14, clang 16 or latest msvc. 
-        . cmake 3.30 or up
-        . ninja 1.11 or up
+            . eg: gcc
+        . cmake
+        . ninja
         . vcpkg and setting up the VCPKG_ROOT environment variable
             . how to update vcpkg: https://learn.microsoft.com/en-us/vcpkg/about/faq#how-do-i-update-vcpkg
         . A debugger: 
@@ -49,16 +49,10 @@
             . Windows: Get-command
                 . eg: Get-command ninja
 
-    . Philosophy: 
-        . All non module looking code should be hidden away in the utilities module.
-
 */
 
 // One line comment
-#include <filesystem>
-#include <fmt/format.h>
-
-import utilities;
+#include "utilities.h"
 
 int main() {
 

@@ -9,12 +9,13 @@
 */
 
 // One line comment
-import utilities;
 
 /*
     This is a block comment that englobes multiple
     lines of text
 */
+
+#include "utilities.h"
 
 int main()
 {

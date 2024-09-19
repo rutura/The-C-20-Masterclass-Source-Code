@@ -8,20 +8,16 @@ project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
 set(CMAKE_CXX_STANDARD 23) # Default C++ standard for targets
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-target_sources(${PROJECT_NAME}
-        PUBLIC
-        FILE_SET CXX_MODULES FILES
-        utilities.ixx 
-        try_catch_blocks.ixx 
-        need_for_exceptions.ixx 
-        exceptions_diff_levels.ixx 
-        multiple_handlers_for_exception.ixx 
-        nested_try_blocks.ixx 
+add_executable(${PROJECT_NAME} main.cpp
+        utilities.h utilities.cpp
+        try_catch_blocks.h
+        need_for_exceptions.h need_for_exceptions.cpp
+        exceptions_diff_levels.h exceptions_diff_levels.cpp
+        multiple_handlers_for_exception.h multiple_handlers_for_exception.cpp
+        nested_try_blocks.h nested_try_blocks.cpp
 )
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

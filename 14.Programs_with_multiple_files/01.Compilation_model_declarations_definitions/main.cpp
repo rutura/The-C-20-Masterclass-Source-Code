@@ -54,7 +54,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     use_point();

@@ -55,7 +55,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     //spaceship_op_the_basics();

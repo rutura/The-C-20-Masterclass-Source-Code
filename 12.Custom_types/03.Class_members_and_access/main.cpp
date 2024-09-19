@@ -27,7 +27,7 @@
 */
 
 // One line comment
-import utilities;
+#include "utilities.h"
 
 int main() {
     //getters_as_setters();
