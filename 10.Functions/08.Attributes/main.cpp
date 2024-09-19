@@ -6,6 +6,8 @@
 
         . Compilers have varying levels of support for these attributes.
 
+        . Attributes we have seen are related to functions, but they can also be applied classes, and other entities in C++.
+
     . Uses vcpkg as a dependency manager
     . Build instructions: 
         . Bare hands with CMake: 
