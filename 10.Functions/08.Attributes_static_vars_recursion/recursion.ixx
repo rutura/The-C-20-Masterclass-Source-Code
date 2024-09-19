@@ -27,7 +27,7 @@ namespace recursion{
         return memo[n];
     }
 
-    export int fibonacci_iterative(int n) {
+    export constexpr int fibonacci_iterative(int n) {
         if (n == 0) return 0;
         if (n == 1) return 1;
 
