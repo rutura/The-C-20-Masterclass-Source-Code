@@ -1,12 +1,15 @@
 /*
     . Reading and writing text files in modern C++.
         . Topics : 
-            . Reading and writing text files in modern C++
-            . Reading and writing binary files in modern C++
-            . Reading and writing POD types in modern C++
-            . Reading and writing several POD types in modern C++
-            . Reading and writing non-POD types in modern C++
-            . Reading and writing several non-POD types in modern C++
+            . Fundamental types: 
+                . Reading and writing text files in modern C++
+                . Reading and writing binary files in modern C++
+
+            . Objects: 
+                . Reading and writing POD types in modern C++
+                . Reading and writing several POD types in modern C++
+                . Reading and writing non-POD types in modern C++
+                . Reading and writing several non-POD types in modern C++
 
     . Build instructions: 
         . Bare hands with CMake: 

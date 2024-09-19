@@ -77,6 +77,7 @@ These methods provide different ways to write data to a file, each with its own 
 export module text_files;
 
 namespace text_files {
+	
     export void write_file(const std::filesystem::path& file_path, const std::string& content) {
 
         //Open the file for writing and in append mode
