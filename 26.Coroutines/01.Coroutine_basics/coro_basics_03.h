@@ -29,11 +29,11 @@ struct CoroType
       m_value = val;
     }
 
-    /*
-    void return_void() {
+
+    /*void return_void() {
         fmt::println("Returning void...");
-    }
-    */
+    }*/
+
   };
 
   CoroType(promise_type *p)
@@ -54,7 +54,7 @@ inline CoroType do_work()
   co_yield 1;
   co_yield 2;
   co_yield 3;
-  co_return;
+  co_return 0;
 }
 
 }//namespace coro_basics_03

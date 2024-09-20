@@ -1,4 +1,3 @@
-#pragma once
 #include "utilities.h"
 #include "coro_basics_01.h"
 #include "coro_basics_02.h"
