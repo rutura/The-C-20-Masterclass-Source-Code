@@ -11,7 +11,6 @@ icons/endless-sky.icns
 
 # dlls needed to run the binary
 *.dll
-# for file in *.ixx; do base="${file%.ixx}"; mv "$file" "$base.h"; touch "$base.cpp"; done
 # Build Directories and toolchain-generated files
 build/
 obj/
