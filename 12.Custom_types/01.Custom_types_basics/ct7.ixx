@@ -44,10 +44,7 @@ namespace ct7{
 
     export class Pixel {
     public:
-        Pixel();  // Default constructor
-        Pixel(uint32_t color, unsigned int x, unsigned int y);
         Pixel(uint32_t color, const Position& pos, const uint32_t& ref_color);  // Custom constructor
-        ~Pixel();
 
         uint32_t get_color() const;
         void set_color(uint32_t color);
@@ -68,37 +65,21 @@ namespace ct7{
     };
 
     // Implementations
-
-    Pixel::Pixel()
-        :   m_const_color{0}, 
-            m_ref_color{m_color}, 
-            m_position{0, 0} 
-    {
-        //m_const_color = 0;  // Error: assignment of read-only member 'ct7::Pixel::m_const_color'
-        //m_ref_color = m_color;  
-        //m_position = Position(0, 0);  
-        fmt::print("Default Pixel created\n");
-    }
-
-    Pixel::Pixel(uint32_t color, unsigned int x, unsigned int y) 
-        :   m_const_color{color}, 
-            m_ref_color{color}, 
-            m_position{x, y}, 
-            m_color{color}, 
-            m_pos_x{x}, 
-            m_pos_y{y} {
-        fmt::print("Pixel created with color: 0x{:08X} at ({}, {})\n", color, x, y);
-    }
-
-    // Constructor demonstrating const, reference, and non-default constructor initialization
     Pixel::Pixel(uint32_t color, const Position& pos, const uint32_t& ref_color) 
-        : m_const_color{color}, m_ref_color{ref_color}, m_position{pos.x, pos.y}, m_color{color} {
-        fmt::print("Pixel created with color: 0x{:08X} at Position({}, {}) using a reference to 0x{:08X}\n", 
-                    color, pos.x, pos.y, ref_color);
-    }
-
-    Pixel::~Pixel() {
-        fmt::print("Pixel destroyed\n");
+        : m_const_color{color},
+        m_ref_color{ref_color},
+        m_position{pos.x, pos.y},
+        m_color{color},
+        m_pos_x{0},
+        m_pos_y{0}
+    {
+        fmt::print(
+            "Pixel created with color: 0x{:08X} at Position({}, {}) using a reference to 0x{:08X}\n", 
+            color, 
+            pos.x, 
+            pos.y, 
+            ref_color
+        );
     }
 
     uint32_t Pixel::get_color() const {

@@ -30,7 +30,14 @@ namespace ct6{
     export class Pixel {
         public: 
             Pixel();
-            Pixel(uint32_t color, unsigned int x, unsigned int y);
+            //Pixel(uint32_t color, unsigned int x, unsigned int y);
+            Pixel(uint32_t color, unsigned int x, unsigned int y)
+                : m_color{color}, 
+                m_pos_x{x}, 
+                m_pos_y{y} 
+            {
+                fmt::print("Pixel created\n");
+            }
             ~Pixel();
 
             uint32_t get_color() const;
@@ -53,12 +60,14 @@ namespace ct6{
         fmt::print("Pixel created\n");
     }
 
+    /*
     Pixel::Pixel(uint32_t color, unsigned int x, unsigned int y) : 
         m_color{color}, 
         m_pos_x{x}, 
         m_pos_y{y} {
         fmt::print("Pixel created\n");
     }
+    */
 
     Pixel::~Pixel(){
         fmt::print("Pixel destroyed\n");

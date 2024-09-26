@@ -50,7 +50,8 @@ export void ct1_demo(){
 
 export void ct2_demo(){
 	
-	ct2::Pixel p;
+	//Create the object on the stack
+	ct2::Pixel p{0x00FF00FF, 10, 20 };
 
 	//Change the data inside the Pixel object
 	p.set_color(0x00FF00FF);
@@ -70,7 +71,7 @@ export void ct2_demo(){
 	auto p2 = std::make_unique<ct2::Pixel>(0x00FF00FF, 10, 20);
 	fmt::println("Pixel color: {:#010x}", p2->get_color());
 	fmt::println("Pixel position: ({}, {})", p2->get_x(), p2->get_y());
-	p2->print_log();
+	p2->print_access_count();
 
 	//When the default constructor is needed
 	/*
@@ -144,7 +145,7 @@ export void ct5_demo(){
 	fmt::println("Pixel position: ({}, {})", p.get_x(), p.get_y());
 	
 
-	//Write a recursiva lambda using explicit object parameter. Fibonacci series
+	// Recursive lambda with explicit object parameters
 	auto fib = [](auto self, int n) -> int {
 		if(n <= 1) return n;
 		return self(self, n - 1) + self(self, n - 2);
@@ -178,26 +179,14 @@ export void ct6_demo(){
 
 export void ct7_demo(){
 
-	ct7::Pixel p;
+	
+	ct7::Pixel p(0x00FF00FF, ct7::Position{10,20}, 0x00FF00FF);
 
 	//Change the data inside the Pixel object
 	p.set_color(0x00FF00FF);
 	p.set_x(10);
 	p.set_y(20);
 
-	fmt::println("Pixel color: {:#010x}", p.get_color());
-	fmt::println("Pixel position: ({}, {})", p.get_x(), p.get_y());
-
-	//Create objects on the heap with raw pointers
-	ct7::Pixel* p1 = new ct7::Pixel(0x00FF00FF, 10, 20);
-	fmt::println("Pixel color: {:#010x}", p1->get_color());
-	fmt::println("Pixel position: ({}, {})", p1->get_x(), p1->get_y());
-	delete p1;
-
-	//Create objects on the heap with smart pointers
-	auto p2 = std::make_unique<ct7::Pixel>(0x00FF00FF, 10, 20);
-	fmt::println("Pixel color: {:#010x}", p2->get_color());
-	fmt::println("Pixel position: ({}, {})", p2->get_x(), p2->get_y());
 }
 
 export void ct8_demo(){
