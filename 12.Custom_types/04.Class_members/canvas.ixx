@@ -70,8 +70,8 @@ namespace raw{
         Canvas& operator=(const Canvas& rhs);
         Canvas& operator=(Canvas&& other) noexcept;
 
-        void set_pixel_at(std::size_t x, std::size_t y, const Pixel& pixel);
-        Pixel& get_pixel_at(std::size_t x, std::size_t y);
+        void modify_pixel(std::size_t x, std::size_t y, const Pixel& pixel);
+        Pixel& retrieve_pixel(std::size_t x, std::size_t y);
 
         void swap(Canvas& other) noexcept;
 

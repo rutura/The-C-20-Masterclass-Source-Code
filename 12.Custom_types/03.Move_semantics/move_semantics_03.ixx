@@ -1,5 +1,5 @@
 /*
-    This file contains code that tinkers with moving temporaries around.
+    This file contains code that plays with Canvas after move semantics have been added.
         . The canvas class with move semantics added.
         . Step through these demos with a debugger to see how these 
             constructors and assignment operators are used.
@@ -75,10 +75,9 @@ import canvas;
 namespace move_semantics_03{
 
     export class Scores{
-
         public: 
 
-            //Two overlads
+            //Two overloads
             /*
             void set_scores(const std::vector<int>& scores){
                 m_scores = scores;

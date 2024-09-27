@@ -92,9 +92,8 @@ namespace raw{
             return *this;
         }
         swap(other);
-        //doint this does not guarantee that the contents of this is immediately cleaned up. Instead,
-        //the contents of this escapes through other to the caller of the move assignment operator and thus
-        //might stay alive longer than expected.
+        //Whatever the current object was pointing to is moved into the temporary
+        //which should die after a while when it's no longer in use.
         return *this;
     }
 
@@ -142,12 +141,12 @@ namespace raw{
     */
 
 
-    void Canvas::set_pixel_at(std::size_t x, std::size_t y, const Pixel& pixel) {
+    void Canvas::modify_pixel(std::size_t x, std::size_t y, const Pixel& pixel) {
         verify_coordinate(x, y);
         m_pixels[x][y] = pixel;
     }
 
-    Pixel& Canvas::get_pixel_at(std::size_t x, std::size_t y) {
+    Pixel& Canvas::retrieve_pixel(std::size_t x, std::size_t y) {
         verify_coordinate(x, y);
         return m_pixels[x][y];
     }
@@ -189,12 +188,12 @@ namespace modern{
     Canvas::Canvas(const Canvas& src)
         : m_width(src.m_width), m_height(src.m_height), m_pixels(src.m_pixels) {}
 
-    void Canvas::set_pixel_at(std::size_t x, std::size_t y, const Pixel& pixel) {
+    void Canvas::modify_pixel(std::size_t x, std::size_t y, const Pixel& pixel) {
         verify_coordinate(x, y);
         m_pixels[x][y] = pixel;
     }
 
-    Pixel& Canvas::get_pixel_at(std::size_t x, std::size_t y) {
+    Pixel& Canvas::retrieve_pixel(std::size_t x, std::size_t y) {
         verify_coordinate(x, y);
         return m_pixels[x][y];
     }
