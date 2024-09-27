@@ -2,6 +2,9 @@
     . Exploring constructor delegation
         . Delegated constructors are put in the constructor initializer list.
         . They should be the only member initializer in the list.
+            . a member can't be both initialized by a delegated constructor
+                 and have an initializer in the member initializer list.
+            . Variables not initialized by a delegated constructor, can't be added to the initializer list too.
         . The one parameter constructor delegates to the three parameter constructor.
         . The copy constructor delegates to the three parameter constructor.
         . This approach keeps your code DRY (Don't Repeat Yourself) and makes it easier to maintain.

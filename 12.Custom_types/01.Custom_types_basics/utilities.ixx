@@ -213,9 +213,9 @@ ct9::Pixel create_pixel() {
 
 export void ct9_demo(){
 	
-	/*
 	ct9::Pixel p1(0x00FF00FF, 10, 20);
 	ct9::Pixel p2 = p1; //Deep copy
+	/*
 
 	fmt::println("Pixel 1 color: {:#010x}", p1.get_color());
 	fmt::println("Pixel 1 position: ({}, {})", p1.get_x(), p1.get_y());
@@ -234,25 +234,25 @@ export void ct9_demo(){
 
 	//Cases where the copy constructor is called
 	// 1. Copy initialization
+	/*
     ct9::Pixel p1{0xFFFFFF, 10, 20};
     ct9::Pixel p2 = p1;  // Copy constructor is called
+	*/
 
     // 2. Passing by value
-    process_pixel(p1);  // Copy constructor is called to pass p1 to the function
+    //process_pixel(p1);  // Copy constructor is called to pass p1 to the function
 
     // 3. Returning by value: This may not always call the copy constructor due to RVO (Return Value Optimization)
-    ct9::Pixel p3 = create_pixel();  // Copy constructor may be called (or elided)
-
-    // 4. Assignment (uses the assignment operator, not the copy constructor)
-    //ct9::Pixel p4;
-    //p4 = p1;  // Assignment operator is called
+    //ct9::Pixel p3 = create_pixel();  // Copy constructor may be called (or elided)
 
     // 5. Copying an object in a collection (vector)
+	/*
     std::vector<ct9::Pixel> pixels;
     pixels.push_back(p1);  // Copy constructor is called when adding to the vector
+	*/
 
     // 6. Explicit copy constructor
-    ct9::Pixel p5(p1);  // Copy constructor is explicitly called
+    //ct9::Pixel p5(p1);  // Copy constructor is explicitly called
 
 
 }
@@ -275,12 +275,16 @@ export void ct11_demo(){
 	ct11::print_pixel(color);	//If the one param constructor is explicit, this will not compile
 	*/
 
+	/*
 	ct11::Pixel p1{0xFF00FF00, 100, 50}; // Directly uses the three-argument constructor
 	ct11::print_pixel(p1);
+	*/
+
 }
 
 
 export void ct13_demo(){
+
 	ct13::Pixel p1{0xFF00FF00, 100, 50};
 	ct13::Pixel p2{0x00FF00FF, 200, 150};
 
@@ -419,17 +423,17 @@ export void ct16_demo(){
     //std::filesystem::path file_path = R"(/path/to/your/input_file.bin)"; // Linux
 
     // Serialize the vector of Pixel objects to a file
-    ct16::write_pixels_to_file(pixels, file_path);
+	ct16::save_pixels(pixels, file_path);
 
-    // Deserialize the vector of Pixel objects from the file
-    std::vector<ct16::Pixel> deserialized_pixels = ct16::read_pixels_from_file(file_path);
+	//Deserialize the vector of Pixel objects from the file
+	std::vector<ct16::Pixel> deserialized_pixels = ct16::load_pixels(file_path);
 
-    // Print the deserialized Pixel objects to verify
+	// Print the deserialized Pixel objects to verify
 	fmt::println("Deserialized Pixels from binary file");
-    for (const auto& p : deserialized_pixels) {
-        fmt::print("Pixel color: {:#08X}, Position: ({}, {})\n", p.get_color(), p.get_x(), p.get_y());
-    }
-
+	for (const auto& p : deserialized_pixels) {
+		auto position = p.get_position();
+		fmt::print("Pixel color: {:#08X}, Position: ({}, {})\n", p.get_color(), position.x, position.y);
+	}
 }
 
 export void ct17_demo(){

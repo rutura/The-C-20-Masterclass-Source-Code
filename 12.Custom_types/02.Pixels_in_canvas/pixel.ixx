@@ -22,6 +22,6 @@ public:
 
 private:
     uint32_t m_color{0xFFFFFF}; // Default to white color in hex
-    Position m_position;
+    Position m_position{0, 0}; // Default initialized anyway.
 };
 

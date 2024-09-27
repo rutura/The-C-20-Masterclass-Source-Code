@@ -22,7 +22,7 @@
             . Things you can do: 
                                 Pixel b{a};       // Copy constructor (if 'Pixel a' exists)
 
-        4. You have a single or multi-argement non-copy constructor: 
+        4. You have a single or multi-argument non-copy constructor: 
             . The compiler generates: 
                 . Copy constructor. You can do something like Pixel p1 = p2;
             . Things you can do: 

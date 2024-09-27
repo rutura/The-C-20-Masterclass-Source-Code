@@ -14,7 +14,7 @@ export void canvas_demo(){
 	/*
 	raw::Canvas canvas{10, 10};
 	Pixel pixel(0xFF0000, Position{5, 5});
-	canvas.set_pixel_at(5, 5, pixel);
+	canvas.modify_pixel(5, 5, pixel);
 	canvas.print();
 	*/
 
@@ -22,7 +22,7 @@ export void canvas_demo(){
 	/*
 	auto canvas = std::make_unique<raw::Canvas>{10, 10};
 	auto pixel = std::make_unique<Pixel>(0xFF0000, Position{5, 5});
-	canvas->set_pixel_at(5, 5, *pixel);
+	canvas->modify_pixel(5, 5, *pixel);
 	canvas->print();
 	*/
 
@@ -30,7 +30,7 @@ export void canvas_demo(){
 	/*
 	auto canvas = new raw::Canvas{10, 10};
 	auto pixel = new Pixel(0xFF0000, Position{5, 5});
-	canvas->set_pixel_at(5, 5, *pixel);
+	canvas->modify_pixel(5, 5, *pixel);
 	canvas->print();
 	delete pixel;
 	delete canvas;
@@ -40,7 +40,7 @@ export void canvas_demo(){
 	/*
 	auto canvas = std::make_unique<raw::Canvas>(10, 10);
 	auto pixel = std::make_unique<Pixel>(0xFF0000, Position{5, 5});
-	canvas->set_pixel_at(5, 5, *pixel);
+	canvas->modify_pixel(5, 5, *pixel);
 	canvas->print();
 
 	fmt::println("Before copying");
@@ -54,7 +54,7 @@ export void canvas_demo(){
 	// Use the entities in the modern namespace
 	auto canvas = std::make_unique<modern::Canvas>(10, 10);
 	auto pixel = std::make_unique<Pixel>(0xFF0000, Position{5, 5});
-	canvas->set_pixel_at(5, 5, *pixel);
+	canvas->modify_pixel(5, 5, *pixel);
 	canvas->print();
 
 	fmt::println("Before copying");

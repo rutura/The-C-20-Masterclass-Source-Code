@@ -21,7 +21,6 @@ namespace ct8{
               //Set up a copy constructor
               //Pixel(const Pixel& other) = default;
               Pixel(const Pixel& other);
-              ~Pixel();
     
               uint32_t get_color() const;
               void set_color(uint32_t color);
@@ -39,7 +38,11 @@ namespace ct8{
     };
 
     Pixel::Pixel(uint32_t color, unsigned int x, unsigned int y)
-        : m_color{color}, m_pos_x{x}, m_pos_y{y} {
+        : m_color{color}, 
+        m_pos_x{x}, 
+        m_pos_y{y} 
+    {
+        fmt::print("Pixel created\n");
     }
 
     //Copy constructor
@@ -48,10 +51,7 @@ namespace ct8{
         m_pos_x{other.m_pos_x}, 
         m_pos_y{other.m_pos_y} 
     {
-    }
-
-    Pixel::~Pixel(){
-        fmt::print("Pixel destroyed\n");
+        fmt::print("Pixel copied.\n");
     }
 
     uint32_t Pixel::get_color() const {

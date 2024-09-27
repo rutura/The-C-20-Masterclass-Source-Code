@@ -71,12 +71,12 @@ namespace raw{
         return *this;
     }
 
-    void Canvas::set_pixel_at(std::size_t x, std::size_t y, const Pixel& pixel) {
+    void Canvas::modify_pixel(std::size_t x, std::size_t y, const Pixel& pixel) {
         verify_coordinate(x, y);
         m_pixels[x][y] = pixel;
     }
 
-    Pixel& Canvas::get_pixel_at(std::size_t x, std::size_t y) {
+    Pixel& Canvas::retrieve_pixel(std::size_t x, std::size_t y) {
         verify_coordinate(x, y);
         return m_pixels[x][y];
     }
@@ -87,16 +87,16 @@ namespace raw{
         std::swap(m_pixels, other.m_pixels);
     }
 
-    void Canvas::print() const {
-            for (std::size_t y = 0; y < m_height; ++y) {
-                for (std::size_t x = 0; x < m_width; ++x) {
-                    const Pixel& pixel = m_pixels[y][x];
-                    auto color = pixel.get_color();
-                    fmt::print("#{0:06X} ", color);
-                }
-                fmt::print("\n");
+    void Canvas::print() const {    
+        for (std::size_t y = 0; y < m_height; ++y) {
+            for (std::size_t x = 0; x < m_width; ++x) {
+                const Pixel& pixel = m_pixels[y][x];
+                auto color = pixel.get_color();
+                fmt::print("#{0:06X} ", color);
             }
+            fmt::print("\n");
         }
+    }
 
     void Canvas::verify_coordinate(std::size_t x, std::size_t y) const {
         if (x >= m_width || y >= m_height) {
@@ -115,15 +115,12 @@ namespace modern{
     Canvas::Canvas(std::size_t width, std::size_t height)
         : m_width(width), m_height(height), m_pixels(width, std::vector<Pixel>(height)) {}
 
-    Canvas::Canvas(const Canvas& src)
-        : m_width(src.m_width), m_height(src.m_height), m_pixels(src.m_pixels) {}
-
-    void Canvas::set_pixel_at(std::size_t x, std::size_t y, const Pixel& pixel) {
+    void Canvas::modify_pixel(std::size_t x, std::size_t y, const Pixel& pixel) {
         verify_coordinate(x, y);
         m_pixels[x][y] = pixel;
     }
 
-    Pixel& Canvas::get_pixel_at(std::size_t x, std::size_t y) {
+    Pixel& Canvas::retrieve_pixel(std::size_t x, std::size_t y) {
         verify_coordinate(x, y);
         return m_pixels[x][y];
     }

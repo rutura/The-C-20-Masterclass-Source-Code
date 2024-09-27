@@ -23,7 +23,7 @@ namespace ct11 {
         Pixel() = default;
 
         // Constructor with color only, explicit to prevent implicit conversions
-        explicit(true) Pixel(uint32_t color) : Pixel(color, 0, 0) {
+        explicit Pixel(uint32_t color) : Pixel(color, 0, 0) {
             fmt::print("Body of the one param constructor\n");
         }
 
