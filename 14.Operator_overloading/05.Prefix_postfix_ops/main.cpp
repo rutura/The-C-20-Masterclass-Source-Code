@@ -38,7 +38,8 @@
 import utilities;
 
 int main() {
-    //unary_prefix_operator_as_member();
-    //unary_prefix_plus_operator_as_non_member();
-    //postfix_plus_operator();
+    //fix_ops_1_demo();
+    //fix_ops_2_demo();
+    //fix_ops_3_demo();
+    fix_ops_4_demo();
 }

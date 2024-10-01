@@ -1,0 +1,243 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_COLOR_DIAGNOSTICS": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "installDir": "${sourceDir}/install/release",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
+        "ES_USE_SYSTEM_LIBRARIES": "OFF",
+        "BUILD_TESTING": "OFF"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "$env{CI}",
+        "rhs": "true"
+      }
+    },
+    {
+      "name": "linux-gcc",
+      "displayName": "Linux GCC",
+      "description": "Builds with the default host compiler on Linux",
+      "inherits": "base",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+        "CMAKE_CXX_COMPILER": "g++"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "macos",
+      "displayName": "MacOS",
+      "description": "Builds with the default host compiler on x64-based MacOS",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_OSX_ARCHITECTURES": "x86_64",
+        "VCPKG_TARGET_TRIPLET": "x64-osx-dynamic"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macos-arm",
+      "displayName": "MacOS ARM",
+      "description": "Builds with the default host compiler on ARM-based MacOS",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "VCPKG_TARGET_TRIPLET": "arm64-osx-dynamic"
+      },
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "cl",
+      "displayName": "Windows cl",
+      "description": "Builds with Visual C++ on Windows",
+      "inherits": "base",
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "description": "Builds for Linux like an official release",
+      "inherits": "release",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+        "VCPKG_HOST_TRIPLET": "linux64-release",
+        "VCPKG_TARGET_TRIPLET": "linux64-release"
+      }
+    },
+    {
+      "name": "macos-release",
+      "displayName": "MacOS Release",
+      "description": "Builds for MacOS like an official release",
+      "inherits": "release",
+      "cacheVariables": {
+        "ES_CREATE_BUNDLE": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+        "VCPKG_HOST_TRIPLET": "macos64-release",
+        "VCPKG_TARGET_TRIPLET": "macos64-release",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "10.9"
+      }
+    },
+    {
+      "name": "macos-arm-release",
+      "displayName": "MacOS ARM Release",
+      "description": "Builds for MacOS ARM like an official release",
+      "inherits": "release",
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "ES_CREATE_BUNDLE": "ON",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "sccache",
+        "VCPKG_HOST_TRIPLET": "macos64-release",
+        "VCPKG_TARGET_TRIPLET": "macos-arm64-release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64",
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "10.9"
+      }
+    },
+    {
+      "name": "linux_clang",
+      "displayName": "Linux Clang++",
+      "description": "Builds with the clang++ compiler",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "hidden": true,
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-gcc-debug",
+      "displayName": "Debug",
+      "configurePreset": "linux-gcc",
+      "inherits": "debug"
+    },
+    {
+      "name": "linux-gcc-release",
+      "displayName": "Release",
+      "configurePreset": "linux-gcc",
+      "inherits": "release"
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "Debug",
+      "configurePreset": "macos",
+      "inherits": "debug"
+    },
+    {
+      "name": "macos-release",
+      "displayName": "Release",
+      "configurePreset": "macos",
+      "inherits": "release"
+    },
+    {
+      "name": "macos-arm-debug",
+      "displayName": "Debug",
+      "configurePreset": "macos-arm",
+      "inherits": "debug"
+    },
+    {
+      "name": "macos-arm-release",
+      "displayName": "Release",
+      "configurePreset": "macos-arm",
+      "inherits": "release"
+    },
+    {
+      "name": "cl-debug",
+      "displayName": "Debug",
+      "configurePreset": "cl",
+      "inherits": "debug"
+    },
+    {
+      "name": "cl-release",
+      "displayName": "Release",
+      "configurePreset": "cl",
+      "inherits": "release"
+    },
+    {
+      "name": "linux_clang-debug",
+      "displayName": "Debug",
+      "configurePreset": "linux_clang",
+      "inherits": "debug"
+    },
+    {
+      "name": "linux_clang-release",
+      "displayName": "Release",
+      "configurePreset": "linux_clang",
+      "inherits": "release"
+    }
+  ],
+  "testPresets": [
+  ]
+}
