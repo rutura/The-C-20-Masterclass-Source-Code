@@ -32,5 +32,6 @@
 import utilities;
 
 int main() {
-    overload_stream_insertion_operator();
+    //overload_stream_insertion_operator();
+    overload_stream_extraction_operator();
 }

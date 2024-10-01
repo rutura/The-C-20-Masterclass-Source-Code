@@ -42,9 +42,11 @@
 import utilities;
 
 int main() {
-    //overload_plus_operator_as_member();
-    //overload_plus_operator_as_non_member();
-    //overload_subscript_operator();
-    //overload_subscript_reading_writing();
-    overload_subscript_operator_for_collection_types();
+
+    //op_overloading_1_demo();
+    //op_overloading_2_demo();
+    //op_overloading_3_demo();
+    //op_overloading_4_demo();
+    //op_overloading_5_demo();
+    op_overloading_6_demo();
 }
