@@ -18,5 +18,8 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
+        ordering_1.ixx 
+        ordering_2.ixx 
+        ordering_3.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

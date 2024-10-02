@@ -30,8 +30,8 @@
 import utilities;
 
 int main() {
-    //weak_ordering_ex1();
-    //weak_ordering_ex2();
-    partial_ordering_example();
+    //ordering_1_demo();
+    //ordering_2_demo();
+    ordering_3_demo();
     
 }
