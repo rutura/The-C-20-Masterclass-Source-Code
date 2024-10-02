@@ -18,10 +18,12 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        item.ixx
-        point.ixx
-        big_item.ixx
-        vector.ixx 
-        number.ixx
+        spaceship_ops_1.ixx 
+        spaceship_ops_2.ixx 
+        spaceship_ops_3.ixx 
+        spaceship_ops_4.ixx 
+        spaceship_ops_5.ixx 
+        spaceship_ops_6.ixx 
+        spaceship_ops_7.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

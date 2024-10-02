@@ -2,6 +2,7 @@ module;
 
 #include <fmt/format.h>
 #include <cmath>
+#include <iostream>
 
 export module point;
 

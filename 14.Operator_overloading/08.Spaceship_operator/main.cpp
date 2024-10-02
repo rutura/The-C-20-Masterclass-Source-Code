@@ -58,10 +58,12 @@
 import utilities;
 
 int main() {
-    //spaceship_op_the_basics();
-    //defaulted_equality_operator();
-    //custom_equality_operator();
-    //default_ordering_with_spaceship();
-    //members_without_spaceship();
-    //custom_spaceship_op_for_ordering();
+
+    //spaceship_ops_1_demo();
+    //spaceship_ops_2_demo();
+    //spaceship_ops_3_demo();
+    //spaceship_ops_4_demo();
+    //spaceship_ops_5_demo();
+    //spaceship_ops_6_demo();
+    spaceship_ops_7_demo();
 }

@@ -9,11 +9,6 @@ export module utilities;
 import point;
 import number;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
-
 export void logical_operators(){
 	Point point1(10.0, 10.0);
 	Point point2(20.0, 20.0);
