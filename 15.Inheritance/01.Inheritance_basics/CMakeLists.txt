@@ -18,10 +18,10 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        inh_basics.ixx
-        protected_members.ixx
-        base_acc_spec.ixx 
-        priv_inh.ixx
-        resurect.ixx
+        inh_poly_1.ixx 
+        inh_poly_2.ixx 
+        inh_poly_3.ixx 
+        inh_poly_4.ixx 
+        inh_poly_5.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

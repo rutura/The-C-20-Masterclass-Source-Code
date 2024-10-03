@@ -42,15 +42,13 @@
 
 */
 
-// One line comment
 import utilities;
 
 int main() {
 
-    //inheritance_basics();
-    //protected_members_func();
-    //base_access_specifiers();
-    //zooming_on_private_inheritance();
-    resurect_members_back_in_context();
+    //inh_poly_2_demo();
+    //inh_poly_3_demo();
+    //inh_poly_4_demo();
+    inh_poly_5_demo();
 
 }
