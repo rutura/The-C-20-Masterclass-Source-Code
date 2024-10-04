@@ -1,13 +1,12 @@
 /*
-    . Polymorphism - going deep:
+    . Inheritance and constructors
+        .#1: Default arg constructors with inheritance
 
-        .#1: The override keyword
+        .#2: Constructors and inheritance
 
-        .#2: Overriding, overloading and hiding
+        .#3: Copy constructors and inheritance
 
-        .#3: Polymorphism at different levels
-
-        .#4: Polymophism with static members
+        .#4: Inheriting base constructors
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -36,8 +35,10 @@
 import utilities;
 
 int main() {
-   //override_keyword_demo();
-   //overloading_overriding_and_hiding_demo();
-   //polymorphism_diff_levels_demo();
-   //polymorphism_with_static_members_demo();
+
+    //inh_poly_1_demo();
+    //inh_poly_2_demo();
+    //inh_poly_3_demo();
+    inh_poly_4_demo();
+
 }

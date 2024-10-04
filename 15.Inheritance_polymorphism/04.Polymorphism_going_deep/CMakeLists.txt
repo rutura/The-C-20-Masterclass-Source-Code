@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
-project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
+project(Rocket  VERSION 1.0.0 LANGUAGES CXX)
 
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
@@ -18,6 +18,9 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        reused_symbols.ixx
+        polymorphism_with_static_members.ixx 
+        poly_1.ixx 
+        poly_2.ixx 
+        poly_3.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

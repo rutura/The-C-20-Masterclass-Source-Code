@@ -18,9 +18,9 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        override_keyword.ixx 
-        override_overload_and_hide.ixx 
-        polymorphism_diff_levels.ixx
-        polymorphism_with_static_members.ixx 
+        poly_1.ixx 
+        poly_2.ixx 
+        poly_3.ixx 
+        poly_4.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

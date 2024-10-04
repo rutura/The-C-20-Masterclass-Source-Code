@@ -1,5 +1,20 @@
 /*
-    . Reused symbols with inheritance
+    . Polymorphism basics: 
+        .#1: Static binding with inheritance
+            . see poly_1.ixx
+        .#2: Polymorphism with virtual functions
+            . see poly_2.ixx
+
+        .#3: The need for virtual destructors
+
+        .#4: Sizes and slicing
+            . see sizes_and_slicing.ixx
+            . Exploring sizes of polymorphic objects and slicing.
+
+        .#4: Polymorphism and collections
+            . see polymorphism_and_collections.ixx
+            . Storing polymorphic objects in collections.
+
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -28,5 +43,9 @@
 import utilities;
 
 int main() {
-    reused_symbols_demo();
+    //poly_1_demo();
+    //poly_2_demo();
+    //poly_3_demo();
+    //poly_4_demo();
+    polymorphism_and_collections_demo();
 }

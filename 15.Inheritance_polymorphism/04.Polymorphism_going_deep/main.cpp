@@ -1,18 +1,11 @@
 /*
-    . Polymorphism basics: 
-        .#1: Static binding with inheritance
-            . see static_binding.ixx
-        .#2: Polymorphism with virtual functions
-            . see polymorphism.ixx
+    . Polymorphism - going deep:
 
-        .#3: Sizes and slicing
-            . see sizes_and_slicing.ixx
-            . Exploring sizes of polymorphic objects and slicing.
+        .#2: Overriding, overloading and hiding
 
-        .#4: Polymorphism and collections
-            . see polymorphism_and_collections.ixx
-            . Storing polymorphic objects in collections.
+        .#3: Polymorphism at different levels
 
+        .#4: Polymophism with static members
 
     . Build instructions: 
         . Bare hands with CMake: 
@@ -37,12 +30,12 @@
 
 */
 
-// One line comment
 import utilities;
 
 int main() {
-  //static_binding_demo();  
-  //polymorphism_demo();
-  //sizes_and_slicing_demo();
-  polymorphism_and_collections_demo();
+   //polymorphism_with_static_members_demo();
+
+    //poly_1_demo();
+    //poly_2_demo();
+    poly_3_demo();
 }
