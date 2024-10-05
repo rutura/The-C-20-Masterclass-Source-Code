@@ -7,8 +7,6 @@ module;
 
 export module utilities;
 
-import polymorphism_with_static_members;
-
 import poly_1;
 import poly_2;
 import poly_3;
@@ -47,6 +45,7 @@ export void poly_1_demo(){
 	//oval.draw();  // Calls Oval's draw() (overridden)
 }
 
+//#2: Polymorphism at different levels
 export void poly_2_demo(){
 
 	// Animal polymorphism
@@ -71,7 +70,6 @@ export void poly_2_demo(){
 	fmt::println("\nFeline polymorphism: ");
 	for (const auto &feline : felines) { feline->run(); }
 
-
 	fmt::println("------------");
 
 	// Bird polymorphism
@@ -83,6 +81,7 @@ export void poly_2_demo(){
 	for (const auto &bird : birds) { bird->fly(); }
 }
 
+//#3: Static members in polymorphic classes
 export void poly_3_demo() {
 	// Shape
 	poly_3::Shape shape1("shape1");
@@ -105,8 +104,17 @@ export void poly_3_demo() {
 	fmt::println("***********************************************");
 
 	// Shape polymorphism
-
 	poly_3::Shape *shapes[]{ &shape1, &ellipse1 };
 	for (auto &s : shapes) { fmt::println("count : {}", s->get_count());
 	}
+
+	fmt::println("\nA base class pointer to a Ellipse object: ");
+	std::unique_ptr<poly_3::Shape> shapePtr = std::make_unique<poly_3::Ellipse>(5.0, 10.0, "My Ellipse");
+
+    // This will call Ellipse's get_count, returning Ellipse's count
+    fmt::println("Count from Shape pointer: {}", shapePtr->get_count());
+
+    // Accessing static counts directly
+    fmt::println("Shape count: {}", poly_3::Shape::get_static_count());
+    fmt::println("Ellipse count: {}", poly_3::Ellipse::get_static_count());
 } 

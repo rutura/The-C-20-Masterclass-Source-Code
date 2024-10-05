@@ -18,7 +18,6 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        polymorphism_with_static_members.ixx 
         poly_1.ixx 
         poly_2.ixx 
         poly_3.ixx 
