@@ -6,11 +6,6 @@
             by the override keyword, which helps catch errors at compile time 
             if the function does not actually override a base class function.
 
-        . Overloading: The draw() function is overloaded in both the Shape and 
-            Oval classes. The Shape class has a version that takes no parameters 
-            and one that takes an int, while the Oval class adds an additional 
-            draw() function that takes both an int and a std::string_view.
-
         . Member Hiding: In the Oval class, the overloaded draw(int color_depth, 
             std::string_view color) function hides the Shape::draw(int) function. 
 
@@ -18,6 +13,13 @@
                 the one param draw function in the Shape class is hidden. 
                 If you don't explicitly override the one param draw function in the
                 Oval class, you lose the ability to call draw() on an Oval object.
+
+        . Overloading: The draw() function is overloaded in both the Shape and 
+            Oval classes. The Shape class has a version that takes no parameters 
+            and one that takes an int, while the Oval class adds an additional 
+            draw() function that takes both an int and a std::string_view.
+
+
 
         . I decided to keep the two draw functions in the Oval class to show the 
             concept of member hiding, and overloading. Notice that the two param 

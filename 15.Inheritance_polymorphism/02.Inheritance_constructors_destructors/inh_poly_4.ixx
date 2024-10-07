@@ -1,5 +1,5 @@
 /*
-    . Explanation of Member Hiding
+    . Exploring Member Hiding
 
         . In C++, when a derived class defines a member (either a variable or a 
             function) with the same name as one in its base class, the base class 
@@ -10,7 +10,7 @@
 
         . Key Points:
             . Hiding in Member Variables:
-                . In the Child class, the member variable m_member_var is defined 
+                . the member variable m_member_var is defined 
                     in both Parent and Child. When we refer to m_member_var in 
                     the Child class, it will refer to the Child's m_member_var 
                     instead of the Parent's m_member_var. This means that any 

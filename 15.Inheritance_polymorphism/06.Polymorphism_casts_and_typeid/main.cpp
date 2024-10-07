@@ -1,12 +1,7 @@
 /*
-    . Polymorphism, casts and destructors
-        .#1: Virtual destructors
-
-        .#2: Dynamic casts
-
-        .#3: Polymorphic functions and destructors
-
-        .#4: typeid operator
+    . Dynamic casts and typeid operator:
+        .#1: Dynamic casts
+        .#2: typeid operator
 
 
     . Build instructions: 

@@ -83,12 +83,12 @@ export void inh_poly_3_demo(){
 //#4: Member hiding in inheritance
 export void inh_poly_4_demo(){
 	inh_poly_4::Parent parent1;
-	parent1.print_var();
+	parent1.print_var();	// Calls Parent's print_var
 
 	fmt::println("");
 
 	inh_poly_4::Child child1;
-	child1.print_var();
-	child1.Parent::print_var();
-	child1.show_values();
+	child1.print_var();		// Calls Child's print_var
+	child1.Parent::print_var();	// Calls Parent's print_var
+	child1.show_values();	// Calls Child's show_values, which in turn accesses Parent's m_member_var
 }

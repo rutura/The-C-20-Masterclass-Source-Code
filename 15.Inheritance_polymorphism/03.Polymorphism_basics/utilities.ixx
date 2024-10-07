@@ -20,7 +20,7 @@ export void poly_1_demo(){
     poly_1::Oval oval(5.0, 3.0, "Oval Shape");
     poly_1::Circle circle(7.0, "Circle Shape");
 
-    // Managing objects via pointers and references
+    // Managing objects via pointers
     poly_1::Shape* shape_ptr = &shape;
     poly_1::Shape* oval_ptr = &oval;    // Pointer to base class, but points to Oval object
     poly_1::Shape* circle_ptr = &circle; // Pointer to base class, but points to Circle object
@@ -89,19 +89,19 @@ export void poly_2_demo(){
 	fmt::println("\nUsing smart pointers:");
     {
         std::unique_ptr<Shape> shape = std::make_unique<Shape>("Basic Shape");
-        shape->draw();
+        shape->draw(); // Calls Shape's draw()
     }  // shape goes out of scope and is destroyed here
 
     // Creating and using Oval
     {
         std::unique_ptr<Oval> oval = std::make_unique<Oval>(5.0, 10.0, "Oval Shape");
-        oval->draw(); 
+        oval->draw(); 	// Calls Oval's draw()
     }  // oval goes out of scope and is destroyed here
 
     // Creating and using Circle
     {
         std::unique_ptr<Circle> circle = std::make_unique<Circle>(7.0, "Circle Shape");
-        circle->draw(); 
+        circle->draw(); 		// Calls Circle's draw()
     }  // circle goes out of scope and is destroyed here
 
 }
@@ -128,15 +128,15 @@ export void poly_4_demo(){
 
 	//early binding
 	fmt::println("\nObject sizes with static binding:");
-	fmt::println("sizeof(Shape) : {}", sizeof(poly_4::early_binding::Shape));// dynamic : 40
-	fmt::println("sizeof(Oval) : {}", sizeof(poly_4::early_binding::Oval));// dynamic : 56
-	fmt::println("sizeof(Circle) : {}", sizeof(poly_4::early_binding::Circle));// dynamic : 56
+	fmt::println("sizeof(Shape) : {}", sizeof(poly_4::early_binding::Shape));
+	fmt::println("sizeof(Oval) : {}", sizeof(poly_4::early_binding::Oval));
+	fmt::println("sizeof(Circle) : {}", sizeof(poly_4::early_binding::Circle));
 
 	//late binding
 	fmt::println("\nObject sizes with dynamic binding:");
-	fmt::println("sizeof(Shape) : {}", sizeof(poly_4::late_binding::Shape));// dynamic : 40
-	fmt::println("sizeof(Oval) : {}", sizeof(poly_4::late_binding::Oval));// dynamic : 56
-	fmt::println("sizeof(Circle) : {}", sizeof(poly_4::late_binding::Circle));// dynamic : 56
+	fmt::println("sizeof(Shape) : {}", sizeof(poly_4::late_binding::Shape));
+	fmt::println("sizeof(Oval) : {}", sizeof(poly_4::late_binding::Oval));
+	fmt::println("sizeof(Circle) : {}", sizeof(poly_4::late_binding::Circle));
 
 	//Slicing 
 	fmt::println("\nSlicing:");

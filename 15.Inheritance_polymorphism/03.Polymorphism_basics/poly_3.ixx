@@ -91,6 +91,8 @@ namespace poly_3{
                 fmt::println("Derived class constructor");
             }
 
+            //If the base is virtual, the derived class destructor should also be virtual.
+            //So we can omit the virtual keyword here. But it's good practice to include it for readability.
             ~Derived() override {
                 delete[] data;  // Memory cleanup
                 fmt::println("Derived class destructor");

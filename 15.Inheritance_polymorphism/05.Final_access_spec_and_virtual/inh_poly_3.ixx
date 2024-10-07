@@ -1,5 +1,11 @@
 /*
-    . Exploring the case where when the same function is public in the base class and private in the derived class
+    . Exploring the case where when the same function is public in the base class and private in the derived class, and vice versa.
+
+    . The situation: 
+        . draw is public in shape and private id ellipse
+        . func is private in shape and public in ellipse
+    . The question: if we go through a base class pointer, which classes's function will be called 
+        both for draw and func?
         . When polymorphism is used, the function in the derived class is called.
         . When static binding is used, the function in the base class is called.
 
@@ -26,7 +32,7 @@
                   |                     |
                   +---------------------+
 
-    . Dynamci binding: 
+    . Dynamic binding: 
         . When you call the virtual function through a base class pointer, the access specifier 
             in the base class determines whether the function is accessible, regardless of the 
             access specifier in the derived class

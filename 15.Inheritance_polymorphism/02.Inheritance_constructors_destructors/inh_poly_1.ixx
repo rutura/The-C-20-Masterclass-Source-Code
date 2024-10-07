@@ -23,6 +23,7 @@
 
             . Destructors:
                 . Called when the objects go out of scope or are deleted.
+                . Destructors are called in the reverse order of constructors.
 */
 module;
 
@@ -58,8 +59,6 @@ namespace inh_poly_1 {
     protected:
         std::string m_full_name{"None"};
         int m_age{0};
-
-    protected:
         std::string m_address{"None"};
     };
 
