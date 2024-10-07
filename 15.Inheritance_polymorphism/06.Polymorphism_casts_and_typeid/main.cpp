@@ -36,8 +36,6 @@
 import utilities;
 
 int main() {
-  //virtual_destructors_demo();
-  //dynamic_casts_demo();
-  //poly_func_and_destructors_demo();
-  typeid_operator_demo();
+    //inh_poly_1_demo();
+    inh_poly_2_demo();
 }
