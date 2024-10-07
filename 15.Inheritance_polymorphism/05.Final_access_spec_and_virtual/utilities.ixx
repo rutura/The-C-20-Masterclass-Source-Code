@@ -1,114 +1,129 @@
 module;
 #include <string_view>
 #include <fmt/format.h>
+#include <memory>
 
 export module utilities;
 
-import final_keyword;
-import final_override_not_keywords;
-import poly_func_and_acc_spec;
-import no_poly_and_acc_spec;
-import virt_func_default_arg;
+import inh_poly_1;
+import inh_poly_2;
+import inh_poly_3;
+import inh_poly_4;
 
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
+//#1: The final identifier
+export void inh_poly_1_demo(){
+
+	inh_poly_1::Animal animal{"Generic Animal"};
+    animal.breathe();
+
+    inh_poly_1::Dog dog{"Short fur", "Dog"};
+    dog.run();  // Dog::run called
+    dog.bark(); // Dog::bark called: Woof!
+
+    inh_poly_1::BullDog bulldog;
+    bulldog.run(); // Inherited Dog::run, no override allowed
+    bulldog.bark(); // Inherited Dog::bark
+
+    inh_poly_1::Cat cat{"Soft fur", "Cat"};
+    cat.run();  // Cat::run called, overridden from Feline
+    cat.miaw(); // Cat::miaw() called
+
+    inh_poly_1::Bird bird{"White wings", "Bird"};
+    bird.fly(); // Bird::fly() called
+
+    inh_poly_1::Crow crow{"Black wings", "Crow"};
+    crow.fly(); // Bird::fly() called, final prevents override
+    crow.cow(); // Crow::cow() called
+
 }
 
-
-export void final_keyword_demo(){
-	fmt::println("Can't inherit from a final class");
+//#2: Final and override are not keywords
+export void inh_poly_2_demo(){
+	//No implementation here.
 }
 
-export void final_override_not_keywords_demo(){
-	final_override_not_keywords::override();
-}
+//#3: Polymorphic functions and access specifiers
+export void inh_poly_3_demo(){
 
-export void poly_func_and_acc_spec_demo(){
-
-	// Accessing stuff through the base class pointer
-	std::shared_ptr<poly_func_and_acc_spec::Shape> shape0 = 
-							std::make_shared<poly_func_and_acc_spec::Ellipse>(1, 5, "ellipse0");
-	shape0->draw();// Polymorphism
-					// shape0->func(); // Error :  func is private in Shape
-
-	fmt::println("------------");
-
-	// Direct objects : static binding
-	poly_func_and_acc_spec::Ellipse ellipse1(1, 6, "ellipse1");
-	ellipse1.func();// Works
-	// ellipse1.draw(); //Error : draw() is private in Ellipse.- Static binding
-
-
-	fmt::println("------------");
-
-	// Raw derived object assigned to raw base object
-	// Slicing will occur, Shape::draw will be called
-	poly_func_and_acc_spec::Shape shape3 = poly_func_and_acc_spec::Ellipse(2, 3, "ellipse3");
-	shape3.draw();// Shape::draw() called
-					// shape3.func(); // Error : func is private in shape
-}
-
-export void non_polymorphic_func_and_acc_spec_demo(){
+	//Dynamic binding
+	{
+		fmt::println("\nDynamic binding");
+		using inh_poly_3::dyn_bind::Shape;
+		using inh_poly_3::dyn_bind::Ellipse;
 
 		// Accessing stuff through the base class pointer
-	std::shared_ptr<no_poly_and_acc_spec::Shape> shape0 = 
-						std::make_shared<no_poly_and_acc_spec::Ellipse>(1, 5, "ellipse0");
-	shape0->draw();// Static binding
-					// shape0->func(); // Error :  func is private in Shape
+		std::shared_ptr<Shape> shape0 = 
+						std::make_shared<Ellipse>(1, 5, "ellipse0");
+		shape0->draw();// Polymorphism
+		// shape0->func(); // Error :  func is private in Shape
 
-	fmt::println("------------");
+		// Direct objects : static binding
+		Ellipse ellipse1(1, 6, "ellipse1");
+		ellipse1.func();// Works
+		//ellipse1.draw(); //Error : draw() is private in Ellipse.- Static binding
 
-	// Direct objects : static binding
-	no_poly_and_acc_spec::Ellipse ellipse1(1, 6, "ellipse1");
-	ellipse1.func();// Works
-	// ellipse1.draw(); //Error : draw() is private in Ellipse.- Static binding
+		// Raw derived object assigned to raw base object
+		// Slicing will occur, Shape::draw will be called
+		Shape shape3 = Ellipse(2, 3, "ellipse3");
+		shape3.draw();// Shape::draw() called
+		// shape3.func(); // Error : func is private in shape
+	}
 
+	//Static binding
+	{
+		fmt::println("\nStatic binding");
+		using inh_poly_3::stat_bind::Shape;
+		using inh_poly_3::stat_bind::Ellipse;
 
-	fmt::println("------------");
+		// Accessing stuff through the base class pointer
+		std::shared_ptr<Shape> shape0 = 
+						std::make_shared<Ellipse>(1, 5, "ellipse0");
+		shape0->draw();// Polymorphism
+		// shape0->func(); // Error :  func is private in Shape
 
-	// Raw derived object assigned to raw base object
-	// Slicing will occur, Shape::draw will be called
-	no_poly_and_acc_spec::Shape shape3 = no_poly_and_acc_spec::Ellipse(2, 3, "ellipse3");
-	shape3.draw();// Shape::draw() called
-					// shape3.func(); // Error : func is private in shape
+		// Direct objects : static binding
+		Ellipse ellipse1(1, 6, "ellipse1");
+		ellipse1.func();// Works
+		//ellipse1.draw(); //Error : draw() is private in Ellipse.- Static binding
+
+		// Raw derived object assigned to raw base object
+		// Slicing will occur, Shape::draw will be called
+		Shape shape3 = Ellipse(2, 3, "ellipse3");
+		shape3.draw();// Shape::draw() called
+		// shape3.func(); // Error : func is private in shape
+	}
 }
 
 
-export void virt_func_default_arg_demo(){
-	
-	// Base ptr : Uses polymorphism
-	virt_func_default_arg::Base *base_ptr1 = new virt_func_default_arg::Derived;
-	double result = base_ptr1->add();
-	fmt::println("Result (base ptr) : {}", result);// 12
+export void inh_poly_4_demo(){
+		fmt::println("\nBase ptr managing derived object: ");
+		inh_poly_4::Base *base_ptr1 = new inh_poly_4::Derived;
+		double result = base_ptr1->add();
+		fmt::println("Result (base ptr) : {}", result);// 12
 
 
-	fmt::println("---------------------");
-
-	// Base ref : Uses Polymorphism
-	virt_func_default_arg::Derived derived1;
-	virt_func_default_arg::Base &base_ref1 = derived1;
-	result = base_ref1.add();
-	fmt::println("Result (base ref) : {}", result);// 12
-
-	fmt::println("---------------------");
+		fmt::println("\nBase ref managing derived object: ");
+		inh_poly_4::Derived derived1;
+		inh_poly_4::Base &base_ref1 = derived1;
+		result = base_ref1.add();
+		fmt::println("Result (base ref) : {}", result);// 12
 
 
-	// Raw objects
-	virt_func_default_arg::Base base3;
-	result = base3.add();
-	fmt::println("raw result : {}", result);
+		fmt::println("\nRaw base object: ");
+		inh_poly_4::Base base3;
+		result = base3.add();
+		fmt::println("raw result : {}", result);
 
-	fmt::println("---------------------");
 
-	// Direct object : Uses static binding
-	virt_func_default_arg::Derived derived2;
-	result = derived2.add();
-	fmt::println("Result (Direct object) : {}", result);// 22
+		// Direct object : Uses static binding
+		fmt::println("\nRaw derived object: ");
+		inh_poly_4::Derived derived2;
+		result = derived2.add();
+		fmt::println("Result (Direct object) : {}", result);// 22
 
-	fmt::println("---------------------");
 
-	// Raw objects - slicing : uses static binding
-	virt_func_default_arg::Base base1 = derived2;
-	result = base1.add();
-	fmt::println("Result (Raw objects assignment) : {}", result);// 11
+		fmt::println("\nRaw objects assignment - slicing: ");
+		inh_poly_4::Base base1 = derived2;
+		result = base1.add();
+		fmt::println("Result (Raw objects assignment) : {}", result);// 11
 }

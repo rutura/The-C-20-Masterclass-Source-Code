@@ -18,10 +18,9 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        final.ixx
-        final_override_not_keywords.ixx 
-        poly_func_and_acc_spec.ixx 
-        no_poly_and_acc_spec.ixx 
-        virt_func_default_arg.ixx 
+        inh_poly_1.ixx 
+        inh_poly_2.ixx 
+        inh_poly_3.ixx 
+        inh_poly_4.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
