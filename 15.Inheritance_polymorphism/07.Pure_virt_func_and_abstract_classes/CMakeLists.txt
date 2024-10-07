@@ -18,7 +18,7 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx 
-        pure_virt_func_abstract_classes.ixx 
-        abstract_class_interfaces.ixx 
+        inh_poly_1.ixx 
+        inh_poly_2.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

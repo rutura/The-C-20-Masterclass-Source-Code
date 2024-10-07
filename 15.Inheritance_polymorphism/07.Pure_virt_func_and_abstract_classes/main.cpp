@@ -32,6 +32,6 @@
 import utilities;
 
 int main() {
-  //pure_virt_func_abstract_classes_demo();
-  abstract_class_interfaces_demo();
+    //inh_poly_1_demo();
+    inh_poly_2_demo();
 }
