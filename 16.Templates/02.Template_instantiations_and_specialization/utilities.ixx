@@ -5,102 +5,96 @@ module;
 
 export module utilities; 
 
-import implicit_instantiations;
-import explicit_instantiation_definition;
-import explicit_instantiation_declaration;
-import full_specialization;
-import type_trait_example;
-import single_method_in_class;
+import templates_1;
+import templates_2;
+import templates_3;
+import templates_4;
+import templates_5;
+import templates_6;
 
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
+//#1: Implicit Instantiations
+export void templates_1_demo(){
+
+    using templates_1::MyClass;
+
+    MyClass<int> my_int_instance;
+    my_int_instance.safe_function();  // This works
+
+    MyClass<double> my_double_instance;
+    my_double_instance.safe_function();  // This works
+
+    //my_int_instance.error_function(); // Notice that the code compiled, even if the call to error_function was in there.
+                                        // So no checks are done before instantiating the template.
+    //my_double_instance.error_function();
 }
 
-export void implicit_instantiations_demo(){
-
-	// Create an instance of MyClass with int (no errors will be caused because we don't call errorFunction)
-    implicit_instantiations::MyClass<int> myIntInstance;
-    myIntInstance.safeFunction();  // This works
-
-    // Create an instance of MyClass with double (again, no errors because errorFunction is not called)
-    implicit_instantiations::MyClass<double> myDoubleInstance;
-    myDoubleInstance.safeFunction();  // This works
-
-    // Uncommenting the following lines will cause a compilation error because errorFunction will be instantiated
-    // myIntInstance.errorFunction();
-    // myDoubleInstance.errorFunction();
+//#2: Explicit Instantiation Definition
+export void templates_2_demo(){
+    //All relevant parts are in the templates_2 module.
 }
 
-export void explicit_instantiation_definition_demo(){
-	
-	
+
+//#3: Explicit Instantiation Declaration and definition
+// Visual C++ is having trouble resolving the add function, it can find the class though. Weird.
+// Clang 18 is able to resolve both.
+export void templates_3_demo(){
+
+    using templates_3::add;
+    using templates_3::Point;
+
+    /*
+    auto result1 = add(1, 2);
+    Point<int> point(1, 2);
+    fmt::print("Point: ({}, {})\n", point.getX(), point.getY());
+    fmt::println("Result of add: {}", result1);
+    */
 }
 
-export void explicit_instantiation_declaration_demo(){
-    //auto result1 = explicit_instantiation_declaration::add(1, 2);
-    //explicit_instantiation_declaration::Point<int> point(1, 2);
-    //fmt::print("Point: ({}, {})\n", point.getX(), point.getY());
-}
+//#4: Full Specialization
+export void templates_4_demo(){
 
-export void full_specialization_demo(){
+    using templates_4::Adder;
+    using templates_4::add;
 
     //Class specialization
-    full_specialization::Adder<int> adder;
+    Adder<int> adder;
     fmt::print("Sum: {}\n", adder.add(1, 2));
 
-    full_specialization::Adder<const char*> adder2;
+    Adder<const char*> adder2;
     char a[20] = "Hello"; //strcat appends to the first parameter. So, we need to have enough space. Here, 20 bytes.
     char b[] = " World";
     auto result = adder2.add(a, b);
     fmt::print("Concatenated string: {}\n", result);
 
     //Function specialization
-    fmt::print("Sum: {}\n", full_specialization::add(1, 2));
-    fmt::println("Concatenated string: {}", full_specialization::add(a, b));
+    fmt::print("Sum: {}\n", add(1, 2));
+    fmt::println("Concatenated string: {}", add(a, b));
 }
 
-export void type_trait_example_demo(){
-    fmt::println("Is int: {}", type_trait_example::is_int<int>::value);    // true
-    fmt::println("Is int: {}", type_trait_example::is_int<double>::value); // false
-    fmt::println("Is int: {}", type_trait_example::is_int<char>::value);   // false
-    fmt::println("Is int: {}", type_trait_example::is_int<std::string>::value); // false
-    fmt::println("Is int: {}", type_trait_example::is_int<long int>::value); // false
+//#5: Type Traits Example
+export void templates_5_demo(){
+    using templates_5::is_int;
+    fmt::println("Is int: {}", is_int<int>::value);    // true
+    fmt::println("Is int: {}", is_int<double>::value); // false
+    fmt::println("Is int: {}", is_int<char>::value);   // false
+    fmt::println("Is int: {}", is_int<std::string>::value); // false
+    fmt::println("Is int: {}", is_int<long int>::value); // false
 }
 
-export void single_method_in_class_demo(){
-    /*
-    single_method_in_class::Adder<int> adder;
-    fmt::print("Sum: {}\n", adder.add(1, 2));
+// #6: Partial Specialization
+export void templates_6_demo(){
 
-    single_method_in_class::Adder<const char*> adder2;
-    const char* a = "Hello"; //strcat appends to the first parameter. So, we need to have enough space. Here, 20 bytes.
-    const char* b = " World";
-    auto result = adder2.add(a, b);
-    fmt::print("Concatenated string: {}\n", result);
-    delete result;
-    */
-    single_method_in_class::BoxContainer<int> int_box;
-    int_box.add(10);	
-    int_box.add(11);
-    int_box.add(62);
-    int_box.add(330);
-    int_box.add(3);
-    int_box.add(7);
-    int_box.add(9);
-    int_box.add(8);
-    std::cout << "int_box : " << int_box << std::endl;
-    std::cout << "int_box.max : " << int_box.get_max() << std::endl;
-    std::cout << "-------------" << std::endl;
+    using templates_6::Adder;
+    using templates_6::add;
 
-    single_method_in_class::BoxContainer<const char*> char_ptr_box;
-    char_ptr_box.add("Apple");
-    char_ptr_box.add("Kiwi");
-    char_ptr_box.add("Banana");
-    char_ptr_box.add("Zeus");
-    std::cout << "char_ptr_box : " << char_ptr_box << std::endl;
-    std::cout << "char_ptr_box : " << char_ptr_box.get_max() << std::endl;
+    Adder<int,double> adder;
+    //adder.add(1, 2.0); // Calls the partial specialization version
+
+    Adder<double,int> adder2;
+    //adder2.add(1.0, 2); // Calls the generic version
+
+    //add(1, 2.0); //Calls the function overload for (int, T)
+
+    add<int,double>(1, 2.0); //Calls the generic function template
+
 }
-
-
-
-

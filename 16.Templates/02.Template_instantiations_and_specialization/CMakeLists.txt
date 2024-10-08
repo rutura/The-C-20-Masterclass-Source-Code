@@ -12,18 +12,17 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 find_package(fmt CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp explicit_instantiation_declaration.cpp)
+add_executable(${PROJECT_NAME} main.cpp templates_3.cpp)
 
 target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        implicit_instantiations.ixx 
-        explicit_instantiation_definition.ixx 
-        explicit_instantiation_declaration.ixx
-        full_specialization.ixx 
-        partial_specialization.ixx
-        type_trait_example.ixx 
-        single_method_in_class.ixx 
+        templates_1.ixx 
+        templates_2.ixx 
+        templates_3.ixx 
+        templates_4.ixx 
+        templates_5.ixx 
+        templates_6.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

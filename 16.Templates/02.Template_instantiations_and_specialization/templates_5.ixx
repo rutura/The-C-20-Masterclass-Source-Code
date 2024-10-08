@@ -1,8 +1,12 @@
+/*
+    . An example of how full specializations can be used to build our own type trait.
+*/
 module;
 
-export module type_trait_example;
+export module templates_5;
 
-namespace type_trait_example{
+namespace templates_5{
+
     // Primary template (default case: type is not int)
     export template <typename T>
     struct is_int {
@@ -14,5 +18,5 @@ namespace type_trait_example{
     struct is_int<int> {
         constexpr static bool value = true;
     };
-
-}   // namespace type_trait_example
+    
+} // namespace templates_5

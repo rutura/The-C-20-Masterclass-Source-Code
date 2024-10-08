@@ -1,11 +1,19 @@
+/*
+    . Exploring template full specialization.
+        . Full specialization happens when you provide a complete definition for a specific type or function, completely overriding the generic (original) template.
+
+        . Full specialization takes precedence over the primary(generic) template and any partial specialization.
+
+        . When the compiler a call to a function call or object instantiation, it will first look for a full specialization, then a partial specialization, and finally the primary template.
+
+*/
 module;
 
-#include <fmt/format.h>
-#include <cstring>
+#include<fmt/format.h>
 
-export module full_specialization;
+export module templates_4;
 
-namespace full_specialization{
+namespace templates_4{
 
     // Generic (primary) template
     export template <typename T>
@@ -51,4 +59,5 @@ namespace full_specialization{
         return std::strcat(a, b);
     }
 
-}   // namespace full_specialization
+    
+} // namespace templates_4

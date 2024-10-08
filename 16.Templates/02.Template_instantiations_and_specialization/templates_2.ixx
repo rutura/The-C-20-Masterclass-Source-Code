@@ -14,9 +14,9 @@
 */
 module;
 
-export module explicit_instantiation_definition;
+export module templates_2;
 
-namespace explicit_instantiation_definition{
+namespace templates_2{
 
     export template<typename T>
     T add(T a, T b) {
@@ -44,6 +44,6 @@ namespace explicit_instantiation_definition{
 
     //Explicit template instantiation definitions
     //template int add<int>(int, int);
-    //template class Point<int>;
-
-}   // namespace explicit_instantiation_definition
+    template class Point<int>;
+    
+} // namespace templates_2

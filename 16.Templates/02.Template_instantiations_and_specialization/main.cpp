@@ -53,8 +53,10 @@
 import utilities;
 
 int main() {
-      //explicit_instantiation_declaration_demo();
-      //full_specialization_demo();
-      //type_trait_example_demo();
-      //single_method_in_class_demo();
+      //templates_1_demo();
+      //templates_2_demo();
+      //templates_3_demo();
+      //templates_4_demo();
+      //templates_5_demo();
+      templates_6_demo();
 }
