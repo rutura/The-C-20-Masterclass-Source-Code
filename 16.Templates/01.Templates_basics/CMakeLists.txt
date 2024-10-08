@@ -18,10 +18,10 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx 
-        template_basics.ixx
-        class_template_basics.ixx 
-        template_member_functions.ixx 
-        template_parameter_types.ixx 
-        template_template_parameters.ixx 
+        templates_1.ixx 
+        templates_2.ixx 
+        templates_3.ixx 
+        templates_4.ixx 
+        templates_5.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

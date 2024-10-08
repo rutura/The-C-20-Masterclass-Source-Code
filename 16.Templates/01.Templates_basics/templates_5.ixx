@@ -1,31 +1,25 @@
+/*
+    . Exploring different arrangements for classes and member functions when templates are involved: 
+        . The class is a template.
+        . The class is not a template, but the member functions are templates.
+        . Both the class and the member functions are templates.
+*/
 module;
 
-export module template_member_functions;
+export module templates_5;
 
-namespace template_member_functions{
+namespace templates_5{
 
-    //Class is a template, member uses the template parameter
+    // Class is a template, member uses the template parameter
     export template <typename T>
-    class Calculator_1{
-
+    class Calculator_1 {
     public:
-        Calculator_1(){}
+        Calculator_1() = default;
 
-        T add(T a, T b){
-            return a + b;
-        }
-
-        T subtract(T a, T b){
-            return a - b;
-        }
-
-        T multiply(T a, T b){
-            return a * b;
-        }
-
-        T divide(T a, T b){
-            return a / b;
-        }
+        T add(T a, T b) { return a + b; }
+        T subtract(T a, T b) { return a - b; }
+        T multiply(T a, T b) { return a * b; }
+        T divide(T a, T b) { return a / b; }
     };
 
 
@@ -76,5 +70,5 @@ namespace template_member_functions{
             return item == other; // There may be assumptions made on the U type here, but we'll just use ==.
         }
     };
-
-}   // namespace template_member_functions
+    
+} // namespace templates_5

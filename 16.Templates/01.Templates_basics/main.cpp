@@ -1,11 +1,8 @@
 /*
     . Template basics in C++
         .#1: Basic function template
-
         .#2: Class template basics
-
         .#3: Template member functions
-
         .#4: Template parameter types: 
             . type template parameters
             . non-type template parameters
@@ -45,9 +42,9 @@
 import utilities;
 
 int main() {
-    //function_template_basics_demo();
-    //class_template_basics_demo();
-    //template_member_functions_demo();
-    //template_parameter_types_demo();
-    template_template_parameters_demo();
+    //templates_1_demo();
+    //templates_2_demo();
+    //templates_3_demo();
+    //templates_4_demo();
+    templates_5_demo();
 }
