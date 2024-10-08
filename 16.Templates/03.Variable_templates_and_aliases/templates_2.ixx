@@ -1,12 +1,18 @@
+/*
+    . Exploring alias templates: 
+        . A way to provide a new name for an existing type.
+        . Syntax: 
+            . template <typename T> using NewName = ExistingType<T>;
+*/
 module;
 
 #include <vector>
 #include <string>
 #include <map>
 
-export module template_aliases;
+export module templates_2;
 
-namespace template_aliases{
+namespace templates_2{
 
     // KeyValueStore class template 
     export template <typename Key, typename Value>
@@ -32,5 +38,5 @@ namespace template_aliases{
     // Alias template for KeyValueStore with std::string as key
     export template <typename Value>
     using StringKeyStore = KeyValueStore<std::string, Value>;
-
-}   // namespace template_aliases
+    
+} // namespace templates_2

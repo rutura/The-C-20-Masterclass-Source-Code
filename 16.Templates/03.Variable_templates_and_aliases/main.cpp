@@ -1,7 +1,6 @@
 /*
     . Variable templates and alias templates: 
         .#1: Variable templates
-            . see variable_templates.ixx 
 
         .#2: Alias templates
             . We just use using declarations
@@ -30,10 +29,10 @@
 
 */
 
-// One line comment
 import utilities;
 
 int main() {
-    //variable_templates_demo();
-    template_aliases_demo();
+
+    templates_1_demo();
+    //templates_2_demo();
 }
