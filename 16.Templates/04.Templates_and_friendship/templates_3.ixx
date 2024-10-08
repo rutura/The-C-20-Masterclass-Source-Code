@@ -1,15 +1,21 @@
 /*
-   Friendship is only granted to a select group of specializations of the friend function or friend class.
-   Int instances specifically
-   print_point<double> and Canvas<double> cannot access the private members of Point for example. 
+    .#3: Class is not a template, but the friend function and class are 
+         specific specializations (or instances) of the template.
+            . Only a few friend functions and templates have access 
+                to the private members of the class.
+            . Specifically, friendship is only granted to a select group 
+                of specializations of the friend function or friend class templates.
+                int instances and specializations specifically.
+            . print_point<double> and Canvas<double> cannot access the private 
+                members of Point for example. 
 */
 module;
 
 #include <fmt/format.h>
 
-export module templates_and_friendship_03;
+export module templates_3;
 
-namespace templates_and_friendship_03 {
+namespace templates_3 {
 
     class Point;    //Forward declaration
 
@@ -20,15 +26,15 @@ namespace templates_and_friendship_03 {
     class Canvas;   //Forward declaration
 
     export class Point {
-        //Only int instances of the friends have access to the private members of any instance Point class.
+        //Only int instances of the friends have access to the private 
+        //members of any instance of the Point class.
         friend void print_point<int>(const Point& p);
         friend class Canvas<int>;
-
-        int x;
-        int y;
-
     public:
         Point(int x, int y) : x(x), y(y) {}
+    private: 
+        int x;
+        int y;
     };
 
     //Definition if print_point
@@ -64,4 +70,4 @@ namespace templates_and_friendship_03 {
     */
 
     
-}   // namespace templates_and_friendship_03 
+}   // namespace templates_3 

@@ -7,121 +7,113 @@ module;
 
 export module utilities;
 
-import templates_and_friendship_01;
-import templates_and_friendship_02;
-import templates_and_friendship_03;
-import templates_and_friendship_04;
-import templates_and_friendship_05;
-import templates_and_friendship_06;
-import templates_and_friendship_07;
-import templates_and_friendship_08;
+import templates_1;
+import templates_2;
+import templates_3;
+import templates_4;
+import templates_5;
+import templates_6;
+import templates_7;
 
-export void print_msg(std::string_view msg) { fmt::println("{}", msg); }
+//IMPORTANT NOTE: Code from this chapter prioritized compilation on Windows with Visual C++.
+//                Some parts couldn't compile on Clang. Test each part incrementally.
+//                May be it has to do with C++20 modules? 
 
-export void templates_and_friendship_01_demo() {
-  templates_and_friendship_01::Point p(1, 2);
+
+//#1: Friendship without templates
+export void templates_1_demo() {
+  templates_1::Point p(1, 2);
   print_point(p);
 }
 
-export void templates_and_friendship_02_demo() {
-  /*
-  templates_and_friendship_02::Point p(3, 4);
-  templates_and_friendship_02::print_point<double>(p);	//The template parameter
-  could be anything here. It's not used anyway.
+//#2: The class is not a template, but the friend function and class are templates.
+export void templates_2_demo() {
+  templates_2::Point p(3, 4);
+  templates_2::print_point<double>(p);	//The template parameter
+                                        //could be anything here. It's not used anyway.
 
-  templates_and_friendship_02::Canvas<int> canvas;
+  templates_2::Canvas<int> canvas;
   canvas.draw(p);
 
-  templates_and_friendship_02::Canvas<double> canvas2;
+  templates_2::Canvas<double> canvas2;
   canvas2.draw(p);
-  */
 }
 
-export void templates_and_friendship_03_demo() {
-  /*
-  //Int instances of the friends.
-  templates_and_friendship_03::Point p(5, 6);
-  //templates_and_friendship_03::print_point<int>(p);	// print_point<int> can
-  access the private members of Point<int>
+//#3: The class is not a template, but the friend function and 
+//   class are specific specializations of the template.
+export void templates_3_demo() {
+    //Int instances of the friends.
+    templates_3::Point p(5, 6);
 
-  templates_and_friendship_03::Canvas<int> canvas; // If it was double, you'd
-  get a compiler error. canvas.draw(p);	// Canvas<int> can access the private
-  members of Point<int>
-  */
+    //print_point<int> can access the private members of Point<int>.
+    //If it was double, you'd get a compiler error.Canvas<int> can access the private
+    templates_3::print_point<int>(p);	
+
+    //The same goes for the Canvas class template.
+    templates_3::Canvas<int> canvas; 
+    canvas.draw(p);
 }
 
-export void templates_and_friendship_04_demo() {
-  // templates_and_friendship_04::Point<int> p(7, 8);
-  // print_point(p);	// print_point can access the private members of
-  // Point<int>
+//#4: Class is a template, and the friend function is not a template.
+//     . Granting access to a limited set of function overloads.
+export void templates_4_demo() {
+  templates_4::Point<int> p(7, 8);
+  print_point(p);	// print_point can access the private members of Point<int>
 
-  // templates_and_friendship_04::Point<double> p2(9.0, 10.0);
-  // print_point(p2);	// print_point can't access the private members of
-  // Point<double>
+  templates_4::Point<double> p2(9.0, 10.0);
+  //print_point(p2);	// Error. Why?  
 }
 
-export void templates_and_friendship_05_demo() {
-  /*
-  templates_and_friendship_05::Point<int> p(11, 12);
-  print_point(p);	// print_point can access the private members of
-  Point<int>
+//#5: The class is a template, friend functions and classes are templates, but
+// only a int instances of the friends have access to the private members.
+export void templates_5_demo() {
 
-  templates_and_friendship_05::Canvas<int> canvas;
-  canvas.draw(p);	// Canvas<int> can access the private members of
-  Point<int>
-  */
+  templates_5::Point<int> p(11, 12);
+  print_point(p);	// print_point can access the private members of Point<int>
+
+  templates_5::Canvas<int> canvas;
+  canvas.draw(p);	// Canvas<int> can access the private members of Point<int>
 
   // Creating a Point<double> instance
-  // templates_and_friendship_05::Point<double> p2(13.0, 14.0);
-  // print_point(p2);	// print_point can't access the private members of
-  // Point<double>
+  templates_5::Point<double> p2(13.0, 14.0);
+  //print_point(p2);	// Error: print_point can't access the private members of // Point<double>
 }
 
-export void templates_and_friendship_06_demo() {
-  /*
-  templates_and_friendship_06::Point<int> p(15, 16);
-  print_point(p);	// print_point can access the private members of
-  Point<int>
 
-  templates_and_friendship_06::Canvas<int> canvas;
-  canvas.draw(p);	// Canvas<int> can access the private members of
-  Point<int>
-  */
+//#6: Class is template, friends are template, and we want any instance 
+//    of the friend templates to have access to private members of the class.
+export void templates_6_demo() {
+  templates_6::Point<int> p(15, 16);
+  print_point(p);	// print_point can access the private members of Point<int>
+
+  templates_6::Canvas<int> canvas;
+  canvas.draw(p);	// Canvas<int> can access the private members of Point<int>
 
   // Creating a Point<double> instance
-  templates_and_friendship_06::Point<double> p2(17.0, 18.0);
+  templates_6::Point<double> p2(17.0, 18.0);
   print_point(p2);
 
-  templates_and_friendship_06::Canvas<double> canvas2;
+  templates_6::Canvas<double> canvas2;
   canvas2.draw(p2);
 }
 
-export void templates_and_friendship_07_demo() {
-  templates_and_friendship_07::Point<int> p(19, 20);
-  // print_point(p);	// print_point can access the private members of
-  // Point<int>
 
-  // templates_and_friendship_07::Canvas<int> canvas;
-  // canvas.draw(p);	// Canvas<int> can access the private members of
-  // Point<int>
+//#7: Class is a template, friends are templates, and we only want friends 
+// whose template paramter matches that  of the class to have access to 
+// the private members of the class.
+export void templates_7_demo() {
+  templates_7::Point<int> p(19, 20);
+  print_point(p);	// print_point can access the private members of Point<int>
 
-  // Creating a Point<double> instance
-  // templates_and_friendship_07::Point<double> p2(21.0, 22.0);
-  // print_point<double>(p2);
-  // print_point<int>(p2);	// Error
+  templates_7::Canvas<int> canvas;
+  canvas.draw(p);	// Canvas<int> can access the private members of Point<int>
 
-  // templates_and_friendship_07::Canvas<double> canvas2;
-  // canvas2.draw(p2);
-  // canvas2.draw(p);	// Error
-}
+  //Creating a Point<double> instance
+  templates_7::Point<double> p2(21.0, 22.0);
+  print_point<double>(p2);
+  //print_point<int>(p2);	// Error
 
-export void templates_and_friendship_08_demo() {
-  templates_and_friendship_08::BoxContainer<int> box_container;
-  box_container.add(1);
-  box_container.add(2);
-  box_container.add(3);
-  box_container.add(4);
-  box_container.add(5);
-
-  std::cout << box_container << '\n';
+  templates_7::Canvas<double> canvas2;
+  canvas2.draw(p2);
+  //canvas2.draw(p);	// Error
 }

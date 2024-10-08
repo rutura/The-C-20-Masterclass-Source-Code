@@ -18,13 +18,12 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        templates_and_friendship_01.ixx 
-        templates_and_friendship_02.ixx
-        templates_and_friendship_03.ixx 
-        templates_and_friendship_04.ixx
-        templates_and_friendship_05.ixx
-        templates_and_friendship_06.ixx  
-        templates_and_friendship_07.ixx 
-        templates_and_friendship_08.ixx 
+        templates_1.ixx 
+        templates_2.ixx
+        templates_3.ixx 
+        templates_4.ixx
+        templates_5.ixx
+        templates_6.ixx  
+        templates_7.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)

@@ -1,16 +1,19 @@
+/*
+    . Class is a template, and the friend function is not a template.
+        . Granting access to a limited set of function overloads.
+*/
 module;
 
 #include <fmt/format.h>
 
-export module templates_and_friendship_04;
+export module templates_4;
 
-namespace templates_and_friendship_04 {
+namespace templates_4 {
 
     export template <typename T>
     class Point {
         //The overload of print_point that takes a Point<int> as an argument can access the private members of any instance of Point.
         friend void print_point(const Point<int>& p);
-        friend class Canvas;
         int x;
         int y;  
     public:
@@ -29,4 +32,4 @@ namespace templates_and_friendship_04 {
     }
     */
 
-}   // namespace templates_and_friendship_04
+}   // namespace templates_4

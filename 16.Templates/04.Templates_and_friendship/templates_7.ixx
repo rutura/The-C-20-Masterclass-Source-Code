@@ -1,25 +1,29 @@
+/*
+    .#7: Class is a template, friends are templates, and we only want friends 
+        whose template paramter matches that  of the class to have access to 
+        the private members of the class.
+*/
 module;
 
 #include <fmt/format.h>
 
-export module templates_and_friendship_07;
+export module templates_7;
 
-namespace templates_and_friendship_07{
+namespace templates_7{
 
     template <typename T>
     class Canvas;
 
     export template <typename T>
     class Point {
-
         //We only grant access to friends whose template paramters match that of the class.
         friend class Canvas<T>;
         friend void print_point<T>(const Point<T>& p);
-
-        T x;
-        T y;
     public:
         Point(T x, T y) : x(x), y(y) {}
+    private: 
+        T x;
+        T y;
     };
 
     export template <typename T>
@@ -35,4 +39,4 @@ namespace templates_and_friendship_07{
         }
     };
 
-}   // namespace templates_and_friendship_07 
+}   // namespace templates_7 
