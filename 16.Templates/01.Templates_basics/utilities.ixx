@@ -87,7 +87,6 @@ export void templates_3_demo(){
 	auto result1 = maximum(11, 2);
 	fmt::print("The result is: {}\n", result1);
 
-	//Defaults
 	auto result2 = add(11, 2);
 	fmt::print("The result is: {}\n", result2);
 
@@ -108,10 +107,10 @@ export void templates_4_demo(){
 	processor1.process(container1, 2);
 	processor1.process(container1, 3);
 
-	//We can easily change the container that Processor works with.
+	//We can easily change the container that Processor works with, without having to change the class.
 	//This is powered by template template parameters.
 	Container<std::string> container2; 	
-	Processor<Container, std::string> processor2;
+	Processor<Container, std::string> processor2; // A class template instance passed as a template argument
 	processor2.process(container2, "Hello");
 	processor2.process(container2, "World");
 }

@@ -15,38 +15,28 @@ namespace templates_5{
     class Calculator_1 {
     public:
         Calculator_1() = default;
-
         T add(T a, T b) { return a + b; }
         T subtract(T a, T b) { return a - b; }
         T multiply(T a, T b) { return a * b; }
         T divide(T a, T b) { return a / b; }
     };
 
-
-    //Class is not a template, member is a function template
-    export class Calculator_2{
+    // Class is not a template, member is a function template
+    export class Calculator_2 {
     public:
-        Calculator_2(){}
+        Calculator_2() = default;
 
-        template <typename T>
-        T add(T a, T b){
-            return a + b;
-        }
+        template <typename T> 
+        T add(T a, T b) { return a + b; }
 
-        template <typename T>
-        T subtract(T a, T b){
-            return a - b;
-        }
+        template <typename T> 
+        T subtract(T a, T b) { return a - b; }
 
-        template <typename T>
-        T multiply(T a, T b){
-            return a * b;
-        }
-
-        template <typename T>
-        T divide(T a, T b){
-            return a / b;
-        }
+        template <typename T> 
+        T multiply(T a, T b) { return a * b; }
+        
+        template <typename T> 
+        T divide(T a, T b) { return a / b; }
     };
 
     //Both class and member are templates

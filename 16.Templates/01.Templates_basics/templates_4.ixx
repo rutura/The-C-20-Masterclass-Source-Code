@@ -22,7 +22,7 @@ export module templates_4;
 
 namespace templates_4{
 
-        //The container template.
+    //The container template.
     export template <typename T>
     class Container {
     public:
@@ -42,6 +42,7 @@ namespace templates_4{
     };
 
     //Template template parameter.
+    //The class accepts another template class as a parameter, which in this case is ContainerType.
     export template <template <typename> class ContainerType, typename T>
     class Processor {
     public:
