@@ -11,12 +11,6 @@ import concepts_03;
 import concepts_04;
 import concepts_05;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
-
-
 export void concepts_01_demo(){
 
 	char a_0{ 10 };
