@@ -2,19 +2,16 @@
     How It Works:
 
         . Base Case:
-            . The base case function takes two parameters of type T and returns
-   their sum. . This base case handles the situation where there are exactly two
-   arguments left to process.
+            . The base case function takes two parameters of type T and returns their sum. 
+            . This base case handles the situation where there are exactly two arguments left to process.
 
         . Variadic Template:
-            . The variadic template function uses a template parameter pack
-   (Args...) to accept an arbitrary number of arguments. . It adds the first
-   argument (first) to the result of calling add recursively on the remaining
-   arguments (args...). . The recursion eventually reduces the problem to the
-   base case of adding two parameters.
+            . The variadic template function uses a template parameter pack (Args...) to accept 
+                an arbitrary number of arguments. . It adds the first argument (first) to the 
+                result of calling add recursively on the remaining arguments (args...). . The 
+                recursion eventually reduces the problem to the base case of adding two parameters.
 
-        . This function template can handle any number of arguments and sum them
-   up correctly.
+        . This function template can handle any number of arguments and sum them up correctly.
 
 */
 module;

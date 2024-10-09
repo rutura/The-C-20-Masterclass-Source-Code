@@ -40,5 +40,9 @@ int main() {
     //recursion_demo();
     //variadic_function_templates_demo();
     //variadic_class_templates_demo();
-    fold_expressions_demo();
+    //fold_expressions_demo();
+
+    //templates_1_demo();
+    //templates_2_demo();
+    templates_3_demo();
 }
