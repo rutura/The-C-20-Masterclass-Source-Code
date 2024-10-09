@@ -18,7 +18,6 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        boxcontainer.ixx
         class_templates_concepts_01.ixx
         class_templates_concepts_02.ixx 
         class_templates_concepts_03.ixx 

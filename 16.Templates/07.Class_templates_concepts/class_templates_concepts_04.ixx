@@ -1,3 +1,7 @@
+/*
+            .#4: example 2
+            . see class_templates_concepts_04.ixx
+*/
 module;
 
 #include <concepts>

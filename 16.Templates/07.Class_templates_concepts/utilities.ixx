@@ -8,7 +8,6 @@ module;
 
 export module utilities; 
 
-import boxcontainer;
 import class_templates_concepts_01;
 import class_templates_concepts_02;
 import class_templates_concepts_03;
@@ -33,11 +32,6 @@ export void class_templates_concepts_01_demo(){
 
 
 
-	box::BoxContainer<class_templates_concepts_01::Point<int>> point_box;
-	point_box.add(point_int);
-	point_box.add(class_templates_concepts_01::Point<int>(40,50));
-	
-	std::cout << "point_box : " << point_box << std::endl;
 }
 
 export void class_templates_concepts_02_demo(){
@@ -63,8 +57,6 @@ export void class_templates_concepts_02_demo(){
 	//static_assert(std::same_as<int,int>); // Success
 	//static_assert(std::same_as<int,double>);// Fail
 	//static_assert(std::same_as<class_templates_concepts_02::Dog,class_templates_concepts_02::Cat>); //Fail
-	//static_assert(std::same_as<box::BoxContainer<int>, box::BoxContainer<int>>); // Success
-	//static_assert(std::same_as<BoxContainer<int>, BoxContainer<double>>); // Fail
 	static_assert(std::same_as<class_templates_concepts_02::Point<int>,class_templates_concepts_02::Point<int>>); // Success
 	//static_assert(std::same_as<class_templates_concepts_02::Point<int>,class_templates_concepts_02::Point<float>>); // Fail
 	
@@ -78,21 +70,11 @@ export void class_templates_concepts_02_demo(){
 }
 
 export void class_templates_concepts_03_demo(){
+	class_templates_concepts_03::Point p{10,20};
+	std::cout << "Point : " << p << std::endl;
 
-	//Set up a box container of int
-	box::BoxContainer<int> int_box;
-	int_box.add(10);
-	int_box.add(20);
-	int_box.add(30);
-	//Print the box
-	std::cout << "int_box : " << int_box << std::endl;
-
-	box::BoxContainer<class_templates_concepts_03::Point> point_box;
-	point_box.add({10,20});
-	point_box.add({40,50});
-	//Print the box
-	std::cout << "point_box : " << point_box << std::endl;
-
+	struct Dog{};
+	//class_templates_concepts_03::Point<Dog> p1;
 }
 
 export void class_templates_04_demo(){
