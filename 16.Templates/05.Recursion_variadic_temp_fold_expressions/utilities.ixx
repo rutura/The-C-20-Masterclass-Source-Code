@@ -5,14 +5,10 @@ module;
 
 export module utilities; 
 
-import recursion;
-import variadic_function_templates;
-import variadic_class_templates;
-import fold_expressions;
-
 import templates_1;
 import templates_2;
 import templates_3;
+import templates_4;
 
 //#1: Template recursion
 export void templates_1_demo(){
@@ -65,32 +61,23 @@ export void templates_3_demo(){
 	fmt::println("Fourth value: {}", bag4.get_tail().get_tail().get_tail().get_value());
 }
 
+//#4: Fold expressions
+export void templates_4_demo(){
 
-
-export void fold_expressions_demo(){
 	//Trying out fold expressions
-	//Unary left fold
-	fmt::println("Unary left fold add 1,2,3: {}", fold_expressions::add_unary_left_fold(1, 2, 3));
-	fmt::println("Unary left fold sub 1,2,3: {}", fold_expressions::sub_unary_left_fold(1, 2, 3));
-
-	//Unary right fold
-	fmt::println("Unary right fold add 1,2,3: {}", fold_expressions::add_unary_right_fold(1, 2, 3));
-	fmt::println("Unary right fold sub 1,2,3: {}", fold_expressions::sub_unary_right_fold(1, 2, 3));
-
-	//Binary left fold
-	fmt::println("Binary left fold add 1,2,3: {}", fold_expressions::add_binary_left_fold(1, 2, 3));
-	fmt::println("Binary left fold sub 1,2,3: {}", fold_expressions::sub_binary_left_fold(1, 2, 3));
-
-	//Binary right fold
-	fmt::println("Binary right fold add 1,2,3: {}", fold_expressions::add_binary_right_fold(1, 2, 3));
-	fmt::println("Binary right fold sub 1,2,3: {}", fold_expressions::sub_binary_right_fold(1, 2, 3));
+	fmt::println("Unary left fold add 1,2,3: {}", templates_4::add_unary_left_fold(1, 2, 3, 4, 5));
+	fmt::println("Unary right fold add 1,2,3: {}", templates_4::add_unary_right_fold(1, 2, 3, 4, 5));
+	fmt::println("Binary left fold add 1,2,3: {}", templates_4::add_binary_left_fold(1, 2, 3, 4, 5));
+	fmt::println("Binary right fold add 1,2,3: {}", templates_4::add_binary_right_fold(1, 2, 3, 4, 5));
 
 
 	//Trying out empty parameter packs
 	//Unary folds must have at least one parameter, otherwise, you'll get a compiler error.
-	//fmt::println("Unary left fold add: {}", fold_expressions::add_unary_left_fold()); Error
-	//fmt::println("Unary right fold add: {}", fold_expressions::add_unary_right_fold()); Error
-	//fmt::println("Binary left fold add: {}", fold_expressions::add_binary_left_fold()); 
-	//fmt::println("Binary right fold add: {}", fold_expressions::add_binary_right_fold());
-	//fmt::println("Unary left fold add 1: {}", fold_expressions::add_unary_left_fold(1));
+	/*
+	//fmt::println("Unary left fold add: {}", templates_4::add_unary_left_fold()); Error
+	//fmt::println("Unary right fold add: {}", templates_4::add_unary_right_fold()); Error
+	fmt::println("Binary left fold add: {}", templates_4::add_binary_left_fold()); 
+	fmt::println("Binary right fold add: {}", templates_4::add_binary_right_fold());
+	fmt::println("Unary left fold add 1: {}", templates_4::add_unary_left_fold(1));
+	*/
 }

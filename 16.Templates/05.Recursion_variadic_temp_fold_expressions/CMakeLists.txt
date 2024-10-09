@@ -18,12 +18,9 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx
-        recursion.ixx 
-        variadic_function_templates.ixx 
-        variadic_class_templates.ixx
-        fold_expressions.ixx 
         templates_1.ixx 
         templates_2.ixx 
         templates_3.ixx 
+        templates_4.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
