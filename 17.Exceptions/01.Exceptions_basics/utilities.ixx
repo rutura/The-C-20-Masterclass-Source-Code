@@ -11,166 +11,58 @@ import exceptions_diff_levels;
 import multiple_handlers_for_exception;
 import nested_try_blocks;
 
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
+import exceptions_1;
+import exceptions_2;
+import exceptions_3;
+
+//#1: The basics on ecxeptions in C++
+export void exceptions_1_demo(){
+	exceptions_1::exceptions_basics();
+	exceptions_1::throwing_pointers();
+	exceptions_1::potential_memory_leaks();
+	exceptions_1::unhandled_exceptions();
+	exceptions_1::the_need_for_copy_constructors();
 }
 
 
-export void try_catch_blocks_demo(){
-	
-	// Showing that that automatic local variables are destroyed when
-	// we are thrown out of a try block
-	int a{10};
-	int b{10};
-
-	try{
-		try_catch_blocks::Item item; // When exception is thrown, control immediately exits the try block
-					// an automatic local variables are released
-					// But pointers may leak memory.
-		if( b == 0 )
-			throw 110;
-		a++; // Just using a and b in here, could use them to do anything.
-		b++;
-		fmt::println( "Code that executes when things are fine" );
-	} catch(int ex){
-		fmt::println( "Something went wrong. Exception thrown : {}", ex);
-	}
-	fmt::println( "Done!" );
-
-
-	//.Throwing a pointer : recipe for disaster
-	// Throwing pointers is a recipe for disaster, as by the time
-	// the catch block executes, the memory allocated and used in try
-	// block is pointing to invalid data. The program may seem to work
-	// sometimes but there are no guarantees you'll always get valid stuff
-	// if you dereference pointers allocated in the try block.
-	/*
-	int c{0};
-	try{
-		int var{55};
-		int* int_ptr = &var;
-		if(c == 0)
-			throw int_ptr;
-		fmt::println( "Keeping doing some other things..." );
-	}catch(int* ex){
-		fmt::println( "Something went wrong. Exception thrown : ", *ex );
-	}
-	fmt::println( "END." );
-	*/
-
-
-	// Potential memory leaks
-	// The destructor for Item is never called when we're thrown out of the
-	// try block, and memory is leaked.
-	/*
-	int d{0};
-	try{
-	//try_catch_blocks::Item * item_ptr = new try_catch_blocks::Item();
-	std::shared_ptr<try_catch_blocks::Item> item_ptr = std::make_shared<try_catch_blocks::Item>();
-	if(d == 0)
-		throw 0;
-	fmt::println( "Keeping doing some other things..." );
-	}catch(int ex){
-	fmt::println( "Something went wrong. Exception thrown : {}", ex );
-	}
-	fmt::println( "END." );
-	*/
-
-
-	// If you throw an exception and it's not handled anywhere in your code,
-	// you'll get a hard crash
-	/*
-	throw 0;
-	fmt::println( "Doing something after we throw" );
-
-	fmt::println( "END." );
-	*/
-
-
-	// If copy constructor is either deleted, protected or private, the
-	// object can't be thrown as exception. You'll get a compiler error.
-	/*
-
-	try {
-		try_catch_blocks::MyException e;
-		throw e;//
-
-	} catch (try_catch_blocks::MyException ex) {}
-	fmt::println("END.");
-	*/
+//#2: Exploring the need for exceptions
+export void exceptions_2_demo(){
+	exceptions_2::integer_division_by_zero();
+	exceptions_2::downcast_troubles();
+	exceptions_2::recover_from_division_by_zero();
+	exceptions_2::recover_from_bad_downcast();
+	exceptions_2::exceptions_coming_from_elsewhere();
 }
 
-
-export void need_for_exceptions_demo(){
-
-	// int division by 0 : CRASH
-	const int a{45};
-	const int b{0};
-	//int result = a/b;		//Some compilers flag division by zero as an error out of the box.
-	fmt::println( "Done!" );
-
-
-	// Downcast using dynamic_cast with references
-	// The hierarchy of Animal->Dog has to be polymorphic to be able to do
-	// this. This throws an exception because animal has no dog part so the
-	// cast won't really work.
+//#3: Exploring exceptions from different levels
+export void exceptions_3_demo(){
 	/*
-	need_for_exceptions::Animal a;
-	need_for_exceptions::Dog& d{dynamic_cast<need_for_exceptions::Dog&>(a)};
+	//#1: No exception thrown
+	exceptions_3::opt_1::f1();
 
-	fmt::println( "Done!" );
+	//#2: Exception thrown from f3() scope : Not handled anywhere
+	exceptions_3::opt_2::f1();
+
+
+	//#3: Exception thrown from f3() scope : Handled in f3()
+	exceptions_3::opt_3::f1();
+
+	//#4: Exception thrown from f3() scope : Handled in f2()
+	exceptions_3::opt_4::f1();
+
+	//#5: Exception thrown from f3() scope : Handled in f1()
+	exceptions_3::opt_5::f1();
 	*/
 
-
-	// Exceptions allow us to recover from these errors and give
-	// our program a chance to continue running.
-	// Integer division
-	/*
-	const int a{45};
-	const int b{0};
-	int result;
-
+	//#6: Exception thrown from f3() scope : Handled the closest to main
 	try{
-		if(b == 0)
-		throw 0;
-		//result = a/b;	//Some compilers flag division by zero as an error out of the box.
-	}
-		catch(std::string ex){
-		//Some processing
-		fmt::println( "Something went wrong : {}", ex );
-		}
-
-	catch(int ex){
-		fmt::println( "Integer division detected, ex  : {}", ex );
-	}
-
-	fmt::println("END." );
-	*/
-
-
-	// Exceptions thrown out of other parts of code written by you
-	// or somebody else
-	/*
-	try {
-		need_for_exceptions::process_parameters(10, 0);
-	} catch (const char *ex) {
-		fmt::println("Exception: {}", ex);
-	}
-
-	fmt::println("Done!");
-	*/
-}
-
-
-export void exceptions_diff_levels_demo(){
-
-	//exceptions_diff_levels::f1();
-
-	try{
-		exceptions_diff_levels::f1();
+		exceptions_3::opt_6::f1();
 	}catch(int ex){
 		fmt::println( "Handling execution the closest main()" );
 	}
+
+	//#7: The best thing to do is to handle the exception as close to the source as possible.
+
 
 	fmt::println("END.");
 

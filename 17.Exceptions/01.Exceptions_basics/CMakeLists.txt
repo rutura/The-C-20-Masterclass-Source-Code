@@ -23,5 +23,8 @@ target_sources(${PROJECT_NAME}
         exceptions_diff_levels.ixx 
         multiple_handlers_for_exception.ixx 
         nested_try_blocks.ixx 
+        exceptions_1.ixx 
+        exceptions_2.ixx 
+        exceptions_3.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
