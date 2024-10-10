@@ -1,11 +1,8 @@
 /*
     .#3: Class is not a template, but the friend function and class are 
          specific specializations (or instances) of the template.
-            . Only a few friend functions and templates have access 
-                to the private members of the class.
-            . Specifically, friendship is only granted to a select group 
-                of specializations of the friend function or friend class templates.
-                int instances and specializations specifically.
+            . Specifically, friendship is only granted to int instances or specializations
+                of the friend classes or functions.
             . print_point<double> and Canvas<double> cannot access the private 
                 members of Point for example. 
 */

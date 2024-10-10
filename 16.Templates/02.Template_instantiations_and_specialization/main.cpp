@@ -21,10 +21,6 @@
         .#6: Type traits
             . see type_trait_example.ixx
 
-        #7: Specialize a single method in a class
-            . see single_method_in_class.ixx 
-            . specializing only the get_max function. This keeps all the other functions we had in the BoxContainer class.
-
     
     . Build instructions: 
         . Bare hands with CMake: 

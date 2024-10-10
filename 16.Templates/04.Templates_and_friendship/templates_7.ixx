@@ -1,6 +1,6 @@
 /*
     .#7: Class is a template, friends are templates, and we only want friends 
-        whose template paramter matches that  of the class to have access to 
+        whose template parameter matches that  of the class to have access to 
         the private members of the class.
 */
 module;

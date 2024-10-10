@@ -28,15 +28,22 @@ export void templates_1_demo() {
 
 //#2: The class is not a template, but the friend function and class are templates.
 export void templates_2_demo() {
-  templates_2::Point p(3, 4);
-  templates_2::print_point<double>(p);	//The template parameter
-                                        //could be anything here. It's not used anyway.
 
-  templates_2::Canvas<int> canvas;
-  canvas.draw(p);
+    using templates_2::Point;
+    using templates_2::Canvas;
+    using templates_2::print_point;
 
-  templates_2::Canvas<double> canvas2;
-  canvas2.draw(p);
+    Point p1(3, 4);
+    Canvas<int> canvas1;
+    canvas1.draw(p1);
+    print_point<int>(p1);
+
+    Point p2(5, 7);
+    Canvas<float> canvas2;
+    canvas2.draw(p2); // Canvas<float> can access the private members of Point.
+    print_point<float>(p2);
+    print_point<float>(p1); // A float instance of print_point can access the private members of Point.
+
 }
 
 //#3: The class is not a template, but the friend function and 

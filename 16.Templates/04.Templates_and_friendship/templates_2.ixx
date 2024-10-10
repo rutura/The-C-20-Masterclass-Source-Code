@@ -18,7 +18,6 @@ namespace templates_2 {
 
     //The class is not a template, but the friend function and class are templates.
     export class Point {
-
         template<typename T>
         friend class Canvas;
 
@@ -27,22 +26,38 @@ namespace templates_2 {
 
         int x;
         int y;
+
     public:
         Point(int x, int y) : x(x), y(y) {}
-
     };
 
     export template<typename T>
     class Canvas {
     public:
         void draw(const Point& p) {
-            fmt::print("Drawing point: ({}, {})\n", p.x, p.y);
+            if constexpr (std::is_same_v<T, int>) {
+                fmt::print("Drawing integer point: ({}, {})\n", p.x, p.y);
+            } else if constexpr (std::is_same_v<T, float>) {
+                fmt::print("Drawing float point: ({:.2f}, {:.2f})\n"
+                        , static_cast<float>(p.x)
+                        , static_cast<float>(p.y));
+            } else {
+                fmt::print("Drawing generic point: ({}, {})\n", p.x, p.y);
+            }
         }
     };
 
     export template <typename T>
     void print_point(const Point& p) {
-        fmt::print("Point: ({}, {})\n", p.x, p.y);
+        if constexpr (std::is_same_v<T, int>) {
+            fmt::print("Point with int format: ({}, {})\n", p.x, p.y);
+        } else if constexpr (std::is_same_v<T, float>) {
+            fmt::print("Point with float format: ({:.2f}, {:.2f})\n"
+                    , static_cast<float>(p.x)
+                    , static_cast<float>(p.y));
+        } else {
+            fmt::print("Generic point: ({}, {})\n", p.x, p.y);
+        }
     }
 
 }   // namespace templates_2

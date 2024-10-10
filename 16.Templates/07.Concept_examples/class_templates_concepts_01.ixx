@@ -9,11 +9,12 @@ namespace class_templates_concepts_01{
         
     export template <typename T>
     requires std::is_arithmetic_v<T>
+    //requires std::arithmetic<T>
     class Point{
         /*
             static_assert(std::is_arithmetic_v<T>,
             "Coordinates of Point can only be numbers.");
-            */
+        */
     public : 
         Point() = default;
         Point(T x, T y)  
