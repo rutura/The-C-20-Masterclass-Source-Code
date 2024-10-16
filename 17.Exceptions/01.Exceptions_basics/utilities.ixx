@@ -5,15 +5,11 @@ module;
 
 export module utilities; 
 
-import try_catch_blocks;
-import need_for_exceptions;
-import exceptions_diff_levels;
-import multiple_handlers_for_exception;
-import nested_try_blocks;
-
 import exceptions_1;
 import exceptions_2;
 import exceptions_3;
+import exceptions_4;
+import exceptions_5;
 
 //#1: The basics on ecxeptions in C++
 export void exceptions_1_demo(){
@@ -23,7 +19,6 @@ export void exceptions_1_demo(){
 	exceptions_1::unhandled_exceptions();
 	exceptions_1::the_need_for_copy_constructors();
 }
-
 
 //#2: Exploring the need for exceptions
 export void exceptions_2_demo(){
@@ -68,10 +63,11 @@ export void exceptions_3_demo(){
 
 }
 
-export void multiple_handlers_for_exception_demo(){
+//#4: Multiple handlers for an exception
+export void exceptions_4_demo(){
 	
 	try {
-		multiple_handlers_for_exception::f1();
+		exceptions_4::f1();
 	} catch (int ex) {
 		fmt::println("Handling execution in main()");
 	}
@@ -79,9 +75,10 @@ export void multiple_handlers_for_exception_demo(){
 }
 
 
-export void nested_try_blocks_demo(){
+//#5: Nested try blocks
+export void exceptions_5_demo(){
 	try {
-		nested_try_blocks::some_function();
+		exceptions_5::some_function();
 	} catch (std::string &ex) {
 		fmt::println("Main catch block , cought : {}", ex);
 	}

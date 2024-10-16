@@ -34,17 +34,12 @@
 
 */
 
-// One line comment
 import utilities;
 
 int main() {
-    //try_catch_blocks_demo();
-    //need_for_exceptions_demo();
-    //exceptions_diff_levels_demo();
-    //multiple_handlers_for_exception_demo();
-    //nested_try_blocks_demo();
-
     //exceptions_1_demo();
     //exceptions_2_demo();
-    exceptions_3_demo();
+    //exceptions_3_demo();
+    //exceptions_4_demo();
+    exceptions_5_demo();
 }
