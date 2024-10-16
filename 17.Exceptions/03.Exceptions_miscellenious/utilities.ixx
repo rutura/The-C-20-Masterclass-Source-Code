@@ -1,86 +1,102 @@
 module;
 #include <string_view>
 #include <fmt/format.h>
+#include <typeinfo>
 
 export module utilities; 
 
-import rethrowing_exceptions;
-import ellipsis_catch_all;
-import noexcept_specifier;
-import exceptions_in_destructors;
-
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
+import exceptions_1;
+import exceptions_2;
+import exceptions_3;
+import exceptions_4;
+import exceptions_5;
 
 
-export void rethrowing_exceptions_demo(){
+//#1: Rethrowing exceptions
+export void exceptions_1_demo(){
+	using exceptions_1::SomethingIsWrong;
+	using exceptions_1::Warning;
+	using exceptions_1::SmallError;
+	using exceptions_1::CriticalError;
+	using exceptions_1::do_something;
 
 	for (size_t i{ 0 }; i < 5; ++i) {
 		try {
-		try {
-			rethrowing_exceptions::do_something(i);
-		} catch (rethrowing_exceptions::SomethingIsWrong &ex_inner) {
-			if (typeid(ex_inner) == typeid(rethrowing_exceptions::Warning)) {
-			fmt::println(" {}-Inner catch block ,Exception cought: {}", typeid(ex_inner).name(), ex_inner.what());
-			} else {
-			throw;//
-			// throw ex_inner;//This will do a copy, and there will be slicing.Beware.
+			try {
+				do_something(i);
+			} catch (SomethingIsWrong &ex_inner) {
+				if (typeid(ex_inner) == typeid(Warning)) {
+					fmt::println(" {}-Inner catch block ,Exception caught: {}", typeid(ex_inner).name(), ex_inner.what());
+				} else {
+					throw;
+					// throw ex_inner; // This will do a copy, and there will be slicing. Beware.
+				}
 			}
+		} catch (SomethingIsWrong &ex_outer) {
+			fmt::println(" {}-Outer catch block, Exception caught: {}", typeid(ex_outer).name(), ex_outer.what());
 		}
-		} catch (rethrowing_exceptions::SomethingIsWrong &ex_outer) {
-			fmt::println(" {}-Outer catch block, Exception cought: {}", typeid(ex_outer).name(), ex_outer.what());
-		}
-	}// End of for loop
+	} // End of for loop
 
 }
 
 
-export void ellipsis_catch_all_demo(){
+//#2: Custom termination
+//   . Shown in the main function
+
+
+//3: Ellipsis catch all block
+export void exceptions_3_demo() {
+	using exceptions_3::SomethingIsWrong;
+	using exceptions_3::Warning;
+	using exceptions_3::SmallError;
+	using exceptions_3::CriticalError;
+	using exceptions_3::some_function;
+
 	try {
 		for (size_t i{}; i < 5; ++i) {
-		try {
-			ellipsis_catch_all::some_function(i);
-		} catch (int ex) {
-			fmt::println("int handler- Cought an integer");
-		} catch (...) {
-			fmt::println("Inner... handler , Cought some exception");
-			throw;
-		}
+			try {
+				some_function(i);
+			} catch (int ex) {
+				fmt::println("int handler - Caught an integer");
+			} catch (...) {
+				fmt::println("Inner... handler, Caught some exception");
+				throw;
+			}
 		}
 	} catch (const std::string &ex) {
-		fmt::println("Cought some string exception");
+		fmt::println("Caught some string exception");
 	} catch (...) {
-		fmt::println("Outer ...handler cought some other exception");
+		fmt::println("Outer ...handler caught some other exception");
 	}
 }
 
-export void noexcept_specifier_demo(){
+//#4: Noexcept specifier
+export void exceptions_4_demo(){
 	// Exceptions can't be propagated out of a noexcept function by
 	// any means, if you do so the program will terminate, you can
 	// also see that the compiler gives you a warning about that.
+	/*
 	try{
-		noexcept_specifier::some_function();
+		exceptions_4::some_function();
 	}catch(int ex){
 		fmt::println( "Catching rethrown exception in main" );
 	}
+	*/
 
 
 	// Using noexcept member function
-	/*
-	noexcept_specifier::Item item;
+	exceptions_4::Item item;
 	try {
 		item.do_something_in_class();
 	} catch (int ex) {
 		fmt::println("main() : Catching exception thrown from method");
 	}
-	*/
 }
 
-export void exceptions_in_destructors_demo(){
+// #5: Exceptions in destructors
+export void exceptions_5_demo(){
 	try {
-		exceptions_in_destructors::Item item;
+		exceptions_5::Item item;
 	} catch (int ex) {
 		fmt::println("main() : Catching int exception");
 	}

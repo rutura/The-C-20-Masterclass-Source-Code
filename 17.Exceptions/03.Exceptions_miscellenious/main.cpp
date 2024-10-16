@@ -70,7 +70,8 @@ int main() {
     throw 1;
     */
 
-    //ellipsis_catch_all_demo();
-    //noexcept_specifier_demo();
-    //exceptions_in_destructors_demo();
+    //exceptions_1_demo();
+    //exceptions_3_demo();
+    //exceptions_4_demo();
+    //exceptions_5_demo();
 }
