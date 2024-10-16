@@ -37,7 +37,6 @@
 import utilities;
 
 int main() {
-    //throw_class_objects_demo();
-    //throw_class_objects_with_inheritance_demo();
-    polymorphic_exceptions_demo();
+    //exceptions_1_demo();
+    exceptions_2_demo();
 }

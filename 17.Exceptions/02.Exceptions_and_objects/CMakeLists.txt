@@ -18,8 +18,7 @@ target_sources(${PROJECT_NAME}
         PUBLIC
         FILE_SET CXX_MODULES FILES
         utilities.ixx 
-        throw_class_objects.ixx 
-        throw_class_objects_with_inheritance.ixx
-        polymorphic_exceptions.ixx 
+        exceptions_1.ixx 
+        exceptions_2.ixx
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
