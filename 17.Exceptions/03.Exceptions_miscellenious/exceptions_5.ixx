@@ -2,8 +2,7 @@
     . Exploring exceptions in destructors: 
         . Exceptions in destructors are a bad idea.
         . Destructors are are noexcept by default.
-        . If an exception is thrown in a destructor, the program will terminate.
-        . The reason is that the destructor is called as part of the stack unwinding process.
+        . Destructors are called as part of the stack unwinding process.
         . If an exception is thrown during stack unwinding, the program will terminate.
 
     . Note: You can allow exceptions to be thrown from destructors by using the noexcept(false) specifier.

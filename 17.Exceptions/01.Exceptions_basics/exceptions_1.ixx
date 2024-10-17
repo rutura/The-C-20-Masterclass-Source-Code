@@ -76,7 +76,7 @@ namespace exceptions_1{
         // Potential memory leaks
         // The destructor for Item is never called when we're thrown out of the
         // try block, and memory is leaked.
-        // Using memory leaks solves the issue. Memory is released when we get out of scope.
+        // Using smart pointers solves the issue. Memory is released when we get out of scope.
         int d{0};
         try{
         //try_catch_blocks::Item * item_ptr = new try_catch_blocks::Item();
@@ -92,7 +92,7 @@ namespace exceptions_1{
 
     export void unhandled_exceptions(){
         // If you throw an exception and it's not handled anywhere in your code,
-        // you'll get a hard crash
+        // you'll get a hard crash. The program terminates immediately.
         throw 0;
         fmt::println( "Doing something after we throw" );
 

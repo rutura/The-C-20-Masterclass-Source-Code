@@ -29,7 +29,6 @@ export void exceptions_2_demo(){
 	using exceptions_2::do_something;
 
 	for (size_t i{ 0 }; i < 5; ++i) {
-
 		try {
 			do_something(i);
 		} catch (CriticalError &ex) {

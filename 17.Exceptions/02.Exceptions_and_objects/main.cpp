@@ -1,13 +1,10 @@
 /*
     . Exceptions and objects: 
         .#1: Throwing class objects
-            . see throw_class_objects.ixx
+            . see exceptions_1.ixx
 
-        .#2: Throwing class objects with inheritance
-            . see throw_class_objects_with_inheritance.ixx
-
-        .#3: Polymprphic exceptions
-            . see polymorphic_exceptions.ixx
+        .#2: Throwing class objects with inheritance and polymorphism
+            . see exceptions_2.ixx
 
 
     . Build instructions: 

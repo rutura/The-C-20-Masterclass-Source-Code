@@ -20,7 +20,7 @@ export void exceptions_1_demo(){
 
 	Animal animal;	// Animal can't bee cast to Feline. But we catch the exception and we are OK.
 	try {
-		Feline &feline_ref = dynamic_cast<Feline &>(animal);
+		Feline &feline_ref = dynamic_cast<Feline &>(animal); // will throw std::bad_cast
 	} catch (std::exception &ex) {
 		fmt::println("Something is wrong : {}", ex.what());
 	}
