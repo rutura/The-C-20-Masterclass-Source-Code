@@ -5,33 +5,36 @@ module;
 
 export module utilities; 
 
-import box_container;
+import box_container_it_1;
 import box_container_it_2;
 import box_container_it_3;
 import box_container_it_4;
 import box_container_it_5;
 
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
 
 //#1
 export void constructing_destructing_demo(){
 
-	iteration_1::BoxContainer box1(15);
+	using iteration_1::BoxContainer;
+
+	BoxContainer box1(15);
 	box1.dummy_initialize();
-	
 	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "&box1 : " << &box1 << std::endl;
-	
-	iteration_1::BoxContainer box2(box1);
+
+	BoxContainer box2(box1);	// Copy constructor
 	std::cout << "box2 : " << box2 << std::endl;
-	std::cout << "&box2 : " << &box2 << std::endl;	
+
+	BoxContainer box3;	
+	box3 = box1;	// Copy assignment
+	std::cout << "box3 : " << box3 << std::endl;
+
 }
 
 //#2
 export void adding_items_demo(){
-	iteration_2::BoxContainer box1(5);
+	using iteration_2::BoxContainer;
+
+	BoxContainer box1(5);
 	std::cout << "box1 : " << box1 << std::endl;
 
 	box1.add(11);
@@ -57,8 +60,9 @@ export void adding_items_demo(){
 
 //#3
 export void removing_items_demo(){
+	using iteration_3::BoxContainer;
 	
-	iteration_3::BoxContainer box1;
+	BoxContainer box1;
 	std::cout << "box1 : " << box1 << std::endl;
 	
 	box1.add(11);
@@ -120,15 +124,16 @@ export void removing_items_demo(){
 
 //#4
 export void other_operators_demo(){
+	using iteration_4::BoxContainer;
 	//Operator+=
-	iteration_4::BoxContainer box1;
+	BoxContainer box1;
 	box1.add(1);
 	box1.add(2);
 	box1.add(3);
 	
 	std::cout << "box1 : " << box1 << std::endl;
 	
-	iteration_4::BoxContainer box2;
+	BoxContainer box2;
 	box2.add(10);
 	box2.add(20);
 	box2.add(30);
@@ -163,48 +168,48 @@ export void other_operators_demo(){
 
 	std::cout << "--------------------------" << std::endl;
 	
-//----------------------------------------------------
-
-	//Operator=
-	std::cout << std::endl;
-	std::cout << "operator= : " << std::endl;
-	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
-	std::cout << "box3 : " << box3 << std::endl;
-	
-	box3 = box2;
-	
-	std::cout << "box1 : " << box1 << std::endl;
-	std::cout << "box2 : " << box2 << std::endl;
-	std::cout << "box3 : " << box3 << std::endl;
 }
 
 
 //#5
 export void storing_different_types_demo(){
+	using iteration_5::BoxContainer;
+	using iteration_5::Point;
 
-	iteration_5::DoubleContainer double_box1;
-	double_box1.add(11.2);
-	double_box1.add(33.5);
-	
-	std::cout << "double_box1 : " << double_box1 << std::endl;
-	
-	iteration_5::IntContainer int_box1;
-	int_box1.add(10);
-	int_box1.add(20);
-	
-	std::cout << "int_box1 : " << int_box1 << std::endl;
-	
-	iteration_5::CharContainer char_box1;
-	char_box1.add('H');
-	char_box1.add('e');
-	char_box1.add('l');
-	char_box1.add('l');
-	char_box1.add('o');
-	
-	std::cout << "char_box1 : " << char_box1 << std::endl;
+	// BoxContainer for int
+    BoxContainer<int> int_box;
+    int_box.add(10);
+    int_box.add(20);
+    int_box.add(30);
+    //std::cout << "int_box: " << int_box << "\n";
+	std::cout << "int_box : " << int_box << std::endl;
 
-    char_box1.remove_all('l');
-	std::cout << "char_box1 : " << char_box1 << std::endl;
+    // BoxContainer for double
+    BoxContainer<double> double_box;
+    double_box.add(10.5);
+    double_box.add(20.3);
+    double_box.add(30.7);
+    std::cout << "double_box: " << double_box << "\n";
+
+    // BoxContainer for std::string
+    BoxContainer<std::string> string_box;
+    string_box.add("Hello");
+    string_box.add("World");
+    string_box.add("C++");
+    std::cout << "string_box: " << string_box << "\n";
+
+	// BoxContainer for Point
+    BoxContainer<Point> point_box;
+    point_box.add(Point{1, 2});
+    point_box.add(Point{3, 4});
+    point_box.add(Point{5, 6});
+    std::cout << "point_box: " << point_box << "\n";
+
+    // Combining two BoxContainers for Point
+    BoxContainer<Point> another_point_box;
+    another_point_box.add(Point{7, 8});
+    another_point_box.add(Point{9, 10});
+
+    point_box += another_point_box;
+    std::cout << "point_box after += another_point_box: " << point_box << "\n";
 }

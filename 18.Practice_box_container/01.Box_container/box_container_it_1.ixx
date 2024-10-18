@@ -1,15 +1,16 @@
 /*
-    .#2: Adding items
+     .#1: Constructing and destructing
+        . The class is not a template
 */
 module;
 
 #include <iostream>
 
-export module box_container_it_2;
+export module box_container_it_1;
 
 import stream_insertable;
 
-namespace iteration_2{
+namespace iteration_1{
 
     export class BoxContainer : public StreamInsertable
     {
@@ -31,9 +32,7 @@ namespace iteration_2{
         size_t capacity() const { return m_capacity; }
 
         void dummy_initialize();
-        void add(value_type item);     // Add method
-        void expand(size_t new_capacity); // Expand method
-
+        
         // Swap function
         void swap(BoxContainer& other) noexcept;
 
@@ -85,15 +84,15 @@ namespace iteration_2{
     BoxContainer& BoxContainer::operator=(BoxContainer&& source) noexcept {
         if (this != &source) {
 
-            // Release the current resources
+            //Release the current resources
             delete[] m_items;
 
-            // Steal data from the source
+            //Steal data from the source
             m_items = source.m_items;
             m_capacity = source.m_capacity;
             m_size = source.m_size;
 
-            // Reset the source
+            //Reset the source
             source.m_items = nullptr;
             source.m_size = 0;
             source.m_capacity = 0;
@@ -101,32 +100,10 @@ namespace iteration_2{
         return *this;
     }
 
-    // Add method: adds a new item to the container
-    void BoxContainer::add(value_type item) {
-        if (m_size >= m_capacity) {
-            // Expand if capacity is insufficient
-            expand(m_capacity * 2);
-        }
-        m_items[m_size++] = item;
-    }
-
-    // Expand method: increases the capacity of the container
-    void BoxContainer::expand(size_t new_capacity) {
-        value_type* new_items = new value_type[new_capacity];
-
-        // Copy the old items into the new array
-        std::copy(m_items, m_items + m_size, new_items);
-
-        // Delete old items and reassign the new array
-        delete[] m_items;
-        m_items = new_items;
-        m_capacity = new_capacity;
-    }
-
     void BoxContainer::dummy_initialize() {
 
-        // The test below protects against cases where for example the capacity is 2 and DUMMY_ITEM_COUNT is 10
-        // It will only initialize the first 2 items
+        //The test below protects against cases where for example the capacity is 2 and DUMMY_ITEM_COUNT is 10
+        //It will only initialize the first 2 items
         for (size_t i{}; i < DUMMY_ITEM_COUNT && i < m_capacity; ++i) {
             m_items[i] = i + 12;
         }
@@ -141,6 +118,5 @@ namespace iteration_2{
         }
         out << "]";
     }
- 
 
-}   // namespace iteration_2
+} // namespace iteration_1

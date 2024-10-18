@@ -1,3 +1,6 @@
+/*
+    .#3: Removing items 
+*/
 module;
 
 #include <iostream>
@@ -8,148 +11,153 @@ import stream_insertable;
 
 namespace iteration_3{
 
-    export class BoxContainer : public iteration_1::StreamInsertable
+   export class BoxContainer : public StreamInsertable
     {
-            //typedef int value_type; // Allows us to change what's stored in the vector on the fly
-                                    // Can make it store int, double,...
-            using value_type = int;
+        using value_type = int;
+        static constexpr size_t DEFAULT_CAPACITY = 30;  
+        static constexpr size_t DUMMY_ITEM_COUNT = 10;
 
-            static const size_t DEFAULT_CAPACITY = 30;  
-            static const size_t EXPAND_STEPS = 5;// The box expands the capacity by this amount
     public:
         BoxContainer(size_t capacity = DEFAULT_CAPACITY);
-        BoxContainer(const BoxContainer& source);
+        BoxContainer(const BoxContainer& source); // Copy constructor
+        BoxContainer& operator=(BoxContainer source);  // Copy assignment using copy-and-swap idiom
+        BoxContainer(BoxContainer&& source) noexcept;  // Move constructor
+        BoxContainer& operator=(BoxContainer&& source) noexcept;    // Move assignment
         ~BoxContainer();
         
-        //StreamInsertable Interface
-        virtual void stream_insert(std::ostream& out)const override;
-        
-        // Helper getter methods
-        size_t size( ) const { return m_size; }
-        size_t capacity() const{return m_capacity;};
+        virtual void stream_insert(std::ostream& out) const override;
 
-        //Method to add items to the collection
-        void add(const value_type& item);
+        size_t size() const { return m_size; }
+        size_t capacity() const { return m_capacity; }
 
-        //Remove items
-        bool remove_item(const value_type& item);
-        size_t remove_all(const value_type& item);
+        void dummy_initialize();
+        void add(value_type item);     // Add method
+        void expand(size_t new_capacity); // Expand method
 
-    private : 
-        void expand(size_t new_capacity);
+        // Remove items
+        bool remove_item(const value_type& item);    // Remove first occurrence
+        size_t remove_all(const value_type& item);   // Remove all occurrences
 
-    private : 
-        value_type * m_items;
+        // Swap function
+        void swap(BoxContainer& other) noexcept;
+
+    private:
+        value_type* m_items;
         size_t m_capacity;
         size_t m_size;
     };
-    //Implementation
+
+    // Constructor
     BoxContainer::BoxContainer(size_t capacity)
-    {
-        m_items = new value_type[capacity];
-        m_capacity = capacity;
-        m_size =0;
-    }
+        : m_items(new value_type[capacity]), m_capacity(capacity), m_size(0) {}
 
+    // Copy constructor
     BoxContainer::BoxContainer(const BoxContainer& source)
-    {
-        //Set up the new box
-        m_items = new value_type[source.m_capacity];
-        m_capacity = source.m_capacity;
-        m_size = source.m_size;
-        
-        //Copy the items over from source 
-        for(size_t i{} ; i < source.size(); ++i){
-            m_items[i] = source.m_items[i];
-        }
+        : m_items(new value_type[source.m_capacity]), m_capacity(source.m_capacity), m_size(source.m_size) {
+        std::copy(source.m_items, source.m_items + source.m_size, m_items);
     }
 
-    BoxContainer::~BoxContainer()
-    {
+    // Move constructor
+    BoxContainer::BoxContainer(BoxContainer&& source) noexcept 
+        : m_items(source.m_items), m_capacity(source.m_capacity), m_size(source.m_size) {
+        source.m_items = nullptr;
+        source.m_size = 0;
+        source.m_capacity = 0;
+    }
+
+    // Destructor
+    BoxContainer::~BoxContainer() {
         delete[] m_items;
     }
 
-    void BoxContainer::stream_insert(std::ostream& out)const{
-        
-        out << "BoxContainer : [ size :  " << m_size
-            << ", capacity : " << m_capacity << ", items : " ;
-                
-        for(size_t i{0}; i < m_size; ++i){
-            out << m_items[i] << " " ;
+    // Swap function for copy-and-swap idiom
+    void BoxContainer::swap(BoxContainer& other) noexcept {
+        std::swap(m_items, other.m_items);
+        std::swap(m_capacity, other.m_capacity);
+        std::swap(m_size, other.m_size);
+    }
+
+    // Copy assignment using copy-and-swap
+    BoxContainer& BoxContainer::operator=(BoxContainer source) {
+        swap(source);
+        return *this;
+    }
+
+    // Move assignment
+    BoxContainer& BoxContainer::operator=(BoxContainer&& source) noexcept {
+        if (this != &source) {
+            delete[] m_items;
+            m_items = source.m_items;
+            m_capacity = source.m_capacity;
+            m_size = source.m_size;
+
+            source.m_items = nullptr;
+            source.m_size = 0;
+            source.m_capacity = 0;
         }
-        std::cout << "]";
+        return *this;
     }
 
-    void BoxContainer::expand(size_t new_capacity){
-        std::cout << "Expanding to " << new_capacity << std::endl;
-        value_type *new_items_container;
-
-        if (new_capacity <= m_capacity)
-            return; // The needed capacity is already there
-        
-        //Allocate new(larger) memory
-        new_items_container = new value_type[new_capacity];
-
-        //Copy the items over from old array to new 
-        for(size_t i{} ; i < m_size; ++i){
-            new_items_container[i] = m_items[i];
+    // Add method: adds a new item to the container
+    void BoxContainer::add(value_type item) {
+        if (m_size >= m_capacity) {
+            expand(m_capacity * 2);
         }
-        
-        //Release the old array
-        delete [ ] m_items;
-        
-        //Make the current box wrap around the new array
-        m_items = new_items_container;
-        
-        //Use the new capacity
-        m_capacity = new_capacity;	
+        m_items[m_size++] = item;
     }
 
-    void BoxContainer::add(const value_type& item){
-        if (m_size == m_capacity)
-            expand(m_size + EXPAND_STEPS);// Let's expand in increments of 5 to optimize on the calls to expand
-        m_items[m_size] = item;
-        ++m_size;	
+    // Expand method: increases the capacity of the container
+    void BoxContainer::expand(size_t new_capacity) {
+        value_type* new_items = new value_type[new_capacity];
+        std::copy(m_items, m_items + m_size, new_items);
+        delete[] m_items;
+        m_items = new_items;
+        m_capacity = new_capacity;
     }
 
-
-    bool BoxContainer::remove_item(const value_type& item){
-
-        //Find the target item
-        size_t index {m_capacity + 999}; // A large value outside the range of the current 
-                                            // array
-        for(size_t i{0}; i < m_size ; ++i){
-            if (m_items[i] == item){
-                index = i;
-                break; // No need for the loop to go on
+    // Remove the first occurrence of the item
+    bool BoxContainer::remove_item(const value_type& item) {
+        for (size_t i = 0; i < m_size; ++i) {
+            if (m_items[i] == item) {
+                // Shift all elements after the found item
+                for (size_t j = i; j < m_size - 1; ++j) {
+                    m_items[j] = m_items[j + 1];
+                }
+                --m_size;
+                return true;
             }
         }
-        
-        if(index > m_size)
-            return false; // Item not found in our box here
-            
-        //If we fall here, the item is located at m_items[index]
-        
-        //Overshadow item at index with last element and decrement m_size
-        m_items[index] = m_items[m_size-1];
-        m_size--;
-        return true;
-
+        return false;
     }
-    size_t BoxContainer::remove_all(const value_type& item){
-        size_t remove_count{};
-        
-        bool removed = remove_item(item);
-        if(removed)
-            ++remove_count;
-        
-        while(removed == true){
-            removed = remove_item(item);
-            if(removed)
-                ++ remove_count;
+
+    // Remove all occurrences of the item
+    size_t BoxContainer::remove_all(const value_type& item) {
+        size_t count = 0;
+        for (size_t i = 0; i < m_size; ) {
+            if (m_items[i] == item) {
+                remove_item(item);
+                ++count;
+            } else {
+                ++i;
+            }
         }
-        
-        return remove_count;
+        return count;
+    }
+
+    void BoxContainer::dummy_initialize() {
+        for (size_t i{}; i < DUMMY_ITEM_COUNT && i < m_capacity; ++i) {
+            m_items[i] = i + 12;
+        }
+        m_size = std::min(DUMMY_ITEM_COUNT, m_capacity);
+    }
+
+    void BoxContainer::stream_insert(std::ostream& out) const {
+        out << "BoxContainer : [ size :  " << m_size
+            << ", capacity : " << m_capacity << ", items : ";
+        for (size_t i{0}; i < m_size; ++i) {
+            out << m_items[i] << " ";
+        }
+        out << "]";
     }
 
 }   //namespace iteration_3

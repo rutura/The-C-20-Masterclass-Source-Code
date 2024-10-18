@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 
-project(Project_template  VERSION 1.0.0 LANGUAGES CXX)
+project(Rocket  VERSION 1.0.0 LANGUAGES CXX)
 
 #Require C++23
 set(CXX_STANDARD_REQUIRED ON) #Make C++23 a hard requirement
@@ -19,7 +19,7 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         stream_insertable.ixx
-        box_container.ixx 
+        box_container_it_1.ixx 
         box_container_it_2.ixx 
         box_container_it_3.ixx 
         box_container_it_4.ixx
