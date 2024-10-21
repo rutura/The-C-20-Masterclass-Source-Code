@@ -23,7 +23,8 @@ namespace containers_iterators_01{
     fmt::println("");
     }
 
-    template<typename T> void print_raw_array(const T *p, std::size_t size)
+    template<typename T> 
+    void print_raw_array(const T *p, std::size_t size)
     {
     fmt::print("data = ");
     for (std::size_t i = 0; i < size; ++i) fmt::print("{} ", p[i]);

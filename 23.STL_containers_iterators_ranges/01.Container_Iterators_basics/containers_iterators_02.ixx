@@ -1,8 +1,9 @@
 /*
-    This code contains functions that print the contents of a collection, using iterators.
-    The main goals is to introduce iterators.
-    It can print both std::vector and std::array. Any container, as long as it has begin() and end() functions, can be printed.
-    Most containers in the STL have these functions.
+    . Tinkering with functions that print the contents of a collection, using iterators.
+    . The main goals is to introduce iterators.
+    . It can print both std::vector and std::array. 
+        . Any container, as long as it has begin() and end() functions, can be printed.
+    . Most containers in the STL have these functions.
 */
 module;
 

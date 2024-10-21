@@ -17,12 +17,6 @@ import custom_iterators_07;
 import custom_iterators_08;
 import custom_iterators_09;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
-
-
 //Input iterators: read only
 export void custom_iterators_01_demo(){
 

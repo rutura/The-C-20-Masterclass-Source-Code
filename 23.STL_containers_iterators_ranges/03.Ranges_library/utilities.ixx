@@ -16,11 +16,6 @@ import ranges_library_03;
 import ranges_library_04;
 import ranges_library_05;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
-
 export void ranges_library_01_demo(){
 
 	std::vector<int> numbers{ 11, 2, 6, 4, 8, 3, 17, 9 };

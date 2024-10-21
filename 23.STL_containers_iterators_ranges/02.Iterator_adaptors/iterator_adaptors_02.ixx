@@ -1,3 +1,8 @@
+/*
+        .#2: Move iterators
+            . see iterator_adaptors_02.ixx
+            . std::make_move_iterator is a utility that gives us an iterator we can use to move elements from a container to another container.
+*/
 module;
 
 #include <fmt/format.h>

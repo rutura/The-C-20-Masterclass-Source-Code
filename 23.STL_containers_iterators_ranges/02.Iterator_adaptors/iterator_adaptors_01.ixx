@@ -28,7 +28,7 @@ namespace iterator_adaptors_01 {
 
     export void back_insert_iterator_test(){
 
-        // Initialize a vector with some elements
+        // Initialize a vector with some elements. We use vector here because it supports push_back.
         std::vector<int> vec = {1, 2, 3};
         // Another vector with values to add to vec
         std::vector<int> values_to_add = {4, 5, 6};
