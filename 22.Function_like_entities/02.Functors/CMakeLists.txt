@@ -19,7 +19,8 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         functors_01.ixx 
-        boxcontainer.ixx 
+        stream_insertable.ixx
+        box_container_it_5.ixx
         functors_02.ixx 
         functors_03.ixx 
         functors_04.ixx

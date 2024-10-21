@@ -9,12 +9,9 @@ module;
 export module utilities; 
 
 import std_function;
-import boxcontainer;
+import box_container_it_5;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
+using iteration_5::BoxContainer;
 
 export void std_function_demo(){
 
@@ -41,7 +38,10 @@ export void std_function_demo(){
 	// Storing function like entities in a collection
 	fmt::println("Collection of function like entities : ");
 
-	box::BoxContainer<std::function<char(const char &)>> func_entities;
+	//The functions are not equality comparable, we'll get a compiler error here.
+	//But comment out the concept and show that this works. Then revert to the initial state.
+	/*
+	BoxContainer<std::function<char(const char &)>> func_entities;
 	func_entities.add(std_function::encrypt);// Function pointer
 	func_entities.add(decrypt);// Functor
 	func_entities.add([](const char &param) {// Lambda function
@@ -51,12 +51,13 @@ export void std_function_demo(){
 	for (size_t i{}; i < func_entities.size(); ++i) {
 		fmt::println("result {}. D transformed becomes : {}", i, func_entities.get_item(i)('D'));
 	}
+	*/
 
 	fmt::println("--------");
 
 	// std::function as callback
 	fmt::println("Modifying the quote : ");
-	box::BoxContainer<std::string> quote;
+	BoxContainer<std::string> quote;
 	quote.add("The");
 	quote.add("sky");
 	quote.add("is");

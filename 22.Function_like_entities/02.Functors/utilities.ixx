@@ -10,35 +10,46 @@ export module utilities;
 
 import functors_01;
 import functors_02;
-import boxcontainer;
+import box_container_it_5;
 import functors_03;
 import functors_04;
 
-// Module purview
-export void print_msg(std::string_view msg) { fmt::println("{}", msg); }
+using iteration_5::BoxContainer;
 
 export void functors_01_demo() {
+	using functors_01::Encrypt;
+	using functors_01::Decrypt;
+	using functors_01::encrypt;
+	using functors_01::decrypt;
+	using functors_01::modify;
+
 	// Modifying through functors
 	std::string msg{"Hello world!"};
-	functors_01::Encrypt encryptor;
-	functors_01::Decrypt decryptor;
+	Encrypt encryptor;
+	Decrypt decryptor;
 
 	fmt::print("Original message: {}\n", msg);
-	functors_01::modify(msg, encryptor);
+	modify(msg, encryptor);
 	fmt::print("Encrypted message: {}\n", msg);
-	functors_01::modify(msg, decryptor);
+	modify(msg, decryptor);
 	fmt::print("Decrypted message: {}\n", msg);
 
 	// Modifying through function pointers
 	std::string msg2{"Hello world!"};
 	fmt::print("Original message: {}\n", msg2);
-	functors_01::modify(msg2, functors_01::encrypt);
+	modify(msg2, encrypt);
 	fmt::print("Encrypted message: {}\n", msg2);
-	functors_01::modify(msg2, functors_01::decrypt);
+	modify(msg2, decrypt);
 	fmt::print("Decrypted message: {}\n", msg2);
 }
 
 export void functors_02_demo() {
+
+	using functors_02::get_best;
+	using functors_02::custom_greater;
+	using functors_02::Greater;
+
+
 	std::plus<int> adder;
 	std::minus<int> substracter;
 	std::greater<int> compare_greater;
@@ -49,7 +60,7 @@ export void functors_02_demo() {
 
 	fmt::println("---------------------------------");
 
-	box::BoxContainer<std::string> quote;
+	BoxContainer<std::string> quote;
 	quote.add("The");
 	quote.add("sky");
 	quote.add("is");
@@ -62,20 +73,17 @@ export void functors_02_demo() {
 	// fmt::println("quote : {}", quote);
 	std::cout << "quote: " << quote << "\n";
 	//  Built in functor
-	fmt::println("greater string : {}",
-				functors_02::get_best(quote, string_comparator));
+	fmt::println("greater string : {}", get_best(quote, string_comparator));
 	// Custom function pointer
 	fmt::println(
-		"greater string : {}",
-		functors_02::get_best(quote, functors_02::custom_greater<std::string>));
+		"greater string : {}", get_best(quote, custom_greater<std::string>));
 	// Custom functor
-	functors_02::Greater<std::string> greater_string_custom_functor;
-	fmt::println("greater string :{} ",
-				functors_02::get_best(quote, greater_string_custom_functor));
+	Greater<std::string> greater_string_custom_functor;
+	fmt::println("greater string :{} ",get_best(quote, greater_string_custom_functor));
 
 	fmt::println("---------------------------------");
 
-	box::BoxContainer<int> ints;
+	BoxContainer<int> ints;
 	ints.add(10);
 	ints.add(3);
 	ints.add(6);
@@ -84,43 +92,44 @@ export void functors_02_demo() {
 	ints.add(4);
 
 	std::greater<int> int_comparator{};
-	functors_02::Greater<int> greater_int_custom_functor;
+	Greater<int> greater_int_custom_functor;
 
 	std::cout << "ints: " << ints << "\n";
-	fmt::println("greater int :{} ", functors_02::get_best(ints, int_comparator));
-	fmt::println("greater int :{} ", functors_02::get_best(ints,
-										functors_02::custom_greater<int>));
-	fmt::println("greater int :{} ",
-									functors_02::get_best(ints,greater_int_custom_functor));
-	fmt::println("lesser int : {}", functors_02::get_best(ints,std::less<int>{}));
+	fmt::println("greater int :{} ", get_best(ints, int_comparator));
+	fmt::println("greater int :{} ", get_best(ints, custom_greater<int>));
+	fmt::println("greater int :{} ",get_best(ints,greater_int_custom_functor));
+	fmt::println("lesser int : {}", get_best(ints,std::less<int>{}));
 }
 
 
 export void functors_03_demo(){
 
-	box::BoxContainer<double> doubles;
+	using functors_03::IsInRange;
+	using functors_03::range_sum;
+
+	BoxContainer<double> doubles;
 	doubles.add(10.1);
 	doubles.add(20.2);
 	doubles.add(30.3);
 	doubles.add(15);
 
 	std::cout << "doubles: " << doubles << "\n";
-	fmt::println("range_sum :{} ", functors_03::range_sum(doubles, functors_03::IsInRange<double>(10.0, 15.5))); 
-	fmt::println("range_sum :{} ", functors_03::range_sum(doubles, functors_03::IsInRange<double>(10.0, 41.5)));
+	fmt::println("range_sum :{} ", range_sum(doubles, IsInRange<double>(10.0, 15.5))); 
+	fmt::println("range_sum :{} ", range_sum(doubles, IsInRange<double>(10.0, 41.5)));
 
 
 	fmt::println("------");
-	/*
 	//Constraints not satisfied.
-	box::BoxContainer<std::string> strings;
+	/*
+	BoxContainer<std::string> strings;
 	strings.add("Hello");
 	strings.add("World");
-	functors_03::	range_sum(strings,functors_03::IsInRange<std::string> ("Hello","World"));
+	range_sum(strings,IsInRange<std::string> ("Hello","World"));
 	*/
 
 	fmt::println("-----");
 
-	box::BoxContainer<int> ints;
+	BoxContainer<int> ints;
 	ints.add(10);
 	ints.add(3);
 	ints.add(6);
@@ -129,8 +138,8 @@ export void functors_03_demo(){
 	ints.add(4);
 
 	std::cout << "ints: " << ints << "\n";
-	fmt::println("range_sum :{} ", functors_03::range_sum(ints, functors_03::IsInRange<int>(10, 20)));// 10
-	fmt::println("range_sum :{} ", functors_03::range_sum(ints, functors_03::IsInRange<int>(10, 30)));// 33
+	fmt::println("range_sum :{} ", range_sum(ints, IsInRange<int>(10, 20)));// 10
+	fmt::println("range_sum :{} ", range_sum(ints, IsInRange<int>(10, 30)));// 33
 
 }
 

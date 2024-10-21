@@ -1,3 +1,6 @@
+/*
+    .#2: Capturing by value under the hood
+*/
 module;
 
 #include <fmt/format.h>

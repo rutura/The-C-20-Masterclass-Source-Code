@@ -7,17 +7,14 @@ module;
 
 export module utilities; 
 
+import box_container_it_5;
 import lambdas_01;
-import boxcontainer;
 import lambdas_02;
 import lambdas_03;
 import lambdas_04;
 import lambdas_05;
 
-//Module purview
-export void print_msg(std::string_view msg) {
-	fmt::println("{}",msg);
-}
+using iteration_5::BoxContainer;
 
 export void lambdas_01_demo(){
 
@@ -51,7 +48,7 @@ export void lambdas_01_demo(){
 	fmt::println("--------");
 
 	fmt::println("strings stored in BoxContainer : ");
-	box::BoxContainer<std::string> quote;
+	BoxContainer<std::string> quote;
 	quote.add("The");
 	quote.add("sky");
 	quote.add("is");

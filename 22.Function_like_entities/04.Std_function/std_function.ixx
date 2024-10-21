@@ -5,7 +5,9 @@ module;
 
 export module std_function;
 
-import boxcontainer;
+import box_container_it_5;
+
+using iteration_5::BoxContainer;
 
 namespace std_function{
 
@@ -21,7 +23,7 @@ namespace std_function{
 
 
     // Modifying a BoxContainer of strings
-    export box::BoxContainer<std::string> &modify(box::BoxContainer<std::string> &sentence,
+    export BoxContainer<std::string> &modify(BoxContainer<std::string> &sentence,
     // char(*modifier) (const char&)){
     std::function<char(const char &)> modifier)
     {
@@ -36,7 +38,7 @@ namespace std_function{
     return sentence;
     }
 
-    export std::string get_best(const box::BoxContainer<std::string> &sentence,
+    export std::string get_best(const BoxContainer<std::string> &sentence,
     // bool(*comparator)(const std::string& str1, const std::string& str2)){
     std::function<bool(const std::string &str1, const std::string &str2)> comparator)
     {
