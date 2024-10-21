@@ -75,8 +75,7 @@ export void functors_02_demo() {
 	//  Built in functor
 	fmt::println("greater string : {}", get_best(quote, string_comparator));
 	// Custom function pointer
-	fmt::println(
-		"greater string : {}", get_best(quote, custom_greater<std::string>));
+	fmt::println("greater string : {}", get_best(quote, custom_greater<std::string>));
 	// Custom functor
 	Greater<std::string> greater_string_custom_functor;
 	fmt::println("greater string :{} ",get_best(quote, greater_string_custom_functor));

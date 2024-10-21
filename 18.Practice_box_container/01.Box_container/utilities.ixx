@@ -158,7 +158,7 @@ export void other_operators_demo(){
 	std::cout << "box1 : " << box1 << std::endl;
 	std::cout << "box2 : " << box2 << std::endl;
 	
-	iteration_4::BoxContainer box3;
+	BoxContainer box3;
 	box3.add(81);
 	box3.add(82);
 	

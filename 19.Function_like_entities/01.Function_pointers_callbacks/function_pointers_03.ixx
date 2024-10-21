@@ -1,5 +1,7 @@
 /*
-    .#3: Function pointer aliases
+    .#3: Templated type aliases
+        . They allow us to write a generic comparator.
+        . More specifically, they allow us to specify a generic callback function.
 */
 module;
 
@@ -15,7 +17,7 @@ namespace function_pointers_03{
 
     // Templated type alias
     export template<typename T> 
-    using compare_T = bool (*)(const T &, const T &);
+    using compare_T = bool (*)(const T &, const T &); // Compare two "things" and return a bool
 
     export template<typename T> 
     T get_best(const BoxContainer<T> &collection, compare_T<T> comparator)
@@ -29,19 +31,13 @@ namespace function_pointers_03{
         return best;
     }
 
-    export bool larger_in_size(const std::string &str1, const std::string &str2) {
-        return str1.size() > str2.size();
-    }
+    export bool larger_in_size(const std::string &str1, const std::string &str2) {return str1.size() > str2.size();}
 
     export bool greater_lexicographically(const std::string &str1, const std::string &str2) { return (str1 > str2); }
 
     export bool larger_int(const int &param1, const int &param2) { return param1 > param2; }
 
-
     export template<typename T>
-    bool smaller(const T &param1, const T &param2)
-    {
-        return param1 < param2;
-    }
+    bool smaller(const T &param1, const T &param2){return param1 < param2;}
 
 }   //namespace function_pointers_03

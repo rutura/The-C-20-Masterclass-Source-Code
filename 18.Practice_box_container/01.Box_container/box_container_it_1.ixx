@@ -49,6 +49,12 @@ namespace iteration_1{
     // Copy constructor
     BoxContainer::BoxContainer(const BoxContainer& source)
         : m_items(new value_type[source.m_capacity]), m_capacity(source.m_capacity), m_size(source.m_size) {
+        //Loop through the source items and copy them to the new object
+        /*
+        for(size_t i{}; i < source.m_size; ++i) {
+            m_items[i] = source.m_items[i];
+        }
+        */
         std::copy(source.m_items, source.m_items + source.m_size, m_items);
     }
 
@@ -80,7 +86,7 @@ namespace iteration_1{
         return *this;
     }
 
-    // Move assignment
+    // Move assignment operator
     BoxContainer& BoxContainer::operator=(BoxContainer&& source) noexcept {
         if (this != &source) {
 
