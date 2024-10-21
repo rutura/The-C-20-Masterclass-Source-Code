@@ -1,3 +1,6 @@
+/*
+    .#2: Callback functions: 
+*/
 module;
 
 #include <string>
@@ -5,7 +8,9 @@ module;
 
 export module function_pointers_02;
 
-import boxcontainer;
+import box_container_it_5;
+
+using iteration_5::BoxContainer; 
 
     
 namespace function_pointers_02{
@@ -30,7 +35,7 @@ namespace function_pointers_02{
     }
 
     // Modifying a BoxContainer of strings
-    export box::BoxContainer<std::string> &modify(box::BoxContainer<std::string> &sentence, char (*modifier)(const char &))
+    export BoxContainer<std::string> &modify(BoxContainer<std::string> &sentence, char (*modifier)(const char &))
     {
         for (size_t i{}; i < sentence.size(); ++i) {
 
@@ -44,9 +49,9 @@ namespace function_pointers_02{
     }
 
 
-    export std::string get_best(const box::BoxContainer<std::string> &sentence,
+    export std::string get_best(const BoxContainer<std::string> &sentence,
     bool (*comparator)(const std::string &str1, const std::string &str2))
-        {
+    {
 
         std::string best = sentence.get_item(0);
         for (size_t i{}; i < sentence.size(); ++i) {

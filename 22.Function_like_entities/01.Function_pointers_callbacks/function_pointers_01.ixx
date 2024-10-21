@@ -1,3 +1,6 @@
+/*
+    .#1: Function pointers
+*/
 module;
 
 export module function_pointers_01;
