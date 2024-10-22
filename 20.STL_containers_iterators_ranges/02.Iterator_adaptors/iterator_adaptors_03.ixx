@@ -1,6 +1,8 @@
 /*
-    This file contains code that explores the stream iterators.
-    Input stream iterators and output stream iterators are used to read from and write to streams.
+    . Exploring stream iteators
+        . Using istream_iterator to read from std::cin
+        . Using ostream_iterator to write to std::cout
+        . These facilities work really well with the standard algorithms
 */
 module;
 
@@ -34,8 +36,7 @@ namespace iterator_adaptors_03{
         std::cout << "\n";
     }
 
-    //Create and export a functoin that sums up integers between a begining iterator and an end iterator.
-    //The function should return the sum.
+    //A function that sums up the elements in a range: [begin, end)
     template <typename InputIt>
     auto sum_up(InputIt begin, InputIt end){
         auto sum {*begin};

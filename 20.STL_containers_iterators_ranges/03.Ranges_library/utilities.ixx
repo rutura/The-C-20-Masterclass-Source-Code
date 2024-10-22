@@ -16,6 +16,8 @@ import ranges_library_03;
 import ranges_library_04;
 import ranges_library_05;
 
+
+//#1: Range algorithms
 export void ranges_library_01_demo(){
 
 	std::vector<int> numbers{ 11, 2, 6, 4, 8, 3, 17, 9 };
@@ -27,7 +29,9 @@ export void ranges_library_01_demo(){
 
 	auto odd = [](int n) { return n % 2 != 0; };
 
-	auto result = std::ranges::all_of(numbers, odd);
+	//Use iterator pairs
+	auto result = std::all_of(numbers.begin(), numbers.end(), odd);
+	//auto result = std::ranges::all_of(numbers, odd);
 
 	if (result) {
 		fmt::print("All elements in numbers are odd");
@@ -67,12 +71,11 @@ export void ranges_library_01_demo(){
 	// Important, copying into outputstream on the fly
 	fmt::println("");
 	fmt::print("numbers: ");
-	fmt::print("{}\n", fmt::join(numbers | std::views::common, " "));
-	// std::ranges::copy(numbers,std::ostream_iterator<int>(std::cout, " "));
+	std::ranges::copy(numbers,std::ostream_iterator<int>(std::cout, " "));
 
 }
 
-
+//#2: Range library: Iterator pair algorithms.
 export void ranges_library_02_demo(){
 
 	std::vector<int> numbers{ 11, 2, 6, 4, 8, 3, 17, 9 };
@@ -124,7 +127,7 @@ export void ranges_library_02_demo(){
 	fmt::println("");
 	fmt::print("numbers : ");
 	// std::ranges::copy(numbers.begin(),numbers.end(),std::ostream_iterator<int>(std::cout, " "));
-	fmt::print("{}\n", fmt::join(numbers | std::views::common, " "));
+	//fmt::print("{}\n", fmt::join(numbers | std::views::common, " "));
 
 
 	// Why you should prefer std::ranges algorithms from now on
@@ -137,6 +140,7 @@ export void ranges_library_02_demo(){
 
 }
 
+//#3: Projections
 export void ranges_library_03_demo(){
 	 //Projections : usually the sorting is done based on operator<
     //but you get one chance to write operator <
@@ -198,6 +202,7 @@ export void ranges_library_03_demo(){
 
 }
 
+//#4: Views and range adaptors
 export void ranges_library_04_demo(){
 
 	std::vector<int> vi{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -220,6 +225,10 @@ export void ranges_library_04_demo(){
 
 	fmt::print("vi : ");
 	ranges_library_04::print(vi);
+
+	//Set up a view adaptor
+	auto v_a = std::views::filter(vi, evens);
+	ranges_library_04::print(v_a);
 
 
 	// std::ranges::transform_view
@@ -244,7 +253,7 @@ export void ranges_library_04_demo(){
 	ranges_library_04::print(v_taken);
 
 
-	// is met
+	// std::ranges::take_while_view : takes elements as long as the predicate is met
 	fmt::println("");
 	fmt::println("std::views::take_while : ");
 	vi = { 1, 11, 23, 131, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -266,7 +275,7 @@ export void ranges_library_04_demo(){
 	ranges_library_04::print(v_drop);
 
 
-	// std::views::drop_while_view : drops elements as long as the predicate is met
+	// std::ranges::drop_while_view : drops elements as long as the predicate is met
 	fmt::println("");
 	fmt::println("std::ranges::drop_while_view : ");
 	vi = { 1, 11, 23, 4, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -285,9 +294,10 @@ export void ranges_library_04_demo(){
 	std::vector<pair> numbers{ { 1, "one" }, { 2, "two" }, { 3, "tree" } };
 
 	// Compiler error when you build views explicitly. Don't understand why yet
-	// auto k_view = std::ranges::keys_view(numbers);
-	// auto v_view = std::ranges::values_view(numbers);
+	//auto k_view = std::ranges::keys_view(numbers);
+	//auto v_view = std::ranges::values_view(numbers);
 
+	// But we can use view adaptors
 	auto k_view = std::views::keys(numbers);
 	auto v_view = std::views::values(numbers);
 	ranges_library_04::print(k_view);
@@ -317,6 +327,7 @@ export void ranges_library_04_demo(){
 	fmt::println("");
 	fmt::println("students example : ");
 
+	//Set up a classroom of students
 	std::vector<ranges_library_04::Student> class_room{ { "Mike", 12 }, { "John", 17 }, { "Drake", 14 }, { "Mary", 16 } };
 
 	fmt::println("");
@@ -325,6 +336,7 @@ export void ranges_library_04_demo(){
 		 std::cout << s << " ";
 	}
 
+	// Sort the students by age in ascending order
 	std::ranges::sort(class_room, std::less<>{}, &ranges_library_04::Student::m_age);
 
 	fmt::println("");
@@ -334,11 +346,13 @@ export void ranges_library_04_demo(){
 	}
 
 	fmt::println("students under 15 : ");
-	ranges_library_04::print(std::views::take_while(class_room, [](const ranges_library_04::Student &s) { return (s.m_age < 15); }));
+	ranges_library_04::print(std::views::take_while(class_room, [](const ranges_library_04::Student &s) { 
+		return (s.m_age < 15); 
+	}));
 	
 }
 
-
+//#5: View composition and pipe operator
 export void ranges_library_05_demo(){
 
 	std::vector<int> vi{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -369,16 +383,14 @@ export void ranges_library_05_demo(){
 	// auto names_view = std::views::keys(classroom);
 	auto names_view = classroom | std::views::keys;
 	fmt::println("names : ");
-	fmt::print("{}\n", fmt::join(names_view | std::views::common, " "));
-	// std::ranges::copy(names_view, std::ostream_iterator<std::string>(std::cout, " "));
+	std::ranges::copy(names_view, std::ostream_iterator<std::string>(std::cout, " "));
 
 
 	// Print out the ages :
 	fmt::println("");
 	auto ages_view = std::views::values(classroom);
 	fmt::print("ages : ");
-	fmt::print("{}\n", fmt::join(ages_view | std::views::common, " "));
-	// std::ranges::copy(ages_view,std::ostream_iterator<unsigned int>(std::cout," "));
+	std::ranges::copy(ages_view,std::ostream_iterator<unsigned int>(std::cout," "));
 
 
 	// Print names in reverse : this doesn't work if you store the data in an
@@ -386,9 +398,8 @@ export void ranges_library_05_demo(){
 	// that are needed to set up a reverse view.
 	fmt::println("");
 	fmt::print("names in reverse : ");
-	fmt::print("{}\n", fmt::join(std::views::keys(classroom) | std::views::reverse, " "));
-	/*std::ranges::copy(std::views::keys(classroom) | std::views::reverse ,
-								std::ostream_iterator<std::string>(std::cout, " "));*/
+	std::ranges::copy(std::views::keys(classroom) | std::views::reverse ,
+								std::ostream_iterator<std::string>(std::cout, " "));
 
 	// Pick names that come before the letter "M" in the alphabet
 	fmt::println("");
@@ -397,16 +408,55 @@ export void ranges_library_05_demo(){
 	};
 
 	fmt::print("names before M : ");
-	fmt::print("{}\n", fmt::join(classroom | std::views::keys | std::views::filter(before_M), " "));
-	/*std::ranges::copy(classroom | std::views::keys | std::views::filter(before_M),
-				std::ostream_iterator<std::string>(std::cout, " "));*/
+	std::ranges::copy(classroom | std::views::keys | std::views::filter(before_M),
+				std::ostream_iterator<std::string>(std::cout, " "));
 
+
+}
+
+//#6: Range factories
+/*
+	. A range factory creates views from scratch, rather than adapting an existing range. 
+		These factories generate new ranges rather than modifying existing ones.
+	. Example of range factories include std::views::iota.
+
+	. View vs View adaptor vs Range factory: 
+		. View:
+			. A view is an object that represents a non-owning, lazily evaluated transformation of a range.
+			. Example: std::ranges::take_while_view.
+			. Can be directly created but typically created using adaptors or range factories.
+		. View Adaptor:
+			. A view adaptor is a function-like entity used to create or adapt a view from an existing range.
+			. Example: std::views::take_while.
+			. Cleaner and more convenient to use, supports chaining operations on ranges.
+		. Range Factory:
+			. A range factory generates a range (or view) from scratch, without needing an underlying range.
+			. Example: std::views::iota.
+			. Used to produce ranges that do not directly rely on another range (e.g., infinite ranges, ranges of numbers, etc.).
+
+*/
+export void ranges_library_06_demo(){
+	//Range factories
+	// Generate an infinite sequence of numbers
+	// auto infinite_view = std::views::iota(1) | std::views::take(20); // Stores the compuation
+	// auto data_view = std::views::take( std::views::iota(1) , 20);
+
+	// Numbers are generated lazily, on the fly, as we need them in each iteration
+	for (auto i : std::views::iota(1) | std::views::take(20)) {
+		fmt::println("{}", i); 
+	}
+}
+
+// #7: Some other view adaptors from C++23
+export void ranges_library_07_demo(){
 	//Some other views from C++23
+	/*
 	//std::views::zip (C++23)
 	std::vector<int> v1 = {1, 2, 3};
     std::vector<std::string> v2 = {"one", "two", "three"};
 
-    auto zipped = std::views::zip(v1, v2);
+    auto zipped = std::views::zip(v1, v2); // The result is a view where each element is a 
+										   //tuple of the corresponding elements from the input ranges
 
     fmt::print("std::views::zip:\n");
     for (const auto& [i, s] : zipped) {
@@ -415,7 +465,8 @@ export void ranges_library_05_demo(){
     fmt::print("\n\n");
 
 	//std::views::adjacent (C++23)
-    auto adjacent = std::views::adjacent<2>(v1);
+    auto adjacent = std::views::adjacent<2>(v1); // The result is a view where each element is a pair 
+												 // of adjacent elements from the input range
 
     fmt::print("std::views::adjacent:\n");
     for (const auto& [a, b] : adjacent) {
@@ -424,36 +475,43 @@ export void ranges_library_05_demo(){
     fmt::print("\n\n");
 
     // std::views::chunk (C++23)
-    auto chunked = std::views::chunk(v1, 2);
-    fmt::print("std::views::chunk:\n");
+	std::vector<int> v1 {1, 2, 3, 4, 5, 6, 7, 8};
+    auto chunked = std::views::chunk(v1, 2); // The result is a view where each element is a chunk of 
+											  // the input range with the specified size
+    // Iterate over the chunked view and print each subrange
     for (const auto& chunk : chunked) {
-        fmt::print("{{{}}} ", fmt::join(chunk, ", "));
+        fmt::print("Chunk: ");
+        for (int n : chunk) {
+            fmt::print("{} ", n);
+        }
+        fmt::println(""); // Prints a new line after each chunk
     }
     fmt::print("\n\n");
 
     // std::views::stride (C++23)
-    auto strided = std::views::stride(v1, 2);
+	std::vector<int> v1 {1, 2, 3, 4, 5, 6, 7, 8};
+    auto strided = std::views::stride(v1, 2);	// The result is a view where each element 
+												// is every nth element from the input range
 
-    fmt::print("std::views::stride:\n");
-    fmt::print("{}\n\n", fmt::join(strided, ", "));
+	fmt::print("std::views::stride:\n");
+	for (int n : strided) {
+		fmt::print("{} ", n);
+	}
+	fmt::print("\n\n");
+	*/
+
+
 
     // std::views::cartesian_product (C++23)
+	std::vector<int> v1 = {1, 2, 3};
     std::vector<char> v3 = {'a', 'b', 'c'};
-    auto cartesian_product = std::views::cartesian_product(v1, v3);
+    auto cartesian_product = std::views::cartesian_product(v1, v3); // The result is a view where each element is a pair 
+			// of elements from the input ranges: [(1, 'a'), (1, 'b'), (1, 'c'), (2, 'a'), (2, 'b'), (2, 'c'), (3, 'a'), (3, 'b'), (3, 'c')]
 
     fmt::print("std::views::cartesian_product:\n");
     for (const auto& [i, c] : cartesian_product) {
         fmt::print("({}, {}) ", i, c);
     }
     fmt::print("\n");
-}
 
-export void ranges_library_06_demo(){
-	//Range factories
-	// Generate an infinite sequence of numbers
-	// auto infinite_view = std::views::iota(1) | std::views::take(20); // Stores the compuation
-	// auto data_view = std::views::take( std::views::iota(1) , 20);
-
-	// Numbers are generated lazily, on the fly, as we need them in each iteration
-	for (auto i : std::views::iota(1) | std::views::take(20)) { fmt::println("{}", i); }
 }

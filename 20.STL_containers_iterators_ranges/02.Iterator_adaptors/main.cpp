@@ -46,6 +46,5 @@ import utilities;
 
 int main() {
     //iterator_adaptors_01_demo();
-    //iterator_adaptors_02_demo();
     iterator_adaptors_03_demo();
 }

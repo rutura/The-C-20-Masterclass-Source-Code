@@ -13,7 +13,7 @@
         .#3: Constant iterators, std::begin, and std::end
             . see containers_iterators_03.ixx
 
-        .#4: Generic container elements: 
+        .#4: The iterator traits template
             . see containers_iterators_04.ixx
 
 
@@ -46,6 +46,6 @@ import utilities;
 int main() {
     //containers_iterators_01_demo();
     //containers_iterators_02_demo();
-    //containers_iterators_03_demo();
-    containers_iterators_04_demo();
+    containers_iterators_03_demo();
+    //containers_iterators_04_demo();
 }

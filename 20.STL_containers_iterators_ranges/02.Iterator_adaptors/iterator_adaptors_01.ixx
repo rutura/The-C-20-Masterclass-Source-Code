@@ -1,18 +1,22 @@
 /*
-    C++ supports several iterator adapter types, each providing unique functionality to enhance the behavior of standard iterators. Here is a list of the most common iterator adapters in C++:
-        std::back_insert_iterator
-        std::front_insert_iterator
-        std::insert_iterator
-        std::reverse_iterator
-        std::move_iterator
-        std::ostream_iterator
-        std::istream_iterator
-        std::istreambuf_iterator
-        std::ostreambuf_iterator
-        std::counting_iterator (C++20)
-        std::common_iterator (C++20)
-        std::unreachable_sentinel (C++20)
-    We cover the first five in this module.
+    . Some iterator adaptors: 
+        . C++ supports several iterator adapter types, each providing unique functionality
+             to enhance the behavior of standard iterators. 
+             
+        . Here is a list of the most common iterator adapters in C++:
+            . std::back_insert_iterator
+            . std::front_insert_iterator
+            . std::insert_iterator
+            . std::reverse_iterator
+            . std::move_iterator
+            . std::ostream_iterator
+            . std::istream_iterator
+            . std::istreambuf_iterator
+            . std::ostreambuf_iterator
+            . std::counting_iterator (C++20)
+            . std::common_iterator (C++20)
+            . std::unreachable_sentinel (C++20)
+        . We cover the first five in this module.
 */
 module;
 
@@ -82,6 +86,13 @@ namespace iterator_adaptors_01 {
     }
 
     export void reverse_iterator_test(){
+
+        /*
+            . Iteration and invocation: 
+                . std::for_each iterates of the range [vec.rbegin(), vec.rend()]. 
+                . For each element, it invokes the lambda function.
+                . The current element is passed to the lambda function as an argument.
+        */
 
         //Reverse iterators increment backwards.
         // Initialize a vector with some elements

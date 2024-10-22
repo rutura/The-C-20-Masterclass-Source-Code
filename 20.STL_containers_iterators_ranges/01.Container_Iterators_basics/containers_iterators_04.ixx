@@ -1,5 +1,10 @@
 /*
-    .#4: Generic container elements:
+    .  The iterator traits template:
+        . Problem: 
+            . Once we have an iterator, we want to know what type of data it points to.
+            . But we don't know the type of the container.
+        . Solution: 
+            . Use the iterator_traits template to get the type of the data the iterator points to.
 */
 module;
 
@@ -19,6 +24,7 @@ namespace containers_iterators_04{
         fmt::println("{}", val);
     }
 
+    //We can use the technique to create a find function that works with any container: Pretty slick if you ask me.
     export template <typename T>
     auto custom_find(T begin, T end, typename std::iterator_traits<T>::value_type val){
 

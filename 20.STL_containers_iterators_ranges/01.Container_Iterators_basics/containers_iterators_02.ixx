@@ -1,5 +1,6 @@
 /*
     . Tinkering with functions that print the contents of a collection, using iterators.
+        . Containers are manipulated in a unified way.
     . The main goals is to introduce iterators.
     . It can print both std::vector and std::array. 
         . Any container, as long as it has begin() and end() functions, can be printed.
@@ -16,13 +17,12 @@ namespace containers_iterators_02{
     export template<typename T> 
     void print_collection(const T &collection)
     {
-
-        auto it = collection.begin();
+        auto it = collection.begin(); //begin returns an iterator pointing to the first element
 
         fmt::print(" [");
-        while (it != collection.end()) {
-            fmt::print(" {}", *it);
-            ++it;
+        while (it != collection.end()) {    //end returns an iterator pointing to the element after the last element
+            fmt::print(" {}", *it); // iterators can be dereferenced to get the value, the idea is to make them behave like pointers
+            ++it;   // iterators can be incremented
         }
         fmt::println(" ]");
     }

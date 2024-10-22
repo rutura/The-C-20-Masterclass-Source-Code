@@ -52,7 +52,8 @@ int main() {
     //ranges_library_01_demo();
     //ranges_library_02_demo();
     //ranges_library_03_demo();
-    ranges_library_04_demo();
+    //ranges_library_04_demo();
     //ranges_library_05_demo();
     //ranges_library_06_demo();
+    ranges_library_07_demo();
 }

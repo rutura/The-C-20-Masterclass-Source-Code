@@ -27,11 +27,11 @@ export void containers_iterators_02_demo(){
 	std::vector ints1{ 11, 22, 33, 44 };
 	std::array ints2{ 100, 200, 300, 400 };
 
-	auto it_begin = ints1.begin();
-	auto it_end = ints1.end();
+	auto it_begin = ints1.begin();//begin returns an iterator pointing to the first element of the collection
+	auto it_end = ints1.end(); //end returns an iterator pointing to the element after the last element of the collection
 
-	fmt::println("first elt: {}", *it_begin);
-	fmt::println("it == end_it: {}", (it_begin == it_end));
+	fmt::println("first elt: {}", *it_begin);	//dereferencing the iterator gives the value
+	fmt::println("it == end_it: {}", (it_begin == it_end)); 
 
 	++it_begin;
 	fmt::println("second elt: {}", *it_begin);
@@ -60,7 +60,7 @@ export void containers_iterators_02_demo(){
 	fmt::print("ints2:");
 	containers_iterators_02::print_collection(ints2);
 
-	//Adjust begining and end.
+	//Adjust the beginning and end
 	fmt::println("Adjusting begining and end");
 	std::vector ints3{ 11, 22, 33, 44, 55, 66, 77 };
 	std::array ints4{ 100, 200, 300, 400, 500, 600 };
@@ -89,13 +89,11 @@ export void containers_iterators_03_demo(){
 	fmt::print("numbers : ");
 	containers_iterators_03::print_collection(numbers);
 
-	/*
 	std::vector<int>::iterator it = numbers.begin();
 	while( it != numbers.end()){
 		*it = 100;
 		++it;
 	}
-	*/
 
 	fmt::print("numbers : ");
 	containers_iterators_03::print_collection(numbers);
@@ -105,8 +103,8 @@ export void containers_iterators_03_demo(){
 	// std::vector<int>::const_iterator c_it = numbers.cbegin();
 	auto c_it = numbers.cbegin();
 	while (c_it != numbers.end()) {
-		// *c_it = 100;
-		++c_it;
+		//*c_it = 100; // You can't go through the iterator and modify the container data
+		++c_it;	// But you can move the iterator (increment, decrement)
 	}
 
 
@@ -123,20 +121,18 @@ export void containers_iterators_03_demo(){
 	//std::begin and std::end
 	// std::vector<int> vi {1,2,3,4,5,6,7,8,9};
 	int vi[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-
-
 	/*
-	fmt::print( " Collection : " );
+	fmt::print( " Collection : " ); // This will fail on raw arrays because they don't have begin and end functions
 	for(auto it = vi.begin(); it!= vi.end(); ++it){
 		fmt::print( "{} ", *it );
 	}
-
 	*/
-
 	fmt::println("--------");
 
-	fmt::print(" Collection : ");
-	for (auto it = std::begin(vi); it != std::end(vi); ++it) { fmt::print("{} ", *it); }
+	fmt::print(" Collection : ");	// This will work on raw arrays
+	for (auto it = std::begin(vi); it != std::end(vi); ++it) {
+		fmt::print("{} ", *it); 
+	}
 }
 
 

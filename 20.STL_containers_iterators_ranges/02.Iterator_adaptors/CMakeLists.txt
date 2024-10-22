@@ -19,7 +19,6 @@ target_sources(${PROJECT_NAME}
         FILE_SET CXX_MODULES FILES
         utilities.ixx
         iterator_adaptors_01.ixx
-        iterator_adaptors_02.ixx 
         iterator_adaptors_03.ixx 
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
