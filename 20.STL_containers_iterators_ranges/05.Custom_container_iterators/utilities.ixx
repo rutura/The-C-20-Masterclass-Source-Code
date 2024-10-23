@@ -38,7 +38,7 @@ export void custom_iterators_01_demo(){
         fmt::print("{} ",*it);
     }
    
-    //find algorithm
+    //find algorithm: requires an input iterator
     if (std::ranges::find(box1, 8) != box1.end()) {
 		fmt::println("numbers contains: {}",8);
     } else {
@@ -54,8 +54,6 @@ export void custom_iterators_01_demo(){
 		fmt::print("{} ",n);
     }
 	  fmt::println("\n");
-
-    //custom_iterators_01::read_lines_from_file();
 
 }
 
@@ -301,6 +299,8 @@ export void custom_iterators_06_demo(){
 
 }
 
+
+//#7: Const and reverse iteators
 export void custom_iterators_07_demo(){
     custom_iterators_07::BoxContainer<int> vi;
     vi.add(5);

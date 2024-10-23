@@ -2,14 +2,13 @@
     . Custom container iterators: 
 
         .#1: Input iterator
+            . These are iterators that can be used to read from a container: read only
+            . Input iterators are single pass.
             . see custom_iterators_01.ixx 
-            . Input iterators are single pass iterators.
 
         .#2: Output iterator
+            . They have input iterator capabilities, but can also be used to modify the value referenced by the iterator.
             . see custom_iterators_01.ixx
-            . the same code from custom_iterators_01.ixx is used here.
-            . operator* and operator-> are used to modify the value referenced by the iterator.
-            . hence, this being an output iterator, we can use to modify the value referenced by the iterator.
 
         .#3: Forward iterator
             . see custom_iterators_01.ixx
@@ -82,6 +81,9 @@
 
     . Philosophy: 
         . All non module looking code should be hidden away in the utilities module.
+
+
+   
 
 */
 
