@@ -1,5 +1,6 @@
 /*
-    This file contains code that tinkers with sequence containers, the iterators they provide and common algorithms that require these iterators.
+    Exploring  sequence containers, the iterators they provide and
+    common algorithms that require these iterators.
 
         . std::vector: 
             . Iterator type: random access iterator
@@ -62,6 +63,9 @@ namespace containers_iterators_algorithms_01{
         fmt::print("\n");
     }
     */
+
+   // We clearly communicate that the function requires an input range: that is, 
+   // a range that can be iterated over in a forward direction.
     export template<std::ranges::input_range Container>
     void print_container(const Container& container) {
         for (const auto& elem : container) {

@@ -38,37 +38,40 @@ module;
 
 #include <set>
 #include <algorithm>
+#include <ranges>
 #include <numeric>
 #include <fmt/format.h>
+#include <iterator>
 
 export module containers_iterators_algorithms_02;
 
 namespace containers_iterators_algorithms_02{
 
     export void use_set(){
-        std::set<int> mySet = {1, 3, 5, 7, 9};
+        std::set<int> my_set = {1, 3, 5, 7, 9};
 
         // Find an element
-        auto it = mySet.find(5);
-        if (it != mySet.end()) {
+        auto it = my_set.find(5);
+        if (it != my_set.end()) {
             fmt::print("Found: {}\n", *it);
         }
 
         // Perform set union with another set
-        std::set<int> otherSet = {2, 4, 6, 8, 10};
-        std::set<int> resultSet;
-        std::set_union(mySet.begin(), mySet.end(),
-                    otherSet.begin(), otherSet.end(),
-                    std::inserter(resultSet, resultSet.begin()));
+        std::set<int> other_set = {2, 4, 6, 8, 10};
+        std::set<int> result_set;
+        std::set_union(my_set.begin(), my_set.end(),
+                    other_set.begin(), other_set.end(),
+                    std::inserter(result_set, result_set.begin()));
 
         fmt::print("Set union: ");
-        for (int n : resultSet) {
+        for (int n : result_set) {
             fmt::print("{} ", n);
         }
         fmt::print("\n");
 
         // Calculate the sum of all elements
-        int sum = std::accumulate(mySet.begin(), mySet.end(), 0);
+        int sum = std::accumulate(my_set.begin(), my_set.end(), 0);
+        //There is no ranges version of accumulate: https://stackoverflow.com/questions/63933163/why-didnt-accumulate-make-it-into-ranges-for-c20
         fmt::print("Sum of elements: {}\n", sum);
     }
 

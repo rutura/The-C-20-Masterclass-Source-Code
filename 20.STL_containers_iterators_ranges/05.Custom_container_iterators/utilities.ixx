@@ -22,6 +22,7 @@ export void custom_iterators_01_demo(){
 
 	//std::vector<int> box1 {8,1,4,2,5,3,7,9};
     custom_iterators_01::BoxContainer<int> box1;
+    //improvement::BoxContainer<int> box1;
     box1.add(5);
     box1.add(1);
     box1.add(4);
@@ -31,6 +32,11 @@ export void custom_iterators_01_demo(){
     box1.add(7);
     box1.add(9);
     box1.add(6);
+
+    //Use iterator to access the elements
+    for(auto it = box1.begin(); it!=box1.end(); ++it){
+        fmt::print("{} ",*it);
+    }
    
     //find algorithm
     if (std::ranges::find(box1, 8) != box1.end()) {
@@ -49,7 +55,7 @@ export void custom_iterators_01_demo(){
     }
 	  fmt::println("\n");
 
-    custom_iterators_01::read_lines_from_file();
+    //custom_iterators_01::read_lines_from_file();
 
 }
 
@@ -120,19 +126,17 @@ export void custom_iterators_04_demo(){
     std::ranges::reverse(box1);
     std::cout << "box1 : " << box1 << std::endl;
 
-    /*
-    std::cout << "box1-reverse : ";
+    //Traverse in reverse
+    std::cout << "box1 (printed reversed) : ";
     for(auto it = box1.end();it!=box1.begin(); ){
         std::cout << *(--it )<< " ";
     }
     std::cout << std::endl;
-    */
 
 }
 
 //Random access iterators
 export void custom_iterators_05_demo(){
-
     custom_iterators_05::BoxContainer<int> box1;
     box1.add(5);
     box1.add(1);
@@ -146,6 +150,8 @@ export void custom_iterators_05_demo(){
    
     std::cout << "box1 : " << box1 << std::endl;
     std::ranges::sort(box1.begin(),box1.end());
+    //std::ranges::sort(box1);  
+    //std::sort(box1.begin(),box1.end());
     std::cout << "box1 : " << box1 << std::endl;
 
 }
@@ -164,8 +170,7 @@ export void custom_iterators_06_demo(){
     vi.add(9);
     vi.add(6);
 
-   //std::ranges::filter_view
-   /*
+    //std::ranges::filter_view
     std::cout <<std::endl;
     std::cout << "std::ranges::filter_view : " << std::endl;
     auto evens = [](int i){
@@ -182,7 +187,6 @@ export void custom_iterators_06_demo(){
     //Print evens on the fly 
     std::cout << "vi evens : " ;
     custom_iterators_06::print(std::ranges::filter_view(vi,evens));
-    */
 
 
     //std::ranges::transform_view
@@ -308,17 +312,37 @@ export void custom_iterators_07_demo(){
     vi.add(7);
     vi.add(9);
     vi.add(6);
-
     const custom_iterators_07::BoxContainer<int> copy(vi);
 
-    std::cout << "data : ";
-    for (auto it = copy.begin(); it!=copy.end(); ++it){
+    //Use regular non const iteator
+    std::cout << "forward : ";
+    for(auto it = vi.begin(); it!=vi.end(); ++it){
         std::cout << (*it) << " ";
     }
-    std::cout << std::endl;
+    std::cout << "\n";
+
+    //Use const iterator
+    std::cout << "const forward: ";
+    for(auto it = copy.begin(); it!=copy.end(); ++it){
+        std::cout << (*it) << " ";
+    }
+    std::cout << "\n";
 
 
-    //custom_iterators_07::print(copy);
+    //Use reverse iterator
+    std::cout << "reverse : ";
+    for(auto it = vi.rbegin(); it!=vi.rend(); ++it){
+        std::cout << (*it) << " ";
+    }
+    std::cout << "\n";
+
+    //Use const reverse iterator
+    std::cout << "const reverse : ";
+    for(auto it = copy.rbegin(); it!=copy.rend(); ++it){
+        std::cout << (*it) << " ";
+    }
+    std::cout << "\n";
+
 
 }
 

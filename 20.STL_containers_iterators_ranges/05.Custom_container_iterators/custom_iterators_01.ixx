@@ -1,5 +1,7 @@
 /*
     This file contains code that exemplifies the building process for input iterators: 
+        . Input iterator: something we can read from. 
+            . We use it to read from a container.
         . Their purpose is to provide a way to iterate over a container in a read-only fashion.
         . common requirements for all iterators: 
             . copy-constructible,
@@ -22,312 +24,484 @@ module;
 #include <fmt/format.h>
 #include <iostream>
 #include <fstream>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <vector>
 
 export module custom_iterators_01;
 
-namespace custom_iterators_01{
+namespace custom_iterators_01 {
 
+    // BoxContainer class template definition
     export template <typename T>
-    requires std::is_default_constructible_v<T>
-    class BoxContainer
-    {
-        //static_assert(std::is_default_constructible_v<T>,"Types stored in BoxContainer must have a default constructor");
-            
-        static const size_t DEFAULT_CAPACITY = 5;  
-        static const size_t EXPAND_STEPS = 5;
+    requires std::default_initializable<T> // Ensuring type T is default-initializable
+    class BoxContainer {
+        static constexpr size_t DEFAULT_CAPACITY = 5; // Default initial capacity of the container
+        static constexpr size_t EXPAND_STEPS = 5;     // Steps to expand the container's capacity
+
     public:
+        // Constructor with optional initial capacity
         BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+
+        // Copy constructor enabled only for copyable types (requires C++20)
         BoxContainer(const BoxContainer& source) requires std::copyable<T>;
-        ~BoxContainer();
-        
-        
-        friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand)
-        {
-            out << "BoxContainer : [ size :  " << operand.m_size
-                << ", capacity : " << operand.m_capacity << ", items : " ;
-                    
-            for(size_t i{0}; i < operand.m_size; ++i){
-                out << operand.m_items[i] << " " ;
+
+        // Move constructor
+        BoxContainer(BoxContainer&& source) noexcept;
+
+        // Copy assignment operator, uses copy-and-swap idiom
+        BoxContainer& operator=(const BoxContainer& source);
+
+        // Move assignment operator
+        BoxContainer& operator=(BoxContainer&& source) noexcept;
+
+        // Destructor is defaulted, no manual cleanup needed
+        ~BoxContainer() = default;
+
+        // Output operator overload for BoxContainer, for pretty printing
+        friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand) {
+            out << "BoxContainer : [ size : " << operand.m_size
+                << ", capacity : " << operand.m_capacity << ", items : ";
+
+            for (size_t i{ 0 }; i < operand.m_size; ++i) {
+                out << operand.m_items[i] << " "; // Print each item
             }
             out << "]";
-            
             return out;
         }
 
-        // Helper getter methods
-        size_t size( ) const { return m_size; }
-        size_t capacity() const{return m_capacity;};
-        
-        T get_item(size_t index) const{
+        // Returns the current number of elements in the container
+        size_t size() const noexcept { return m_size; }
+
+        // Returns the current capacity of the container
+        size_t capacity() const noexcept { return m_capacity; }
+
+        // Get item at index with bounds-checked access (throws if out of bounds)
+        const T& get_item(size_t index) const {
+            if(index >= m_size)
+                throw std::out_of_range("Index out of bounds");
             return m_items[index];
         }
-        
-        //Method to add items to the box
+
+        // Adds a new item to the container, expands if needed
         void add(const T& item);
+
+        // Removes the first occurrence of an item, returns true if found and removed
         bool remove_item(const T& item);
+
+        // Removes all occurrences of an item, returns the count of removed items
         size_t remove_all(const T& item);
-        //In class operators
-        void operator +=(const BoxContainer<T>& operand);
-        void operator =(const BoxContainer<T>& source);
 
-        public : 
-        class Iterator{
-            public : 
-                    using iterator_category = std::input_iterator_tag;
-                    using difference_type   = std::ptrdiff_t;
-                    using value_type        = T;
-                    using pointer_type           = T*;
-                    using reference_type         = T&;
+        // Combines another container into this one (operator overload)
+        void operator+=(const BoxContainer<T>& operand);
 
-            Iterator() = default;
-            Iterator(pointer_type ptr) : m_ptr(ptr) {}
+        // Iterator class for BoxContainer (Input Iterator)
+        class Iterator {
+        public:
+            using iterator_category = std::input_iterator_tag;   // Input iterator tag
+            using difference_type = std::ptrdiff_t;              // Difference type
+            using value_type = T;                                // Value type
+            using pointer_type = T*;                             // Pointer type
+            using reference_type = T&;                           // Reference type
 
-            //Copy constructor
-            Iterator(const Iterator& source) : m_ptr(source.m_ptr) {
-            }
+            Iterator() = default;                                // Default constructor
 
-            //Copy assignment operator
-            Iterator& operator=(const Iterator& source){
-                if(this == &source)
-                    return *this;
-                m_ptr = source.m_ptr;
-                return *this;
-            }
-        
-            reference_type operator*() const {
-                return *m_ptr;
-            }
+            // Constructor taking a pointer to the underlying data
+            explicit Iterator(pointer_type ptr) : m_ptr(ptr) {}
 
-            pointer_type operator->() {
-                return m_ptr;
-            }
+            // Copy constructor and assignment operator can be defaulted
+            Iterator(const Iterator&) = default;
+            Iterator& operator=(const Iterator&) = default;
 
-            Iterator& operator++() {
-                m_ptr++; return *this;
-            }  
-            Iterator operator++(int) {
-                Iterator tmp = *this;
-                ++(*this);
-                return tmp;
-            }
+            // Dereference operator to access the value
+            reference_type operator*() const { return *m_ptr; }
 
-            //These operators are non members, but can still access private
-            //members of Iterator. Cool.
-            friend bool operator== (const Iterator& a, const Iterator& b) {
-                return a.m_ptr == b.m_ptr;
-            }
-            friend bool operator!= (const Iterator& a, const Iterator& b) {
-                //return a.m_ptr != b.m_ptr; 
-                return !(a == b);
-            } 
+            // Arrow operator to access members directly
+            pointer_type operator->() { return m_ptr; }
 
-            private : 
-                pointer_type m_ptr;
+            // Pre-increment operator (advances the pointer)
+            Iterator& operator++() { ++m_ptr; return *this; }
+
+            // Post-increment operator (advances but returns old value)
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            // Equality comparison operator for iterators
+            friend bool operator==(const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; }
+
+            // Inequality comparison operator for iterators
+            friend bool operator!=(const Iterator& a, const Iterator& b) { return !(a == b); }
+
+        private:
+            pointer_type m_ptr{ nullptr }; // Pointer to the current element
         };
-        Iterator begin() { return Iterator(&m_items[0]); }
-        Iterator end()   { return Iterator(&m_items[m_size]); }
-        
-    private : 
-        void expand(size_t new_capacity);	
-    private : 
-        T * m_items;
-        size_t m_capacity;
-        size_t m_size;
-        
+
+        // Begin iterator (points to the first element)
+        Iterator begin() { return Iterator(m_items.get()); }
+
+        // End iterator (points one past the last element)
+        Iterator end() { return Iterator(m_items.get() + m_size); }
+
+    private:
+        // Expands the container's capacity to the new size
+        void expand(size_t new_capacity);
+
+    private:
+        std::unique_ptr<T[]> m_items;  // m_items is a smart pointer that will manage 
+                                       // a dynamically allocated array of type T.
+        size_t m_capacity{ 0 };        // Current capacity of the container
+        size_t m_size{ 0 };            // Current number of elements in the container
     };
 
-    //Free operators
-    template <typename T> requires std::is_default_constructible_v<T>
-    BoxContainer<T> operator +(const BoxContainer<T>& left, const BoxContainer<T>& right);
+    // --- Method Definitions ---
+    // Operator to concatenate two BoxContainers and return a new one
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T> operator+(const BoxContainer<T>& left, const BoxContainer<T>& right) {
+        BoxContainer<T> result(left.size() + right.size()); // Create a new container large enough
+        result += left;                                     // Add elements from left
+        result += right;                                    // Add elements from right
+        return result;                                      // Return the combined container
+    }
 
-
-
-    //Definitions moved into here
-
-    template <typename T> requires std::is_default_constructible_v<T>
+    // Constructor
+    template <typename T> requires std::default_initializable<T>
     BoxContainer<T>::BoxContainer(size_t capacity)
-    {
-        m_items = new T[capacity];
-        m_capacity = capacity;
-        m_size =0;
-    }
+        : m_items(std::make_unique<T[]>(capacity)), m_capacity(capacity), m_size(0) {}
 
-    template <typename T> requires std::is_default_constructible_v<T>
+    // Copy constructor, uses std::copy for copying elements
+    template <typename T> requires std::default_initializable<T>
     BoxContainer<T>::BoxContainer(const BoxContainer<T>& source) requires std::copyable<T>
-    {
-        //Set up the new box
-        m_items = new T[source.m_capacity];
-        m_capacity = source.m_capacity;
-        m_size = source.m_size;
-        
-        //Copy the items over from source 
-        for(size_t i{} ; i < source.size(); ++i){
-            m_items[i] = source.m_items[i];
+        : m_items(std::make_unique<T[]>(source.m_capacity)), m_capacity(source.m_capacity), m_size(source.m_size) {
+        std::copy(source.m_items.get(), source.m_items.get() + source.m_size, m_items.get());
+    }
+
+    // Move constructor
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>::BoxContainer(BoxContainer&& source) noexcept
+        : m_items(std::move(source.m_items)), 
+        m_capacity(source.m_capacity), 
+        m_size(source.m_size) {
+        source.m_capacity = 0; // Invalidate the moved-from object's capacity
+        source.m_size = 0;     // Invalidate the moved-from object's size
+    }
+
+    // Copy assignment operator using copy-and-swap idiom (exception safe)
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>& BoxContainer<T>::operator=(const BoxContainer<T>& source) {
+        if (this != &source) {
+            BoxContainer temp(source);          // Copy source into a temporary object
+            std::swap(m_items, temp.m_items);   // Swap data members
+            std::swap(m_capacity, temp.m_capacity);
+            std::swap(m_size, temp.m_size);
         }
+        return *this;                           // Return the modified object
     }
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    BoxContainer<T>::~BoxContainer()
-    {
-        delete[] m_items;
+    // Move assignment operator
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>& BoxContainer<T>::operator=(BoxContainer&& source) noexcept {
+        if (this != &source) {
+            m_items = std::move(source.m_items); // Move the resource
+            m_capacity = source.m_capacity;       // Transfer capacity
+            m_size = source.m_size;               // Transfer size
+
+            // Invalidate the moved-from object's state
+            source.m_capacity = 0; 
+            source.m_size = 0; 
+        }
+        return *this; // Return the modified object
     }
 
-
-    template <typename T> requires std::is_default_constructible_v<T>
-    void BoxContainer<T>::expand(size_t new_capacity){
-        std::cout << "Expanding to " << new_capacity << std::endl;
-        T *new_items_container;
-
+    // Expands the container's capacity to hold more elements
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::expand(size_t new_capacity) {
         if (new_capacity <= m_capacity)
-            return; // The needed capacity is already there
-        
-        //Allocate new(larger) memory
-        new_items_container = new T[new_capacity];
+            return;  // No need to expand if the current capacity is sufficient
 
-        //Copy the items over from old array to new 
-        for(size_t i{} ; i < m_size; ++i){
-            new_items_container[i] = m_items[i];
-        }
-        
-        //Release the old array
-        delete [ ] m_items;
-        
-        //Make the current box wrap around the new array
-        m_items = new_items_container;
-        
-        //Use the new capacity
-        m_capacity = new_capacity;
+        std::unique_ptr<T[]> new_items = std::make_unique<T[]>(new_capacity);  // Allocate new larger array
+        std::copy(m_items.get(), m_items.get() + m_size, new_items.get());     // Copy existing elements
+        m_items.swap(new_items);                                               // Replace old array
+        m_capacity = new_capacity;                                             // Update capacity
     }
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    void BoxContainer<T>::add(const T& item){
+    // Adds a new item to the container, expanding if necessary
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::add(const T& item) {
         if (m_size == m_capacity)
-            //expand(m_size+5); // Let's expand in increments of 5 to optimize on the calls to expand
-            expand(m_size + EXPAND_STEPS);
-        m_items[m_size] = item;
-        ++m_size;
+            expand(m_size + EXPAND_STEPS);  // Expand if capacity is full
+        m_items[m_size] = item;             // Add the new item
+        ++m_size;                           // Increment size
     }
 
+    // Removes the first occurrence of the item from the container
+    template <typename T> requires std::default_initializable<T>
+    bool BoxContainer<T>::remove_item(const T& item) {
+        auto it = std::find(m_items.get(), m_items.get() + m_size, item); // Use std::find to locate the item
+        if (it == m_items.get() + m_size)
+            return false;  // Item not found
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    bool BoxContainer<T>::remove_item(const T& item){
-        
-        //Find the target item
-        size_t index {m_capacity + 999}; // A large value outside the range of the current 
-                                            // array
-        for(size_t i{0}; i < m_size ; ++i){
-            if (m_items[i] == item){
-                index = i;
-                break; // No need for the loop to go on
+        // Replace the removed item with the last item and reduce size
+        *it = std::move(m_items[m_size - 1]); // Move last item to the removed item's position
+        --m_size;  // Decrease size
+        return true;  // Return success
+    }
+
+    // Removes all occurrences of the item from the container
+    template <typename T> requires std::default_initializable<T>
+    size_t BoxContainer<T>::remove_all(const T& item) {
+        size_t count = 0;
+        for (size_t i = 0; i < m_size;) {
+            if (m_items[i] == item) {
+                remove_item(item);  // Use remove_item to remove the item
+                ++count;            // Increment count
+            } else {
+                ++i;  // Only increment if no item is removed
             }
         }
-        
-        if(index > m_size)
-            return false; // Item not found in our box here
-            
-        //If we fall here, the item is located at m_items[index]
-        
-        //Overshadow item at index with last element and decrement m_size
-        m_items[index] = m_items[m_size-1];
-        m_size--;
-        return true;
+        return count; // Return the number of removed items
     }
 
-
-    //Removing all is just removing one item, several times, until
-    //none is left, keeping track of the removed items.
-    template <typename T> requires std::is_default_constructible_v<T>
-    size_t BoxContainer<T>::remove_all(const T& item){
-        
-        size_t remove_count{};
-        
-        bool removed = remove_item(item);
-        if(removed)
-            ++remove_count;
-        
-        while(removed == true){
-            removed = remove_item(item);
-            if(removed)
-                ++ remove_count;
+    // Combines another container into this one (operator overload)
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::operator+=(const BoxContainer<T>& operand) {
+        for (size_t i = 0; i < operand.m_size; ++i) {
+            add(operand.m_items[i]);  // Add each item from the operand container
         }
-        
-        return remove_count;
     }
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    void BoxContainer<T>::operator +=(const BoxContainer<T>& operand){
-        
-        //Make sure the current box can acommodate for the added new elements
-        if( (m_size + operand.size()) > m_capacity)
-            expand(m_size + operand.size());
-            
-        //Copy over the elements
-        for(size_t i{} ; i < operand.m_size; ++i){
-            m_items [m_size + i] = operand.m_items[i];
+} // namespace custom_iterators_01
+
+
+namespace improvement{
+ 
+    // BoxContainer class template definition
+    export template <typename T>
+    requires std::default_initializable<T> // Ensuring type T is default-initializable
+    class BoxContainer {
+        static constexpr size_t DEFAULT_CAPACITY = 5; // Default initial capacity of the container
+
+    public:
+        // Constructor with optional initial capacity
+        BoxContainer(size_t capacity = DEFAULT_CAPACITY);
+
+        // Copy constructor enabled only for copyable types (requires C++20)
+        BoxContainer(const BoxContainer& source) requires std::copyable<T>;
+
+        // Move constructor
+        BoxContainer(BoxContainer&& source) noexcept;
+
+        // Copy assignment operator, uses copy-and-swap idiom
+        BoxContainer& operator=(const BoxContainer& source);
+
+        // Move assignment operator
+        BoxContainer& operator=(BoxContainer&& source) noexcept;
+
+        // Destructor is defaulted, no manual cleanup needed
+        ~BoxContainer() = default;
+
+        // Output operator overload for BoxContainer, for pretty printing
+        friend std::ostream& operator<<(std::ostream& out, const BoxContainer<T>& operand) {
+            out << "BoxContainer : [ size : " << operand.m_size
+                << ", capacity : " << operand.m_capacity << ", items : ";
+
+            for (size_t i{ 0 }; i < operand.m_size; ++i) {
+                out << operand.m_items[i] << " "; // Print each item
+            }
+            out << "]";
+            return out;
         }
-        
-        m_size += operand.m_size;
-    }
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    BoxContainer<T> operator +(const BoxContainer<T>& left, const BoxContainer<T>& right){
-        BoxContainer<T> result(left.size( ) + right.size( ));
-        result += left; 
-        result += right;
-        return result;	
-    }
+        // Returns the current number of elements in the container
+        size_t size() const noexcept { return m_size; }
 
-    template <typename T> requires std::is_default_constructible_v<T>
-    void BoxContainer<T>::operator =(const BoxContainer<T>& source){
-        T *new_items;
+        // Returns the current capacity of the container
+        size_t capacity() const noexcept { return m_capacity; }
 
-        // Check for self-assignment:
-        if (this == &source)
-                return;
-    /*
-        // If the capacities are different, set up a new internal array
-        //that matches source, because we want object we are assigning to 
-        //to match source as much as possible.
-        */
-        if (m_capacity != source.m_capacity)
-        { 
-            new_items = new T[source.m_capacity];
-            delete [ ] m_items;
-            m_items = new_items;
-            m_capacity = source.m_capacity;
+        // Get item at index with bounds-checked access 
+        const T& get_item(size_t index) const {
+            return m_items.at(index); // Use at() for bounds checking
         }
-        
-        //Copy the items over from source 
-        for(size_t i{} ; i < source.size(); ++i){
-            m_items[i] = source.m_items[i];
-        }
-        
-        m_size = source.m_size;
+
+        // Adds a new item to the container, expands if needed
+        void add(const T& item);
+
+        // Removes the first occurrence of an item, returns true if found and removed
+        bool remove_item(const T& item);
+
+        // Removes all occurrences of an item, returns the count of removed items
+        size_t remove_all(const T& item);
+
+        // Combines another container into this one (operator overload)
+        void operator+=(const BoxContainer<T>& operand);
+
+        // Iterator class for BoxContainer (Input Iterator)
+        class Iterator {
+        public:
+            using iterator_category = std::input_iterator_tag;   // Input iterator tag
+            using difference_type = std::ptrdiff_t;              // Difference type
+            using value_type = T;                                // Value type
+            using pointer_type = T*;                             // Pointer type
+            using reference_type = T&;                           // Reference type
+
+            Iterator() = default;                                // Default constructor
+
+            // Constructor taking a pointer to the underlying data
+            explicit Iterator(pointer_type ptr) : m_ptr(ptr) {}
+
+            // Copy constructor and assignment operator can be defaulted
+            Iterator(const Iterator&) = default;
+            Iterator& operator=(const Iterator&) = default;
+
+            // Dereference operator to access the value
+            reference_type operator*() const { return *m_ptr; }
+
+            // Arrow operator to access members directly
+            pointer_type operator->() { return m_ptr; }
+
+            // Pre-increment operator (advances the pointer)
+            Iterator& operator++() { ++m_ptr; return *this; }
+
+            // Post-increment operator (advances but returns old value)
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            // Equality comparison operator for iterators
+            friend bool operator==(const Iterator& a, const Iterator& b) { return a.m_ptr == b.m_ptr; }
+
+            // Inequality comparison operator for iterators
+            friend bool operator!=(const Iterator& a, const Iterator& b) { return !(a == b); }
+
+        private:
+            pointer_type m_ptr{ nullptr }; // Pointer to the current element
+        };
+
+        // Begin iterator (points to the first element)
+        Iterator begin() { return Iterator(m_items.data()); }
+
+        // End iterator (points one past the last element)
+        Iterator end() { return Iterator(m_items.data() + m_size); }
+
+    private:
+        // Expands the container's capacity to the new size
+        void expand(size_t new_capacity);
+
+    private:
+        std::vector<T> m_items;  // Use std::vector to manage items
+        size_t m_capacity{ 0 };  // Current capacity of the container
+        size_t m_size{ 0 };      // Current number of elements in the container
+    };
+
+    // --- Method Definitions ---
+    // Operator to concatenate two BoxContainers and return a new one
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T> operator+(const BoxContainer<T>& left, const BoxContainer<T>& right) {
+        BoxContainer<T> result(left.size() + right.size()); // Create a new container large enough
+        result += left;                                     // Add elements from left
+        result += right;                                    // Add elements from right
+        return result;                                      // Return the combined container
     }
 
+    // Constructor
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>::BoxContainer(size_t capacity)
+        : m_capacity(capacity), m_items() {
+        m_items.reserve(capacity); // Reserve space in the vector
+        m_size = 0;                // Initialize size to zero
+    }
 
-    /*
-    std::istream_iterator is a single pass iterator. Can't go back to the beginning of the file.
-    Input iterators are often associated with input streams where the data is transient, meaning that after you read it, the data is no longer available for re-reading. This is common in scenarios like reading from a file, network stream, or any situation where the data is consumed and cannot be revisited.
-    */
-    export void read_lines_from_file(){
+    // Copy constructor, uses std::copy for copying elements
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>::BoxContainer(const BoxContainer<T>& source) requires std::copyable<T>
+        : m_capacity(source.m_capacity), m_items(source.m_items), m_size(source.m_size) {}
 
-        //Set up the file path. Adapt this to your local environment.
-        std::ifstream file("D:\\Sandbox\\The-C-20-Masterclass-Source-Code\\23.STL_containers_iterators_ranges\\23.05Custom_container_iterators\\data.txt");
+    // Move constructor
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>::BoxContainer(BoxContainer&& source) noexcept
+        : m_items(std::move(source.m_items)), 
+          m_capacity(source.m_capacity), 
+          m_size(source.m_size) {
+        source.m_capacity = 0; // Invalidate the moved-from object's capacity
+        source.m_size = 0;     // Invalidate the moved-from object's size
+    }
 
-            if (file.is_open()) {
-                std::istream_iterator<std::string> fileIt(file);  // Input iterator for the file stream
-                std::istream_iterator<std::string> end;           // Default constructed end iterator
+    // Copy assignment operator using copy-and-swap idiom (exception safe)
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>& BoxContainer<T>::operator=(const BoxContainer<T>& source) {
+        if (this != &source) {
+            BoxContainer temp(source);          // Copy source into a temporary object
+            std::swap(m_items, temp.m_items);   // Swap data members
+            std::swap(m_capacity, temp.m_capacity);
+            std::swap(m_size, temp.m_size);
+        }
+        return *this;                           // Return the modified object
+    }
 
-                while (fileIt != end) {
-                    std::cout << *fileIt << std::endl;  // Read and print the current line
-                    ++fileIt;  // Move to the next chunk of data.
-                }
+    // Move assignment operator
+    template <typename T> requires std::default_initializable<T>
+    BoxContainer<T>& BoxContainer<T>::operator=(BoxContainer&& source) noexcept {
+        if (this != &source) {
+            m_items = std::move(source.m_items); // Move the resource
+            m_capacity = source.m_capacity;       // Transfer capacity
+            m_size = source.m_size;               // Transfer size
 
-                file.close();
-            }else{
-                std::cerr << "Could not open the file" << std::endl;
+            // Invalidate the moved-from object's state
+            source.m_capacity = 0; 
+            source.m_size = 0; 
+        }
+        return *this; // Return the modified object
+    }
+
+    // Adds a new item to the container, expanding if necessary
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::add(const T& item) {
+        if (m_size == m_capacity) {
+            expand(m_capacity + DEFAULT_CAPACITY); // Expand if capacity is full
+        }
+        m_items.push_back(item); // Add the new item
+        ++m_size;               // Increment size
+    }
+
+    // Removes the first occurrence of the item from the container
+    template <typename T> requires std::default_initializable<T>
+    bool BoxContainer<T>::remove_item(const T& item) {
+        auto it = std::find(m_items.begin(), m_items.end(), item); // Use std::find to locate the item
+        if (it == m_items.end())
+            return false;  // Item not found
+
+        m_items.erase(it); // Remove the found item
+        --m_size;           // Decrease size
+        return true;       // Return success
+    }
+
+    // Removes all occurrences of the item from the container
+    template <typename T> requires std::default_initializable<T>
+    size_t BoxContainer<T>::remove_all(const T& item) {
+        size_t count = 0;
+        auto it = m_items.begin();
+        while (it != m_items.end()) {
+            if (*it == item) {
+                it = m_items.erase(it); // Remove the item and get the new iterator
+                ++count;                // Increment count
+            } else {
+                ++it; // Only increment if no item is removed
             }
         }
+        m_size -= count; // Update size
+        return count;    // Return number of removed items
+    }
 
-}   // namespace custom_iterators_01
+    // Combines another BoxContainer into this one
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::operator+=(const BoxContainer<T>& operand) {
+        for (const auto& item : operand.m_items) {
+            add(item); // Add each item from the operand
+        }
+    }
+
+    // Expands the container's capacity
+    template <typename T> requires std::default_initializable<T>
+    void BoxContainer<T>::expand(size_t new_capacity) {
+        m_items.reserve(new_capacity); // Reserve new capacity
+        m_capacity = new_capacity;      // Update capacity
+    }   
+} // namespace improvement
+

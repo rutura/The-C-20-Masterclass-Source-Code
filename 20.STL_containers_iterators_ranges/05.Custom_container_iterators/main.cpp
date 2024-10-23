@@ -95,7 +95,7 @@ int main() {
     //custom_iterators_04_demo();
     //custom_iterators_05_demo();
     //custom_iterators_06_demo();
-    //custom_iterators_07_demo();
+    custom_iterators_07_demo();
     //custom_iterators_08_demo();
-    custom_iterators_09_demo();
+    //custom_iterators_09_demo();
 }
