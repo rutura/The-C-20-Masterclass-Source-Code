@@ -45,6 +45,18 @@ export void more_on_modules_03_demo(){
 }
 
 //#4: Module partitions: add_partition.ixx + mult_partition ==>> math_v1.ixx
+/*
+	. Module interface partitions: 
+		. This a technique used to split the module interface into many manageable sub-interfaces.
+		. The sub-interfaces can't show up on the outside themselves; they have to be grouped, 
+			and exported together into the main interface file: math.ixx in our case.
+		. partitions are internal to the module itself, they usually contain helper functions
+			and entities that help with the implementation of the main interface.
+		. Don't confuse partitions with submodules.
+			. Submodules are legit full modules in their own right.We just conveniently name them
+				with a dot in the name to give consumers of our module some granularity in having
+				the choice to only use parts for our module when that helps.
+*/
 export void more_on_modules_04_demo(){
 	auto result1 = more_on_modules_04::add(10, 20);
 	fmt::println("result1: {}", result1);
@@ -66,6 +78,13 @@ export void more_on_modules_05_demo(){
 }
 
 //#6: Private module fragment
+/*
+	. We keep the declaration separate from the implementation in a single file.
+	. It SHOULD be in a single file.
+	. Changes of code in the private fragement don't trigger recompilation of the translation units that 
+		import the module.
+	. Good for optimized builds.
+*/
 export void more_on_modules_06_demo(){
 	// Add 10 to 20 and print the result using the math module
 	fmt::println("10 + 20 = {}", more_on_modules_06::add(10, 20));

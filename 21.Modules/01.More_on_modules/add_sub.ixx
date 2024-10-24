@@ -12,5 +12,5 @@ namespace more_on_modules_03{
 			return a - b;
 		}
 	}
-}
+}	//namespace more_on_modules_03
 

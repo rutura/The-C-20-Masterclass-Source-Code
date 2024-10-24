@@ -10,8 +10,7 @@ export module more_on_modules_05;
 
 namespace more_on_modules_05{
 
-    //The point class is not eexported.
-    //A class to represent a Point in 2D space with x and y coordinates together with getters and setters
+    //The point class is not exported.
 	class Point {
 	private:
 		double x_;
