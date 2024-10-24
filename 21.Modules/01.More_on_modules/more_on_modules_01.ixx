@@ -1,3 +1,6 @@
+/*
+    . Exploring block export: 
+*/
 module;
 
 #include <fmt/format.h>

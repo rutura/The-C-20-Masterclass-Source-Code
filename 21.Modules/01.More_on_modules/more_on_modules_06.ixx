@@ -1,3 +1,6 @@
+/*
+    . Private module fragment
+*/
 module;
 
 export module more_on_modules_06;
