@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 // A function: a named, reusable block of statements.
 // This one takes a name and prints a greeting for it.
