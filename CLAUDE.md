@@ -113,15 +113,31 @@ chapter 3 (`03.FirstSteps`):
     9.15 onward), keeping all function-related material in one place except
     for lambda captures. `FunctionsTheMisfits` was dissolved the same way
     earlier (static locals, inline, recursion, all now in chapter 9).
-  - `LambdaFunctions` (chapter 14, right after Function Templates/Concepts,
-    before Classes) is the one function-related chapter that stayed
-    separate, since a capture list is really a small class in disguise and
-    reads better once Classes exist to compare it to.
-  - `BitwiseOperators` (chapter 18) sits after Enums, kept deliberately
+  - `LambdaFunctions` (chapter 15, right after Classes) is the one
+    function-related chapter that stayed separate, since a capture list is
+    really a small class in disguise and reads better once Classes exist to
+    compare it to.
+  - `BitwiseOperators` (chapter 19) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
     one realistic use case (combining flags via `enum class`).
+  - **`Classes` (chapter 14, right after Strings, before Lambda Functions)**
+    is a merge of what used to be three separate chapters -
+    `19.Classes` (first classes, constructors, destructors, `this`, structs),
+    `20.ZoomingInOnClassObjects` (const objects/member functions, dangling
+    references, `mutable`, structured bindings), and
+    `21.DivingDeepIntoConstructorsAndInitialization` (aggregate/designated
+    initialization, default constructor parameters, delegation, `explicit`,
+    copy/move constructors, deleted constructors) - moved earlier in the
+    course and combined into one 29-lecture chapter, thematically reordered
+    (basics -> const-correctness -> aggregate init -> advanced constructor
+    mechanics) rather than left as three chapters concatenated back to back.
+    Two near-duplicate lectures (`ConstObjectsAsFunctionParameters` and
+    `ConstMemberFunctions`, which differed only by whether `dog.h`'s getters
+    were marked `const`) were merged into a single lecture showing the
+    const-correctness problem and its fix together, rather than kept as two
+    files that were 90% identical.
   - **When merging a lecture into a chapter it topically belongs to** (not
     just renumbering it in place), append it after that chapter's existing
     lectures rather than trying to interleave it - preserves the existing
