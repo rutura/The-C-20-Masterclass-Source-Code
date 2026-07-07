@@ -67,6 +67,21 @@ did the hard way:
   because unlike `=`, it refuses to silently truncate a value you didn't
   mean to lose (a *narrowing conversion*) - the compiler catches it for you.
 
+## Capstone project: 4.8 Expense Tracker
+
+Once you've been through 4.2-4.7, `4.8ExpenseTrackerProject` puts it all to
+work on something you might actually use: a small command-line expense
+logger. You log expenses one at a time (category, amount, whether you have a
+receipt), and it tracks a running total, a bitmask of which categories you
+used, and a transaction id - then saves a ledger to disk so the next run
+picks up where you left off, the same file-persistence idea chapter 3 ended
+on.
+
+It deliberately includes one bug on purpose: storing the running total in an
+`int` instead of a `double`. Read the comment next to it once you spot the
+missing cents in the output - it's the narrowing conversion from 4.7, shown
+doing real damage instead of just being a warning in an isolated example.
+
 ## Building the code
 
 Every lecture folder has its own `CMakeLists.txt`, same as the rest of the
