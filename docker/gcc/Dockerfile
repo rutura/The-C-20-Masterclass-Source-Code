@@ -17,7 +17,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config \
         less \
         vim \
+        curl \
+        zip \
+        unzip \
+        tar \
     && rm -rf /var/lib/apt/lists/*
+
+ENV VCPKG_ROOT=/opt/vcpkg
+RUN git clone --depth 1 https://github.com/microsoft/vcpkg.git ${VCPKG_ROOT} \
+    && ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics
+ENV PATH="${VCPKG_ROOT}:${PATH}"
 
 WORKDIR /workspace
 

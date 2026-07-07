@@ -9,9 +9,9 @@ course without installing a compiler locally.
 | `docker/clang` | Clang 21.1.8 | `silkeh/clang:21` (Debian 13) |
 
 Both images add: CMake, Ninja, git, a debugger (gdb / lldb), a
-formatter+linter (clang-format, clang-tidy, cppcheck), and two common test
-frameworks (Catch2, GoogleTest) so later chapters that add tests have
-somewhere to compile against.
+formatter+linter (clang-format, clang-tidy, cppcheck), two common test
+frameworks (Catch2, GoogleTest), and [vcpkg](https://vcpkg.io) for pulling in
+any third-party library a future chapter might need.
 
 ## Build the images
 
@@ -38,6 +38,35 @@ cmake --build build
 Swap `masterclass-gcc:16` for `masterclass-clang:21` and add
 `-DCMAKE_CXX_COMPILER=clang++` to the `cmake` call to build the same chapter
 with Clang instead.
+
+## Using vcpkg for a chapter that needs a third-party library
+
+Both images have vcpkg pre-bootstrapped at `/opt/vcpkg`, exported as
+`$VCPKG_ROOT`. If a chapter needs a library (e.g. `fmt`), add a
+`vcpkg.json` manifest next to that chapter's `CMakeLists.txt`:
+
+```json
+{
+  "name": "chapter-name",
+  "version": "0.1.0",
+  "dependencies": ["fmt"]
+}
+```
+
+Then point CMake at vcpkg's toolchain file when configuring:
+
+```sh
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake .
+cmake --build build
+```
+
+vcpkg reads the manifest, builds/installs the requested libraries into
+`<chapter>/vcpkg_installed/` on first configure (this step downloads and
+compiles the library, so it takes longer the first time only), and
+`find_package(fmt CONFIG REQUIRED)` /
+`target_link_libraries(... fmt::fmt)` in `CMakeLists.txt` resolves against
+it normally. Verified working end-to-end on both the GCC and Clang images
+with `fmt` as the test package.
 
 ## Known limitation: Chapter 49 (Modules)
 
