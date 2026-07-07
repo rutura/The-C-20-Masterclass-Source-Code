@@ -1,10 +1,10 @@
-#include <iostream>
+#include <print>
 #include <string>
 
 // A function: a named, reusable block of statements.
 // This one takes a name and prints a greeting for it.
 void greetPerson(std::string name) {
-    std::cout << "Hello, " << name << "!" << std::endl;
+    std::println("Hello, {}!", name);
 }
 
 int main() {

@@ -1,8 +1,9 @@
 #include <iostream>
+#include <print>
 #include <string>
 
 void greetPerson(std::string name) {
-    std::cout << "Hello, " << name << "!" << std::endl;
+    std::println("Hello, {}!", name);
 }
 
 int main() {
@@ -10,19 +11,19 @@ int main() {
     std::string name;
     int age{};
 
-    std::cout << "What is your name? ";
+    std::print("What is your name? ");
     std::getline(std::cin, name);
 
-    std::cout << "How old are you? ";
+    std::print("How old are you? ");
     std::cin >> age;
 
     greetPerson(name);
 
     // An "if/else" lets the program make a decision and follow different paths.
     if (age >= 18) {
-        std::cout << "You are an adult." << std::endl;
+        std::println("You are an adult.");
     } else {
-        std::cout << "You are a minor." << std::endl;
+        std::println("You are a minor.");
     }
 
     return 0;

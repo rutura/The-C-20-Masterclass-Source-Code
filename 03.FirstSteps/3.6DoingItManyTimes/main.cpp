@@ -1,9 +1,10 @@
 #include <iostream>
+#include <print>
 #include <string>
 #include <vector>
 
 void greetPerson(std::string name) {
-    std::cout << "Hello, " << name << "!" << std::endl;
+    std::println("Hello, {}!", name);
 }
 
 int main() {
@@ -11,30 +12,30 @@ int main() {
     std::string name;
     int age{};
 
-    std::cout << "What is your name? ";
+    std::print("What is your name? ");
     std::getline(std::cin, name);
 
-    std::cout << "How old are you? ";
+    std::print("How old are you? ");
     std::cin >> age;
     std::cin.ignore(); // discard the leftover newline left behind by std::cin >> age
 
     greetPerson(name);
 
     if (age >= 18) {
-        std::cout << "You are an adult." << std::endl;
+        std::println("You are an adult.");
     } else {
-        std::cout << "You are a minor." << std::endl;
+        std::println("You are a minor.");
     }
 
     // A vector is a growable list of values - here, a list of friend names.
     std::vector<std::string> friends;
 
-    std::cout << "\nLet's add some friends. Type a name and press enter." << std::endl;
-    std::cout << "Press enter on an empty line when you're done." << std::endl;
+    std::println("\nLet's add some friends. Type a name and press enter.");
+    std::println("Press enter on an empty line when you're done.");
 
     // A loop repeats the same statements until we tell it to stop.
     while (true) {
-        std::cout << "Friend's name: ";
+        std::print("Friend's name: ");
         std::string friendName;
         std::getline(std::cin, friendName);
 
@@ -45,9 +46,9 @@ int main() {
         friends.push_back(friendName);
     }
 
-    std::cout << "\nYou added " << friends.size() << " friend(s):" << std::endl;
+    std::println("\nYou added {} friend(s):", friends.size());
     for (const std::string& friendName : friends) {
-        std::cout << " - " << friendName << std::endl;
+        std::println(" - {}", friendName);
     }
 
     return 0;

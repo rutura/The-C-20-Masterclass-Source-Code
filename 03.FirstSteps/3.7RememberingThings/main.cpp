@@ -1,20 +1,21 @@
 #include <iostream>
+#include <print>
 #include <string>
 #include <vector>
 #include <fstream>
 
 void greetPerson(std::string name) {
-    std::cout << "Hello, " << name << "!" << std::endl;
+    std::println("Hello, {}!", name);
 }
 
 std::vector<std::string> collectFriendNames() {
     std::vector<std::string> friends;
 
-    std::cout << "\nLet's add some friends. Type a name and press enter." << std::endl;
-    std::cout << "Press enter on an empty line when you're done." << std::endl;
+    std::println("\nLet's add some friends. Type a name and press enter.");
+    std::println("Press enter on an empty line when you're done.");
 
     while (true) {
-        std::cout << "Friend's name: ";
+        std::print("Friend's name: ");
         std::string friendName;
         std::getline(std::cin, friendName);
 
@@ -31,9 +32,9 @@ std::vector<std::string> collectFriendNames() {
 void saveFriendsToFile(const std::vector<std::string>& friends, const std::string& fileName) {
     std::ofstream outputFile(fileName);
     for (const std::string& friendName : friends) {
-        outputFile << friendName << std::endl;
+        outputFile << friendName << "\n";
     }
-    std::cout << "Saved " << friends.size() << " friend(s) to " << fileName << std::endl;
+    std::println("Saved {} friend(s) to {}", friends.size(), fileName);
 }
 
 std::vector<std::string> loadFriendsFromFile(const std::string& fileName) {
@@ -53,19 +54,19 @@ int main() {
     std::string name;
     int age{};
 
-    std::cout << "What is your name? ";
+    std::print("What is your name? ");
     std::getline(std::cin, name);
 
-    std::cout << "How old are you? ";
+    std::print("How old are you? ");
     std::cin >> age;
     std::cin.ignore();
 
     greetPerson(name);
 
     if (age >= 18) {
-        std::cout << "You are an adult." << std::endl;
+        std::println("You are an adult.");
     } else {
-        std::cout << "You are a minor." << std::endl;
+        std::println("You are a minor.");
     }
 
     std::vector<std::string> friends = collectFriendNames();
@@ -76,9 +77,9 @@ int main() {
     // Read the file back in, proving the data survives after the program ends and restarts.
     std::vector<std::string> friendsFromDisk = loadFriendsFromFile(fileName);
 
-    std::cout << "\nReloaded from " << fileName << ":" << std::endl;
+    std::println("\nReloaded from {}:", fileName);
     for (const std::string& friendName : friendsFromDisk) {
-        std::cout << " - " << friendName << std::endl;
+        std::println(" - {}", friendName);
     }
 
     return 0;

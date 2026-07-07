@@ -10,12 +10,12 @@
    remembers things between runs.
 */
 
-#include <iostream>
+#include <print>
 
 int main() {
 
-    std::cout << "Hello there!" << std::endl;
-    std::cout << "Welcome to your very first C++ program." << std::endl;
+    std::println("Hello there!");
+    std::println("Welcome to your very first C++ program.");
 
     return 0;
 }

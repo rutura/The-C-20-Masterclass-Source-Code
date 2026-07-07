@@ -1,8 +1,9 @@
 #include <iostream>
+#include <print>
 #include <string>
 
 void greetPerson(std::string name) {
-    std::cout << "Hello, " << name << "!" << std::endl;
+    std::println("Hello, {}!", name);
 }
 
 int main() {
@@ -10,15 +11,15 @@ int main() {
     std::string name;
     int age{};
 
-    // std::cout sends text to the console. std::cin/std::getline read text from it.
-    std::cout << "What is your name? ";
+    // std::print sends text to the console. std::cin/std::getline read text from it.
+    std::print("What is your name? ");
     std::getline(std::cin, name); // getline reads a full line, including spaces
 
-    std::cout << "How old are you? ";
+    std::print("How old are you? ");
     std::cin >> age;
 
     greetPerson(name);
-    std::cout << "You are " << age << " years old." << std::endl;
+    std::println("You are {} years old.", age);
 
     return 0;
 }
