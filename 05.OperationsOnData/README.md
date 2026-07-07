@@ -66,6 +66,25 @@ print the results clearly.
   width, fill, justification, base, precision, and sign - one small
   mini-language instead of memorizing a dozen separate manipulator names.
 
+## Capstone project: 5.10 Bill Splitter
+
+Once you've been through 5.2-5.9, `5.10.BillSplitterProject` puts every
+operator in this chapter to work on something genuinely useful: splitting a
+restaurant bill. You log each item's price, then the program works out tip
+and tax (percentage math, with parentheses making the order of operations
+explicit), splits the grand total evenly among the group, rounds the result
+to a sensible cash amount, and flags anyone whose share blows past what they
+budgeted for the meal.
+
+Every lecture shows up for a reason: `+=`/`++` accumulate the running
+subtotal and item count as you go (5.4), `std::round`/`std::ceil` turn an
+exact-but-awkward share into something you'd actually hand over in cash
+(5.9), relational and logical operators combine into an "over budget" and a
+separate "cutting it close" check (5.5, 5.6), and the whole thing prints as
+a lined-up receipt using `std::format`'s spec mini-language (5.7) - then
+saves that receipt to a file, the same file-persistence idea chapter 3
+ended on.
+
 ## Building the code
 
 Every lecture folder has its own `CMakeLists.txt`, same as the rest of the
