@@ -121,6 +121,13 @@ int main() {
 
     // Save the receipt to a file, the same file-persistence idea chapter 3
     // ended on - so the group has a record after everyone's gone home.
+    //
+    // "receipt.txt" is a relative path, so it's created in whatever directory
+    // you *ran the program from* - not necessarily next to main.cpp, and not
+    // necessarily inside build/. Following this course's documented workflow
+    // (running `./build/rooster` from this lecture folder) puts it right
+    // here, next to main.cpp. If you instead cd into build/ first and run
+    // `./rooster` from there, you'll find it inside build/ instead.
     std::ofstream receiptFile("receipt.txt");
     receiptFile << "Bill split among " << peopleSplitting << " people\n";
     receiptFile << "Subtotal: " << runningSubtotal << "\n";

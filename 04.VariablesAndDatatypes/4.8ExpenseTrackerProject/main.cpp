@@ -62,6 +62,12 @@ int main() {
     // would give it over months of use - long long, same reasoning as 4.3.
     long long nextTransactionId{1000};
 
+    // A relative filename like this is created in whatever directory you
+    // *ran the program from*, not necessarily next to main.cpp or inside
+    // build/. Following this course's documented workflow (running
+    // `./build/rooster` from this lecture folder) puts it right here, next
+    // to main.cpp; cd-ing into build/ first and running `./rooster` from
+    // there would put it inside build/ instead.
     const std::string ledgerFileName = "expenses.txt";
 
     // --- Load the existing ledger, if one exists from a previous run ---

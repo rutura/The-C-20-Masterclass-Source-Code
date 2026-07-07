@@ -71,6 +71,12 @@ int main() {
 
     std::vector<std::string> friends = collectFriendNames();
 
+    // A relative filename like this is created in whatever directory you
+    // *ran the program from*, not necessarily next to main.cpp or inside
+    // build/. Following this course's documented workflow (running
+    // `./build/rooster` from this lecture folder) puts it right here, next
+    // to main.cpp; cd-ing into build/ first and running `./rooster` from
+    // there would put it inside build/ instead.
     const std::string fileName = "friends.txt";
     saveFriendsToFile(friends, fileName);
 
