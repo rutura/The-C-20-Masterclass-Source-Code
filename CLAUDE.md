@@ -117,17 +117,17 @@ chapter 3 (`03.FirstSteps`):
     function-related chapter that stayed separate, since a capture list is
     really a small class in disguise and reads better once Classes exist to
     compare it to.
-  - `BitwiseOperators` (chapter 19) sits after Enums, kept deliberately
+  - `BitwiseOperators` (chapter 17) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
     one realistic use case (combining flags via `enum class`).
   - **`Classes` (chapter 14, right after Strings, before Lambda Functions)**
     is a merge of what used to be three separate chapters -
-    `19.Classes` (first classes, constructors, destructors, `this`, structs),
-    `20.ZoomingInOnClassObjects` (const objects/member functions, dangling
+    `Classes` (first classes, constructors, destructors, `this`, structs),
+    `ZoomingInOnClassObjects` (const objects/member functions, dangling
     references, `mutable`, structured bindings), and
-    `21.DivingDeepIntoConstructorsAndInitialization` (aggregate/designated
+    `DivingDeepIntoConstructorsAndInitialization` (aggregate/designated
     initialization, default constructor parameters, delegation, `explicit`,
     copy/move constructors, deleted constructors) - moved earlier in the
     course and combined into one 29-lecture chapter, thematically reordered
@@ -138,6 +138,31 @@ chapter 3 (`03.FirstSteps`):
     were marked `const`) were merged into a single lecture showing the
     const-correctness problem and its fix together, rather than kept as two
     files that were 90% identical.
+  - **`Templates` (chapter 24, right after OperatorOverloading, before
+    LogicalOperatorsAndThreeWayComparison)** is a merge of what used to be
+    three separate chapters - `FunctionTemplates`, `Concepts`, and
+    `ClassTemplates` - concatenated in that order (each chapter's own
+    internal lecture order was already a sensible progression, so no
+    thematic reshuffling was needed, unlike the Classes merge). Placing a
+    "class templates" chapter this early required checking every one of its
+    32 lectures for forward references to material taught later - two were
+    found and fixed rather than accepted as-is: `ConceptsExample1` used
+    `std::vector` (not introduced until `StlContainersAndIterators`,
+    chapter 32) and was rewritten to use `BoxContainer` (already established
+    earlier in the same chapter) instead; `BuiltInConcepts` defaulted
+    `operator<=>` (not introduced until `LogicalOperatorsAndThreeWayComparison`)
+    purely to feed one already-commented-out, never-executed
+    `static_assert`, so that one member was removed rather than kept as a
+    dependency. Two lectures still legitimately need `friend`
+    (`FriendFunctionsForClassTemplates`) and `operator<<` overloading
+    (`StreamInsertionOperatorForClassTemplates`) - both are satisfied by
+    Friends (18) and OperatorOverloading (23), which is exactly why chapter
+    24 (right after OperatorOverloading) is the safe placement, not earlier.
+    Before moving a template/concept-heavy chapter like this, actually read
+    every lecture's source for forward-referenced syntax rather than
+    assuming "templates and concepts" are self-contained - `std::vector` and
+    `operator<=>` usage snuck in as incidental, non-essential parts of two
+    otherwise-unrelated example programs.
   - **When merging a lecture into a chapter it topically belongs to** (not
     just renumbering it in place), append it after that chapter's existing
     lectures rather than trying to interleave it - preserves the existing
