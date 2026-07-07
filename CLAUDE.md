@@ -91,30 +91,47 @@ chapter 3 (`03.FirstSteps`):
   - **Chapter 9, `FunctionBasics`, is a new chapter** inserted right after
     Scope and before Arrays (chapter 10) - on the reasoning that raw arrays,
     pointers, and references are low-level tooling that shouldn't gate a
-    student's first exposure to functions. It covers only the ~20% of
-    function knowledge that doesn't require arrays/pointers/references as a
-    prerequisite (declarations, pass-by-value, default parameters,
+    student's first exposure to functions. Lectures 9.2-9.14 cover the ~20%
+    of function knowledge that doesn't require arrays/pointers/references as
+    a prerequisite (declarations, pass-by-value, default parameters,
     `std::string_view` parameters, overloading basics, `auto` return
     deduction, `std::optional`, captureless lambdas, `static`/`inline`/
-    recursion, `constexpr`/`consteval`). Everything that genuinely needs
-    arrays, pointers, or references first was left behind in later,
-    consolidated chapters: `14.Functions` (pass-by-pointer/reference, array
-    parameters), `15.GettingThingsOutOfFuntions` (return by reference/
-    pointer, output parameters), `16.FunctionOverloading` (pointer/reference
-    overloads), and `17.LambdaFunctions` (captures) - all four sit
-    immediately after References (12) and Strings (13), since that's the
-    first point where their examples make sense. The old `FunctionsTheMisfits`
-    chapter was dissolved entirely into chapter 9 (static locals, inline,
-    recursion all qualify as basics with no pointer/array/reference
-    dependency).
-  - `BitwiseOperators` (chapter 23) sits after Enums, kept deliberately
+    recursion, `constexpr`/`consteval`).
+  - **What used to be five separate "advanced functions" chapters
+    (`14.Functions`, `15.GettingThingsOutOfFuntions`, `16.FunctionOverloading`,
+    `18.ArgumentsToTheMainFunction`, `19.FunctionCallStackD_ebugging`) no
+    longer exist as their own chapters.** Once Arrays (10), Pointers (11),
+    and References (12) existed, most of their content turned out to
+    *belong* there rather than in a function-specific chapter, so it was
+    merged in directly: array-parameter lectures into Arrays, pass-by-pointer
+    variants into Pointers, pass-by-reference variants (and bare `auto`
+    deduction) into References. What was left over - output parameters,
+    returning a reference/pointer and the dangling pitfalls that come with
+    it, overload resolution once pointers/references exist, `argc`/`argv`,
+    and debugger walkthroughs - doesn't reduce to "an Arrays/Pointers/
+    References topic," so it was folded into chapter 9 instead (lectures
+    9.15 onward), keeping all function-related material in one place except
+    for lambda captures. `FunctionsTheMisfits` was dissolved the same way
+    earlier (static locals, inline, recursion, all now in chapter 9).
+  - `LambdaFunctions` (chapter 14, right after Function Templates/Concepts,
+    before Classes) is the one function-related chapter that stayed
+    separate, since a capture list is really a small class in disguise and
+    reads better once Classes exist to compare it to.
+  - `BitwiseOperators` (chapter 18) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
     one realistic use case (combining flags via `enum class`).
-  - When trimming a chapter down to its "advanced" remainder like this,
-    renumber what's left to stay sequential (no gaps) - don't leave holes
-    where the migrated lectures used to be.
+  - **When merging a lecture into a chapter it topically belongs to** (not
+    just renumbering it in place), append it after that chapter's existing
+    lectures rather than trying to interleave it - preserves the existing
+    chapter's internal order and avoids unnecessary renumbering of untouched
+    lectures.
+  - When dissolving a chapter, delete it outright (including its
+    `C++ 20 Template Project` scaffold folder) once every lecture inside has
+    been moved elsewhere or confirmed dropped - don't leave an empty
+    chapter folder behind, and don't leave a gap in the numbering; renumber
+    every following chapter to close it.
 
 ## Building and testing
 
