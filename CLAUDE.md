@@ -138,31 +138,37 @@ chapter 3 (`03.FirstSteps`):
     were marked `const`) were merged into a single lecture showing the
     const-correctness problem and its fix together, rather than kept as two
     files that were 90% identical.
-  - **`Templates` (chapter 24, right after OperatorOverloading, before
-    LogicalOperatorsAndThreeWayComparison)** is a merge of what used to be
-    three separate chapters - `FunctionTemplates`, `Concepts`, and
-    `ClassTemplates` - concatenated in that order (each chapter's own
-    internal lecture order was already a sensible progression, so no
-    thematic reshuffling was needed, unlike the Classes merge). Placing a
-    "class templates" chapter this early required checking every one of its
-    32 lectures for forward references to material taught later - two were
-    found and fixed rather than accepted as-is: `ConceptsExample1` used
-    `std::vector` (not introduced until `StlContainersAndIterators`,
-    chapter 32) and was rewritten to use `BoxContainer` (already established
-    earlier in the same chapter) instead; `BuiltInConcepts` defaulted
-    `operator<=>` (not introduced until `LogicalOperatorsAndThreeWayComparison`)
-    purely to feed one already-commented-out, never-executed
-    `static_assert`, so that one member was removed rather than kept as a
-    dependency. Two lectures still legitimately need `friend`
-    (`FriendFunctionsForClassTemplates`) and `operator<<` overloading
-    (`StreamInsertionOperatorForClassTemplates`) - both are satisfied by
-    Friends (18) and OperatorOverloading (23), which is exactly why chapter
-    24 (right after OperatorOverloading) is the safe placement, not earlier.
-    Before moving a template/concept-heavy chapter like this, actually read
-    every lecture's source for forward-referenced syntax rather than
-    assuming "templates and concepts" are self-contained - `std::vector` and
-    `operator<=>` usage snuck in as incidental, non-essential parts of two
-    otherwise-unrelated example programs.
+  - **`Templates` (chapter 25, right after LogicalOperatorsAndThreeWayComparison)**
+    is a merge of what used to be three separate chapters -
+    `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
+    that order (each chapter's own internal lecture order was already a
+    sensible progression, so no thematic reshuffling was needed, unlike the
+    Classes merge). Placing a "class templates" chapter this early required
+    checking every one of its 32 lectures for forward references to
+    material taught later - two were found and fixed rather than accepted
+    as-is: `ConceptsExample1` used `std::vector` (not introduced until
+    `StlContainersAndIterators`, chapter 32) and was rewritten to use
+    `BoxContainer` (already established earlier in the same chapter)
+    instead; `BuiltInConcepts` defaulted `operator<=>` (not introduced until
+    `LogicalOperatorsAndThreeWayComparison`) purely to feed one
+    already-commented-out, never-executed `static_assert`, so that one
+    member was removed rather than kept as a dependency. Two lectures still
+    legitimately need `friend` (`FriendFunctionsForClassTemplates`) and
+    `operator<<` overloading (`StreamInsertionOperatorForClassTemplates`) -
+    both are satisfied by Friends (18) and OperatorOverloading (23).
+    `Templates` sits right after `LogicalOperatorsAndThreeWayComparison`
+    (24) rather than immediately after OperatorOverloading, because
+    `LogicalOperatorsAndThreeWayComparison` itself has a soft dependency the
+    other direction: `25.3Rel_OpsNamespace` (now `24.3`) uses raw
+    `template<class T>` syntax as an implementation detail without ever
+    teaching what a template is, which reads better once Templates has
+    already been formally introduced. Before moving a template/concept-heavy
+    chapter like this, actually read every lecture's source for
+    forward-referenced syntax rather than assuming "templates and concepts"
+    are self-contained - `std::vector` and `operator<=>` usage snuck in as
+    incidental, non-essential parts of two otherwise-unrelated example
+    programs, and the chapter placed right before Templates turned out to
+    have its own quiet reliance on template syntax.
   - **When merging a lecture into a chapter it topically belongs to** (not
     just renumbering it in place), append it after that chapter's existing
     lectures rather than trying to interleave it - preserves the existing
