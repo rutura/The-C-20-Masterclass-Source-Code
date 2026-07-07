@@ -83,15 +83,38 @@ chapter 3 (`03.FirstSteps`):
 - **Ordering has been reshuffled from the original course outline** to get
   to flow control, loops, and functions sooner, and to place lower-priority
   topics only once they can lean on a running example instead of being
-  taught in isolation: `LiteralsAndConstants` and
-  `ConversionsOverflowAndUnderflow` were dissolved into chapters 4 and 5;
-  `VariableLifetimeAndScope` (chapter 8) sits right after Loops, where `if`
-  blocks and loop bodies give it real scopes to demonstrate; and
-  `BitwiseOperators` (chapter 15) sits after Enums, kept deliberately short -
-  most of what a course would traditionally spend 7 lectures on (masks,
-  shifting, manual color packing) doesn't earn that much space in a course
-  aimed at practical know-how, so it's 3 lectures ending on the one
-  realistic use case (combining flags via `enum class`).
+  taught in isolation:
+  - `LiteralsAndConstants` and `ConversionsOverflowAndUnderflow` were
+    dissolved into chapters 4 and 5.
+  - `VariableLifetimeAndScope` (chapter 8) sits right after Loops, where `if`
+    blocks and loop bodies give it real scopes to demonstrate.
+  - **Chapter 9, `FunctionBasics`, is a new chapter** inserted right after
+    Scope and before Arrays (chapter 10) - on the reasoning that raw arrays,
+    pointers, and references are low-level tooling that shouldn't gate a
+    student's first exposure to functions. It covers only the ~20% of
+    function knowledge that doesn't require arrays/pointers/references as a
+    prerequisite (declarations, pass-by-value, default parameters,
+    `std::string_view` parameters, overloading basics, `auto` return
+    deduction, `std::optional`, captureless lambdas, `static`/`inline`/
+    recursion, `constexpr`/`consteval`). Everything that genuinely needs
+    arrays, pointers, or references first was left behind in later,
+    consolidated chapters: `14.Functions` (pass-by-pointer/reference, array
+    parameters), `15.GettingThingsOutOfFuntions` (return by reference/
+    pointer, output parameters), `16.FunctionOverloading` (pointer/reference
+    overloads), and `17.LambdaFunctions` (captures) - all four sit
+    immediately after References (12) and Strings (13), since that's the
+    first point where their examples make sense. The old `FunctionsTheMisfits`
+    chapter was dissolved entirely into chapter 9 (static locals, inline,
+    recursion all qualify as basics with no pointer/array/reference
+    dependency).
+  - `BitwiseOperators` (chapter 23) sits after Enums, kept deliberately
+    short - most of what a course would traditionally spend 7 lectures on
+    (masks, shifting, manual color packing) doesn't earn that much space in
+    a course aimed at practical know-how, so it's 3 lectures ending on the
+    one realistic use case (combining flags via `enum class`).
+  - When trimming a chapter down to its "advanced" remainder like this,
+    renumber what's left to stay sequential (no gaps) - don't leave holes
+    where the migrated lectures used to be.
 
 ## Building and testing
 
