@@ -1,37 +1,38 @@
-#include <iostream>
+#include <print>
 
+int main() {
 
-int main(){
+    // A bool holds only one of two values, true or false - perfect for the
+    // yes/no questions an arcade tracker needs to answer.
+    bool isGameOver{false};
+    bool isNewHighScore{true};
 
-    bool red_light {false};
-    bool green_light{true};
-    
-    if(red_light == true){
-        std::cout << "Stop!" << std::endl;
-    }else{
-        std::cout << "Go through!" << std::endl;
+    if (isGameOver == true) {
+        std::println("Game over!");
+    } else {
+        std::println("Still playing...");
     }
 
-    if(green_light){
-        std::cout << "The light is green!" << std::endl;
-    }else{
-        std::cout << "The light is NOT green!" << std::endl;
+    // Comparing a bool to true/false explicitly works, but it's redundant -
+    // the bool itself already is the yes/no answer.
+    if (isNewHighScore) {
+        std::println("New high score!");
+    } else {
+        std::println("No record this time.");
     }
 
-    //sizeof()
-    std::cout << "sizeof(bool) : " << sizeof(bool) << std::endl;
+    std::println("sizeof(bool): {}", sizeof(bool));
 
+    // std::println formats bools as the words "true"/"false" by default,
+    // which is what we want almost all the time.
+    std::println("");
+    std::println("isGameOver     : {}", isGameOver);
+    std::println("isNewHighScore : {}", isNewHighScore);
 
-    //Printing out a bool
-    //1 -->> true
-    //0 -->> false
-    std::cout << std::endl;
-    std::cout << "red_light : " << red_light << std::endl;
-    std::cout << "green_light : " << green_light << std::endl;
+    // {:d} instead formats a bool as the underlying integer instead:
+    // 1 for true, 0 for false.
+    std::println("isGameOver     : {:d}", isGameOver);
+    std::println("isNewHighScore : {:d}", isNewHighScore);
 
-    std::cout << std::boolalpha;
-    std::cout << "red_light : " << red_light << std::endl;
-    std::cout << "green_light : " << green_light << std::endl;
-   
     return 0;
 }

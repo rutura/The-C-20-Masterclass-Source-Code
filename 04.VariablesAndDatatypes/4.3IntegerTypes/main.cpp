@@ -1,70 +1,54 @@
-#include <iostream>
+#include <print>
+#include <cstdint>
 
+int main() {
 
-int main(){
+    // Different stats in our arcade tracker need different amounts of room to
+    // store their values, so C++ gives us several integer types to choose
+    // from - each one a different size in memory (checked here with sizeof).
 
-    //Braced initializers
-    /*
-    //Variable may contain random garbage value . WARNING
-    int elephant_count;
-    
-    int lion_count{};//Initializes to zero
-    
-    int dog_count {10}; //Initializes to 10
-    
-    int cat_count {15}; //Initializes to 15
-    
-    //Can use expression as initializer
-    int domesticated_animals { dog_count + cat_count };
+    // The current level fits comfortably in a small range, so a short is enough.
+    short currentLevel{7};
 
-    //
-    //int new_number{doesnt_exist};
+    // The high score is a bigger, everyday number - int is the natural default.
+    int highScore{1'000'000};
 
-   // int narrowing_conversion {2.9};//Compiler error
+    // Total coins fed into the cabinet over its lifetime can climb into the
+    // billions, which overflows an int - long long gives us far more headroom.
+    long long lifetimeCoinsInserted{9'000'000'000};
 
-    std::cout << "Elephant count : " << elephant_count << std::endl;
-    std::cout << "Lion count : " << lion_count << std::endl;
-    std::cout << "Dog count : " << dog_count << std::endl;
-    std::cout << "Cat count : " << cat_count << std::endl;
-    std::cout << "Domesticated animal count : " << domesticated_animals << std::endl;
-   */
+    std::println("currentLevel          : {} ({} bytes)", currentLevel, sizeof(currentLevel));
+    std::println("highScore             : {} ({} bytes)", highScore, sizeof(highScore));
+    std::println("lifetimeCoinsInserted : {} ({} bytes)", lifetimeCoinsInserted, sizeof(lifetimeCoinsInserted));
 
+    // Every integer type above is "signed" by default - it can represent
+    // negative values too. Some stats, like a count of coins, can never
+    // sensibly go negative, so we can mark the type "unsigned" instead and get
+    // a bit more positive range out of the same number of bytes.
+    unsigned int coinsInMachine{250};
+    std::println("coinsInMachine        : {} ({} bytes)", coinsInMachine, sizeof(coinsInMachine));
 
+    // unsigned int negativeAttempt{-5}; // compiler error: can't store a negative value
 
+    // Watch out: unsigned subtraction never goes negative - it wraps around
+    // instead, which is a classic source of arcade-tracker bugs.
+    unsigned int coinsAfterRefund{coinsInMachine - 300};
+    std::println("coinsInMachine - 300  : {} (wrapped around, not -50!)", coinsAfterRefund);
 
-   //Functional Initialization
-   /*
-    int apple_count(5);
-    int orange_count(10);
-    int fruit_count (apple_count + orange_count);
-    //int bad_initialization ( doesnt_exist3 + doesnt_exist4 );
+    // Writing out "short", "unsigned int", "long long" etc. describes a size
+    // in *bytes*, but the exact number of bytes those keywords map to can
+    // differ across platforms and compilers. When we need a guaranteed exact
+    // width - for save-file formats, network messages, or just to be precise -
+    // <cstdint> gives us fixed-width aliases instead, which is the modern,
+    // more portable way to say "I need exactly this many bits".
+    std::int16_t compactLevel{7};        // guaranteed 16 bits, same value as currentLevel
+    std::int32_t portableHighScore{1'000'000};
+    std::uint32_t portableCoinsInMachine{250};
 
-    //Information lost. less safe than braced initializers
-    int narrowing_conversion_functional (2.9);
-    
-    
-    std::cout << "Apple count : " << apple_count << std::endl;
-    std::cout << "Orange count : " << orange_count << std::endl;
-    std::cout << "Fruit count : " << fruit_count << std::endl;
-    std::cout << "Narrowing conversion : " << narrowing_conversion_functional << std::endl;//Will loose info
-    */
+    std::println("");
+    std::println("compactLevel (int16_t)          : {} ({} bytes)", compactLevel, sizeof(compactLevel));
+    std::println("portableHighScore (int32_t)     : {} ({} bytes)", portableHighScore, sizeof(portableHighScore));
+    std::println("portableCoinsInMachine (uint32_t): {} ({} bytes)", portableCoinsInMachine, sizeof(portableCoinsInMachine));
 
-
-   //Assignment notation
-    
-    int bike_count = 2;
-    int truck_count = 7;
-    int vehicle_count = bike_count +truck_count;
-    int narrowing_conversion_assignment = 2.9;
-
-    std::cout << "Bike count : " << bike_count << std::endl;
-    std::cout << "Truck count : " << truck_count << std::endl;
-    std::cout << "Vehicle count : " << vehicle_count << std::endl;
-    std::cout << "Narrowing conversion : " << narrowing_conversion_assignment << std::endl;
-    
-
-    //Check the size with sizeof
-    std::cout << "sizeof int : " << sizeof(int) << std::endl;
-    std::cout << "sizeof truck_count : " << sizeof(truck_count) << std::endl;
     return 0;
 }
