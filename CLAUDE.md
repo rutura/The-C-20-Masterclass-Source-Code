@@ -76,19 +76,22 @@ chapter 3 (`03.FirstSteps`):
   `add_executable(rooster main.cpp)` with `CMAKE_CXX_STANDARD 23`. Copy an
   existing sibling lecture's `CMakeLists.txt`/`.gitignore` verbatim when
   scaffolding a new or renumbered folder - don't hand-roll variations.
-- Chapters currently top out around chapter 6+ using the older style;
+- Chapters currently top out around chapter 8+ using the older style;
   expect more chapters to need this same treatment over time. Check whether
   a later chapter already covers a concept (e.g. chapter 5 covers operators
   and `std::numeric_limits`) before re-teaching it in an earlier chapter.
-- **Chapters 6-14 were restructured** so students hit flow control and loops
-  sooner: the old `LiteralsAndConstants` and `ConversionsOverflowAndUnderflow`
-  chapters were dissolved, with their content absorbed into chapter 4
-  (const/constexpr) and chapter 5 (conversions, overflow/underflow, right
-  after the numeric-limits/integer-promotion lecture). `08.VariableLifetimeAndScope`
-  now sits after Loops as chapter 8. `14.BitwiseOperators` now sits after
-  Functions as chapter 14, still written as an operator-by-operator
-  enumeration from before this restructuring - it's next in line for the
-  running-example rewrite the rest of this chapter's siblings already got.
+- **Ordering has been reshuffled from the original course outline** to get
+  to flow control, loops, and functions sooner, and to place lower-priority
+  topics only once they can lean on a running example instead of being
+  taught in isolation: `LiteralsAndConstants` and
+  `ConversionsOverflowAndUnderflow` were dissolved into chapters 4 and 5;
+  `VariableLifetimeAndScope` (chapter 8) sits right after Loops, where `if`
+  blocks and loop bodies give it real scopes to demonstrate; and
+  `BitwiseOperators` (chapter 15) sits after Enums, kept deliberately short -
+  most of what a course would traditionally spend 7 lectures on (masks,
+  shifting, manual color packing) doesn't earn that much space in a course
+  aimed at practical know-how, so it's 3 lectures ending on the one
+  realistic use case (combining flags via `enum class`).
 
 ## Building and testing
 
