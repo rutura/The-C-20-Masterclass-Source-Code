@@ -1,37 +1,43 @@
-#include <iostream>
+// Chapter 5 continues the expense tracker from chapter 4 - now that we know
+// how to store amounts and categories, this chapter is about actually
+// computing with them.
 
+#include <print>
 
-int main(){
-   
-   //Addition
-   int number1{2};
-   int number2{7};
+int main() {
 
-   int result = number1 + number2;
-   std::cout << "result : " << result << std::endl;
+    int lunchCost{12};
+    int coffeeCost{7};
 
-    //Subtraction
-    result = number2 - number1 ;
-   std::cout << "result : " << result << std::endl;
+    // Addition: combining two expenses into a subtotal.
+    int subtotal = lunchCost + coffeeCost;
+    std::println("subtotal (lunch + coffee): {}", subtotal);
 
-   result = number1 - number2;
-   std::cout << "result : " << result << std::endl;
+    // Subtraction: applying a discount, or finding the difference in price
+    // between two purchases.
+    int discount = coffeeCost - 2;
+    std::println("discounted coffee (coffeeCost - 2): {}", discount);
 
-   //Multiplication
-   result = number1 * number2;
-   std::cout << "result : " << result << std::endl;
+    int priceDifference = lunchCost - coffeeCost;
+    std::println("priceDifference (lunchCost - coffeeCost): {}", priceDifference);
 
+    // Multiplication: the cost of buying several of the same thing.
+    int coffeesForTheTeam = coffeeCost * 4;
+    std::println("coffeesForTheTeam (coffeeCost * 4): {}", coffeesForTheTeam);
 
-   //Division
-   result = number2 / number1;
-   std::cout << "result : " << result << std::endl;
+    // Division: splitting a bill evenly between people.
+    int totalBill{47};
+    int peopleSplitting{4};
+    int perPersonShare = totalBill / peopleSplitting;
+    std::println("perPersonShare (totalBill / peopleSplitting): {}", perPersonShare);
+    // Integer division truncates - 47 / 4 is really 11.75, but int can only
+    // hold 11. Chapter 5.9 comes back to why, and chapter 4's float/double
+    // types are the fix when the fractional part actually matters.
 
+    // Modulus (%): the remainder left over after dividing - here, the leftover
+    // cents that don't divide evenly among the group.
+    int leftoverCents = totalBill % peopleSplitting;
+    std::println("leftoverCents (totalBill % peopleSplitting): {}", leftoverCents);
 
-   //Modulus
-   result = number2 % number1; // 7 % 2
-   std::cout << "result : " << result << std::endl; // 1
-
-   result = 31 % 10;
-   std::cout << "result : " << result << std::endl; // 1
     return 0;
 }
