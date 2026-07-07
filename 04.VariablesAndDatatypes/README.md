@@ -46,6 +46,10 @@ reason) - is exactly what this chapter teaches.
   `auto`, and the difference between *initializing* a variable and later
   *assigning* to it (including the narrowing pitfalls that come with each -
   the same mistake that quietly loses cents in a real ledger).
+- **4.8 Const and Constexpr** - locking a value down once it's set with
+  `const` (a tax rate that shouldn't change mid-calculation), and going a
+  step further with `constexpr` for values the compiler must know before the
+  program even runs (a fixed receipt threshold).
 
 ## How C++'s latest features help
 
@@ -66,9 +70,9 @@ did the hard way:
   because unlike `=`, it refuses to silently truncate a value you didn't
   mean to lose (a *narrowing conversion*) - the compiler catches it for you.
 
-## Capstone project: 4.8 Expense Tracker
+## Capstone project: 4.9 Expense Tracker
 
-Once you've been through 4.2-4.7, `4.8ExpenseTrackerProject` puts everything
+Once you've been through 4.2-4.8, `4.9ExpenseTrackerProject` puts everything
 together into one program you might actually use: a small command-line
 expense logger. You log expenses one at a time (category, amount, whether
 you have a receipt), and it tracks a running total, a bitmask of which

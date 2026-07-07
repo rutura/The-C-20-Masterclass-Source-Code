@@ -76,10 +76,19 @@ chapter 3 (`03.FirstSteps`):
   `add_executable(rooster main.cpp)` with `CMAKE_CXX_STANDARD 23`. Copy an
   existing sibling lecture's `CMakeLists.txt`/`.gitignore` verbatim when
   scaffolding a new or renumbered folder - don't hand-roll variations.
-- Chapters currently top out around chapter 10+ using the older style;
+- Chapters currently top out around chapter 6+ using the older style;
   expect more chapters to need this same treatment over time. Check whether
   a later chapter already covers a concept (e.g. chapter 5 covers operators
   and `std::numeric_limits`) before re-teaching it in an earlier chapter.
+- **Chapters 6-14 were restructured** so students hit flow control and loops
+  sooner: the old `LiteralsAndConstants` and `ConversionsOverflowAndUnderflow`
+  chapters were dissolved, with their content absorbed into chapter 4
+  (const/constexpr) and chapter 5 (conversions, overflow/underflow, right
+  after the numeric-limits/integer-promotion lecture). `08.VariableLifetimeAndScope`
+  now sits after Loops as chapter 8. `14.BitwiseOperators` now sits after
+  Functions as chapter 14, still written as an operator-by-operator
+  enumeration from before this restructuring - it's next in line for the
+  running-example rewrite the rest of this chapter's siblings already got.
 
 ## Building and testing
 
