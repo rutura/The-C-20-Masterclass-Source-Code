@@ -1,14 +1,14 @@
 #include <iostream>
 #include "boxcontainer.h"
 
-void populate_box(BoxContainer<int>& box, int modifier){
+void populate_box(BoxContainer& box, int modifier){
 	for(size_t i{0} ; i < 20 ; ++i){
 		box.add((i+1)*modifier);
 	}
 }
 
-BoxContainer<int> make_box(int modifier){
-	BoxContainer<int> local_int_box(20);
+BoxContainer make_box(int modifier){
+	BoxContainer local_int_box(20);
 	populate_box(local_int_box,modifier);
 	return local_int_box;
 }
@@ -16,7 +16,7 @@ BoxContainer<int> make_box(int modifier){
 
 int main(){
 
-	BoxContainer<int> box_array[2];
+	BoxContainer box_array[2];
 
     std::cout << "--------" << std::endl;
 

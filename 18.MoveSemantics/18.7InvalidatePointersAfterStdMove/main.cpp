@@ -1,7 +1,7 @@
 #include <iostream>
 #include "boxcontainer.h"
 
-void populate_box(BoxContainer<int>& box, int modifier){
+void populate_box(BoxContainer& box, int modifier){
 	for(size_t i{0} ; i < 20 ; ++i){
 		box.add((i+1)*modifier);
 	}
@@ -11,12 +11,12 @@ void populate_box(BoxContainer<int>& box, int modifier){
 
 int main(){
 
-    BoxContainer<int> box1;
+    BoxContainer box1;
 	populate_box(box1,2);
 
     std::cout << "box1 : " << box1 << std::endl;
-    
-    BoxContainer<int> box2(std::move(box1));
+
+    BoxContainer box2(std::move(box1));
 
     std::cout << "box2 : " << box2 << std::endl;
     std::cout << "box1 : " << box1 << std::endl;

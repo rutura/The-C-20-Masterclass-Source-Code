@@ -113,11 +113,11 @@ chapter 3 (`03.FirstSteps`):
     function-related material in one place except for lambda captures.
     `FunctionsTheMisfits` was dissolved the same way earlier (static locals,
     inline, recursion, all now in chapter 9).
-  - `LambdaFunctions` (chapter 22, right after Polymorphism) is the one
+  - `LambdaFunctions` (chapter 23, right after Polymorphism) is the one
     function-related chapter that stayed separate, since a capture list is
     really a small class in disguise and reads better once Classes exist to
     compare it to.
-  - `BitwiseOperators` (chapter 24) sits after Enums, kept deliberately
+  - `BitwiseOperators` (chapter 25) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
@@ -142,7 +142,7 @@ chapter 3 (`03.FirstSteps`):
     lecture (`DeletedConstructors`) rather than interleaved into the
     const-correctness section, so the chapter's already-settled internal
     order wasn't disturbed a second time.
-  - **`Templates` (chapter 25, right after OperatorOverloading)**
+  - **`Templates` (chapter 26, right after OperatorOverloading)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -179,15 +179,15 @@ chapter 3 (`03.FirstSteps`):
     snuck in as incidental, non-essential parts of two otherwise-unrelated
     example programs, and the chapter that used to sit right before
     Templates turned out to have its own quiet reliance on template syntax.
-  - **`OperatorOverloading` (chapter 19) absorbed
+  - **`OperatorOverloading` (chapter 20) absorbed
     `LogicalOperatorsAndThreeWayComparison`**, which no longer exists as its
     own chapter. The two were always the same broad topic (operator
     overloading, with relational/comparison operators as a specialized
     case), so the merge is a straight concatenation - `OperatorOverloading`'s
     original 19 lectures (arithmetic, subscript, stream, conversion,
-    assignment, functor operators; unchanged, still 19.2-19.20) followed by
+    assignment, functor operators; unchanged, still 20.2-20.20) followed by
     `LogicalOperatorsAndThreeWayComparison`'s 14 lectures renumbered
-    19.21-19.34 in their existing order (manual relational operators, the
+    20.21-20.34 in their existing order (manual relational operators, the
     legacy `std::rel_ops` pattern, `<=>`/`std::partial_ordering`/
     `std::weak_ordering`/`std::strong_ordering`). No thematic reshuffling was
     needed - each source chapter's internal order was already sensible on
@@ -195,15 +195,15 @@ chapter 3 (`03.FirstSteps`):
     was de-templatizing `Rel_OpsNamespace`'s `my_utility.h` (see the
     Templates entry above) now that it sits much further from Templates than
     it used to.
-  - **`Practice-BoxContainerType` (chapter 18, right after Friends) was
+  - **`Practice-BoxContainerType` (chapter 19, right after MoveSemantics) was
     pulled forward** from its old spot after Exceptions, on the reasoning
     that students benefit from a non-trivial "build something" project
     earlier in the course rather than two-thirds of the way through.
-    Every lecture's container class (`BoxContainer` in 18.2-18.5,
-    `IntContainer`/`DoubleContainer`/`CharContainer` in 18.6) used to publicly
+    Every lecture's container class (`BoxContainer` in 19.2-19.5,
+    `IntContainer`/`DoubleContainer`/`CharContainer` in 19.6) used to publicly
     inherit from an abstract `StreamInsertable` base class with a pure
     virtual `stream_insert()`, overridden by every concrete class - genuine
-    runtime polymorphism (chapters 20/21, both still well after this new
+    runtime polymorphism (chapters 21/22, both still well after this new
     slot), not an incidental usage. Since moving the whole
     OperatorOverloading/Inheritance/Polymorphism block forward again (as was
     done once already for the Classes-adjacent chapters) wasn't the chosen
@@ -214,12 +214,16 @@ chapter 3 (`03.FirstSteps`):
     chapters 14-17, before Inheritance/Polymorphism exist) - `stream_insert()`'s
     body moved as-is into each `operator<<`'s definition, so behavior and
     output are unchanged. `operator+=`/`operator=`/free `operator+`
-    (originally in `27.5OtherOperators`, now `18.5OtherOperators`) were kept
+    (originally in `27.5OtherOperators`, now `19.5OtherOperators`) were kept
     as-is rather than stripped out or deferred - this lecture is now the
     student's first hands-on exposure to operator overloading, a chapter
-    ahead of the formal `OperatorOverloading` chapter (19): students see the
-    operators work concretely here first, then `OperatorOverloading` (19)
-    formalizes the general rules afterward.
+    ahead of the formal `OperatorOverloading` chapter (20): students see the
+    operators work concretely here first, then `OperatorOverloading` (20)
+    formalizes the general rules afterward. `Practice-BoxContainerType`
+    itself later moved one slot further out when `MoveSemantics` was pulled
+    forward to sit immediately before it (see below) - it's still
+    immediately after Friends' original spot, just with one more chapter
+    now sandwiched between Friends and it.
     No exceptions, move semantics, or STL usage was found anywhere in the
     chapter (Rule-of-Three raw-pointer management throughout, no
     `std::vector`), so Exceptions/MoveSemantics/StlContainersAndIterators
@@ -228,7 +232,7 @@ chapter 3 (`03.FirstSteps`):
     (`27.5OtherOperators` jumping straight to `27.7StoringInDifferentTypes`,
     no `27.6`) was also closed, since every lecture was being renumbered for
     the move anyway - the chapter's 5 lectures are now sequential
-    18.2-18.6 with no gap.
+    19.2-19.6 with no gap.
   - **`ConstAndStaticMembers` doesn't exist as its own chapter anymore - 9 of
     its 10 lectures were folded into `Classes` (14.34-14.42), and the 10th
     was relocated into `Polymorphism`.** Static/const class members
@@ -248,8 +252,8 @@ chapter 3 (`03.FirstSteps`):
     previously been relocated to the *end* of `ConstAndStaticMembers` in the
     first place, per this chapter's own history below. Rather than pull
     Inheritance/Polymorphism forward yet again to accommodate one lecture, it
-    was appended to `Polymorphism` instead, as 21.21 - the same "leave the
-    one genuinely-dependent lecture behind, fold the rest" pattern already
+    was appended to `Polymorphism` instead, as its last lecture - the same
+    "leave the one genuinely-dependent lecture behind, fold the rest" pattern already
     used for `InheritanceAndPolymorphismWithStaticMembers`'s original
     placement, just one level removed. The 9 `Classes`-bound lectures were
     appended after `Classes`'s existing last lecture (`DeletedConstructors`)
@@ -264,6 +268,45 @@ chapter 3 (`03.FirstSteps`):
     the `27.6` gap above which had an identifiable cause. Since every
     lecture was being renumbered into its new chapter's sequence regardless,
     the gap became moot rather than something worth separately investigating.
+  - **`MoveSemantics` (chapter 18, right before `Practice-BoxContainerType`)
+    was pulled forward** from its old spot after Templates/Exceptions, on the
+    reasoning that move semantics is important enough to reach much earlier
+    in the course. Its running example, `BoxContainer<T>`, was a genuine
+    **class template** throughout 6 of its 8 lectures (`MovingTemporariesAround`
+    onward) - out-of-line template method definitions, a templated friend
+    `operator<<` declaration, even a generic `swap_data<T>` helper function -
+    a real, load-bearing forward reference to Templates (now chapter 26, much
+    further away after this move) rather than incidental use, the same class
+    of problem CLAUDE.md documents for `Rel_OpsNamespace` and `ConceptsExample1`
+    elsewhere. Move semantics itself doesn't need genericity to teach, so
+    `BoxContainer<T>` was de-templatized to a plain, concrete `BoxContainer`
+    (storing `int`) across all 6 affected lectures, mirroring
+    `Practice-BoxContainerType`'s own already-de-templatized style - each
+    lecture's `.h`/`.cpp` split the same way, `template <typename T>` and
+    `BoxContainer<T>`/`BoxContainer<int>` spellings removed throughout, with
+    method bodies otherwise unchanged so behavior and console output stay
+    identical. The one lecture that stores a custom type
+    (`PassingByRvalueReference`, storing `Item` rather than `int`) also had
+    `Item` itself pulled out of `main.cpp` into its own `item.h`/`.cpp`, and
+    given an `operator==` it didn't have before - a concrete (no longer
+    templated) `BoxContainer::remove_item`/`remove_all` always compiles,
+    where the template version only would have if actually instantiated with
+    a call site that needed it (this lecture's `main.cpp` never called
+    `remove_item`, so the missing `operator==` was invisible before).
+    `MovingLvaluesWithStdMove`'s `swap_data<T>` was de-templatized the same
+    way, to a plain `swap_data(BoxContainer&, BoxContainer&)`, since the
+    lesson is about `std::move`, not about writing generic algorithms.
+    Two more pre-existing issues were fixed while the files were already
+    being touched for the de-templatization: `MoveOnlyTypes/main.cpp` had an
+    uncommented compiler error (copy-constructing a `std::unique_ptr` from an
+    lvalue, which is deleted) where every other intentional-error line
+    elsewhere in this chapter is commented out with an explanation per
+    convention - fixed by commenting it out the same way and using
+    `std::move` instead, so the file actually compiles and still demonstrates
+    the same "move-only" point. And `MoveOnlyTypes`/`PassingByRvalueReference`
+    used a leading-zero numbering style (`27.08`, `27.09`) inconsistent with
+    every other lecture in the chapter and the rest of the repo - dropped
+    the leading zero as part of the renumbering the move already required.
   - **Chapters 15-20 (Namespaces, SmartPointers, Friends,
     OperatorOverloading, Inheritance, and Polymorphism) were pulled forward**
     to sit right after Classes(14), on the reasoning that OOP fundamentals
