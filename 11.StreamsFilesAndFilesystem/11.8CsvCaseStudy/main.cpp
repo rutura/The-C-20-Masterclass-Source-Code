@@ -10,6 +10,7 @@
 #include <vector>
 #include <map>
 #include <format>
+#include <stdexcept>
 
 struct Enrollment {
     std::string name;
@@ -62,7 +63,11 @@ int main() {
         Enrollment e;
         e.name = fields[0];
         e.course = fields[1];
-        e.score = std::stoi(fields[2]);
+        try {
+            e.score = std::stoi(fields[2]);
+        } catch (const std::invalid_argument&) {
+            continue; // skip a row whose score isn't a number rather than crash on it
+        }
         e.semester = fields[3];
         enrollments.push_back(e);
     }

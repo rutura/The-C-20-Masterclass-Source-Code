@@ -30,7 +30,7 @@ public:
 
 	//In class operators
 	void operator +=(const BoxContainer& operand);
-	void operator =(const BoxContainer& source); // Copy assignment operator
+	BoxContainer& operator =(const BoxContainer& source); // Copy assignment operator
 private :
 	void expand(size_t new_capacity);
 private :

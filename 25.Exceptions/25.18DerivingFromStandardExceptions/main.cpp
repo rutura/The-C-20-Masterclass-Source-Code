@@ -1,34 +1,34 @@
 #include <iostream>
 #include <exception>
-#include <cstring>
+#include <string>
 
 class DivideByZeroException : public std::exception {
-public :   
-    DivideByZeroException(int a, int b) noexcept : std::exception(),m_a(a),m_b(b){}
-	
+public :
+    DivideByZeroException(int a, int b) noexcept
+        : std::exception(), m_a(a), m_b(b),
+          m_message(std::string("Divide by zero detected, dividing ") +
+              std::to_string(m_a) + std::string(" by ") + std::to_string(m_b)) {}
+
+     // Returning .c_str() of a temporary std::string here would dangle the
+     // moment what() returns - build the message once in the constructor and
+     // store it in a member so the pointer stays valid for the exception's lifetime.
      virtual const char* what() const noexcept override {
-         /*
-         //Some compilers will give a warning that we're returning the address of a local string
-         //link : https://www.udemy.com/instructor/communication/qa/17488954/detail/?course=2987082
-         return (std::string("Divide by zero detected , dividing ") +
-            std::to_string(m_a) + std::string(" by ") +
-                std::to_string(m_b)).c_str();
-                */
-               return"divide by zero detected, dividing ";
+         return m_message.c_str();
      }
-     
+
      int get_a() const{
          return m_a;
      }
-     
+
      int get_b() const{
          return m_b;
      }
-     
-private : 
+
+private :
      int m_a{};
      int m_b{};
-    
+     std::string m_message;
+
 };
 
 int divide( int a, int b){

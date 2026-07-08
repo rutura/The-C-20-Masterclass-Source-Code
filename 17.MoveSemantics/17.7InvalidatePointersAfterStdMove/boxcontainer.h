@@ -31,8 +31,8 @@ public:
 
 	//In class operators
 	void operator +=(const BoxContainer& operand);
-	void operator =(const BoxContainer& source); // Copy assignment operator
-	void operator =( BoxContainer&& source); // Move assignment operator
+	BoxContainer& operator =(const BoxContainer& source); // Copy assignment operator
+	BoxContainer& operator =( BoxContainer&& source); // Move assignment operator
 	void invalidate(){
 		m_items = nullptr;
 		m_size = 0;

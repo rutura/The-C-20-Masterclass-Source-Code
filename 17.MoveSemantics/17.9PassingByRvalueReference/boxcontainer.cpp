@@ -163,14 +163,14 @@ void BoxContainer::operator +=(const BoxContainer& operand){
 
 
 //Copy assignment operator
-void BoxContainer::operator =(const BoxContainer& source){
+BoxContainer& BoxContainer::operator =(const BoxContainer& source){
 		std::cout << "BoxContainer copy assignment operator called. Copying "
 			<< source.m_size << " items..." << std::endl;
 	value_type *new_items;
 
 	// Check for self-assignment:
 	if (this == &source)
-            return;
+            return *this;
 
 	// If the capacities are different, set up a new internal array
 	//that matches source, because we want object we are assigning to
@@ -190,17 +190,18 @@ void BoxContainer::operator =(const BoxContainer& source){
 	}
 
 	m_size = source.m_size;
+	return *this;
 }
 
 //Move assignment operator
-void BoxContainer::operator =( BoxContainer&& source){
+BoxContainer& BoxContainer::operator =( BoxContainer&& source){
 
 
 	std::cout << "BoxContainer move assignment operator called. Moving "
 			<< source.m_size << " items..." << std::endl;
 	// Check for self assignment
 	if (this == &source)
-            return;
+            return *this;
 
 	m_items = source.m_items;
 	m_size = source.m_size;
@@ -209,4 +210,5 @@ void BoxContainer::operator =( BoxContainer&& source){
 	//Remember to invalidate source
 	source.invalidate();
 
+	return *this;
 }
