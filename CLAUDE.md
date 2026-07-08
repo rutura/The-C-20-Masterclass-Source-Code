@@ -113,32 +113,31 @@ chapter 3 (`03.FirstSteps`):
     9.15 onward), keeping all function-related material in one place except
     for lambda captures. `FunctionsTheMisfits` was dissolved the same way
     earlier (static locals, inline, recursion, all now in chapter 9).
-  - `LambdaFunctions` (chapter 15, right after Classes) is the one
+  - `LambdaFunctions` (chapter 23, right after Polymorphism) is the one
     function-related chapter that stayed separate, since a capture list is
     really a small class in disguise and reads better once Classes exist to
     compare it to.
-  - `BitwiseOperators` (chapter 17) sits after Enums, kept deliberately
+  - `BitwiseOperators` (chapter 25) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
     one realistic use case (combining flags via `enum class`).
-  - **`Classes` (chapter 14, right after Strings, before Lambda Functions)**
-    is a merge of what used to be three separate chapters -
-    `Classes` (first classes, constructors, destructors, `this`, structs),
-    `ZoomingInOnClassObjects` (const objects/member functions, dangling
-    references, `mutable`, structured bindings), and
-    `DivingDeepIntoConstructorsAndInitialization` (aggregate/designated
-    initialization, default constructor parameters, delegation, `explicit`,
-    copy/move constructors, deleted constructors) - moved earlier in the
-    course and combined into one 29-lecture chapter, thematically reordered
-    (basics -> const-correctness -> aggregate init -> advanced constructor
-    mechanics) rather than left as three chapters concatenated back to back.
-    Two near-duplicate lectures (`ConstObjectsAsFunctionParameters` and
-    `ConstMemberFunctions`, which differed only by whether `dog.h`'s getters
-    were marked `const`) were merged into a single lecture showing the
-    const-correctness problem and its fix together, rather than kept as two
-    files that were 90% identical.
-  - **`Templates` (chapter 25, right after LogicalOperatorsAndThreeWayComparison)**
+  - **`Classes` (chapter 15, right after Strings)** is a merge of what used
+    to be three separate chapters - `Classes` (first classes, constructors,
+    destructors, `this`, structs), `ZoomingInOnClassObjects` (const
+    objects/member functions, dangling references, `mutable`, structured
+    bindings), and `DivingDeepIntoConstructorsAndInitialization`
+    (aggregate/designated initialization, default constructor parameters,
+    delegation, `explicit`, copy/move constructors, deleted constructors) -
+    moved earlier in the course and combined into one 29-lecture chapter,
+    thematically reordered (basics -> const-correctness -> aggregate init ->
+    advanced constructor mechanics) rather than left as three chapters
+    concatenated back to back. Two near-duplicate lectures
+    (`ConstObjectsAsFunctionParameters` and `ConstMemberFunctions`, which
+    differed only by whether `dog.h`'s getters were marked `const`) were
+    merged into a single lecture showing the const-correctness problem and
+    its fix together, rather than kept as two files that were 90% identical.
+  - **`Templates` (chapter 28, right after LogicalOperatorsAndThreeWayComparison)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -147,28 +146,83 @@ chapter 3 (`03.FirstSteps`):
     checking every one of its 32 lectures for forward references to
     material taught later - two were found and fixed rather than accepted
     as-is: `ConceptsExample1` used `std::vector` (not introduced until
-    `StlContainersAndIterators`, chapter 32) and was rewritten to use
-    `BoxContainer` (already established earlier in the same chapter)
-    instead; `BuiltInConcepts` defaulted `operator<=>` (not introduced until
+    `StlContainersAndIterators`) and was rewritten to use `BoxContainer`
+    (already established earlier in the same chapter) instead;
+    `BuiltInConcepts` defaulted `operator<=>` (not introduced until
     `LogicalOperatorsAndThreeWayComparison`) purely to feed one
     already-commented-out, never-executed `static_assert`, so that one
     member was removed rather than kept as a dependency. Two lectures still
     legitimately need `friend` (`FriendFunctionsForClassTemplates`) and
     `operator<<` overloading (`StreamInsertionOperatorForClassTemplates`) -
-    both are satisfied by Friends (18) and OperatorOverloading (23).
+    both are satisfied earlier in the course (Friends, OperatorOverloading).
     `Templates` sits right after `LogicalOperatorsAndThreeWayComparison`
-    (24) rather than immediately after OperatorOverloading, because
+    rather than immediately after OperatorOverloading, because
     `LogicalOperatorsAndThreeWayComparison` itself has a soft dependency the
-    other direction: `25.3Rel_OpsNamespace` (now `24.3`) uses raw
-    `template<class T>` syntax as an implementation detail without ever
-    teaching what a template is, which reads better once Templates has
-    already been formally introduced. Before moving a template/concept-heavy
-    chapter like this, actually read every lecture's source for
-    forward-referenced syntax rather than assuming "templates and concepts"
-    are self-contained - `std::vector` and `operator<=>` usage snuck in as
-    incidental, non-essential parts of two otherwise-unrelated example
-    programs, and the chapter placed right before Templates turned out to
-    have its own quiet reliance on template syntax.
+    other direction: `Rel_OpsNamespace` uses raw `template<class T>` syntax
+    as an implementation detail without ever teaching what a template is,
+    which reads better once Templates has already been formally introduced.
+    Before moving a template/concept-heavy chapter like this, actually read
+    every lecture's source for forward-referenced syntax rather than
+    assuming "templates and concepts" are self-contained - `std::vector` and
+    `operator<=>` usage snuck in as incidental, non-essential parts of two
+    otherwise-unrelated example programs, and the chapter placed right
+    before Templates turned out to have its own quiet reliance on template
+    syntax.
+  - **Chapters 18-26 (SmartPointers, Friends, OperatorOverloading,
+    Inheritance, Polymorphism, and Namespaces) were pulled forward** to sit
+    right after Classes(15), on the reasoning that OOP fundamentals
+    (smart-pointer-managed objects, operator overloading, inheritance,
+    polymorphism) are central, practical knowledge that shouldn't wait until
+    two-thirds of the way through the course. This required the same kind
+    of dependency audit as the Templates move:
+    - `SmartPointers` was already clean (no dependency on Friends,
+      OperatorOverloading, Inheritance, Polymorphism, or Templates) - it
+      only needs plain classes (Classes, already satisfied) as its demo
+      vehicle, so it moved with zero content changes.
+    - `Inheritance` and `Polymorphism` turned out to use `friend` +
+      `operator<<` overloading as their standard, idiomatic way to print
+      every object (10/11 Inheritance lectures) - not incidental, load-bearing
+      throughout. Rather than rewrite dozens of lectures' printing style,
+      `Friends` and `OperatorOverloading` were pulled forward too, landing
+      immediately before Inheritance/Polymorphism so that idiom is already
+      taught.
+    - `ConstAndStaticMembers` was deliberately **not** pulled forward, since
+      only a handful of lectures elsewhere needed it - moving the whole
+      chapter would have been overkill. Instead, the specific lectures that
+      depended on it were fixed or relocated individually (see below).
+    - `Namespaces` had two lectures (`NamespacesAcrossMultipleFiles`,
+      `UsingDeclarations`) that used a `Cylinder` class with a private
+      `inline static const double PI` member - a `ConstAndStaticMembers`
+      forward reference, but purely incidental (the `static` was never the
+      point of either lecture, just an implementation detail of the demo
+      class). Fixed by changing it to a plain, non-static `const double PI`
+      - identical behavior, zero dependency.
+    - One Polymorphism lecture, `InheritanceAndPolymorphismWithStaticMembers`,
+      could not be fixed the same way - its entire subject *is* static
+      members interacting with inheritance/polymorphism, so simplifying it
+      away would have gutted the lesson. It was relocated instead, out of
+      the (now early) Polymorphism chapter and appended to the end of
+      `ConstAndStaticMembers`, which still sits later in the course - the
+      one point where both prerequisites (static members and polymorphism)
+      are already taught.
+  - **`ProgramsWithMultipleFiles` was split into two chapters** rather than
+    moved as a single unit, because 3 of its 8 lectures fundamentally need
+    classes to exist (one, `ForwardDeclarations`, is entirely about
+    forward-declaring a *class* in a header) while the other 5 are pure
+    free-function/variable multi-file organization with no class dependency
+    at all:
+    - `MultipleFilesBasics` (the 5 class-free lectures: compiling/linking
+      model, linkage, flipping linkage, inline variables/functions, inline
+      vs. static) sits between FunctionBasics and Arrays, right where
+      multi-file organization first becomes relevant for plain functions.
+    - `MultipleFilesWithClasses` (the 3 class-dependent lectures:
+      declarations/definitions with a class, one-definition-rule with a
+      class, forward-declaring a class) sits right after Classes, before
+      Namespaces - the point where splitting a class across files first
+      makes sense.
+    - When a chapter turns out to serve two different prerequisite levels
+      like this, split it along that fault line rather than force the whole
+      chapter to wait for its most demanding lecture.
   - **When merging a lecture into a chapter it topically belongs to** (not
     just renumbering it in place), append it after that chapter's existing
     lectures rather than trying to interleave it - preserves the existing
