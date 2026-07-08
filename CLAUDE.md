@@ -129,15 +129,20 @@ chapter 3 (`03.FirstSteps`):
     bindings), and `DivingDeepIntoConstructorsAndInitialization`
     (aggregate/designated initialization, default constructor parameters,
     delegation, `explicit`, copy/move constructors, deleted constructors) -
-    moved earlier in the course and combined into one 29-lecture chapter,
-    thematically reordered (basics -> const-correctness -> aggregate init ->
-    advanced constructor mechanics) rather than left as three chapters
-    concatenated back to back. Two near-duplicate lectures
+    moved earlier in the course and combined into one chapter, thematically
+    reordered (basics -> const-correctness -> aggregate init -> advanced
+    constructor mechanics) rather than left as three chapters concatenated
+    back to back. Two near-duplicate lectures
     (`ConstObjectsAsFunctionParameters` and `ConstMemberFunctions`, which
     differed only by whether `dog.h`'s getters were marked `const`) were
     merged into a single lecture showing the const-correctness problem and
     its fix together, rather than kept as two files that were 90% identical.
-  - **`Templates` (chapter 26, right after OperatorOverloading)**
+    `Classes` later absorbed 9 more lectures from `ConstAndStaticMembers`
+    (see below) as 14.34-14.42, appended after the original merge's last
+    lecture (`DeletedConstructors`) rather than interleaved into the
+    const-correctness section, so the chapter's already-settled internal
+    order wasn't disturbed a second time.
+  - **`Templates` (chapter 25, right after OperatorOverloading)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -217,12 +222,48 @@ chapter 3 (`03.FirstSteps`):
     formalizes the general rules afterward.
     No exceptions, move semantics, or STL usage was found anywhere in the
     chapter (Rule-of-Three raw-pointer management throughout, no
-    `std::vector`), so chapters 27/28/30 were never a dependency concern.
+    `std::vector`), so Exceptions/MoveSemantics/StlContainersAndIterators
+    were never a dependency concern.
     While renumbering, a pre-existing gap in the original lecture numbering
     (`27.5OtherOperators` jumping straight to `27.7StoringInDifferentTypes`,
     no `27.6`) was also closed, since every lecture was being renumbered for
     the move anyway - the chapter's 5 lectures are now sequential
     18.2-18.6 with no gap.
+  - **`ConstAndStaticMembers` doesn't exist as its own chapter anymore - 9 of
+    its 10 lectures were folded into `Classes` (14.34-14.42), and the 10th
+    was relocated into `Polymorphism`.** Static/const class members
+    (static data members, static constants pre- and post-C++17, members of
+    the class's own type, members of other class types, static member
+    functions, nested classes, in-class member initialization) are
+    fundamentally "more class mechanics," and 9 of the 10 lectures had no
+    dependency on anything taught between Classes(14) and the chapter's old
+    position - confirmed by reading every lecture's source and checking every
+    `#include` in the chapter (nothing beyond `<iostream>`, `<cmath>`,
+    `<string>`, and local headers). The 10th lecture,
+    `InheritanceAndPolymorphismWithStaticMembers`, could not come along: it
+    genuinely needs both Inheritance and Polymorphism as prerequisites
+    (a `Shape`/`Ellipse` hierarchy with `virtual`/`override`, dispatched
+    through an array of base-class pointers, to show that a `static` member
+    is per-class even under polymorphism) - this is exactly why it had
+    previously been relocated to the *end* of `ConstAndStaticMembers` in the
+    first place, per this chapter's own history below. Rather than pull
+    Inheritance/Polymorphism forward yet again to accommodate one lecture, it
+    was appended to `Polymorphism` instead, as 21.21 - the same "leave the
+    one genuinely-dependent lecture behind, fold the rest" pattern already
+    used for `InheritanceAndPolymorphismWithStaticMembers`'s original
+    placement, just one level removed. The 9 `Classes`-bound lectures were
+    appended after `Classes`'s existing last lecture (`DeletedConstructors`)
+    rather than interleaved into the const-correctness section (14.16-14.20)
+    - straight concatenation, not a second thematic reshuffle of a chapter
+    that had already been deliberately reordered once. Two lectures
+    (`MemberVariablesOfTypeSelf`, `MemberVariablesOfOtherTypes`) contain a
+    `new` with no matching `delete` - pre-existing content debt, not
+    introduced by this move, left as-is since fixing it wasn't in scope.
+    The chapter's lectures had also always started at `.3` with no `.2`
+    anywhere in the repo and no record of why - an undocumented gap, unlike
+    the `27.6` gap above which had an identifiable cause. Since every
+    lecture was being renumbered into its new chapter's sequence regardless,
+    the gap became moot rather than something worth separately investigating.
   - **Chapters 15-20 (Namespaces, SmartPointers, Friends,
     OperatorOverloading, Inheritance, and Polymorphism) were pulled forward**
     to sit right after Classes(14), on the reasoning that OOP fundamentals
