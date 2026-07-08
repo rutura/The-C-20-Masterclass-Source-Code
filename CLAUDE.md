@@ -117,7 +117,7 @@ chapter 3 (`03.FirstSteps`):
     function-related chapter that stayed separate, since a capture list is
     really a small class in disguise and reads better once Classes exist to
     compare it to.
-  - `BitwiseOperators` (chapter 25) sits after Enums, kept deliberately
+  - `BitwiseOperators` (chapter 28) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
@@ -142,7 +142,7 @@ chapter 3 (`03.FirstSteps`):
     lecture (`DeletedConstructors`) rather than interleaved into the
     const-correctness section, so the chapter's already-settled internal
     order wasn't disturbed a second time.
-  - **`Templates` (chapter 26, right after OperatorOverloading)**
+  - **`Templates` (chapter 25, right after FunctionLikeEntities)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -275,7 +275,7 @@ chapter 3 (`03.FirstSteps`):
     **class template** throughout 6 of its 8 lectures (`MovingTemporariesAround`
     onward) - out-of-line template method definitions, a templated friend
     `operator<<` declaration, even a generic `swap_data<T>` helper function -
-    a real, load-bearing forward reference to Templates (now chapter 26, much
+    a real, load-bearing forward reference to Templates (now chapter 25, much
     further away after this move) rather than incidental use, the same class
     of problem CLAUDE.md documents for `Rel_OpsNamespace` and `ConceptsExample1`
     elsewhere. Move semantics itself doesn't need genericity to teach, so
@@ -379,6 +379,85 @@ chapter 3 (`03.FirstSteps`):
     been moved elsewhere or confirmed dropped - don't leave an empty
     chapter folder behind, and don't leave a gap in the numbering; renumber
     every following chapter to close it.
+  - **Chapters 24-28 were resequenced** (a pure reorder - no lecture content
+    changed, no chapters merged or dissolved) to put higher-value material
+    ahead of lower-value material: `FunctionLikeEntities` (function
+    pointers/functors/`std::function`) moved up to sit right after
+    `LambdaFunctions`(23), since it's really "lambdas, part 2" and reads
+    better adjacent to it rather than four chapters away; `Templates`(25)
+    and `Exceptions`(26) moved up ahead of `EnumsAndTypeAliases`(27) and
+    `BitwiseOperators`(28), since templates/exceptions are load-bearing for
+    everything that follows (the STL is templates; STL containers/
+    algorithms throw) while enums/bitwise are low-stakes syntax topics that
+    don't need to gate higher-value material. Straight swap of two
+    chapter-pairs, nothing else in 3-22 or 29-35 moved.
+  - **Three new chapters were added: `Testing`(36), `DependencyManagement`(37),
+    and `AI-AssistedCppDevelopment`(38)** - all at the end of the course,
+    after `Modules`(35), on the reasoning that these round out a *practical*
+    course (building something real, not just syntax) but aren't
+    prerequisites for anything else taught. Placement and ordering among the
+    three matters: `Testing` comes first because `DependencyManagement`'s
+    worked examples pull in a *real* Catch2 via FetchContent (37.4) instead
+    of the system-installed one `Testing` used (36.3-36.4), so the two
+    chapters reinforce each other; `AI-AssistedCppDevelopment` is
+    deliberately last, after everything else including `Modules`, because
+    judging AI-generated C++ requires already knowing C++ - teaching it any
+    earlier would be asking students to trust a tool before they can verify
+    it.
+    - `Testing`(36, 7 lectures) is built around Catch2 as the primary
+      framework (`TEST_CASE`/`REQUIRE`/`CHECK`/`SECTION`/fixtures via
+      `TEST_CASE_METHOD`), with one lecture (36.7) porting the same
+      `BankAccount` test suite to GoogleTest side-by-side so the syntax
+      differences are easy to compare, and a closing lecture (36.8) on
+      `enable_testing()`/`catch_discover_tests()` so individual `TEST_CASE`s
+      show up as separately-runnable `ctest` tests rather than one lump
+      pass/fail. 36.5 retrofits a real test suite onto the actual
+      `BoxContainer` from `Practice-BoxContainerType`(19.5OtherOperators)
+      rather than a fresh toy class, so students test code they already
+      understand instead of decoding a new example while also learning
+      testing syntax.
+    - `DependencyManagement`(37, 6 lectures) teaches `FetchContent` as the
+      default/primary mechanism (37.3-37.5: declaring `fmt`, re-declaring
+      Catch2 to show the same pattern applies to test dependencies, then
+      pinning versions via git tag vs. commit hash) before introducing
+      vcpkg (37.6-37.7: manifest mode via `vcpkg.json`, `CMAKE_TOOLCHAIN_FILE`,
+      then a second manifest lecture scaling to two dependencies with a
+      pinned `builtin-baseline`) - matching the "vcpkg, but not too far"
+      framing this chapter was originally scoped with. Every
+      `FetchContent`/vcpkg example was verified to actually download and
+      build against the live network in both Docker images, not just
+      written to look plausible - `GIT_TAG` values for fmt/Catch2 were
+      confirmed against the real upstream repos (`git ls-remote`) rather
+      than typed from memory, after an initial draft of 37.5's example
+      commit hash turned out to be wrong. This verification caught a real
+      cross-compiler bug, not just a typo: fmt `11.0.2` (the version
+      originally pinned in 37.3/37.5) builds fine on GCC 16 but fails to
+      compile its own library sources on Clang 21 under `-std=gnu++23`
+      (a `consteval`-evaluation strictness difference inside fmt's
+      compile-time format-string checking) - confirmed reproducible, not
+      flaky, and confirmed to be fmt's issue rather than this repo's
+      toolchain by noting that 37.6/37.7's vcpkg-resolved fmt `12.2.0`
+      built cleanly on both compilers in the same session. Both lectures
+      were re-pinned to fmt `12.2.0` (tag and commit hash both re-verified
+      against upstream) and re-verified building on both compilers before
+      being considered done. vcpkg's `vcpkg_installed/` local install
+      directory needed adding to those two lectures' `.gitignore` (not the
+      repo's shared template, since only these two lectures use vcpkg) - it
+      isn't covered by the existing build-artifact patterns.
+    - `AI-AssistedCppDevelopment`(38, 6 lectures) treats "how to use AI for
+      C++" as a practical, tool-grounded skill rather than a prompting
+      lecture: generating boilerplate (38.3), explaining a genuine template
+      deduction error and a real dangling-`unique_ptr` segfault (38.4),
+      drafting a Catch2 suite for existing code and then extending it with
+      an edge case a generated suite plausibly missed (38.5), a lecture
+      dedicated to concrete wrong-advice patterns an assistant is prone to
+      suggest - six hand-written relational operators instead of one
+      defaulted `<=>`, and `return std::move(result)` defeating NRVO instead
+      of a plain `return` (38.6) - and a closing checklist-driven code
+      review exercise (38.7) that references back to earlier chapters
+      (SmartPointers, Classes' dangling-reference lecture, this chapter's
+      own 38.6) by name, since the whole point of placing this chapter last
+      is that students can now recognize what those checklist items mean.
 
 ## Building and testing
 

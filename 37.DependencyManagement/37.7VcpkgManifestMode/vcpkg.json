@@ -1,0 +1,9 @@
+{
+  "name": "vcpkg-manifest-mode",
+  "version": "0.1.0",
+  "builtin-baseline": "94b14f2607dafa3c6bf30920d4fd33bc66b159c1",
+  "dependencies": [
+    "fmt",
+    "nlohmann-json"
+  ]
+}
