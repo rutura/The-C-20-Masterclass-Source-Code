@@ -91,12 +91,12 @@ chapter 3 (`03.FirstSteps`):
   - **Chapter 9, `FunctionBasics`, is a new chapter** inserted right after
     Scope and before Arrays (chapter 10) - on the reasoning that raw arrays,
     pointers, and references are low-level tooling that shouldn't gate a
-    student's first exposure to functions. Lectures 9.2-9.14 cover the ~20%
+    student's first exposure to functions. Lectures 9.2-9.19 cover the ~20%
     of function knowledge that doesn't require arrays/pointers/references as
-    a prerequisite (declarations, pass-by-value, default parameters,
-    `std::string_view` parameters, overloading basics, `auto` return
-    deduction, `std::optional`, captureless lambdas, `static`/`inline`/
-    recursion, `constexpr`/`consteval`).
+    a prerequisite (declarations, multi-file organization/linkage,
+    pass-by-value, default parameters, `std::string_view` parameters,
+    overloading basics, `auto` return deduction, `std::optional`, captureless
+    lambdas, `static`/`inline`/recursion, `constexpr`/`consteval`).
   - **What used to be five separate "advanced functions" chapters
     (`14.Functions`, `15.GettingThingsOutOfFuntions`, `16.FunctionOverloading`,
     `18.ArgumentsToTheMainFunction`, `19.FunctionCallStackD_ebugging`) no
@@ -107,22 +107,22 @@ chapter 3 (`03.FirstSteps`):
     variants into Pointers, pass-by-reference variants (and bare `auto`
     deduction) into References. What was left over - output parameters,
     returning a reference/pointer and the dangling pitfalls that come with
-    it, overload resolution once pointers/references exist, `argc`/`argv`,
-    and debugger walkthroughs - doesn't reduce to "an Arrays/Pointers/
-    References topic," so it was folded into chapter 9 instead (lectures
-    9.15 onward), keeping all function-related material in one place except
-    for lambda captures. `FunctionsTheMisfits` was dissolved the same way
-    earlier (static locals, inline, recursion, all now in chapter 9).
-  - `LambdaFunctions` (chapter 23, right after Polymorphism) is the one
+    it, overload resolution once pointers/references exist, and `argc`/`argv`
+    - doesn't reduce to "an Arrays/Pointers/References topic," so it was
+    folded into chapter 9 instead (lectures 9.20 onward), keeping all
+    function-related material in one place except for lambda captures.
+    `FunctionsTheMisfits` was dissolved the same way earlier (static locals,
+    inline, recursion, all now in chapter 9).
+  - `LambdaFunctions` (chapter 21, right after Polymorphism) is the one
     function-related chapter that stayed separate, since a capture list is
     really a small class in disguise and reads better once Classes exist to
     compare it to.
-  - `BitwiseOperators` (chapter 25) sits after Enums, kept deliberately
+  - `BitwiseOperators` (chapter 23) sits after Enums, kept deliberately
     short - most of what a course would traditionally spend 7 lectures on
     (masks, shifting, manual color packing) doesn't earn that much space in
     a course aimed at practical know-how, so it's 3 lectures ending on the
     one realistic use case (combining flags via `enum class`).
-  - **`Classes` (chapter 15, right after Strings)** is a merge of what used
+  - **`Classes` (chapter 14, right after Strings)** is a merge of what used
     to be three separate chapters - `Classes` (first classes, constructors,
     destructors, `this`, structs), `ZoomingInOnClassObjects` (const
     objects/member functions, dangling references, `mutable`, structured
@@ -137,7 +137,7 @@ chapter 3 (`03.FirstSteps`):
     differed only by whether `dog.h`'s getters were marked `const`) were
     merged into a single lecture showing the const-correctness problem and
     its fix together, rather than kept as two files that were 90% identical.
-  - **`Templates` (chapter 28, right after LogicalOperatorsAndThreeWayComparison)**
+  - **`Templates` (chapter 26, right after LogicalOperatorsAndThreeWayComparison)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -168,9 +168,9 @@ chapter 3 (`03.FirstSteps`):
     otherwise-unrelated example programs, and the chapter placed right
     before Templates turned out to have its own quiet reliance on template
     syntax.
-  - **Chapters 18-26 (SmartPointers, Friends, OperatorOverloading,
-    Inheritance, Polymorphism, and Namespaces) were pulled forward** to sit
-    right after Classes(15), on the reasoning that OOP fundamentals
+  - **Chapters 15-20 (Namespaces, SmartPointers, Friends,
+    OperatorOverloading, Inheritance, and Polymorphism) were pulled forward**
+    to sit right after Classes(14), on the reasoning that OOP fundamentals
     (smart-pointer-managed objects, operator overloading, inheritance,
     polymorphism) are central, practical knowledge that shouldn't wait until
     two-thirds of the way through the course. This required the same kind
@@ -205,24 +205,31 @@ chapter 3 (`03.FirstSteps`):
       `ConstAndStaticMembers`, which still sits later in the course - the
       one point where both prerequisites (static members and polymorphism)
       are already taught.
-  - **`ProgramsWithMultipleFiles` was split into two chapters** rather than
-    moved as a single unit, because 3 of its 8 lectures fundamentally need
-    classes to exist (one, `ForwardDeclarations`, is entirely about
-    forward-declaring a *class* in a header) while the other 5 are pure
-    free-function/variable multi-file organization with no class dependency
-    at all:
-    - `MultipleFilesBasics` (the 5 class-free lectures: compiling/linking
-      model, linkage, flipping linkage, inline variables/functions, inline
-      vs. static) sits between FunctionBasics and Arrays, right where
-      multi-file organization first becomes relevant for plain functions.
-    - `MultipleFilesWithClasses` (the 3 class-dependent lectures:
-      declarations/definitions with a class, one-definition-rule with a
-      class, forward-declaring a class) sits right after Classes, before
-      Namespaces - the point where splitting a class across files first
-      makes sense.
-    - When a chapter turns out to serve two different prerequisite levels
-      like this, split it along that fault line rather than force the whole
-      chapter to wait for its most demanding lecture.
+  - **`ProgramsWithMultipleFiles` doesn't exist as its own chapter at all
+    anymore - it was folded directly into FunctionBasics and Classes as
+    extra lectures.** It first got split into two chapters (because 3 of
+    its 8 lectures fundamentally need classes to exist - one,
+    `ForwardDeclarations`, is entirely about forward-declaring a *class* in
+    a header - while the other 5 are pure free-function/variable multi-file
+    organization with no class dependency at all), but a single-lecture
+    "chapter" for a handful of niche lectures doesn't earn a whole chapter
+    slot, so both halves were dissolved a step further:
+    - The 5 class-free lectures (compiling/linking model, linkage, flipping
+      linkage, inline variables/functions, inline vs. static) were inserted
+      into `FunctionBasics` immediately after its existing
+      `FunctionsAcrossMultipleFiles` lecture - same topic, deeper dive,
+      grouped together as one continuous multi-file block rather than split
+      across two places in the chapter.
+    - The 3 class-dependent lectures (declarations/definitions with a
+      class, one-definition-rule with a class, forward-declaring a class)
+      were inserted into `Classes` immediately after its existing
+      `ClassAcrossMultipleFiles` lecture, for the same reason.
+    - When a chapter turns out to only deserve a handful of lectures once
+      split along a prerequisite fault line, don't leave those pieces as
+      their own thin chapters - fold each piece into the chapter whose
+      existing lecture already covers the same idea at a more basic level,
+      inserting right after that lecture (renumbering what follows) rather
+      than tacking the new lectures onto the end.
   - **When merging a lecture into a chapter it topically belongs to** (not
     just renumbering it in place), append it after that chapter's existing
     lectures rather than trying to interleave it - preserves the existing
