@@ -8,10 +8,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Create executable
-add_executable(rooster main.cpp 
-            stream_insertable.h stream_insertable.cpp 
-            intcontainer.h intcontainer.cpp 
-            charcontainer.h charcontainer.cpp 
+add_executable(rooster main.cpp
+            intcontainer.h intcontainer.cpp
+            charcontainer.h charcontainer.cpp
             doublecontainer.h doublecontainer.cpp)
 
 # For multi-file projects with headers and separate .cpp files

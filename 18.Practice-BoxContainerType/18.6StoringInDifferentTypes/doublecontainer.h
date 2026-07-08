@@ -1,22 +1,21 @@
 #ifndef DOUBLE_CONTAINER_H
 #define DOUBLE_CONTAINER_H
 
-#include "stream_insertable.h"
+#include <iostream>
 
-class DoubleContainer : public StreamInsertable
+class DoubleContainer
 {
+		friend std::ostream& operator<< (std::ostream& out, const DoubleContainer& box);
+
 		using value_type = double; // Allows us to change what's stored in the vector on the fly
 								// Can make it store int, double,...
-        static const size_t DEFAULT_CAPACITY = 5;  
+        static const size_t DEFAULT_CAPACITY = 5;
 		static const size_t EXPAND_STEPS = 5;
 public:
 	DoubleContainer(size_t capacity = DEFAULT_CAPACITY);
 	DoubleContainer(const DoubleContainer& source);
 	~DoubleContainer();
-	
-	//StreamInsertable Interface
-	virtual void stream_insert(std::ostream& out)const;
-	
+
 	// Helper getter methods
 	size_t size( ) const { return m_size; }
 	size_t capacity() const{return m_capacity;};

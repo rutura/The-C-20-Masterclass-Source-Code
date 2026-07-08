@@ -1,22 +1,21 @@
 #ifndef CHAR_CONTAINER_H
 #define CHAR_CONTAINER_H
 
-#include "stream_insertable.h"
+#include <iostream>
 
-class CharContainer : public StreamInsertable
+class CharContainer
 {
+		friend std::ostream& operator<< (std::ostream& out, const CharContainer& box);
+
 		using value_type = char; // Allows us to change what's stored in the vector on the fly
 								// Can make it store int, double,...
-        static const size_t DEFAULT_CAPACITY = 5;  
+        static const size_t DEFAULT_CAPACITY = 5;
 		static const size_t EXPAND_STEPS = 5;
 public:
 	CharContainer(size_t capacity = DEFAULT_CAPACITY);
 	CharContainer(const CharContainer& source);
 	~CharContainer();
-	
-	//StreamInsertable Interface
-	virtual void stream_insert(std::ostream& out)const;
-	
+
 	// Helper getter methods
 	size_t size( ) const { return m_size; }
 	size_t capacity() const{return m_capacity;};

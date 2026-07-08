@@ -26,15 +26,16 @@ CharContainer::~CharContainer()
 	delete[] m_items;
 }
 
-void CharContainer::stream_insert(std::ostream& out)const{
-	
-	out << "CharContainer : [ size :  " << m_size
-		<< ", capacity : " << m_capacity << ", items : " ;
-			
-	for(size_t i{0}; i < m_size; ++i){
-		out << m_items[i] << " " ;
+std::ostream& operator<< (std::ostream& out, const CharContainer& box){
+
+	out << "CharContainer : [ size :  " << box.m_size
+		<< ", capacity : " << box.m_capacity << ", items : " ;
+
+	for(size_t i{0}; i < box.m_size; ++i){
+		out << box.m_items[i] << " " ;
 	}
-	std::cout << "]";
+	out << "]";
+	return out;
 }
 
 
