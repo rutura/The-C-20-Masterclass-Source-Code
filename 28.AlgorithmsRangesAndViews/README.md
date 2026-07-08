@@ -1,4 +1,4 @@
-# Chapter 31: Algorithms, Ranges & Views
+# Chapter 28: Algorithms, Ranges & Views
 
 ## From classic algorithms to ranges and views
 

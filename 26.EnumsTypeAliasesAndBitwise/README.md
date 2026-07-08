@@ -1,4 +1,4 @@
-# Chapter 27: Enums, Type Aliases & Bitwise Operators
+# Chapter 26: Enums, Type Aliases & Bitwise Operators
 
 ## Why these three topics share a chapter
 

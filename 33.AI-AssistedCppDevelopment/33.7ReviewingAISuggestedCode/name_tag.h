@@ -11,15 +11,15 @@
 // to concrete code:
 //
 //  1. Ownership: does every resource have a clear, single owner? (Chapter
-//     16, SmartPointers / Chapter 18, MoveSemantics)
+//     15, SmartPointers / Chapter 17, MoveSemantics)
 //  2. Const-correctness: are members and parameters marked const where
-//     nothing needs to change them? (Chapter 14, Classes)
+//     nothing needs to change them? (Chapter 13, Classes)
 //  3. Lifetime: could any reference/pointer here outlive what it refers
-//     to? (Chapter 14's DanglingPointersAndReferences)
+//     to? (Chapter 13's DanglingPointersAndReferences)
 //  4. Idiom: is this how the language expresses the idea today, or an
-//     older pattern that still compiles? (38.6, this chapter)
+//     older pattern that still compiles? (33.6, this chapter)
 //  5. Tests: if this shipped with a generated test suite, does it cover
-//     the case that actually matters? (Chapter 36, Testing)
+//     the case that actually matters? (Chapter 31, Testing)
 //
 // This class passes some of that checklist and fails others -- see the
 // comments on each member for which is which.

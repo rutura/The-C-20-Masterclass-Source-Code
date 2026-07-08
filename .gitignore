@@ -77,3 +77,9 @@ Makefile
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# Working/reference files (not part of published course content)
+/ref1.md
+/ref2.md
+/RESTRUCTURE-PLAN.md
+/NEW_FEATURES.md

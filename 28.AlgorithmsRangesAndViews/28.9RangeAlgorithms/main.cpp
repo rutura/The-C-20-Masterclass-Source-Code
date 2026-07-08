@@ -15,7 +15,7 @@ void print_collection(const T& collection) {
 
 int main() {
 
-    // These are the exact same algorithms from chapter 31 (std::all_of,
+    // These are the exact same algorithms from chapter 28 (std::all_of,
     // std::for_each, std::sort, std::find_if, std::copy) - here as their
     // std::ranges:: versions, which take a whole range directly instead of
     // an iterator pair.

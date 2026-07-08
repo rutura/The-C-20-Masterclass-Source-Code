@@ -1,4 +1,4 @@
-# Chapter 29: STL Containers & Iterators
+# Chapter 27: STL Containers & Iterators
 
 ## From "how do you walk a container" to "how do you build one"
 

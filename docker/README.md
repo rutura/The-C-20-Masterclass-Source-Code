@@ -141,9 +141,9 @@ Verified working end-to-end with `fmt` as the test package.
 
 ---
 
-## Known limitation: Chapter 49 (Modules)
+## Known limitation: Chapter 30 (Modules)
 
-Chapter 49's `.ixx` files are recognized fine by CMake (`FILE_SET
+Chapter 30's `.ixx` files are recognized fine by CMake (`FILE_SET
 CXX_MODULES`) and module-to-module imports (e.g. `import math_stuff;`)
 compile correctly on both images above.
 
@@ -165,7 +165,7 @@ form currently fails on both compilers in a CMake+Ninja build:
 
 This is a toolchain/library gap, not a container misconfiguration — the
 same source will build cleanly on MSVC, which has shipped a prebuilt
-`import std;`-capable STL for longer. If you want chapter 49's header-import
+`import std;`-capable STL for longer. If you want chapter 30's header-import
 examples to build in these Linux containers too, the fix is on the course
 content side (e.g. swap `import <iostream>;` for a plain `#include` inside
 the module's global module fragment), not the Dockerfiles.

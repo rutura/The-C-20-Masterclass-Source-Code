@@ -9,7 +9,7 @@
 // compiles and it works -- but it's six functions doing what one
 // defaulted <=> already covers, and it's exactly the kind of "technically
 // correct, but not how you'd write it today" suggestion this chapter is
-// about catching. Chapter 20 (OperatorOverloading) already covered this.
+// about catching. Chapter 19 (OperatorOverloading) already covered this.
 class Point
 {
 public:

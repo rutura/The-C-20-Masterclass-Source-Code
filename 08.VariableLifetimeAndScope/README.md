@@ -8,8 +8,8 @@ scope worth a real chapter now instead of earlier: a variable declared inside
 an `if` or a loop body behaves differently from one declared in `main()`
 directly, and until those blocks existed there wasn't much to show. This
 chapter uses the expense-tracker examples from earlier chapters to make that
-concrete before chapter 9 (Arrays) and chapter 10 (Pointers) start leaning on
-the same idea implicitly.
+concrete before chapter 9 (Function Basics) and chapter 10 (Indirection:
+Arrays, Pointers, References) start leaning on the same idea implicitly.
 
 ## Lecture by lecture
 

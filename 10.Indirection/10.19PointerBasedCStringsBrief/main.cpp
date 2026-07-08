@@ -5,7 +5,7 @@ int main() {
 
     // Before std::string existed, a "string" was just a pointer to the
     // first char of a null-terminated char array - this is what that
-    // looked like, and why std::string/std::string_view (chapter 11)
+    // looked like, and why std::string/std::string_view (chapter 12)
     // replaced it as the default for new code.
     const char* message{"Hello World!"};
     std::println("message : {}", message);

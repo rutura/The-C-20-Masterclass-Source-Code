@@ -15,8 +15,8 @@ The rest of this chapter (9.20 onward) is everything else about functions
 that doesn't reduce to "a new Arrays/Pointers/References concept" - output
 parameters, returning a reference/pointer and the dangling pitfalls that come
 with it, overload resolution once pointers/references are in the mix, and
-`argc`/`argv` - collected here once Arrays (chapter 10), Pointers (chapter
-11), and References (chapter 12) exist to make those examples make sense.
+`argc`/`argv` - collected here once Arrays, Pointers, and References
+(chapter 10, Indirection) exist to make those examples make sense.
 The exception is lambda *captures*, which live in their own chapter (right
 before Classes) since a capture is really a small class in disguise and
 reads better once Classes exist to compare it to.

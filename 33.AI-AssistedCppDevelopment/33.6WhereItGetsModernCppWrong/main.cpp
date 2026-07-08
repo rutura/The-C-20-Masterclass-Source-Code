@@ -8,7 +8,7 @@
 // compiles cleanly -- but it actively defeats copy elision (NRVO), which
 // the compiler would otherwise apply for free, and in some cases can force
 // a move where a plain return would have elided the copy/move entirely.
-// Chapter 18 (MoveSemantics) covers what std::move actually does and does
+// Chapter 17 (MoveSemantics) covers what std::move actually does and does
 // not do; a suggestion like this is worth recognizing, not accepting
 // because it mentions the right vocabulary word.
 std::vector<int> make_numbers_bad(){
