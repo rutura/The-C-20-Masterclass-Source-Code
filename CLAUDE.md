@@ -137,7 +137,7 @@ chapter 3 (`03.FirstSteps`):
     differed only by whether `dog.h`'s getters were marked `const`) were
     merged into a single lecture showing the const-correctness problem and
     its fix together, rather than kept as two files that were 90% identical.
-  - **`Templates` (chapter 26, right after LogicalOperatorsAndThreeWayComparison)**
+  - **`Templates` (chapter 25, right after OperatorOverloading)**
     is a merge of what used to be three separate chapters -
     `FunctionTemplates`, `Concepts`, and `ClassTemplates` - concatenated in
     that order (each chapter's own internal lecture order was already a
@@ -149,25 +149,47 @@ chapter 3 (`03.FirstSteps`):
     `StlContainersAndIterators`) and was rewritten to use `BoxContainer`
     (already established earlier in the same chapter) instead;
     `BuiltInConcepts` defaulted `operator<=>` (not introduced until
-    `LogicalOperatorsAndThreeWayComparison`) purely to feed one
+    `OperatorOverloading`'s comparison-operator lectures) purely to feed one
     already-commented-out, never-executed `static_assert`, so that one
     member was removed rather than kept as a dependency. Two lectures still
     legitimately need `friend` (`FriendFunctionsForClassTemplates`) and
     `operator<<` overloading (`StreamInsertionOperatorForClassTemplates`) -
     both are satisfied earlier in the course (Friends, OperatorOverloading).
-    `Templates` sits right after `LogicalOperatorsAndThreeWayComparison`
-    rather than immediately after OperatorOverloading, because
-    `LogicalOperatorsAndThreeWayComparison` itself has a soft dependency the
-    other direction: `Rel_OpsNamespace` uses raw `template<class T>` syntax
-    as an implementation detail without ever teaching what a template is,
-    which reads better once Templates has already been formally introduced.
-    Before moving a template/concept-heavy chapter like this, actually read
-    every lecture's source for forward-referenced syntax rather than
-    assuming "templates and concepts" are self-contained - `std::vector` and
-    `operator<=>` usage snuck in as incidental, non-essential parts of two
-    otherwise-unrelated example programs, and the chapter placed right
-    before Templates turned out to have its own quiet reliance on template
-    syntax.
+    `Templates` sits right after `OperatorOverloading` rather than further
+    back in the course because `OperatorOverloading` itself used to have a
+    soft dependency the other direction, back when its comparison-operator
+    lectures were still a separate chapter (`LogicalOperatorsAndThreeWayComparison`):
+    `Rel_OpsNamespace` used raw `template<class T>` syntax as an
+    implementation detail without ever teaching what a template is, which
+    used to read better with Templates immediately following. That chapter
+    has since been merged into `OperatorOverloading` (see below) and
+    `Rel_OpsNamespace`'s `my_utility.h` was de-templatized at the same time -
+    it now declares ordinary (non-template) overloads for the one type
+    (`Point`) the lecture actually needs, defined in a new `my_utility.cpp` -
+    so the forward reference to Templates no longer exists at all, and
+    `Templates` was free to move further back in the course. Before moving a
+    template/concept-heavy chapter like this, actually read every lecture's
+    source for forward-referenced syntax rather than assuming "templates and
+    concepts" are self-contained - `std::vector` and `operator<=>` usage
+    snuck in as incidental, non-essential parts of two otherwise-unrelated
+    example programs, and the chapter that used to sit right before
+    Templates turned out to have its own quiet reliance on template syntax.
+  - **`OperatorOverloading` (chapter 18) absorbed
+    `LogicalOperatorsAndThreeWayComparison`**, which no longer exists as its
+    own chapter. The two were always the same broad topic (operator
+    overloading, with relational/comparison operators as a specialized
+    case), so the merge is a straight concatenation - `OperatorOverloading`'s
+    original 19 lectures (arithmetic, subscript, stream, conversion,
+    assignment, functor operators; unchanged, still 18.2-18.20) followed by
+    `LogicalOperatorsAndThreeWayComparison`'s 14 lectures renumbered
+    18.21-18.34 in their existing order (manual relational operators, the
+    legacy `std::rel_ops` pattern, `<=>`/`std::partial_ordering`/
+    `std::weak_ordering`/`std::strong_ordering`). No thematic reshuffling was
+    needed - each source chapter's internal order was already sensible on
+    its own, same reasoning as the Templates merge. The one content change
+    was de-templatizing `Rel_OpsNamespace`'s `my_utility.h` (see the
+    Templates entry above) now that it sits much further from Templates than
+    it used to.
   - **Chapters 15-20 (Namespaces, SmartPointers, Friends,
     OperatorOverloading, Inheritance, and Polymorphism) were pulled forward**
     to sit right after Classes(14), on the reasoning that OOP fundamentals
