@@ -103,6 +103,10 @@ reads better once Classes exist to compare it to.
   vs. `const T&` overloads.
 - **9.31 Arguments to Main** - `int main(int argc, char* argv[])`, and
   looping over the command line arguments a program was launched with.
+- **9.32 Generating Random Numbers** - `<random>`'s `std::random_device`,
+  `std::mt19937`, and `std::uniform_int_distribution`, the modern
+  replacement for `std::rand()`/`std::srand()` - used throughout the Arrays
+  chapter's FortuneTeller project.
 
 ## Building the code
 
