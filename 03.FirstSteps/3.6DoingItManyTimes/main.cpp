@@ -27,7 +27,9 @@ int main() {
         std::println("You are a minor.");
     }
 
-    // A vector is a growable list of values - here, a list of friend names.
+    // C++ ships with ready-made collections so you don't have to build your
+    // own growable list. std::vector<std::string> is one: a list of strings
+    // that grows as you add to it with push_back - here, a list of friend names.
     std::vector<std::string> friends;
 
     std::println("\nLet's add some friends. Type a name and press enter.");
