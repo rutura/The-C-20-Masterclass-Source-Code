@@ -1,6 +1,6 @@
 ---
 marp: true
-theme: editorial
+theme: contrast
 paginate: true
 footer: 'Chapter 3 · First Steps'
 ---
