@@ -1,0 +1,127 @@
+/* Option 2: Editorial mono - Stripe/Vercel engineering blog style.
+   Warm off-white paper, dark ink, thin hairline rules instead of boxes,
+   monospace reserved strictly for code/labels. */
+@import 'default';
+/* @theme editorial */
+
+:root {
+  --bg: #faf9f6;
+  --ink: #18181b;
+  --muted: #71717a;
+  --hairline: #e4e2dc;
+  --accent: #635bff;
+  --surface: #f2f1ec;
+  --code-ink: #18181b;
+
+  --tok-keyword: #635bff;
+  --tok-string: #0f7b6c;
+  --tok-function: #18181b;
+  --tok-number: #b8580f;
+  --tok-comment: #a1a1aa;
+}
+
+section {
+  font-family: 'Liberation Sans', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  padding: 60px 76px;
+  font-size: 26px;
+  line-height: 1.55;
+}
+
+p:first-child > em:only-child {
+  display: inline-block;
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.48em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  font-style: normal;
+  margin-bottom: 0.6em;
+}
+
+h1 {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 1.75em;
+  letter-spacing: -0.015em;
+  margin: 0.3em 0 0.5em;
+}
+
+h2 {
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  color: var(--ink);
+  font-size: 0.85em;
+  font-weight: 400;
+  margin-bottom: 0.8em;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 0.5em;
+}
+
+p, li { color: var(--ink); }
+strong { color: var(--ink); font-weight: 700; }
+em { color: var(--accent); font-style: normal; font-weight: 600; }
+li::marker { color: var(--accent); }
+
+pre {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 1.1em 1.2em;
+  margin-top: 1.3em;
+  box-shadow: none;
+}
+
+pre::before { content: none; }
+
+pre code {
+  background: transparent;
+  color: var(--code-ink);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.72em;
+  line-height: 1.55;
+}
+
+code {
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  color: var(--accent);
+  background: var(--surface);
+  border-radius: 3px;
+  padding: 0.05em 0.35em;
+  font-size: 0.85em;
+}
+pre code { padding: 0; }
+
+.hljs-keyword, .hljs-built_in, .hljs-type, .hljs-literal, .hljs-operator { color: var(--tok-keyword); }
+.hljs-string { color: var(--tok-string); }
+.hljs-title, .hljs-title.function_ { color: var(--tok-function); font-weight: 700; }
+.hljs-number { color: var(--tok-number); }
+.hljs-comment { color: var(--tok-comment); font-style: italic; }
+.hljs-meta { color: var(--tok-keyword); }
+
+table { font-size: 0.7em; border-collapse: collapse; width: 100%; margin-top: 0.5em; }
+th { background: transparent; color: var(--muted); text-transform: uppercase; font-family: 'Liberation Mono', monospace; font-size: 0.75em; letter-spacing: 0.05em; text-align: left; padding: 0.5em 0.7em; border-bottom: 1px solid var(--ink); }
+td { padding: 0.5em 0.7em; border-bottom: 1px solid var(--hairline); color: var(--ink); }
+
+.callout {
+  background: var(--surface);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 0.6em 1em;
+  margin-top: 0.6em;
+  font-size: 0.78em;
+  color: var(--muted);
+}
+.callout strong { color: var(--ink); }
+
+section.lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+section.lead h1 { font-size: 2.4em; margin-top: 0; }
+section.lead h2 { border: none; color: var(--muted); font-family: 'Liberation Sans', Arial, sans-serif; font-size: 1.1em; padding: 0; }
+
+footer { color: var(--muted); font-family: 'Liberation Mono', monospace; font-size: 0.48em; }
+section::part(paginator) { color: var(--muted); font-family: 'Liberation Mono', monospace; }

@@ -1,6 +1,6 @@
 ---
 marp: true
-theme: masterclass
+theme: editorial
 paginate: true
 footer: 'Chapter 3 · First Steps'
 ---

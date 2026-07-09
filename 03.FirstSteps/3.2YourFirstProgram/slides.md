@@ -1,6 +1,6 @@
 ---
 marp: true
-theme: masterclass
+theme: editorial
 paginate: true
 footer: 'Chapter 3 · First Steps'
 ---
@@ -73,7 +73,7 @@ add_executable(rooster main.cpp)
 
 ---
 
-*3.2 / Run it*
+*Run it*
 
 ## Build and run
 
@@ -87,7 +87,7 @@ cmake --build build
 
 ---
 
-*3.2 / Run it*
+*Run it*
 
 ## Run the Executable
 
@@ -97,7 +97,7 @@ build/rooster
 
 ---
 
-*3.2 / Comments*
+*Comments*
 
 ## Two kinds of comments
 
