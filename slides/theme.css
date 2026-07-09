@@ -4,13 +4,16 @@
  * Design concept: a well-set-up dark editor at night. The left edge carries
  * a gutter rail like a line-number column; the kicker in the top-left uses
  * the same `chapter.lecture` numbering this repo's folders already use.
- * Code blocks get quiet terminal chrome (three dots) to separate "this is
- * code" from "this is prose" at a glance, since these decks alternate
- * between the two constantly.
+ * Code blocks get quiet terminal chrome (three dots) plus a soft accent
+ * glow to separate "this is code" from "this is prose" at a glance, since
+ * these decks alternate between the two constantly. Lead/title slides use
+ * the lecture number itself as a real, oversized layout element rather
+ * than a decorative flourish.
  *
- * Fonts: Liberation Sans (headings/body) + Liberation Mono (kicker, code,
- * labels) - both ship inside the marpteam/marp-cli base image, so nothing
- * is fetched at render time and nothing silently falls back.
+ * Fonts: Space Grotesk (headings/kickers/labels) + JetBrains Mono (code) -
+ * installed as real system fonts inside the Docker image (see Dockerfile
+ * and fonts/) rather than fetched at render time, since this network
+ * blocks outbound HTTPS to font CDNs during `docker build`.
  *
  * Reference from any lecture's slides.md front-matter with:
  *   theme: masterclass
@@ -41,6 +44,9 @@
   --accent-ink: #04211d;
   --accent-warm: #f0a868;
   --code-ink: #eef2f7;
+
+  --font-display: 'Space Grotesk', 'Liberation Sans', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Liberation Mono', 'Courier New', monospace;
 
   /* Syntax token colors - tuned for contrast against --surface (#161b22),
      not just inherited from whatever highlight.js theme Marp bundles by
@@ -74,17 +80,21 @@
 }
 
 section {
-  font-family: 'Liberation Sans', Arial, sans-serif;
+  font-family: var(--font-display);
   /* Gutter rail baked into the background itself (not a pseudo-element) -
      marp-core's own default theme already claims ::before/::after on
      section for its internals, so a second declaration doesn't reliably
-     win. A hard-edged gradient paints the same left-edge rail instead. */
-  background: linear-gradient(
+     win. A hard-edged gradient paints the same left-edge rail; a soft
+     radial glow behind it keeps every slide from reading as one flat
+     color fill. */
+  background:
+    linear-gradient(
       90deg,
       var(--accent) 0,
       var(--accent) var(--gutter-w),
-      var(--bg) var(--gutter-w)
-    )
+      transparent var(--gutter-w)
+    ),
+    radial-gradient(ellipse 900px 500px at 6% 0%, rgba(86, 212, 196, 0.09), transparent 60%),
     var(--bg);
   color: var(--ink);
   padding: 64px 72px 56px 88px;
@@ -98,21 +108,21 @@ section {
    line of a slide's content and it's styled as a small caps label. */
 p:first-child > em:only-child {
   display: inline-block;
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.5em;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
   font-style: normal;
   margin-bottom: 0.6em;
 }
 
 h1 {
-  font-family: 'Liberation Sans', Arial, sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   color: var(--ink);
-  font-size: 1.7em;
+  font-size: 1.8em;
   letter-spacing: -0.01em;
   margin-top: 0.4em;
   margin-bottom: 0.3em;
@@ -130,16 +140,17 @@ h1::after {
 }
 
 h2 {
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   color: var(--accent);
   font-size: 0.95em;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 0.8em;
 }
 
 h3 {
+  font-family: var(--font-display);
   color: var(--accent-warm);
   font-size: 1em;
   font-weight: 700;
@@ -172,13 +183,16 @@ li::marker {
   color: var(--accent);
 }
 
-/* Code blocks: quiet terminal chrome */
+/* Code blocks: quiet terminal chrome + a soft accent glow along the top
+   edge, so the code block reads as the confident focal point it usually
+   is on these slides rather than just another text box. */
 pre {
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 45%);
   border: 1px solid var(--hairline);
+  border-top: 2px solid var(--accent);
   border-radius: 10px;
   padding: 1.1em 1.2em 1em;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   position: relative;
   margin-top: 1.4em;
 }
@@ -198,13 +212,14 @@ pre::before {
 pre code {
   background: transparent;
   color: var(--code-ink);
-  font-family: 'Liberation Mono', 'Courier New', monospace;
-  font-size: 0.62em;
-  line-height: 1.55;
+  font-family: var(--font-mono);
+  font-size: 0.6em;
+  line-height: 1.6;
+  font-feature-settings: 'liga' 1, 'calt' 1;
 }
 
 code {
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   color: var(--accent-warm);
   background: var(--surface-2);
   border-radius: 4px;
@@ -280,7 +295,7 @@ tbody tr:nth-child(2n) {
 th {
   background: var(--surface-2);
   color: var(--accent);
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   text-transform: uppercase;
   font-size: 0.85em;
   letter-spacing: 0.04em;
@@ -312,20 +327,46 @@ a {
 /* Page number */
 section::part(paginator) {
   color: var(--muted);
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
 }
 
-/* Lead slide - title cards (chapter/lecture openers, "next up" closers) */
+/* Lead slide - title cards (chapter/lecture openers, "next up" closers).
+   The lecture number is a real, oversized layout element sitting above
+   the title - not a decorative watermark - so it carries information
+   (which lecture this is) instead of just filling space. Usage: put the
+   number as a leading <span class="lead-number"> inside the H1, e.g.
+   `# <span class="lead-number">3.2</span> Your First Program` - the span
+   is pulled onto its own line and enlarged by CSS below. */
 section.lead {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-left: 88px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent) 0,
+      var(--accent) var(--gutter-w),
+      transparent var(--gutter-w)
+    ),
+    radial-gradient(ellipse 1100px 700px at 14% 35%, rgba(86, 212, 196, 0.14), transparent 65%),
+    var(--bg);
 }
 
 section.lead h1 {
-  font-size: 2.5em;
+  font-size: 2.3em;
   margin-top: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+section.lead .lead-number {
+  font-family: var(--font-mono);
+  font-size: 2.2em;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 0.15em;
 }
 
 section.lead h1::after {
@@ -335,7 +376,7 @@ section.lead h1::after {
 
 section.lead h2 {
   color: var(--muted);
-  font-family: 'Liberation Sans', Arial, sans-serif;
+  font-family: var(--font-display);
   text-transform: none;
   letter-spacing: 0;
   font-size: 1.15em;
@@ -354,7 +395,7 @@ section.lead h2 {
   align-items: center;
   justify-content: center;
   color: var(--muted);
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.6em;
   text-align: center;
   margin-top: 0.6em;
@@ -412,7 +453,7 @@ section.lead h2 {
 
 footer {
   color: var(--muted);
-  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   font-size: 0.5em;
   letter-spacing: 0.04em;
 }

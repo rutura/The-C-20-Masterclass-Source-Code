@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# Making Decisions
+# <span class="lead-number">3.5</span> Making Decisions
 
 ## Branching on what the user told us
 

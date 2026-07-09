@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# Talking to the User
+# <span class="lead-number">3.4</span> Talking to the User
 
 ## Input, and doing something with it
 

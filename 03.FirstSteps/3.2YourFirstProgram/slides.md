@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# Your First Program
+# <span class="lead-number">3.2</span> Your First Program
 
 ## The C++ 20/23/26 Masterclass
 

@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# Saving and Loading Files
+# <span class="lead-number">3.7</span> Saving and Loading Files
 
 ## Making data outlive the program
 
