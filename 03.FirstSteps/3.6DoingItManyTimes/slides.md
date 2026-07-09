@@ -78,17 +78,40 @@ Without it, `while (true)` would never stop on its own.
 
 ## You don't have to build one
 
-C++ ships with ready-made collections - you don't have to build your
-own growable list.
+C++ ships with ready-made collections - you don't have to build your own growable list.
 
 ```cpp
 std::vector<std::string> friends;
 ```
 
-`std::vector<std::string>` is a list of strings that **grows** as you
-add to it with `push_back`.
+`std::vector<std::string>` is a list of strings that **grows** as you add to it with `push_back`.
 
 <div class="callout">Same idea as <code>std::string</code> being a ready-made collection of characters. You don't need to know how <code>std::vector</code> works inside to use one.</div>
+
+---
+
+*Anatomy of a for loop*
+
+```
+  +-----------------+
+  | starting state  |   start at the first
+  +--------+--------+   friend in the list
+           |
+           v
+  +-----------------+
+  | current friend  |<------------------+   
+  | in list?        |                   |   
+  +--------+--------+                   |   
+       yes  |  no                       |
+           |   +-----> done             |
+           v                            |
+  +-----------------+                   |
+  |    loop body    |   print this      |
+  |                 |   friend's name   |
+  +--------+--------+                   |
+           |                            |
+           +-- move to the next friend -+
+```
 
 ---
 
