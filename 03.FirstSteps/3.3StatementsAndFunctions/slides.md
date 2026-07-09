@@ -2,16 +2,23 @@
 marp: true
 theme: masterclass
 paginate: true
+footer: 'Chapter 3 · First Steps'
 ---
 
 <!-- _class: lead -->
+
 # 3.3 Statements and Functions
+
+## Building blocks, not syntax trivia
 
 ---
 
+*3.3 / Statements*
+
 ## Statements
 
-Each instruction we give the computer is a **statement**.
+Each instruction we give the computer is a **statement** - executed top
+to bottom, one after another.
 
 ```cpp
 greetPerson("Ada");
@@ -19,13 +26,16 @@ greetPerson("Grace");
 greetPerson("Alan");
 ```
 
-Three statements, executed top to bottom.
+Three statements. Same function, three different inputs.
 
 ---
 
+*3.3 / Functions*
+
 ## A function
 
-A named, reusable block of statements.
+A named, reusable block of statements - write the logic once, call it
+as many times as you like.
 
 ```cpp
 void greetPerson(std::string name) {
@@ -33,11 +43,13 @@ void greetPerson(std::string name) {
 }
 ```
 
-Call it as many times as you like, with different input each time.
+`name` is a **parameter** - a placeholder filled in by whoever calls it.
 
 ---
 
-## Putting it together
+*3.3 / Putting it together*
+
+## The whole program
 
 ```cpp
 #include <print>
@@ -58,22 +70,48 @@ int main() {
 
 ---
 
-## Two kinds of errors
+*3.3 / Two kinds of errors*
 
-**Compile-time error** - the program won't even build.
+## Compile-time vs. runtime
+
+<div class="cols">
+<div>
+
+**Compile-time error**
+The program won't even build.
 
 ```cpp
-greetPersonn("Ada"); // typo: no such function
+greetPersonn("Ada");
+// typo: no such function
 ```
 
-**Runtime error** - it builds, but breaks while running.
+</div>
+<div>
+
+**Runtime error**
+It builds, but breaks while running.
 
 ```cpp
-int trouble = numerator / 0; // compiles fine, crashes when run
+int trouble = numerator / 0;
+// compiles fine, crashes when run
 ```
+
+</div>
+</div>
+
+---
+
+*3.3 / Debugging habit*
+
+## Start the debugging habit now
+
+<div class="callout">Even here - before there's any input to read - breakpoint the first line inside <code>greetPerson</code> and look at what <code>name</code> holds. Get comfortable pausing a program and inspecting a value <strong>before</strong> it gets complicated.</div>
+
+<div class="shot" data-label="Screenshot: breakpoint set on greetPerson's std::println line, Locals panel showing name"></div>
 
 ---
 
 <!-- _class: lead -->
+
 # Next: 3.4
 ## Talking to the User

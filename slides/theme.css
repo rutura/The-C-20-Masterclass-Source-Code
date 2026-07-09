@@ -1,5 +1,17 @@
 /*
- * Shared Marp theme for the C++ 20/23/26 Masterclass.
+ * "masterclass" — shared Marp theme for the C++ 20/23/26 Masterclass.
+ *
+ * Design concept: a well-set-up dark editor at night. The left edge carries
+ * a gutter rail like a line-number column; the kicker in the top-left uses
+ * the same `chapter.lecture` numbering this repo's folders already use.
+ * Code blocks get quiet terminal chrome (three dots) to separate "this is
+ * code" from "this is prose" at a glance, since these decks alternate
+ * between the two constantly.
+ *
+ * Fonts: Liberation Sans (headings/body) + Liberation Mono (kicker, code,
+ * labels) - both ship inside the marpteam/marp-cli base image, so nothing
+ * is fetched at render time and nothing silently falls back.
+ *
  * Reference from any lecture's slides.md front-matter with:
  *   theme: masterclass
  */
@@ -7,67 +19,324 @@
 
 @import 'default';
 
+/*
+ * Rendering to PDF happens inside a headless Chromium that reports
+ * `prefers-color-scheme: light` regardless of the host OS - there is no
+ * interactive viewer/toggle in this pipeline's use case (a rendered PDF is
+ * static). So dark is the unconditional base palette here, not gated
+ * behind a media query, with light kept as an explicit opt-in via
+ * `data-theme="light"` for anyone viewing slides.md live in a Marp-aware
+ * editor with a light UI.
+ */
+:root {
+  --gutter-w: 10px;
+
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-2: #1c2330;
+  --ink: #e6edf3;
+  --muted: #8b949e;
+  --hairline: #2a3140;
+  --accent: #56d4c4;
+  --accent-ink: #04211d;
+  --accent-warm: #f0a868;
+  --code-ink: #d9e0ea;
+}
+
+:root[data-theme='light'] {
+  --bg: #fafbfc;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --ink: #1c2128;
+  --muted: #57606a;
+  --hairline: #d7dce2;
+  --accent: #0e8a7d;
+  --accent-ink: #ffffff;
+  --accent-warm: #a8590c;
+  --code-ink: #1c2128;
+}
+
 section {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: #1e1e2e;
-  color: #cdd6f4;
-  padding: 60px;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+  /* Gutter rail baked into the background itself (not a pseudo-element) -
+     marp-core's own default theme already claims ::before/::after on
+     section for its internals, so a second declaration doesn't reliably
+     win. A hard-edged gradient paints the same left-edge rail instead. */
+  background: linear-gradient(
+      90deg,
+      var(--accent) 0,
+      var(--accent) var(--gutter-w),
+      var(--bg) var(--gutter-w)
+    )
+    var(--bg);
+  color: var(--ink);
+  padding: 64px 72px 56px 88px;
+  font-size: 26px;
+  line-height: 1.45;
+  position: relative;
+}
+
+/* Kicker: chapter.lecture, top-left, monospace.
+   Usage: put `_Kicker: 3.2 / First Steps_` (an <em> line) as the first
+   line of a slide's content and it's styled as a small caps label. */
+p:first-child > em:only-child {
+  display: inline-block;
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.5em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  font-style: normal;
+  margin-bottom: 0.6em;
 }
 
 h1 {
-  color: #89b4fa;
-  font-size: 1.8em;
-  border-bottom: 3px solid #89b4fa;
-  padding-bottom: 0.2em;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 1.7em;
+  letter-spacing: -0.01em;
+  margin-top: 0.4em;
+  margin-bottom: 0.3em;
+  text-wrap: balance;
+}
+
+h1::after {
+  content: '';
+  display: block;
+  width: 56px;
+  height: 4px;
+  background: var(--accent);
+  margin-top: 0.35em;
+  border-radius: 2px;
 }
 
 h2 {
-  color: #94e2d5;
-  font-size: 1.3em;
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  color: var(--accent);
+  font-size: 0.95em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8em;
 }
 
-section.lead {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+h3 {
+  color: var(--accent-warm);
+  font-size: 1em;
+  font-weight: 700;
 }
 
-section.lead h1 {
-  font-size: 2.4em;
-  border-bottom: none;
+p, li {
+  color: var(--ink);
 }
 
-code {
-  color: #f9e2af;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+strong {
+  color: var(--accent);
+  font-weight: 700;
 }
 
+em {
+  color: var(--accent-warm);
+  font-style: normal;
+  font-weight: 600;
+}
+
+ul, ol {
+  padding-left: 1.1em;
+}
+
+li {
+  margin-bottom: 0.35em;
+}
+
+li::marker {
+  color: var(--accent);
+}
+
+/* Code blocks: quiet terminal chrome */
 pre {
-  background: #11111b;
-  border-radius: 8px;
-  border: 1px solid #313244;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 1.1em 1.2em 1em;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  position: relative;
+  margin-top: 1.4em;
+}
+
+pre::before {
+  content: '';
+  position: absolute;
+  top: -22px;
+  left: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f0a868;
+  box-shadow: 18px 0 0 #56d4c4, 36px 0 0 #7ee787;
 }
 
 pre code {
   background: transparent;
+  color: var(--code-ink);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.62em;
+  line-height: 1.55;
 }
 
-table {
+code {
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  color: var(--accent-warm);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
   font-size: 0.85em;
 }
 
+pre code {
+  padding: 0;
+}
+
+table {
+  font-size: 0.72em;
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.5em;
+  background: transparent;
+}
+
+thead tr,
+tbody tr {
+  background: transparent;
+  border-top: none;
+}
+
+tbody tr:nth-child(2n) {
+  background: var(--surface);
+}
+
 th {
-  background: #313244;
-  color: #89b4fa;
+  background: var(--surface-2);
+  color: var(--accent);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 0.5em 0.7em;
+  border-bottom: 2px solid var(--accent);
+}
+
+td {
+  padding: 0.5em 0.7em;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  background: transparent;
+}
+
+blockquote {
+  border-left: 3px solid var(--accent-warm);
+  padding-left: 0.9em;
+  color: var(--muted);
+  font-style: normal;
 }
 
 a {
-  color: #94e2d5;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+/* Page number */
+section::part(paginator) {
+  color: var(--muted);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* Lead slide - title cards (chapter/lecture openers, "next up" closers) */
+section.lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 88px;
+}
+
+section.lead h1 {
+  font-size: 2.5em;
+  margin-top: 0;
+}
+
+section.lead h1::after {
+  width: 84px;
+  height: 5px;
+}
+
+section.lead h2 {
+  color: var(--muted);
+  font-family: 'Liberation Sans', Arial, sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.15em;
+  font-weight: 400;
+}
+
+/* Image placeholder slots - a labeled dashed box, so a screenshot can be
+   dropped in later without redesigning the slide around it. Usage:
+   <div class="shot" data-label="Qt Creator - breakpoint gutter"></div> */
+.shot {
+  border: 2px dashed var(--hairline);
+  border-radius: 10px;
+  background: var(--surface);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.6em;
+  text-align: center;
+  margin-top: 0.6em;
+}
+
+.shot.tall {
+  min-height: 420px;
+}
+
+.shot::before {
+  content: '[ SCREENSHOT ]\A' attr(data-label);
+  white-space: pre-wrap;
+  padding: 0 2em;
+  text-align: center;
+}
+
+/* Two-column layout helper */
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+  align-items: start;
+}
+
+/* Needs-table callout row emphasis */
+.callout {
+  background: var(--surface);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.7em 1em;
+  margin-top: 0.6em;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+.callout strong {
+  color: var(--ink);
 }
 
 footer {
-  color: #6c7086;
-  font-size: 0.6em;
+  color: var(--muted);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.5em;
+  letter-spacing: 0.04em;
 }

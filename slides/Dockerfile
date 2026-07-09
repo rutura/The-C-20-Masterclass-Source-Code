@@ -4,4 +4,7 @@
 # and docker/clang.
 FROM marpteam/marp-cli:latest
 
-# The upstream image's entrypoint is already `marp`; nothing to add.
+# The theme (theme.css) is deliberately built only on fonts already present
+# in this image (Liberation Sans / Liberation Mono) - no font download at
+# build time, so this Dockerfile has no network dependency beyond the base
+# image pull itself.
