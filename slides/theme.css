@@ -1,0 +1,73 @@
+/*
+ * Shared Marp theme for the C++ 20/23/26 Masterclass.
+ * Reference from any lecture's slides.md front-matter with:
+ *   theme: masterclass
+ */
+/* @theme masterclass */
+
+@import 'default';
+
+section {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 60px;
+}
+
+h1 {
+  color: #89b4fa;
+  font-size: 1.8em;
+  border-bottom: 3px solid #89b4fa;
+  padding-bottom: 0.2em;
+}
+
+h2 {
+  color: #94e2d5;
+  font-size: 1.3em;
+}
+
+section.lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+section.lead h1 {
+  font-size: 2.4em;
+  border-bottom: none;
+}
+
+code {
+  color: #f9e2af;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+pre {
+  background: #11111b;
+  border-radius: 8px;
+  border: 1px solid #313244;
+}
+
+pre code {
+  background: transparent;
+}
+
+table {
+  font-size: 0.85em;
+}
+
+th {
+  background: #313244;
+  color: #89b4fa;
+}
+
+a {
+  color: #94e2d5;
+}
+
+footer {
+  color: #6c7086;
+  font-size: 0.6em;
+}
