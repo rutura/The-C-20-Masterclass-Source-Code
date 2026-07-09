@@ -7,18 +7,17 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.8 Remembering Things
+# Remembering Things
 
-## The chapter's capstone
+## Put It All Together
 
 ---
 
-*3.8 / The plan*
+*The plan*
 
 ## What this lecture does
 
-Takes the raw file I/O from 3.7 and wraps it in functions, then uses
-them properly:
+Takes the raw file I/O from the last lecture and wraps it in functions, then uses them properly:
 
 1. **Load** whatever friends are already saved
 2. **Show** them
@@ -29,7 +28,7 @@ The friends list grows a little more every time you run the program.
 
 ---
 
-*3.8 / Loading*
+*Loading*
 
 ## Wrapping file I/O in a function
 
@@ -49,7 +48,7 @@ std::vector<std::string> loadFriendsFromFile(const std::string& fileName) {
 
 ---
 
-*3.8 / Saving*
+*Saving*
 
 ## The other half
 
@@ -66,7 +65,7 @@ void saveFriendsToFile(const std::vector<std::string>& friends,
 
 ---
 
-*3.8 / Load first*
+*Load first*
 
 ## Load first, THEN collect more
 
@@ -86,40 +85,7 @@ saveFriendsToFile(friends, fileName);
 
 ---
 
-*3.8 / Run it twice*
-
-## Proof it persists
-
-<div class="cols">
-<div>
-
-**First run**
-`friends.txt` doesn't exist yet
-
-```
-You already have 0
-friend(s) saved:
-```
-
-</div>
-<div>
-
-**Second run**
-picks up right where you left off
-
-```
-You already have 2
-friend(s) saved:
- - Grace
- - Hopper
-```
-
-</div>
-</div>
-
----
-
-*Chapter 3 / Wrap-up*
+*Chapter Wrap-up*
 
 ## What this program actually needed
 
@@ -136,23 +102,12 @@ friend(s) saved:
 
 ---
 
-*Chapter 3 / How C++23 helped*
-
-## What C++'s latest features bought us
+*In Your Toolbox*
 
 - **`std::print` / `std::println`** - a single `{}`-style format string
   instead of chained `std::cout <<` - readable from lecture one
-- **Brace initialization (`{}`)** - `int age{};` refuses to silently
-  truncate a value you didn't mean to lose - the same habit chapter 4
-  explains the *why* of
-
-<div class="callout">None of this was necessary to teach the underlying ideas - but it made the code you typed along the way noticeably less ceremonial.</div>
-
----
-
-<!-- _class: lead -->
-
-# End of Chapter 3
-## First Steps
-
-### Next: Chapter 4 — Variables and Data Types
+- **Brace initialization (`{}`)** - `int age{};` It makes your code safer
+- **`std::vector`** - a ready-made collection that grows as you add to it
+- **File I/O** - `std::ifstream` and `std::ofstream` for reading and writing files
+- **Functions** - named, reusable actions that can take input and return output
+- **Decisions and Loops** - `if` / `else` and `while` let your program follow different paths and repeat actions

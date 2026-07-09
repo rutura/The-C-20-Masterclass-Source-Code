@@ -7,24 +7,23 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.7 Saving and Loading Files
+# Saving and Loading Files
 
 ## Making data outlive the program
 
 ---
 
-*3.7 / The problem*
+*The problem*
 
 ## Everything so far disappears
 
-Everything we've built lives only in the program's **memory** - it
-disappears the moment the program ends.
+Everything we've built lives only in the program's **memory** - it disappears the moment the program ends.
 
 <div class="callout"><strong>File I/O</strong> is how a program remembers something between separate runs.</div>
 
 ---
 
-*3.7 / Writing*
+*Writing*
 
 ## Writing a file
 
@@ -33,6 +32,8 @@ disappears the moment the program ends.
 ```cpp
 #include <fstream>
 
+// The file is created in the working directory.
+// Where the program is run from.
 std::ofstream outputFile("friends.txt");
 
 for (const std::string& friendName : friends) {
@@ -46,7 +47,7 @@ Write to it with `<<`, just like `std::cout`.
 
 ---
 
-*3.7 / Reading*
+*Reading*
 
 ## Reading a file back
 
@@ -68,7 +69,7 @@ Same `std::getline` already used for keyboard input.
 
 ---
 
-*3.7 / The key idea*
+*The key idea*
 
 ## It's all just a stream
 
@@ -84,37 +85,10 @@ C++ is concerned.
 
 ---
 
-*3.7 / Proof*
-
-## Proving it worked
-
-```cpp
-std::println("\nReloaded from {}:", fileName);
-for (const std::string& friendName : friendsFromDisk) {
-    std::println(" - {}", friendName);
-}
-```
-
-Written this run, read back this same run - next lecture makes it
-actually persist **across** runs.
-
-<div class="shot" data-label="Screenshot: terminal — Saved N friend(s), then Reloaded from friends.txt listing"></div>
-
----
-
-*3.7 / Debug a file write*
+*Debug a file write*
 
 ## Watch the file appear
 
 Step over the `saveFriendsToFile`-equivalent write, then open
 `friends.txt` in your IDE's file browser - it now exists, with the
 friend names written to it.
-
-<div class="shot" data-label="Screenshot: friends.txt open in editor immediately after stepping over the write"></div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.8
-## Remembering Things
