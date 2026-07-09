@@ -123,3 +123,31 @@ section.lead h2 { color: var(--muted); font-weight: 400; font-size: 1.1em; text-
 
 footer { color: var(--muted); font-family: 'Liberation Mono', monospace; font-size: 0.5em; }
 section::part(paginator) { color: var(--muted); }
+
+.shot {
+  border: 2px dashed var(--ink);
+  border-radius: 0;
+  background: var(--bg);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.6em;
+  text-align: center;
+  margin-top: 0.6em;
+}
+.shot.tall { min-height: 420px; }
+.shot::before { content: '[ SCREENSHOT ]\A' attr(data-label); white-space: pre-wrap; padding: 0 2em; text-align: center; }
+
+.shot-img {
+  display: block;
+  max-width: 100%;
+  max-height: 440px;
+  width: auto;
+  height: auto;
+  margin: 0.6em auto 0;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+}

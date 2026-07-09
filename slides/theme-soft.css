@@ -125,3 +125,32 @@ section.lead h2 { color: var(--muted); font-weight: 400; font-size: 1.1em; }
 
 footer { color: var(--muted); font-family: 'Liberation Sans', Arial, sans-serif; font-size: 0.5em; }
 section::part(paginator) { color: var(--muted); }
+
+.shot {
+  border: 2px dashed var(--hairline);
+  border-radius: 12px;
+  background: var(--surface);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-family: 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.6em;
+  text-align: center;
+  margin-top: 0.6em;
+}
+.shot.tall { min-height: 420px; }
+.shot::before { content: '[ SCREENSHOT ]\A' attr(data-label); white-space: pre-wrap; padding: 0 2em; text-align: center; }
+
+.shot-img {
+  display: block;
+  max-width: 100%;
+  max-height: 440px;
+  width: auto;
+  height: auto;
+  margin: 0.6em auto 0;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
