@@ -40,7 +40,17 @@
   --accent: #56d4c4;
   --accent-ink: #04211d;
   --accent-warm: #f0a868;
-  --code-ink: #d9e0ea;
+  --code-ink: #eef2f7;
+
+  /* Syntax token colors - tuned for contrast against --surface (#161b22),
+     not just inherited from whatever highlight.js theme Marp bundles by
+     default (which skews light/muddy on a dark background). */
+  --tok-keyword: #ff7b72;
+  --tok-string: #a5d6ff;
+  --tok-function: #7ee8d4;
+  --tok-number: #d2a8ff;
+  --tok-comment: #8b96a5;
+  --tok-punct: var(--code-ink);
 }
 
 :root[data-theme='light'] {
@@ -54,6 +64,13 @@
   --accent-ink: #ffffff;
   --accent-warm: #a8590c;
   --code-ink: #1c2128;
+
+  --tok-keyword: #cf222e;
+  --tok-string: #0a3069;
+  --tok-function: #116329;
+  --tok-number: #8250df;
+  --tok-comment: #6e7781;
+  --tok-punct: var(--code-ink);
 }
 
 section {
@@ -197,6 +214,49 @@ code {
 
 pre code {
   padding: 0;
+}
+
+/* highlight.js 11.x token colors - Marp's bundled default theme leans
+   light/muted and reads poorly against a dark code block, so every token
+   class actually used by the cpp/bash grammars is set explicitly here. */
+.hljs-keyword,
+.hljs-built_in,
+.hljs-type,
+.hljs-literal,
+.hljs-operator {
+  color: var(--tok-keyword);
+}
+
+.hljs-string,
+.hljs-meta .hljs-string {
+  color: var(--tok-string);
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-function .hljs-title {
+  color: var(--tok-function);
+}
+
+.hljs-number {
+  color: var(--tok-number);
+}
+
+.hljs-comment {
+  color: var(--tok-comment);
+  font-style: italic;
+}
+
+.hljs-meta,
+.hljs-preprocessor {
+  color: var(--tok-keyword);
+}
+
+.hljs-variable,
+.hljs-params,
+.hljs-attr,
+.hljs-property {
+  color: var(--tok-punct);
 }
 
 table {
