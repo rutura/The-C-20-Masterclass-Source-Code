@@ -7,13 +7,13 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.4 Talking to the User
+# Talking to the User
 
 ## Input, and doing something with it
 
 ---
 
-*3.4 / Reading a line*
+*Reading a line*
 
 ## Reading input
 
@@ -28,7 +28,7 @@ std::getline(std::cin, name); // reads a full line, including spaces
 
 ---
 
-*3.4 / Reading a number*
+*Reading a number*
 
 ## `>>` vs. `getline`
 
@@ -43,11 +43,11 @@ std::cin >> age;
 
 ---
 
-*3.4 / The payoff*
+*Doing More*
 
 ## It's not just echoing back
 
-Reading input only gets interesting once the program **does something**
+Let's **do something** with the data
 with it.
 
 ```cpp
@@ -61,7 +61,7 @@ std::println("You'll turn 100 in the year {}.", turns100In);
 
 ---
 
-*3.4 / Full program*
+*Full program*
 
 ## Where we are now
 
@@ -84,13 +84,7 @@ std::println("You'll turn 100 in the year {}.", turns100In);
 
 ---
 
-*3.4 / See it run*
-
-<div class="shot tall" data-label="Screenshot: terminal — prompts answered, turns-100 output"></div>
-
----
-
-*3.4 / Debugging input*
+*Debugging input*
 
 ## Debugging a read
 
@@ -98,12 +92,3 @@ You can't step **into** `std::cin >> age` to watch it read - it's atomic
 as far as the debugger sees it.
 
 <div class="callout">The pattern: breakpoint on the line <strong>after</strong> the read, step over the read itself, then inspect the variable that just got filled in.</div>
-
-<div class="shot" data-label="Screenshot: IDE debugger stopped after getline(std::cin, name), Locals showing name populated"></div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.5
-## Making Decisions

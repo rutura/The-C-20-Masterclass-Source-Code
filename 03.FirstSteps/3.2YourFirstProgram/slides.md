@@ -7,40 +7,33 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.2 Your First Program
+# Your First Program
 
 ## The C++ 20/23/26 Masterclass
 
 ---
 
-*Chapter 3 / First Steps*
+*First Steps With C++*
 
-## The running example
+**What We Do**: .
 
-Throughout this chapter we build **one small program**: a personal profile
-that greets you, asks a few questions, makes decisions, and - by the end -
-remembers your friends between runs.
-
-- Nothing fancy on purpose
-- One idea added per lecture, on top of the last
-- The same excuse to meet every foundational building block
+- Entry Point
+- Build and Run on The Command Line
+- Output to the Screen
+- Debugging through Qt Creator and Visual Studio (IDE)
 
 ---
 
-*3.2 / Setup*
+*The Files*
 
-## Before we type anything
-
-<div class="shot" data-label="Screenshot: empty lecture folder open in Visual Studio / Qt Creator"></div>
-
-Every lecture folder has its own `CMakeLists.txt`, already scaffolded.
-Open the folder, don't create a new project by hand.
+- `CMakeLists.txt` - the build instructions for CMake, which we use to compile and run our program
+- `main.cpp` - the main program file, where we write our code
 
 ---
 
-*3.2 / Hello, C++*
+*Main.cpp*
 
-## The smallest real program
+## The Entry Point
 
 ```cpp
 #include <print>
@@ -56,16 +49,27 @@ int main() {
 
 ---
 
-*3.2 / Line by line*
+*CMakeLists.txt*
 
-## What's actually happening
+## The Build Instructions
 
-| Line | What it does |
-|---|---|
-| `#include <print>` | pulls in `std::println` |
-| `int main()` | every C++ program starts here |
-| `std::println(...)` | prints text, adds the newline for you |
-| `return 0;` | tells the OS the program finished successfully |
+```cmake
+cmake_minimum_required(VERSION 3.20)
+
+# Project name
+project(rooster)
+
+# Set C++ standard to C++23
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Create executable
+add_executable(rooster main.cpp)
+
+# For multi-file projects with headers and separate .cpp files
+# add_executable(rooster main.cpp dog.cpp dog.h cat.cpp cat.h)
+```
+
 
 ---
 
@@ -85,9 +89,11 @@ cmake --build build
 
 *3.2 / Run it*
 
-## What you should see
+## Run the Executable
 
-<div class="shot" data-label="Screenshot: terminal output — Hello there! / Welcome to your very first C++ program."></div>
+```sh
+build/rooster
+```
 
 ---
 
@@ -105,10 +111,3 @@ cmake --build build
 ```
 
 <div class="callout"><strong>Rule of thumb:</strong> a comment earns its place by explaining <em>why</em>, not by narrating what the code obviously already says.</div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.3
-## Statements and Functions

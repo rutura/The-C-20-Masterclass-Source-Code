@@ -7,13 +7,13 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.5 Making Decisions
+# Making Decisions
 
 ## Branching on what the user told us
 
 ---
 
-*3.5 / if / else*
+*if / else*
 
 ## Following a different path
 
@@ -25,16 +25,13 @@ if (age >= 18) {
 }
 ```
 
-One condition, two possible outcomes.
+We have one condition and two possible outcomes.
 
 ---
 
-*3.5 / Two variables*
+*Two variables*
 
 ## Comparisons between two variables
-
-Comparisons aren't just for one variable against a fixed number - they
-work between two variables too.
 
 ```cpp
 if (age == friendAge) {
@@ -58,12 +55,9 @@ if (age == friendAge) {
 | `<` | less than |
 | `>=` | greater than or equal to |
 
-Same operators, applied where they're actually useful - not memorized
-as an isolated list before you have a reason to care.
-
 ---
 
-*3.5 / A gotcha*
+*A gotcha*
 
 ## Leftover newline
 
@@ -78,12 +72,6 @@ std::getline(std::cin, friendName); // otherwise this reads an empty line
 
 ---
 
-*3.5 / Try it*
-
-<div class="shot tall" data-label="Screenshot: terminal — age vs. friend's age comparison output"></div>
-
----
-
 *3.5 / Conditional breakpoints*
 
 ## Only stop when it matters
@@ -91,12 +79,3 @@ std::getline(std::cin, friendName); // otherwise this reads an empty line
 Right-click a breakpoint on the `if` line and add a **condition**, e.g.
 `age < 18` - the debugger only pauses when that's true, instead of
 every single run.
-
-<div class="shot" data-label="Screenshot: breakpoint condition dialog (Visual Studio or Qt Creator)"></div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.6
-## Doing It Many Times

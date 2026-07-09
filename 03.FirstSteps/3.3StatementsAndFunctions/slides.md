@@ -7,13 +7,13 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.3 Statements and Functions
+# Statements and Functions
 
-## Building blocks, not syntax trivia
+## Building blocks
 
 ---
 
-*3.3 / Statements*
+*Statements*
 
 ## Statements
 
@@ -21,16 +21,14 @@ Each instruction we give the computer is a **statement** - executed top
 to bottom, one after another.
 
 ```cpp
-greetPerson("Ada");
-greetPerson("Grace");
-greetPerson("Alan");
+int age { 42 }; // a statement that declares a variable and initializes it
+greetPerson("Grace"); // a statement that calls a function
+return 0; // a statement that ends the program
 ```
-
-Three statements. Same function, three different inputs.
 
 ---
 
-*3.3 / Functions*
+*Functions*
 
 ## A function
 
@@ -47,30 +45,8 @@ void greetPerson(std::string name) {
 
 ---
 
-*3.3 / Putting it together*
 
-## The whole program
-
-```cpp
-#include <print>
-#include <string>
-
-void greetPerson(std::string name) {
-    std::println("Hello, {}!", name);
-}
-
-int main() {
-    greetPerson("Ada");
-    greetPerson("Grace");
-    greetPerson("Alan");
-
-    return 0;
-}
-```
-
----
-
-*3.3 / Two kinds of errors*
+*Two kinds of errors*
 
 ## Compile-time vs. runtime
 
@@ -101,17 +77,10 @@ int trouble = numerator / 0;
 
 ---
 
-*3.3 / Debugging habit*
+*Debugging habit*
 
 ## Start the debugging habit now
 
-<div class="callout">Even here - before there's any input to read - breakpoint the first line inside <code>greetPerson</code> and look at what <code>name</code> holds. Get comfortable pausing a program and inspecting a value <strong>before</strong> it gets complicated.</div>
+<div class="callout">Breakpoint inside <code>greetPerson</code> and inspect <code>name</code> - get comfortable doing this <strong>before</strong> things get complicated.</div>
 
-<div class="shot" data-label="Screenshot: breakpoint set on greetPerson's std::println line, Locals panel showing name"></div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.4
-## Talking to the User
+<img class="shot-img" src="images/qt-creator-debugging.png" alt="Qt Creator stopped on a breakpoint inside greetPerson, Locals panel showing name">

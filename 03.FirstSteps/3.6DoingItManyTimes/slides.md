@@ -7,13 +7,13 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# 3.6 Doing It Many Times
+# Doing It Many Times
 
 ## Loops and your first collection
 
 ---
 
-*3.6 / while*
+*while*
 
 ## while - repeat until told to stop
 
@@ -33,7 +33,7 @@ while (true) {
 
 ---
 
-*3.6 / break*
+*break*
 
 ## break
 
@@ -49,7 +49,7 @@ Without it, `while (true)` would never stop on its own.
 
 ---
 
-*3.6 / A collection, ready-made*
+*A collection, ready-made*
 
 ## You don't have to build one
 
@@ -67,7 +67,7 @@ add to it with `push_back`.
 
 ---
 
-*3.6 / Looping over it*
+*Looping over it*
 
 ## Looping over the collection
 
@@ -79,29 +79,14 @@ for (const std::string& friendName : friends) {
 ```
 
 A range-based `for` visits every element, one at a time - no manual
-indexing required.
+indexing required. It's another variant of loops in C++.
 
 ---
 
-*3.6 / See it run*
-
-<div class="shot tall" data-label="Screenshot: terminal — adding three friend names, then the printed list"></div>
-
----
-
-*3.6 / Debug the collection*
+*Debug the collection*
 
 ## Watch it grow, one push_back at a time
 
 Step into the loop and open your IDE's variable/locals view - watching
 `friends` gain an element on each iteration is the clearest way to see
 a `std::vector` actually grow.
-
-<div class="shot" data-label="Screenshot: Locals/Expressions panel showing friends vector expanding across steps"></div>
-
----
-
-<!-- _class: lead -->
-
-# Next: 3.7
-## Saving and Loading Files
