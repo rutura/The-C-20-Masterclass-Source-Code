@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# <span class="lead-number">3.6</span> Doing It Many Times
+# Doing It Many Times
 
 ## Loops and your first collection
 

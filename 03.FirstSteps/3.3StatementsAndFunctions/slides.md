@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# <span class="lead-number">3.3</span> Statements and Functions
+# Statements and Functions
 
 ## Building blocks
 

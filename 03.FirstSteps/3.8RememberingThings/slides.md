@@ -7,7 +7,7 @@ footer: 'Chapter 3 · First Steps'
 
 <!-- _class: lead -->
 
-# <span class="lead-number">3.8</span> Remembering Things
+# Remembering Things
 
 ## Functions to Save and Load Files
 
