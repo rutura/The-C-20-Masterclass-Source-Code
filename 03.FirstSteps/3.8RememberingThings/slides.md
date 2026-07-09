@@ -9,7 +9,7 @@ footer: 'Chapter 3 · First Steps'
 
 # Remembering Things
 
-## Put It All Together
+## Functions to Save and Load Files
 
 ---
 
