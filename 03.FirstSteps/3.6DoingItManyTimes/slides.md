@@ -13,6 +13,31 @@ footer: 'Chapter 3 · First Steps'
 
 ---
 
+*Anatomy of a loop*
+
+```
+  +-----------------+
+  | starting state  |   friends starts empty
+  +--------+--------+
+           |
+           v
+  +-----------------+
+  |   stop check     |<-----------------+   "did the user
+  | friendName empty?|                  |    press enter on
+  +--------+--------+                   |    an empty line?"
+       no  |  yes                       |
+           |   +-----> done             |
+           v                            |
+  +-----------------+                   |
+  |    loop body    |   read a name,    |
+  |                 |   push_back it    |
+  +--------+--------+                   |
+           |                            |
+           +---- go back and check -----+
+```
+
+---
+
 *while*
 
 ## while - repeat until told to stop
