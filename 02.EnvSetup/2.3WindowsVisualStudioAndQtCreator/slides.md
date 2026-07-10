@@ -19,19 +19,15 @@ footer: 'Chapter 2 · Environment Setup'
 
 - **Visual Studio** - free Community edition, ships its own compiler
   (MSVC).
-- **Qt Creator** - a lighter, cross-platform IDE. On Windows it doesn't
-  ship a compiler of its own - it needs you to pick a **Kit**.
+- **Qt Creator** - cross-platform IDE. It can use different compilers, including MSVC, MinGW, and LLVM/Clang. You choose a compiler when you configure a **Kit**.
 
-Both read the same `CMakeLists.txt` from this course. Pick whichever one
-you're more comfortable with.
+Both support CMake and will read the same `CMakeLists.txt` from this course. Use what works best for you.
 
 ---
 
 *Visual Studio*
 
 ## Installing Visual Studio
-
-<div class="shot" data-label="Visual Studio Installer - Desktop development with C++ workload"></div>
 
 1. Download the Visual Studio Installer, choose **Community** (free).
 2. Under **Workloads**, check **Desktop development with C++**.
@@ -45,10 +41,8 @@ you're more comfortable with.
 ## Open any lecture folder directly
 
 Visual Studio can open a folder containing a `CMakeLists.txt` without a
-`.sln` file at all: **File -> Open -> CMake...** and pick this lecture's
+`.sln` file at all: **File -> Open -> XXX...** and pick a lecture's
 folder.
-
-<div class="shot" data-label="Visual Studio - Open Folder / CMake project view"></div>
 
 Visual Studio detects `CMakeLists.txt`, configures the project, and shows
 `rooster` as the run/debug target.
@@ -75,11 +69,7 @@ CMake's `set(CMAKE_CXX_STANDARD 23)` (already in this course's
 
 ## Installing Qt Creator
 
-<div class="shot" data-label="Qt Online Installer - component selection"></div>
-
-The Qt Online Installer lets you select **Qt Creator** as a standalone
-component - you don't need to install the full Qt framework or any Qt
-libraries just to use it as a C++ IDE.
+Use the **Qt Online Installer** to install Qt and Qt Creator. 
 
 ---
 
@@ -103,8 +93,6 @@ Studio is already installed (an **MSVC kit**). You can also add:
 
 ## Opening this lecture in Qt Creator
 
-<div class="shot" data-label="Qt Creator - Configure Project screen, choosing a Kit"></div>
-
 **File -> Open File or Project**, choose this folder's `CMakeLists.txt`.
 Qt Creator shows a **Configure Project** screen listing every Kit it
 knows about - check the one you want to build with, then **Configure
@@ -116,9 +104,11 @@ Project**.
 
 ## Not all kits support C++23 equally
 
-MSVC, MinGW, and LLVM/Clang kits are three genuinely different
-compilers - each with its own pace of adding new C++ features. A kit
-that's a version or two behind may not support everything this course
-uses yet.
+MSVC, MinGW, and LLVM/Clang kits are three different compilers,
+each with its own pace of adding new C++ features. A kit with 
+a compiler that's a version or two behind may not support 
+everything this course uses yet.
 
-Lecture 2.5 shows how to check, for whichever kit you end up using.
+If the compiler on your kit doesn't support the C++23 features 
+used in this course, don't panic. I will show you how to use **Docker** 
+to get latest compilers running on your machine.

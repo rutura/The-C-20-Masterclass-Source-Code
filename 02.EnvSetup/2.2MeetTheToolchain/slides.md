@@ -52,9 +52,7 @@ it does.
 main.cpp  --[compiler]-->  main.o  --[linker]-->  rooster (or rooster.exe)
 ```
 
-Two separate tools, two separate jobs. Lecture 2.7 opens this up in full -
-for now, just know they're not the same thing, and a "compiler" alone
-can't produce a runnable program by itself.
+You get to the executable by running the compiler and linker and other tools on your source code.
 
 ---
 
@@ -78,7 +76,7 @@ add_executable(rooster main.cpp)
 
 *Where IDEs fit*
 
-## Visual Studio and Qt Creator both just... call CMake
+## Visual Studio and Qt Creator both call CMake
 
 Neither IDE is its own separate build system in this course - both read
 the exact same `CMakeLists.txt`. What differs is *which compiler* each one
@@ -91,10 +89,9 @@ about.
 
 ## Where we're headed
 
-- **2.3** - Windows: Visual Studio, and Qt Creator with a Kit
-- **2.4** - Linux and Mac: Qt Creator
-- **2.5** - Checking whether your compiler is modern enough
-- **2.6** - Docker, for when it isn't
-- **2.7** - CMake, properly explained
-
-Pick the lecture(s) for your OS - you don't need all of them.
+- **Windows:** Visual Studio, and Qt Creator with a Kit
+- **Linux:** Qt Creator with a Kit
+- **Mac:** Xcode, and Qt Creator with a Kit 
+- Checking whether your compiler is modern enough
+- Docker, for when the compiler is **too old**
+- CMake, the basics
