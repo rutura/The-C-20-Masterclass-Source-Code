@@ -7,19 +7,18 @@ footer: 'Chapter 2 · Environment Setup'
 
 <!-- _class: lead -->
 
-# Linux and Mac: Qt Creator
+# Linux: Qt Creator
 
-## Same IDE, a compiler that's already on your system
+## Uses compiler that's already on your system
 
 ---
 
 *Recommended*
 
-## Qt Creator on Linux and Mac
+## Qt Creator on Linux
 
-Same reasoning as Windows: it's free, cross-platform, and reads the same
-`CMakeLists.txt` every lecture in this course ships with. Install it via
-the Qt Online Installer, selecting just the **Qt Creator** component.
+Free, cross-platform, and reads the same `CMakeLists.txt` every lecture
+in this course ships with. Install Qt and Qt Creator using the **Qt Online Installer**.
 
 ---
 
@@ -27,16 +26,9 @@ the Qt Online Installer, selecting just the **Qt Creator** component.
 
 ## Qt Creator will pick your system compiler
 
-Unlike Windows, Linux and Mac almost always already have a C++ compiler
-installed system-wide:
-
-- **Linux** - usually **GCC**, already on the system or one
-  `apt`/`dnf`/`pacman` install away.
-- **Mac** - **Apple Clang**, installed as part of the Xcode Command Line
-  Tools (`xcode-select --install`).
-
-Qt Creator detects it automatically and creates a Kit for you - in most
-cases, **you won't need to configure a Kit by hand at all**.
+Linux will almost always already have a C++ compiler installed system-wide.
+If yours doesn't yet, install one with your distro's package manager. 
+Qt Creator will detect it automatically and offer a **Kit** that uses it.
 
 ---
 
@@ -44,14 +36,13 @@ cases, **you won't need to configure a Kit by hand at all**.
 
 ## That default compiler might be old
 
-Your distro's or macOS's system compiler is whatever version shipped
-when your OS was released or last updated - not necessarily the latest
-GCC or Clang. This course is written against **C++23**, which needs a
-fairly recent compiler.
+Your distro's system GCC is whatever version shipped when your OS was
+released or last updated - not necessarily the latest one. This course is
+written against **C++23**, which needs a fairly recent compiler.
 
-<div class="callout">A system GCC/Clang that's a few years old may not
-build every example in this course - that's not a mistake on your part,
-it's just what "the default compiler" means.</div>
+<div class="callout">A system GCC that's a few years old may not build
+every example in this course - that's not a mistake on your part, it's
+just what "the default compiler" means.</div>
 
 ---
 
@@ -61,12 +52,12 @@ it's just what "the default compiler" means.</div>
 
 ```sh
 g++ --version
-clang++ --version
 ```
 
-Compare what you get against
-[cppreference's compiler support table](https://en.cppreference.com/w/cpp/compiler_support)
-(lecture 2.5 covers this in depth).
+If your version is less than 14, you may need to install a newer compiler. 
+**But don't panic** - in a later lecture I will show you how to use 
+**Docker** to get a modern GCC or Clang without touching anything 
+already installed on your system.
 
 ---
 
@@ -74,18 +65,6 @@ Compare what you get against
 
 ## Building this lecture's program
 
-<div class="shot" data-label="Qt Creator - Configure Project screen on Linux/Mac"></div>
-
-**File -> Open File or Project**, select this folder's `CMakeLists.txt`,
-confirm the detected Kit, then **Configure Project**. Build and run
+**File -> Open File or Project**, select a lecture's `CMakeLists.txt`,
+confirm a Kit, then **Configure Project**. Build and run
 `rooster` the same way you would any Qt Creator project.
-
----
-
-*If it's too old*
-
-## If your compiler turns out to be too old
-
-You don't need to upgrade your whole system compiler just for this
-course. Lecture 2.6 covers **Docker** - a way to get a modern GCC or
-Clang without touching anything already installed.

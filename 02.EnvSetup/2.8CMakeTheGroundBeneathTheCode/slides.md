@@ -137,5 +137,5 @@ regardless of which lecture you're in.
 Neither IDE has its own separate compilation model in this course - both
 read this exact same `CMakeLists.txt`, and both are really just running
 `cmake -B build` / `cmake --build build` behind a Run/Debug button.
-Docker (2.6) runs the identical two commands by hand, inside a
+Docker (2.7) runs the identical two commands by hand, inside a
 container. One build description, three ways to trigger it.

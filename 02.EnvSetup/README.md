@@ -17,10 +17,11 @@ so you can pick your path once and stop thinking about it.
 |---|---|---|
 | Understand the pieces before touching a specific tool | "what's a compiler vs. a linker vs. an IDE?" | 2.2 Meet the Toolchain |
 | An IDE and compiler on Windows | Visual Studio + MSVC, or Qt Creator + a Kit | 2.3 Windows |
-| An IDE and compiler on Linux/Mac | Qt Creator + your system's GCC/Clang | 2.4 Linux and Mac |
-| Know whether your compiler is modern enough | checking cppreference, compiling a feature probe | 2.5 Checking Compiler Support |
-| A fallback when it isn't | a containerized, always-up-to-date GCC/Clang | 2.6 Docker |
-| Understand what's actually happening under the IDE | CMake, the compiler, and the linker | 2.7 CMake |
+| An IDE and compiler on Linux | Qt Creator + your system's GCC | 2.4 Linux |
+| An IDE and compiler on Mac | Qt Creator + Apple Clang (Xcode Command Line Tools) | 2.5 Mac |
+| Know whether your compiler is modern enough | checking cppreference, compiling a feature probe | 2.6 Checking Compiler Support |
+| A fallback when it isn't | a containerized, always-up-to-date GCC/Clang | 2.7 Docker |
+| Understand what's actually happening under the IDE | CMake, the compiler, and the linker | 2.8 CMake |
 
 ## Lecture by lecture
 
@@ -32,20 +33,24 @@ so you can pick your path once and stop thinking about it.
   Kit (MSVC, MinGW, or LLVM/Clang) as the alternative. Different kits
   bring genuinely different compilers with different levels of modern
   C++ support.
-- **2.4 Linux and Mac: Qt Creator** - the recommended IDE on both, and the
-  gotcha that Qt Creator picks your system's already-installed GCC/Clang
-  by default, which may be older than this course needs.
-- **2.5 Checking What Your Compiler Supports** - using
+- **2.4 Linux: Qt Creator** - the recommended IDE, and the gotcha that Qt
+  Creator picks your system's already-installed GCC by default, which
+  may be older than this course needs.
+- **2.5 Mac: Xcode and Qt Creator** - separating the compiler (Apple
+  Clang, installed via the lightweight Xcode Command Line Tools) from
+  the IDE (we still recommend Qt Creator over the full Xcode app), plus
+  the same "your default compiler might be old" gotcha as Linux.
+- **2.6 Checking What Your Compiler Supports** - using
   [cppreference's compiler support table](https://en.cppreference.com/w/cpp/compiler_support),
   the `-std=c++23` / `/std:c++latest` flags, and a small "feature probe"
   program (this lecture's `main.cpp`) that only compiles on a modern
   enough toolchain - so a compiler error tells you exactly what's
   missing, instead of guessing from a version number.
-- **2.6 Docker: When Your Compiler Is Too Old** - the escape hatch. This
+- **2.7 Docker: When Your Compiler Is Too Old** - the escape hatch. This
   course ships two ready-made images, `masterclass-gcc:16` and
   `masterclass-clang:21`, so you can build and run every lecture without
   installing anything locally or risking your existing setup.
-- **2.7 CMake: The Ground Beneath the Code** - what CMake actually is (a
+- **2.8 CMake: The Ground Beneath the Code** - what CMake actually is (a
   build system *generator*, not a compiler), how `cmake -B build` and
   `cmake --build build` map to the compiler and linker, and where the
   `rooster`/`rooster.exe` executable every lecture produces comes from.
@@ -61,7 +66,7 @@ conventions used everywhere else in this course:
 - **`__cplusplus`**, checked at compile time, to show students concretely
   which standard their toolchain is actually targeting - not just told,
   but printed by their own build.
-- **Concepts** (C++20), used in 2.5's feature-probe program specifically
+- **Concepts** (C++20), used in 2.6's feature-probe program specifically
   *because* they're recent enough to fail loudly on an under-supported
   compiler - which is the point of that lecture.
 
@@ -70,5 +75,5 @@ conventions used everywhere else in this course:
 Every lecture folder in this chapter has its own `CMakeLists.txt`,
 `build-gcc.sh`, and `build-clang.sh`, same as every other chapter. If your
 local Visual Studio, Qt Creator Kit, or system compiler isn't new enough
-(see 2.5), use one of the ready-made Docker images in
+(see 2.6), use one of the ready-made Docker images in
 [`../docker`](../docker) - see that folder's README for exact commands.

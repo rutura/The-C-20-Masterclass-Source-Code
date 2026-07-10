@@ -32,8 +32,6 @@ doesn't automatically mean *every* feature this course uses is available.
 tracks, feature by feature, which GCC/Clang/MSVC version added support
 for it.
 
-<div class="shot" data-label="cppreference.com - C++23 compiler support table"></div>
-
 If something from this course doesn't compile for you, this page is the
 first place to check *why*.
 
@@ -114,5 +112,3 @@ version string - tells you which feature to look up on cppreference.
   Creator's Kit selection offers a newer GCC/Clang/MSVC.
 - **Use Docker** - if upgrading isn't convenient, or you don't want to
   touch your system's installed toolchain at all.
-
-Lecture 2.6 covers the Docker option in detail.
