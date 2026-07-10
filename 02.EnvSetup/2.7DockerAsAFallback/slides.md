@@ -118,3 +118,14 @@ Local toolchains can have quiet gaps (a locally installed compiler that
 compiles `std::print` but fails to *link* it, for example). Whenever
 something behaves unexpectedly on your machine, these two images are the
 reference: if it builds and runs here, the lecture's code is correct.
+
+---
+
+*What's next*
+
+## A container with a real editor attached
+
+So far, working in a container means an interactive shell and typing
+commands by hand. Lecture 2.8 connects **VS Code** to this same
+container - full editing, IntelliSense, and breakpoint debugging,
+without leaving Linux or your compiler of choice.

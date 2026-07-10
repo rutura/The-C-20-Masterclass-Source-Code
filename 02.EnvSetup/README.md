@@ -21,7 +21,8 @@ so you can pick your path once and stop thinking about it.
 | An IDE and compiler on Mac | Qt Creator + Apple Clang (Xcode Command Line Tools) | 2.5 Mac |
 | Know whether your compiler is modern enough | checking cppreference, compiling a feature probe | 2.6 Checking Compiler Support |
 | A fallback when it isn't | a containerized, always-up-to-date GCC/Clang | 2.7 Docker |
-| Understand what's actually happening under the IDE | CMake, the compiler, and the linker | 2.8 CMake |
+| A real editor wired into that container | Dev Containers, CMake Tools, breakpoint debugging | 2.8 VS Code and Docker |
+| Understand what's actually happening under the IDE | CMake, the compiler, and the linker | 2.9 CMake |
 
 ## Lecture by lecture
 
@@ -50,7 +51,15 @@ so you can pick your path once and stop thinking about it.
   course ships two ready-made images, `masterclass-gcc:16` and
   `masterclass-clang:21`, so you can build and run every lecture without
   installing anything locally or risking your existing setup.
-- **2.8 CMake: The Ground Beneath the Code** - what CMake actually is (a
+- **2.8 VS Code and Docker** - connecting Visual Studio Code to a running
+  container with the Dev Containers extension, installing C/C++ and
+  CMake Tools *inside* the container, and using CMake Tools' Configure/
+  Build/Debug buttons to build, run, and breakpoint-debug `rooster`
+  without leaving the editor - plus the basic `docker` CLI commands
+  (`ps`, `images`, `exec`, `logs`, `stop`/`rm`) worth knowing alongside it,
+  and `devcontainer.json` as an optional upgrade once the manual flow
+  makes sense.
+- **2.9 CMake: The Ground Beneath the Code** - what CMake actually is (a
   build system *generator*, not a compiler), how `cmake -B build` and
   `cmake --build build` map to the compiler and linker, and where the
   `rooster`/`rooster.exe` executable every lecture produces comes from.
