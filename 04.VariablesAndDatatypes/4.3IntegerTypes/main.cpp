@@ -19,9 +19,12 @@ int main() {
     // long long gives us far more headroom.
     long long lifetimeCentsProcessed{9'000'000'000};
 
-    std::println("expensesLoggedToday    : {} ({} bytes)", expensesLoggedToday, sizeof(expensesLoggedToday));
-    std::println("transactionId          : {} ({} bytes)", transactionId, sizeof(transactionId));
-    std::println("lifetimeCentsProcessed : {} ({} bytes)", lifetimeCentsProcessed, sizeof(lifetimeCentsProcessed));
+    std::println("expensesLoggedToday    : {} ({} bytes)", 
+            expensesLoggedToday, sizeof(expensesLoggedToday));
+    std::println("transactionId          : {} ({} bytes)", 
+                        transactionId, sizeof(transactionId));
+    std::println("lifetimeCentsProcessed : {} ({} bytes)", 
+        lifetimeCentsProcessed, sizeof(lifetimeCentsProcessed));
 
     // Every integer type above is "signed" by default - it can represent
     // negative values too. Some numbers, like a count of receipts on file,
