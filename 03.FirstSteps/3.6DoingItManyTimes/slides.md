@@ -13,28 +13,20 @@ footer: 'Chapter 3 · First Steps'
 
 ---
 
-*Anatomy of a loop*
+# What We are After
 
-```
-  +-----------------+
-  | starting state  |   friends starts empty
-  +--------+--------+
-           |
-           v
-  +-----------------+
-  |   stop check     |<-----------------+   "did the user
-  | friendName empty?|                  |    press enter on
-  +--------+--------+                   |    an empty line?"
-       no  |  yes                       |
-           |   +-----> done             |
-           v                            |
-  +-----------------+                   |
-  |    loop body    |   read a name,    |
-  |                 |   push_back it    |
-  +--------+--------+                   |
-           |                            |
-           +---- go back and check -----+
-```
+## Collecting a list of friends
+
+- We tell the user to type in a friend's name.
+- We keep asking until they hit enter on an empty line.
+- If they type in a name, we add it to a list of friends.
+- If they hit enter on an empty line, we stop asking and print the list of friends.
+
+---
+
+*Dissecting a while loop*
+
+<img class="shot-img" src="images/while-loop-flowchart.png" alt="Flowchart of the while loop: starting state with friends empty, a stop check for whether friendName is empty, looping back from the loop body that reads a name and pushes it back, or exiting to done">
 
 ---
 
@@ -90,28 +82,9 @@ std::vector<std::string> friends;
 
 ---
 
-*Anatomy of a for loop*
+*Dissecting a for loop*
 
-```
-  +-----------------+
-  | starting state  |   start at the first
-  +--------+--------+   friend in the list
-           |
-           v
-  +-----------------+
-  | current friend  |<------------------+   
-  | in list?        |                   |   
-  +--------+--------+                   |   
-       yes  |  no                       |
-           |   +-----> done             |
-           v                            |
-  +-----------------+                   |
-  |    loop body    |   print this      |
-  |                 |   friend's name   |
-  +--------+--------+                   |
-           |                            |
-           +-- move to the next friend -+
-```
+<img class="shot-img" src="images/for-loop-flowchart.png" alt="Flowchart of the for loop: starting state at the first friend in the list, a check for whether the current friend is in the list, looping back from the loop body that prints the friend's name and moves to the next friend, or exiting to done">
 
 ---
 
