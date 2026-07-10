@@ -28,23 +28,52 @@ long double preciseAverage{93.3333333333333333L};
 
 ---
 
+*Three words, plain English*
+
+## Size, precision, significant digits
+
+- **Size** - how many bytes of memory a variable is given. Think of it
+  as the size of the box a value has to fit in.
+- **Significant digits** - how many digits of a number you can actually
+  *trust* to be correct, reading left to right. `93.333` has 5 of them;
+  the digits after that are just filler if the box was too small to
+  remember more.
+- **Precision** - a type's *limit* on significant digits. A bigger box
+  (more bytes) can afford to remember more digits, so it has higher
+  precision.
+
+<div class="callout">A kitchen scale that only shows whole grams isn't "wrong" when you put a 93.3 g apple on it and it reads 93 g - it simply wasn't built to be more precise than that. A float is that scale; a double is a much more precise one.</div>
+
+---
+
 *Precision compared*
 
 ## How many digits can each type trust?
 
-| Type | Size | Significant digits |
+| Type | Size (the box) | Significant digits (what you can trust) |
 |---|---|---|
 | `float` | 4 bytes | ~7 |
 | `double` | 8 bytes | ~15-16 |
 | `long double` | platform-dependent | more than `double` |
+
+A bigger box doesn't just hold a bigger number - it holds a *more
+precise* one, because there's room to remember more of its digits.
+
+---
+
+*Seeing the limit for yourself*
+
+## Ask each type to show you more digits than it has
 
 ```cpp
 std::println("amountSpent      : {:.15f}", amountSpent);
 std::println("averageDailySpend: {:.15f}", averageDailySpend);
 ```
 
-`{:.15f}` prints 15 digits after the decimal point - enough to expose
-each type's real precision limit.
+`{:.15f}` asks for 15 digits after the decimal point - more than a
+`float` can actually trust. Past its ~7 significant digits, what
+prints is just leftover noise, not the real value: this is precision
+running out, made visible.
 
 ---
 
