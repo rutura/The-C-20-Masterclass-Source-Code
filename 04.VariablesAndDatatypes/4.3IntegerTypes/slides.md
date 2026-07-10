@@ -45,9 +45,12 @@ long long lifetimeCentsProcessed{9'000'000'000};
 ## sizeof tells you the truth
 
 ```cpp
-std::println("expensesLoggedToday    : {} ({} bytes)", ...);
-std::println("transactionId          : {} ({} bytes)", ...);
-std::println("lifetimeCentsProcessed : {} ({} bytes)", ...);
+std::println("expensesLoggedToday    : {} ({} bytes)",
+              expensesLoggedToday, sizeof(expensesLoggedToday));
+std::println("transactionId          : {} ({} bytes)",
+              transactionId, sizeof(transactionId));
+std::println("lifetimeCentsProcessed : {} ({} bytes)",
+              lifetimeCentsProcessed, sizeof(lifetimeCentsProcessed));
 ```
 
 `sizeof` reports how many bytes a type actually occupies on this
