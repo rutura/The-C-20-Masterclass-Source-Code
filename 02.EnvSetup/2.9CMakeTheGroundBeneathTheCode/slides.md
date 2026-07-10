@@ -25,9 +25,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(rooster main.cpp)
 ```
 
-You've been running `cmake -B build` and `cmake --build build` since
-lecture 2.2 without asking what they actually do. This lecture answers
-that.
+You've ran `cmake -B build` and `cmake --build build` on  many occasions
+in the chapter. This lecture explains what those two commands actually do
+and what happens to your source code before it becomes a runnable program.
 
 ---
 
@@ -136,6 +136,5 @@ regardless of which lecture you're in.
 
 Neither IDE has its own separate compilation model in this course - both
 read this exact same `CMakeLists.txt`, and both are really just running
-`cmake -B build` / `cmake --build build` behind a Run/Debug button.
-Docker (2.7) runs the identical two commands by hand, inside a
-container. One build description, three ways to trigger it.
+`cmake -B build` / `cmake --build build` behind a Run/Debug button. You 
+can run these by hand yourself if you need to.
