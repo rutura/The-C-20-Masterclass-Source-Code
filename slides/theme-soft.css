@@ -145,12 +145,15 @@ section::part(paginator) { color: var(--muted); }
 
 .shot-img {
   display: block;
+  box-sizing: border-box;
   max-width: 100%;
   max-height: 440px;
   width: auto;
   height: auto;
   margin: 0.6em auto 0;
+  padding: 1em;
   border: 1px solid var(--hairline);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  background: #fff;
 }
