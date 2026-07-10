@@ -26,7 +26,7 @@ footer: 'Chapter 3 · First Steps'
 
 *Dissecting a while loop*
 
-<img class="shot-img" src="images/while-loop-flowchart.png" alt="Flowchart of the while loop: starting state with friends empty, a stop check for whether friendName is empty, looping back from the loop body that reads a name and pushes it back, or exiting to done">
+<img class="shot-img" src="images/while-loop-flowchart.svg" alt="Flowchart of the while loop: starting state with friends empty, a stop check for whether friendName is empty, looping back from the loop body that reads a name and pushes it back, or exiting to done">
 
 ---
 
@@ -84,7 +84,7 @@ std::vector<std::string> friends;
 
 *Dissecting a for loop*
 
-<img class="shot-img" src="images/for-loop-flowchart.png" alt="Flowchart of the for loop: starting state at the first friend in the list, a check for whether the current friend is in the list, looping back from the loop body that prints the friend's name and moves to the next friend, or exiting to done">
+<img class="shot-img" src="images/for-loop-flowchart.svg" alt="Flowchart of the for loop: starting state at the first friend in the list, a check for whether the current friend is in the list, looping back from the loop body that prints the friend's name and moves to the next friend, or exiting to done">
 
 ---
 
