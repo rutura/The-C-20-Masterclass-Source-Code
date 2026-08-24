@@ -25,17 +25,19 @@ int main() {
 
     std::string name{"Ada"};
     int age{28};
+
+	std::cout << name << " is " << age << " years old.\n";
     std::println("{} is {} years old.", name, age);
 
     // A compile-time error: uncomment to see the compiler refuse to build.
     // The mistake is caught before the program ever runs.
-    // std::println("{} has a typo)", name);
+    // std::printline("{} has a typo", name);
 
     // A run-time error: this compiles fine, but crashes/misbehaves when
     // the program actually executes this line - the compiler can't catch
     // every mistake, only the ones it understands statically.
-    // int total{7 / 0};
-    // std::println("total: {}", total);
+    int total{7 / 0};
+    std::println("total: {}", total);
 
     return 0;
 }
