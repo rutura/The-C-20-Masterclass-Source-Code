@@ -25,14 +25,21 @@ int main() {
     // --- Floating point: fractional numbers ---
     // float trades precision for size; double is the practical default
     // for money and measurements unless you have a specific reason not to.
-    double amount_spent{93.33};
+    // long double offers more precision still, at the cost of more bytes.
     float discount_rate{0.15f};
-    std::println("amount spent: {}, discount rate: {}", amount_spent, discount_rate);
+    double amount_spent{93.33};
+    long double very_precise_rate{0.1512345678901234L};
+    std::println("amount spent: {}, discount rate: {}, precise rate: {}",
+        amount_spent, discount_rate, very_precise_rate);
 
     // Scientific notation reads the same as decimal notation to the
     // compiler - useful once numbers get very large or very small.
     double national_debt{3.4e13};
     std::println("national debt (approx): {}", national_debt);
+
+    // sizeof applied to floating point types
+    std::println("sizeof(float): {}, sizeof(double): {}, sizeof(long double): {}",
+        sizeof(float), sizeof(double), sizeof(long double));
 
     // --- Booleans: true/false ---
     bool over_budget{amount_spent > 100.0};
