@@ -1,0 +1,12 @@
+I want to restructure chapter <N> (<ChapterFolderName>) following CLAUDE.md. Reduce it to <count> lectures:
+
+<title> — <one-line scope>
+<title> — <one-line scope>
+<title> — <one-line scope>
+Before writing any code: list the chapter's current subfolders, identify which are real content vs. stale/duplicate stubs from earlier passes, and propose a mapping of old folders → these new lectures (what merges into what, what gets cut, final numbering). Confirm that mapping with me before touching any files.
+
+Once confirmed: write each lecture using the running example already established for this chapter (or propose one if it doesn't have one yet), following CLAUDE.md's coding conventions exactly — brace-init everywhere, std::print/std::println (not std::cout, unless a lecture is specifically contrasting old vs. new), no using namespace std (except scoped literal namespaces like std::string_literals where it earns its place), digit separators, comments that explain why not what, and no exhaustive enumeration — introduce a type/feature because the example needs it.
+
+Build and run every lecture with MSVC (VsDevCmd + Ninja, per CLAUDE.md) to confirm it actually compiles and produces sensible output before calling it done. Clean up build/ directories afterward and confirm git status shows only the intended changes.
+
+Don't generate a chapter README.
