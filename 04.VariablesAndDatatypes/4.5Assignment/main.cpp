@@ -4,20 +4,6 @@
 
 /*
     Chapter 4 assignment
-
-    Six exercises, each using only what chapters 3-4 have covered so far:
-    std::cout/std::print/std::println, comments, functions with parameters
-    and return values, std::cin/std::getline, number literals/bases,
-    int/unsigned/long long/float/double/long double/bool/char/std::string,
-    sizeof, and auto.
-
-    No flow control (if/else), no loops, and no arrays yet - every
-    exercise should be solvable as a straight-line sequence of statements.
-
-    Each exercise below has its own block comment describing what to build,
-    followed by a small stub so the file compiles as-is. Replace/extend
-    each stub with your solution - the file should keep compiling and
-    running after every exercise, not just at the very end.
 */
 
 // Exercise 4: a function goes here, above main, so main can call it.
