@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <print>
 #include <string>
@@ -60,17 +61,24 @@ int main() {
     double juice_total{juice_price * juice_qty};
     double grand_total{coffee_total + muffin_total + juice_total};
 
-    // Classic way:
+    // Classic way: std::fixed + std::setprecision(2) force 2 decimal
+    // places for every double printed afterward via std::cout.
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << "Coffee " << coffee_qty << "x : $" << coffee_total << "\n";
     std::cout << "Muffin " << muffin_qty << "x : $" << muffin_total << "\n";
     std::cout << "Juice  " << juice_qty << "x : $" << juice_total << "\n";
     std::cout << "Grand total  : $" << grand_total << "\n";
 
-    // Modern way:
-    std::println("Coffee {}x : ${}", coffee_qty, coffee_total);
-    std::println("Muffin {}x : ${}", muffin_qty, muffin_total);
-    std::println("Juice  {}x : ${}", juice_qty, juice_total);
-    std::println("Grand total  : ${}", grand_total);
+    // Modern way: {:.2f} forces 2 decimal places for just that one value,
+    // no stream state to set beforehand or reset afterward.
+    std::println("Coffee {}x : ${:.2f}", coffee_qty, coffee_total);
+    std::println("Muffin {}x : ${:.2f}", muffin_qty, muffin_total);
+    std::println("Juice  {}x : ${:.2f}", juice_qty, juice_total);
+    std::println("Grand total  : ${:.2f}", grand_total);
+
+    // Reset std::cout back to its default formatting so it doesn't leak
+    // into the exercises below.
+    std::cout << std::defaultfloat << std::setprecision(6);
 
 
     // --- Exercise 3: Base converter tool ---

@@ -30,7 +30,8 @@ int main() {
 
         Declare variables for a name, age, height (in meters, as a
         double), and whether the person is a student (bool). Print all
-        four in a single formatted sentence using std::println.
+        four in a single formatted sentence using std::println
+        or std::cout (if you don't have access to std::println).
     */
     std::println("--- Exercise 1: Personal profile card ---");
     // TODO: declare name/age/height/is_student and print them here.
@@ -39,15 +40,29 @@ int main() {
     /*
         Exercise 2 - Receipt printer
 
-        Given three items, each with a price (double) and a quantity
-        (int) as literals in code, compute each item's line total and a
-        grand total. Print a small receipt with std::println, using
-        padded labels (like 4.2NumberSystems's "decimal     :" style) so
-        the columns line up.
+        Declare six variables as literals in code, exactly as follows:
+            coffee_price  (double)  4.50      coffee_qty  (int)  2
+            muffin_price  (double)  3.25      muffin_qty  (int)  1
+            juice_price   (double)  2.75      juice_qty   (int)  3
+
+        Compute a line total for each item (price * quantity) and a
+        grand total (the sum of all three line totals).
+
+        Print exactly four lines, in this order, with a $ before each
+        amount and amounts printed to 2 decimal places (use
+        std::format's {:.2f} spec, e.g. std::println("{:.2f}", 9.0)
+        prints "9.00"):
+            Coffee 2x : $9.00
+            Muffin 1x : $3.25
+            Juice  3x : $8.25
+            Grand total  : $20.50
+        The label column (everything before the " : ") must line up
+        exactly as shown above - pad "Juice " with one trailing space so
+        it's the same width as "Coffee" and "Muffin".
     */
     std::println("\n--- Exercise 2: Receipt printer ---");
-    // TODO: declare three (price, quantity) pairs, compute line totals
-    // and a grand total, and print a formatted receipt here.
+    // TODO: declare the six variables above, compute the four totals,
+    // and print the four-line receipt exactly as specified above.
 
 
     /*
