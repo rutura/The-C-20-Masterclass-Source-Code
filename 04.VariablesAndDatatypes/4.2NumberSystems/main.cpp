@@ -1,3 +1,4 @@
+#include <iostream>
 #include <print>
 
 int main() {
@@ -21,6 +22,17 @@ int main() {
     int reading{1024};
     std::println("{} in decimal is {}, octal {:#o}, hex {:#x}, binary {:#b}",
         reading, reading, reading, reading, reading);
+
+    // The std::cout equivalent: std::dec/std::oct/std::hex switch the
+    // base for everything printed afterward, and that base sticks until
+    // changed again - so we switch back to std::dec at the end to leave
+    // std::cout in its default state for whatever prints next. There's
+    // no std::bin manipulator at all - binary output just isn't
+    // something std::cout can do without extra work.
+    std::cout << reading << " in decimal is " << std::dec << reading
+        << ", octal " << std::oct << reading
+        << ", hex " << std::hex << reading
+        << std::dec << "\n";
 
     return 0;
 }
