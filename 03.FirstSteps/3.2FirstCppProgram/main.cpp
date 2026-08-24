@@ -36,8 +36,8 @@ int main() {
     // A run-time error: this compiles fine, but crashes/misbehaves when
     // the program actually executes this line - the compiler can't catch
     // every mistake, only the ones it understands statically.
-    int total{7 / 0};
-    std::println("total: {}", total);
+    // int total{7 / 0};
+    // std::println("total: {}", total);
 
     return 0;
 }
