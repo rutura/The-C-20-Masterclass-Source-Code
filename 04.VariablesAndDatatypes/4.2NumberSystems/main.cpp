@@ -17,9 +17,10 @@ int main() {
 
     // std::println's format spec can also print an existing value back
     // out in a different base - handy when you want to see what a
-    // decimal number looks like in hex or binary.
+    // decimal number looks like in another base.
     int reading{1024};
-    std::println("{} in hex is {:#x} and in binary is {:#b}", reading, reading, reading);
+    std::println("{} in decimal is {}, octal {:#o}, hex {:#x}, binary {:#b}",
+        reading, reading, reading, reading, reading);
 
     return 0;
 }
