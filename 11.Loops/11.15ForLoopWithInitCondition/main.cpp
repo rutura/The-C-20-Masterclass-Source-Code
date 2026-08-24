@@ -1,12 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
+
 int main(){
-
-
-    for(double multiplier{4}; auto i : {1,2,3,4,5,6,7,8,9,10}){
-        std::cout << "result : " << ( i * multiplier) << std::endl;
-    }
-
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

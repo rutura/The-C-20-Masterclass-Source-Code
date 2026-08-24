@@ -1,11 +1,11 @@
 #include <iostream>
-#include "person.h"
-#include "engineer.h"
-#include "civilengineer.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    CivilEngineer ce1;
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

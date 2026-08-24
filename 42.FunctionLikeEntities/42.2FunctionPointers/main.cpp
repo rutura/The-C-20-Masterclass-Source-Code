@@ -1,29 +1,11 @@
 #include <iostream>
 
-double add(double a, double b){
-    return a+b;
+consteval int get_value(){
+    return 3;
 }
 
-
 int main(){
-
-    //double (*f_ptr) (double, double)  = &add;
-    //double(*f_ptr) (double,double) = add;
-
-    //double(*f_ptr) (double,double) {&add};
-    //double(*f_ptr) (double,double){add};
-
-    //auto f_ptr = &add;
-    //auto f_ptr = add;
-
-    //auto *f_ptr = &add;
-    //auto *f_ptr = add;
-
-    //Things gone wroong
-    double(*f_ptr) (double , double) = nullptr;
-
-
-    std::cout << "add(10,30) : " << f_ptr(10,30) << std::endl;
-    
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

@@ -1,28 +1,11 @@
 #include <iostream>
-#include <vector>
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    //std::vector<int> vi {1,2,3,4,5,6,7,8,9};
-    int vi[] {1,2,3,4,5,6,7,8,9};
-    
-
-    /*
-    std::cout << " Collection : " ;
-    for(auto it = vi.begin(); it!= vi.end(); ++it){
-        std::cout << *it  << " ";
-    }
-
-    */
-
-   std::cout << "--------" << std::endl;
-
-    std::cout << " Collection : " ;
-    for(auto it = std::begin(vi); it!= std::end(vi); ++it){
-        std::cout << *it  << " ";
-    }
-  
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

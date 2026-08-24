@@ -1,32 +1,11 @@
 #include <iostream>
 
-int main(){
+consteval int get_value(){
+    return 3;
+}
 
-	double first_number {5.0};
-    double second_number {33.1};
-    char c{'+'};
-    
-    switch(c){
-        case '+':
-        std::cout << first_number << " + " << second_number << " = " 
-                << first_number + second_number << std::endl;
-        break;
-        
-        case '-':
-        std::cout << first_number << " - " << second_number << "=" 
-                << first_number - second_number << std::endl;
-        break;
-        
-        case 'x':
-        std::cout << first_number << " * " << second_number << " = " 
-                << first_number * second_number << std::endl;
-        break;
-        
-        case '/':
-        std::cout << first_number << " / " << second_number << " = " 
-                << first_number / second_number << std::endl;
-        break;
-		
-    }
-	return 0;
+int main(){
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
+    return 0;
 }

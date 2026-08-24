@@ -1,10 +1,11 @@
 #include <iostream>
-#include "utilities.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    double result = add(10.5,20.8);
-    std::cout << "result : " << result << std::endl;
-    
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

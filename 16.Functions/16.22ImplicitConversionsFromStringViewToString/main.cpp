@@ -1,27 +1,11 @@
 #include <iostream>
-void say_my_name(const std::string& name);
-void process_name(std::string_view name_sv);
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    process_name("Daniel");
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
-}
-
-//Definitions
-void say_my_name(const std::string& name){
-    std::cout << "Your name is " << name << std::endl;
-}
-
-void process_name(std::string_view name_sv){
-    
-	say_my_name(name_sv); // Compiler error . Implicit conversion
-						  // from std::string_view
-                          // to std::string is not  allowed.
-                          
-    //Fix : Be explicit about the conversion
-    //say_my_name(std::string(name_sv));
-    
-    
 }

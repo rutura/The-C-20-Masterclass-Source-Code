@@ -1,18 +1,11 @@
 #include <iostream>
-#include "point.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    //Print the point count in our program
-    //std::cout << "Point count : " << Point::m_point_count << std::endl; //0
-
-    Point p1(10.0,20.1);
-
-    std::cout << "Point count : " << p1.get_point_count() << std::endl; //1
-
-    Point points[] {Point(1,1),Point(),Point(4)};
-
-    std::cout << "Point count : " << p1.get_point_count() << std::endl; //4
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

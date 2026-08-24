@@ -1,11 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
+
 int main(){
-
-    for (size_t i{0} , x {5}, y{22} ; y > 15 ; ++i , x+=5 , y-=1){
-        std::cout << "i: " << i << ", x : " << x << ", y : " << y << std::endl;
-
-    }
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

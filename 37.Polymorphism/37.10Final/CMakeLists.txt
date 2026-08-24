@@ -8,15 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Create executable
-add_executable(rooster
-    main.cpp
-    animal.cpp animal.h
-    bird.cpp bird.h
-    bulldog.cpp bulldog.h
-    cat.cpp cat.h
-    crow.cpp crow.h
-    dog.cpp dog.h
-    feline.cpp feline.h
-    pigeon.cpp pigeon.h
-    wildcat.cpp wildcat.h
-)
+add_executable(rooster main.cpp)
+
+# For multi-file projects with headers and separate .cpp files
+# add_executable(rooster main.cpp dog.cpp dog.h cat.cpp cat.h)

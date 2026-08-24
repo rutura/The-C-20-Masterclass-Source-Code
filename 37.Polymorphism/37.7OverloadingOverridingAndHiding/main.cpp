@@ -1,13 +1,11 @@
 #include <iostream>
-#include <memory>
-#include "shape.h"
-#include "oval.h"
-#include "circle.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Shape * shape_ptr = new Circle(10,"Circle1");
-    shape_ptr->draw(45,"Red");
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

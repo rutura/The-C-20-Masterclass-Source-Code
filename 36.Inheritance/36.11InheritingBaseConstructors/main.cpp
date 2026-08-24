@@ -1,11 +1,11 @@
 #include <iostream>
-#include "person.h"
-#include "engineer.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-	Engineer eng1("Daniel Gray",23,"asdl;fkjdas;fkdas;fk",4);
-	std::cout << "eng1 : " << eng1 << std::endl;
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

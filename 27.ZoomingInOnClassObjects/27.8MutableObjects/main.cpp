@@ -1,15 +1,11 @@
 #include <iostream>
-#include "dog.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Dog dog1("Fluffy","Shepherd",2);
-    dog1.print_info(); //1
-    dog1.print_info();//2
-
-    for(size_t i{0}; i <10;++i){
-        dog1.print_info();
-    }
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

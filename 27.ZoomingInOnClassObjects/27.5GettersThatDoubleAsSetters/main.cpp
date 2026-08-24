@@ -1,18 +1,11 @@
 #include <iostream>
-#include "dog.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-   const Dog dog1("Fluffy","Shepherd",2);
-   dog1.print_info();
-   std::cout << "dog name : " << dog1.name() << std::endl; // Getter
-
-   //Modify the object
-   //dog1.name() = "Milou"; // Setter
-   dog1.print_info();
-
-
-
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

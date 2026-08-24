@@ -1,17 +1,11 @@
 #include <iostream>
 
-//Evaluate this function at compile time. If you can't 
-//do that throw a compiler error
-consteval int get_value(int multiplier){
-    return 3 * multiplier;
+consteval int get_value(){
+    return 3;
 }
 
 int main(){
-
-    int result = get_value(4);
-
-    int some_var{5};
-    result = get_value(some_var);
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

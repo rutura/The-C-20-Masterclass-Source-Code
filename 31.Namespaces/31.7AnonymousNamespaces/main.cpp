@@ -1,21 +1,11 @@
 #include <iostream>
 
-namespace{
-    double add(double a, double b); // Declaration
-} 
-
-
-int main(){
-
-    double result = add(10.2,20.2);
-    std::cout << "result : " << result << std::endl;
-   
-    return 0;
+consteval int get_value(){
+    return 3;
 }
 
-
-namespace{
-    double add(double a, double b){
-        return a + b;
-    }
-} 
+int main(){
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
+    return 0;
+}

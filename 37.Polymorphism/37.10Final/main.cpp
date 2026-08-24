@@ -1,19 +1,11 @@
 #include <iostream>
 
-//Intersting fact #1
-/*
-class Plane final{
-    Plane()=default;
-};
-
-//This will trigger a compiler error
-class FigherJet : public Plane{
-    
-};
-*/
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    std::cout << "Hello" << std::endl;
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

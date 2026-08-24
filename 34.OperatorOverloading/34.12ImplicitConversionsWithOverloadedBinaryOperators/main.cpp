@@ -1,16 +1,11 @@
 #include <iostream>
-#include "number.h"
 
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Number n1(22);
-    std::cout << "n1 : " << n1 << std::endl;
-    std::cout << "n1 + 2  : " << (n1 + 2) << std::endl;
-    std::cout << "2 + n1 : " << (2 + n1) << std::endl;
-    std::cout << "42 - n1 : " << (42 - n1) << std::endl;
-   
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

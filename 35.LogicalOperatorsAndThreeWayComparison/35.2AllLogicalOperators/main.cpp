@@ -1,22 +1,11 @@
 #include <iostream>
-#include "point.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-    Point point1(10.0,10.0);
-	Point point2(20.0,20.0);
-  
-    std::cout << "point1 : " << point1 << std::endl;
-	std::cout << "point2 : "  << point2 << std::endl;
-	
-   
-    std::cout << "point1 > point2 : " <<std::boolalpha <<(point1 > point2) << std::endl;
-    std::cout << "point1 < point2 : "  << (point1 < point2) << std::endl;
-    std::cout << "point1 >= point2 : " << (point1 >= point2) << std::endl;
-    std::cout << "point1 <= point2 : " << (point1 <= point2) << std::endl;
-    std::cout << "point1 == point2 : " << (point1 ==point2) << std::endl;
-    std::cout << "point1 != point2 : " << (point1 != point2) << std::endl;
- 
-    
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

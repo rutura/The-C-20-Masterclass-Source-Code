@@ -1,25 +1,11 @@
 #include <iostream>
 
-//Global namespace
-double add(double a, double b){
-    return a + b;
+consteval int get_value(){
+    return 3;
 }
-
-namespace My_Thing{
-    double add(double a, double b){
-        return a + b - 1;
-    }
-    
-    void do_something(){
-        double result = ::add(5,6);
-        std::cout << "result : " << result << std::endl;
-    }
-    
-}
-
 
 int main(){
-    My_Thing::do_something();
-  
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

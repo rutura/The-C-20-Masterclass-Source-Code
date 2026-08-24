@@ -1,22 +1,11 @@
 #include <iostream>
 
-//internal linkage -> external linkage 
-extern const double distance {45.7}; 
-
-void print_distance(); // Declaration
-void some_other_function(); // Declaration
-
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
- 	std::cout << "distance(main) : " << distance << std::endl;
-	std::cout << "&distance(main) : " << &distance << std::endl;
-	
-	std::cout << std::endl;
-	print_distance();
-
-    std::cout << "----" << std::endl;
-    some_other_function();
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

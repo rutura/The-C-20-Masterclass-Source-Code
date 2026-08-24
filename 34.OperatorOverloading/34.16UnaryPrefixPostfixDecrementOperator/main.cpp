@@ -1,11 +1,11 @@
 #include <iostream>
-#include "point.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Point p1(10,10);
-    std::cout << "p1 : " << p1--<< std::endl; // (10,10);
-    std::cout << "p1 : " << p1 << std::endl; // (11,11)
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

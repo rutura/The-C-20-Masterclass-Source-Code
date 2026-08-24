@@ -1,23 +1,11 @@
 #include <iostream>
 
-
-void print_age_1();
-void print_age_2();
-
-void print_distance_1();
-void print_distance_2();
-
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    print_age_1();
-    print_age_2();
-
-    std::cout << "----" << std::endl;
-
-    print_distance_1();
-    print_distance_2();
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

@@ -1,11 +1,11 @@
 #include <iostream>
-#include "cylinder.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Cylinder c1(4);
-    std::cout << "volume : " << c1.volume() << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

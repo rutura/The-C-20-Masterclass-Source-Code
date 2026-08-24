@@ -1,28 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-	int max{};
-    
-    int a{35};
-    int b{200};
-	
-    std::cout << std::endl;
-	std::cout << "using regular if " << std::endl;
-	
-    /*
-    if(a >  b){
-        max = a;
-    }else{
-        max = b;
-    }
-    */
-
-    max = (a > b)? a : b; // Ternary operator
-	
-    std::cout << "max : " << max << std::endl;
-	
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

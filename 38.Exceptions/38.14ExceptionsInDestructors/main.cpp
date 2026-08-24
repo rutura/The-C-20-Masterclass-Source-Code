@@ -1,26 +1,11 @@
 #include <iostream>
 
-class Item{
-public : 
-    Item(){}
-    ~Item()  {
-        try{
-            throw 0;
-        }catch(int ex){
-            throw;
-        }
-    }
-    
-};
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
- 		try{
-			Item item;	
-		}catch(int ex){
-			std::cout << "main() : Catching int exception" << std::endl;
-		} 
-
-        std::cout << "END." << std::endl; 
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

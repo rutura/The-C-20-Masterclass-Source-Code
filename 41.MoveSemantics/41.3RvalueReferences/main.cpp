@@ -1,24 +1,11 @@
 #include <iostream>
 
-double add(double a , double b){
-    return a + b;
+consteval int get_value(){
+    return 3;
 }
 
-
 int main(){
-    
-    int x{5};
-    int y{10};
-
-    int&& result = x + y;
-
-    double&& outcome = add(10.1,20.2);
-
-
-    //
-
-    std::cout << "result : " << result << std::endl;
-    std::cout << "outcome : " << outcome << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

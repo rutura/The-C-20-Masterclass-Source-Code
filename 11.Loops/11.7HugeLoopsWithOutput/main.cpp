@@ -1,21 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
+
 int main(){
-
-    /*
-    for(size_t i{0} ; i < 100000 ; ++i){
-        //std::cout << "i : " << i << std::endl;
-    }
-    std::cout << "Done!" << std::endl;
-    */
-
-   size_t i{0}; // Iterator
-
-   while(i < 100000){
-        //std::cout << "i : " << i << std::endl; 
-        ++i;     
-   }
-   std::cout << "Done!" << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

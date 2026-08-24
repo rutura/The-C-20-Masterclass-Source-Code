@@ -1,11 +1,11 @@
 #include <iostream>
-#include "dog.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-   Animal * p_animal = new Dog;
-
-   delete p_animal;
-  
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

@@ -1,16 +1,11 @@
 #include <iostream>
-#include <string_view>
 
-void say_my_name(std::string_view name){
-    std::cout << "Hello your name is : " << name << std::endl;
+consteval int get_value(){
+    return 3;
 }
 
 int main(){
-
-    std::string some_name{"John"};
-    //say_my_name("John");
-    //say_my_name(some_name);
-    say_my_name(std::string_view("Samuel"));
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

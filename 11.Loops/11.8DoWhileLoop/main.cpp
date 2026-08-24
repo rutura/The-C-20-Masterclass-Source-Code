@@ -1,30 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
+
 int main(){
-
-	//Print I love C++ 10 times
-    /*
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    std::cout << "I love C++" << std::endl;
-    */
-
-    const int COUNT{0};
-    size_t i{0}; // Iterator declaration
-
-    do{
-        std::cout << i << " : I love C++" << std::endl;
-        ++i; // Incrementation
-    }while( i < COUNT);
-
-    std::cout << "Loop done!" << std::endl;
-    
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

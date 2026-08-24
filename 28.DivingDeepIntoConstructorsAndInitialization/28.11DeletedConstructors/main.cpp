@@ -1,8 +1,11 @@
 #include <iostream>
-#include "point.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-    
-    Point p1(std::move(Point(4.6,5.2)));
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

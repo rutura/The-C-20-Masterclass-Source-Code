@@ -1,22 +1,11 @@
 #include <iostream>
 
-enum   Direction : unsigned char  {
-    TopLeft = 64, TopRight,Center,BottomLeft,BottomRight
-};
-    
-enum   Tool {
-    Pen,Marker, Eraser,Rectangle,Circle,PaintBucket
-};
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-	Direction direction{Direction::TopLeft};
-	Tool tool {Tool::Pen};
-
-    std::cout << "direction : " << static_cast<unsigned int>(direction) << std::endl;
-    std::cout << "tool : " << tool << std::endl;
-    //std::cout << "(tool > direction) : " << (tool > direction) << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

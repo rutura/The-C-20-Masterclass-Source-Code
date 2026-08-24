@@ -1,14 +1,11 @@
 #include <iostream>
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-   
-   constexpr bool condition {false};
-
-   if constexpr (condition){
-       std::cout << "Condition is true" << std::endl;
-   }else{
-       std::cout << "Condition is false" << std::endl;
-   }
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

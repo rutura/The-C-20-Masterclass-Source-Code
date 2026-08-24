@@ -1,13 +1,11 @@
 #include <iostream>
-#include "cylinder.h"
 
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-    Cylinder cylinder1(3.3,10.0);
-    std::cout << "Volume of cylinder : " << cylinder1.volume() << std::endl;
-    std::cout << "Cylinder default color : " << Cylinder::default_color << std::endl;
-    std::cout << "Cylinder default color : " << cylinder1.default_color << std::endl;
-	
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

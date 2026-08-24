@@ -1,29 +1,11 @@
 #include <iostream>
-#include "person.h"
 
-//Variable : Declaration and definition
-double weight {};
-
-double add(double a, double b);
-
-struct Point
-{
-    double m_x{};
-    double m_y{};
-};
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Person p1("John Snow",35);
-    p1.print_info();
-
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }
-
-/*
-double add(double a, double b){
-    return a + b;
-}
-*/
-

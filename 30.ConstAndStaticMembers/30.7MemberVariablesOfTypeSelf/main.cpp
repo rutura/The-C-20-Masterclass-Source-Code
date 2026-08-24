@@ -1,15 +1,11 @@
 #include <iostream>
-#include "point.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Point p1(5,5); // The most vexing parse
-    p1.initialize_pointer(10,10);
-
-    p1.m_point4.print_info();
-
-
-
- 
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

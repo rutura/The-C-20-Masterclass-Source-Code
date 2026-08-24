@@ -1,14 +1,11 @@
 #include <iostream>
-#include "point.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-    //Point p1(10.4,15.6);
-    //p1.print_info();
-
-    //Create a copy from a temporary
-    Point p3(std::move(Point(20.5,5.8)));
-    p3.print_info();
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

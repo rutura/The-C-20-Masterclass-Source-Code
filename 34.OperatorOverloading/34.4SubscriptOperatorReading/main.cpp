@@ -1,13 +1,11 @@
 #include <iostream>
-#include "point.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Point p1(10,20);
-
-    //std::cout << "p1.x : " << p1[0] << std::endl; // x coordinate : 10
-    std::cout << "p1.x : " << p1.operator[](0) << std::endl; // x coordinate : 10
-    std::cout << "p1.y : " << p1[1] << std::endl; // y coordinate : 20
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

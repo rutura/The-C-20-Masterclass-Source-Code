@@ -1,13 +1,11 @@
 #include <iostream>
-#include "outer.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Outer outer1(10,20.1);
-    outer1.do_something();
-
-    
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

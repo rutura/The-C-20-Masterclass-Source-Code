@@ -1,11 +1,11 @@
 #include <iostream>
-#include "player.h"
 
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Player p1("Basketball","John","Snow");
-    std::cout << "player : " << p1 << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

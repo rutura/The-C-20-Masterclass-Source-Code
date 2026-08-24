@@ -1,22 +1,11 @@
 #include <iostream>
 
-
-/*
-int max(int a, int b){
-    return (a > b)? a : b;
+consteval int get_value(){
+    return 3;
 }
-*/
-
-
-int max( int a,  int b);
 
 int main(){
-
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
-}
-
-int max( int a,  int b){
-    ++a;
-    return (a > b)? a : b;
 }

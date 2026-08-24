@@ -1,17 +1,11 @@
 #include <iostream>
-#include "point.h"
-#include "car.h"
+
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    
-    Point p1(10,10,10);
-    Car c1("red",200.0);
-
-    p1 = c1;
-
-    std::cout << "p1 : " << p1 << std::endl;
-    
-
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

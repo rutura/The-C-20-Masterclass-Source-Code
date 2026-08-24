@@ -1,16 +1,11 @@
 #include <iostream>
 
-#include "dog.h"
-#include "farm.h"
-
+consteval int get_value(){
+    return 3;
+}
 
 int main(){
-
-    Dog dog1("Fluffy");
-
-    Farm farm1;
-    farm1.use_dog(dog1);
-
-    
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }

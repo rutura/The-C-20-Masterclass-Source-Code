@@ -1,14 +1,11 @@
 #include <iostream>
 
-size_t sum_up_to_zero(size_t value){
-    if(value!=0)
-        return value + sum_up_to_zero(value-1);
-    return 0;
+consteval int get_value(){
+    return 3;
 }
 
 int main(){
-
-    std::cout << "result : " << sum_up_to_zero(10) << std::endl;
-   
+    constexpr int value = get_value();
+    std::cout << "value : " << value << std::endl;
     return 0;
 }
