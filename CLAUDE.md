@@ -57,16 +57,11 @@ workflow is:
    recorded content is still a structural change — lay out which folders
    map to which final lecture before touching anything, unless the user has
    already given folder-level detail in their instructions.
-7. **Update the chapter's `README.md`** (or add one if missing) once a
-   chapter's trim is done, following the structure already used in
-   `03.FirstSteps/README.md` and `04.VariablesAndDatatypes/README.md`:
-   - a short intro to the running example
-   - a "what does this program actually need" table mapping needs to C++
-     concepts/types
-   - a lecture-by-lecture summary
-   - a "how C++'s latest features help" section
-   - (if applicable) a capstone project section
-   - a "building the code" pointer to `docker/`
+7. **Do not generate a chapter-root `README.md`.** Earlier guidance called
+   for one per modernized chapter; that's no longer wanted for this branch
+   — the code itself is the reference. Don't create one unprompted, and
+   don't recreate the ones removed from `03.FirstSteps` and
+   `04.VariablesAndDatatypes`.
 
 ## Coding conventions (enforced — do not deviate without being asked)
 
