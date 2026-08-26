@@ -224,10 +224,83 @@ the line above it.
 
 ---
 
-## 4. Octal, briefly
+## 4. Octal
 
 Octal (base 8, digits `0`-`7`) is rarely written by hand in modern
-application code. Its main surviving use is Unix/Linux file permissions:
+application code. Its main surviving use is Unix/Linux file permissions.
+
+Octal follows the same place-value idea as decimal and binary — just with
+8 symbols (`0`-`7`) available per position instead of 10 or 2. Counting
+decimal alongside octal and binary side by side shows where it sits
+between the two:
+
+| Decimal | Octal | Binary     |
+|--------:|:-----:|:----------:|
+|       0 | `0`   | `00000000` |
+|       1 | `1`   | `00000001` |
+|       2 | `2`   | `00000010` |
+|       3 | `3`   | `00000011` |
+|       4 | `4`   | `00000100` |
+|       5 | `5`   | `00000101` |
+|       6 | `6`   | `00000110` |
+|       7 | `7`   | `00000111` |
+|       8 | `10`  | `00001000` |
+|       9 | `11`  | `00001001` |
+|      10 | `12`  | `00001010` |
+|      11 | `13`  | `00001011` |
+|      12 | `14`  | `00001100` |
+|      13 | `15`  | `00001101` |
+|      14 | `16`  | `00001110` |
+|      15 | `17`  | `00001111` |
+|      16 | `20`  | `00010000` |
+|      17 | `21`  | `00010001` |
+|      18 | `22`  | `00010010` |
+|      19 | `23`  | `00010011` |
+|      20 | `24`  | `00010100` |
+|      21 | `25`  | `00010101` |
+|      22 | `26`  | `00010110` |
+|      23 | `27`  | `00010111` |
+|      24 | `30`  | `00011000` |
+|      25 | `31`  | `00011001` |
+|      26 | `32`  | `00011010` |
+|      27 | `33`  | `00011011` |
+|      28 | `34`  | `00011100` |
+|      29 | `35`  | `00011101` |
+|      30 | `36`  | `00011110` |
+|      31 | `37`  | `00011111` |
+|      32 | `40`  | `00100000` |
+|      33 | `41`  | `00100001` |
+|      34 | `42`  | `00100010` |
+|      35 | `43`  | `00100011` |
+|      36 | `44`  | `00100100` |
+|      37 | `45`  | `00100101` |
+|      38 | `46`  | `00100110` |
+|      39 | `47`  | `00100111` |
+|      40 | `50`  | `00101000` |
+|      41 | `51`  | `00101001` |
+|      42 | `52`  | `00101010` |
+|      43 | `53`  | `00101011` |
+|      44 | `54`  | `00101100` |
+|      45 | `55`  | `00101101` |
+|      46 | `56`  | `00101110` |
+|      47 | `57`  | `00101111` |
+|      48 | `60`  | `00110000` |
+|      49 | `61`  | `00110001` |
+|      50 | `62`  | `00110010` |
+
+Notice `15` is `17` in octal — which is exactly the `017` literal in
+`main.cpp`. That's the point of the opening hook: `017` looks like it
+should read as "seventeen," but the leading `0` marks it as octal, and
+octal's `17` is decimal `15`.
+
+Octal rolls over every 8 steps (`7 → 10`, `17 → 20`, `27 → 30`, ...) —
+slower than binary's constant rollover, faster than decimal's every-10.
+
+Octal's other convenient property: each octal digit is exactly 3 bits, so
+it groups binary into 3s the way hex groups it into 4s. That 3-bit
+grouping is why it survives in one place — Unix/Linux file permissions,
+where each permission group (owner/group/others) is 3 bits (read/write/
+execute), so it fits neatly into one octal digit per group:
 
 ```
 chmod 755 file.sh
@@ -235,9 +308,6 @@ chmod 755 file.sh
         │
         └─── 7 = read + write + execute (4+2+1 = rwx)
 ```
-
-Each octal digit is 3 bits, which conveniently matches the 3 permission
-bits (read/write/execute) for one of owner, group, or others.
 
 ---
 
