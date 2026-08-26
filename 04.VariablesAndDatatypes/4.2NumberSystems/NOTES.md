@@ -348,7 +348,54 @@ format specs are the more convenient option.
 
 ---
 
-## 6. Where this shows up in practice
+## 6. How many bits, how big a number
+
+Every bit you add **doubles** how many different values fit — because each
+new position doubles the count of possible combinations of `0`s and `1`s
+that came before it:
+
+| Bits | Combinations | Unsigned range |
+|-----:|-------------:|:---------------|
+|    1 |          2^1 | `0` to `1`     |
+|    2 |          2^2 | `0` to `3`     |
+|    3 |          2^3 | `0` to `7`     |
+|    4 |          2^4 | `0` to `15`    |
+|    8 |          2^8 | `0` to `255`   |
+|   16 |         2^16 | `0` to `65,535` |
+|   32 |         2^32 | `0` to `4,294,967,295` |
+
+The pattern: `n` bits can hold `2^n` different values, and since counting
+starts at `0`, the highest value they can hold is `2^n - 1`. That's why 8
+bits (a byte) tops out at `255`, not `256` — `256` different values are
+`0` through `255`.
+
+### Signed vs. unsigned: same bits, different range
+
+The table above is the **unsigned** range — every bit pattern is used to
+count upward from `0`. A **signed** type gives up half of those
+combinations to represent negative numbers instead, so the total number of
+values stays the same, but the range shifts to include negatives:
+
+| Bits | Unsigned range          | Signed range                        |
+|-----:|:------------------------|:------------------------------------|
+|    8 | `0` to `255`            | `-128` to `127`                     |
+|   16 | `0` to `65,535`         | `-32,768` to `32,767`               |
+|   32 | `0` to `4,294,967,295`  | `-2,147,483,648` to `2,147,483,647` |
+
+Notice the signed range isn't symmetric — `-128` to `127`, not `-128` to
+`128`. That's because `0` itself takes up one of the available
+combinations on the positive side, so the negative side gets one more
+value than the positive side does.
+
+This is exactly what's behind the wraparound bug from `4.4Auto`: an
+`unsigned` variable has no combinations set aside for negative numbers at
+all, so assigning `-10` doesn't produce a negative value — it reinterprets
+those same bits as a huge positive number instead, because every possible
+bit pattern for that type is already spoken for by the unsigned range.
+
+---
+
+## 7. Where this shows up in practice
 
 | Base    | Where you'll actually see it                                   |
 |---------|------------------------------------------------------------------|
