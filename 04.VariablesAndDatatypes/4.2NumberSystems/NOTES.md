@@ -176,6 +176,8 @@ Counting the same sequence in both bases side by side shows the pattern:
 |      99 | `01100011` |
 |     100 | `01100100` |
 
+---
+
 ## 3. Hex is binary's shorthand
 
 Hex (base 16) exists because **one hex digit always represents exactly 4
