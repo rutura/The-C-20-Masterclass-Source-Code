@@ -92,23 +92,5 @@ int main() {
     // TODO: declare each of the auto variables described above and
     // print their sizeof() to check your predictions.
 
-
-    /*
-        Exercise 6 - Change-maker (chapter capstone)
-
-        Read a bill total and an amount paid from std::cin (both
-        double). Compute the change owed, convert it to a whole-cents
-        long long (money math should use integer cents, not floating
-        point, to avoid rounding errors - this is the same reasoning
-        4.3DataTypes used long long for yearly_total_cents), then split
-        that into whole dollars and remaining cents using integer
-        division and modulo. Print "you get $X and Y cents back".
-        Optional: wrap the cents-to-dollars-and-cents split in its own
-        function, the same way Exercise 4 does.
-    */
-    std::println("\n--- Exercise 6: Change-maker ---");
-    // TODO: read bill total and amount paid, compute change in cents,
-    // split into dollars/cents, and print the result here.
-
     return 0;
 }
