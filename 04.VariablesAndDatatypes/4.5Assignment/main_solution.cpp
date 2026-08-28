@@ -19,13 +19,6 @@ double unit_price(double total_cost, int quantity) {
     return total_cost / quantity;
 }
 
-// Exercise 6 (optional part): split a whole-cents amount into dollars
-// and remaining cents, so the change-maker logic isn't repeated inline.
-void split_cents(long long total_cents, long long& dollars, long long& cents) {
-    dollars = total_cents / 100;
-    cents = total_cents % 100;
-}
-
 int main() {
 
     // --- Exercise 1: Personal profile card ---
@@ -132,30 +125,6 @@ int main() {
     std::println("c_style_text     : {} bytes (a pointer, not the text)", sizeof(c_style_text));
     std::println("cpp_text         : {} bytes (a real std::string object)", sizeof(cpp_text));
     std::println("mixed_math       : {} ({} bytes)", mixed_math, sizeof(mixed_math));
-
-
-    // --- Exercise 6: Change-maker ---
-    std::println("\n--- Exercise 6: Change-maker ---");
-
-    std::println("Enter the bill total and amount paid:");
-    double bill_total{};
-    double amount_paid{};
-    std::cin >> bill_total >> amount_paid;
-
-    // Money math is done in whole cents (a long long), not floating
-    // point, to avoid the rounding errors doubles can introduce.
-    long long change_cents{
-        static_cast<long long>((amount_paid - bill_total) * 100 + 0.5)};
-
-    long long dollars{};
-    long long cents{};
-    split_cents(change_cents, dollars, cents);
-
-    // Classic way:
-    std::cout << "You get $" << dollars << " and " << cents << " cents back.\n";
-
-    // Modern way:
-    std::println("You get ${} and {} cents back.", dollars, cents);
 
     return 0;
 }
