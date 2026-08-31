@@ -56,7 +56,31 @@ into an engineer. You stop asking only "does it run?" and start asking
 "what does this cost, what can go wrong, and who owns this?" Those
 questions carry over to every other language you will ever use.
 
-## 4. What this course is
+## 4. Why this course exists
+
+This is not a brand-new course. It is a **live update of an existing
+one**: [The Modern C++20 Masterclass](https://www.udemy.com/course/the-modern-cpp-20-masterclass/?couponCode=26BBPAA2MX),
+which has been running for about five years.
+
+That original course was built like a **reference manual**. It set out to
+cover nearly every feature of modern C++, one after another, in detail.
+That has real value, and plenty of students got a lot out of it, but five
+years of feedback made one thing clear: knowing every feature is not the
+same as being able to build something with them.
+
+This update keeps the full coverage. Every feature the original taught is
+still here. What changes is the **balance**: instead of stopping at "here
+is the feature and here is its syntax," we spend more time using those
+features to build practical projects and to work with the professional
+tools people actually use in the field. Less reference manual, more
+workshop. What this means: 
+
+- **I am updating the course as I go:** The initial parts will be updated while I work on the later parts. If you are enrolled, you will get all updates automatically.
+- **If you go through it fast, you may come through old content:** The early chapters will be updated first, so if you go through the course quickly, you may see some content that is not yet updated. I will always provide a note when that is the case, and I will update it as soon as possible.
+- **I plan to get done with the update within 4 months or so:** Bare with me on this.
+- **I am in a position to act on feedback:** If you have suggestions, please let me know. 
+
+## 5. What this course is
 
 This is a **problem-solving course**, not a language-feature tour. Every
 concept is introduced because a problem needs it, not because it exists.
@@ -86,7 +110,7 @@ The goals:
 - **Compiler Support**: Understanding what the compiler you have access to can and cannot do, and how to work with it. C++ 11, 14, 17, 20, and 23 are all supported by different compilers at different levels. We will cover what is available and how to use it.
 - **CMake**: A build system that is widely used in the C++ world. We will cover how to use it to build your projects and manage dependencies.
 
-## 5. How to get the most out of it
+## 6. How to get the most out of it
 
 - **Type the code yourself.** Watching is not learning. The exercises are
   there for a reason.
@@ -98,7 +122,7 @@ The goals:
   you are confused, ask. The only bad question is the one you do not ask.
 
 
-## 6. The Flow
+## 7. The Flow
 
 - **Get the Starter Files**: Download the starter files from the course platform. These contain the course structure, initial code, and any assets you'll need. 
 - **Open a Project and Work Through it folloing along with the video**: Do what we do in the course.
