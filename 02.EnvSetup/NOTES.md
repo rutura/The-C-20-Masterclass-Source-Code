@@ -236,9 +236,12 @@ Dockerfiles under `02.EnvSetup`:
 - `02.EnvSetup/clang/Dockerfile` builds an image with **Clang 21**.
 
 Both give you top notch C++23 support, plus CMake, Ninja, a debugger,
-`clang-format`, `clang-tidy`, and `vcpkg` already set up. This is a
-console workflow: you edit files with your normal editor on your host
-machine, and compile and run them inside the container.
+`clang-format`, `clang-tidy`, and `vcpkg` already set up. The default
+workflow is console based: you edit files with your normal editor on your
+host machine, and compile and run them inside the container. **5.5** shows
+the alternative — attaching a VS Code window straight to the running
+container so the editor, IntelliSense, and debugger all use the
+container's toolchain.
 
 You need **Docker** installed first: Docker Desktop on Windows and macOS
 (<https://www.docker.com/products/docker-desktop/>), or the Docker Engine
@@ -325,7 +328,14 @@ stops the container; `docker start -ai cpp-masterclass` brings it back
 exactly as it was, including anything extra you installed inside it with
 `apt`.
 
-You only redo the `docker run --name` step from 4.2 if you delete the
+If you forget whether the container still exists, `docker container ls` on
+its own will **not** show it — that command only lists currently running
+containers. A stopped container (the normal state between sessions) only
+shows up with `docker container ls -a`, alongside its name and `Exited`
+status. Find it there, then `docker start -ai <name>` brings it back with
+the same mount.
+
+You only redo the `docker run --name` step from 5.2 if you delete the
 container (`docker rm cpp-masterclass`) or rebuild the image.
 
 ### 5.4 Build and run a lecture inside the container
@@ -345,3 +355,120 @@ Every lecture builds the same way because they all define the same
 `rooster` executable target. The `build/` folder is written back out to
 the host through the mount, so you can delete it from your editor like any
 other file. When you are done, type `exit` to stop the container.
+
+### 5.5 Editing in VS Code attached to the container
+
+The steps above are terminal only. If you would rather have an editor, a
+graphical debugger, and IntelliSense that all run against the container's
+compiler, VS Code can attach a window directly to the running container.
+Only the VS Code UI runs on your host; your files, the compiler, and the
+editor extensions all live inside the container.
+
+This is optional — the console workflow in 5.4 is enough to follow the
+course.
+
+**Both images are set up the same way. The only thing that differs is the
+container name from 5.2:** `cpp-masterclass` for the GCC container,
+`cpp-masterclass-clang` for the Clang container. Use yours wherever a step
+says *your container*. Everything else is identical because IntelliSense
+reads the compiler and the flags straight out of the `compile_commands.json`
+your build produces, so it follows whichever image you built with no
+per-compiler tweaks.
+
+#### On the host
+
+- **VS Code** with the **Dev Containers** extension
+  (`ms-vscode-remote.remote-containers`).
+- Docker running, with your container from 5.2 started: `docker start
+  <your container>`. You do not need `-ai` or a terminal in it — VS Code
+  only needs the container to be running.
+
+#### Attach and open a lecture
+
+1. Command Palette (`F1` or `Ctrl+Shift+P`) > **Dev Containers: Attach to
+   Running Container** > pick your container. A new window opens with a
+   coloured *Container <your container>* badge in the bottom-left corner.
+2. **File > Open Folder** and pick the lecture you are working on, for
+   example `/workspace/03.FirstSteps/3.2FirstCppProgram`. Open one lecture
+   folder, not the repo root (see the note at the end).
+
+#### Two extensions, once per container
+
+When attached, the Extensions view splits into a **LOCAL** group and a
+**CONTAINER** group. Install both of these into the **CONTAINER** group:
+
+- **C/C++** (`ms-vscode.cpptools`) — the IntelliSense engine: completion,
+  go-to-definition, error checking, and the debugger UI.
+- **CMake Tools** (`ms-vscode.cmake-tools`) — configure/build/run buttons
+  in the status bar, and it writes the `compile_commands.json` that the
+  C/C++ extension reads.
+
+They install into `~/.vscode-server/extensions` inside the container and
+survive `docker stop` / `docker start`, like anything you `apt install`.
+Delete the container (`docker rm`) and they go with it — recreate it (5.2)
+and reinstall. Do not add a second IntelliSense engine (such as clangd)
+alongside C/C++; they fight over the same squiggles.
+
+#### One setting, once per container
+
+This is the entire configuration, and it goes in the container's own
+settings so it never touches your host VS Code:
+
+1. Command Palette > **Preferences: Open Remote Settings (JSON)**. The
+   editor title must read *Remote Settings*, not *User Settings* — the
+   Remote file lives inside the container at
+   `~/.vscode-server/data/Machine/settings.json` and only applies while a
+   window is attached to it.
+2. Add:
+
+   ```json
+   {
+     "cmake.configureOnOpen": true,
+     "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+   }
+   ```
+
+3. Save.
+
+What the two lines do:
+
+- `cmake.configureOnOpen` — the moment you open a lecture, CMake Tools
+  configures it. The first time, it asks you to pick a kit; choose the
+  Clang or GCC entry it found, or **[Unspecified]** to let CMake decide.
+  It remembers the choice. Configuring writes `build/compile_commands.json`
+  with the exact compiler and `-std=gnu++23` for that lecture.
+- `C_Cpp.default.compileCommands` — points the C/C++ extension at that
+  file. From then on IntelliSense uses the real compiler and the real
+  standard, so `std::println`, `<print>`, and the rest of C++23 resolve
+  with nothing further to do.
+
+The same block works on both images: the compiler path inside
+`compile_commands.json` is written by CMake when it configures, so the
+C/C++ extension follows GCC or Clang on its own — no compiler path or
+standard to set by hand.
+
+#### Day to day
+
+Open a lecture, wait a second for CMake Tools to configure it, and the
+squiggles clear. Build and run from the CMake Tools buttons in the status
+bar, or keep using the terminal exactly as in 5.4 — the `build/` folder is
+the same one.
+
+#### Notes
+
+- **Open one lecture folder at a time, not the repo root.**
+  `${workspaceFolder}` has to resolve to the lecture so
+  `build/compile_commands.json` is found. Opening `/workspace` points it
+  at a single build folder the lectures do not share.
+- **A lecture needs configuring once before IntelliSense is correct.**
+  That is what `cmake.configureOnOpen` handles; if a folder still shows
+  C++23 names as unknown, run **CMake: Configure** from the palette. Until
+  a `build/compile_commands.json` exists, the C/C++ extension falls back to
+  an older standard.
+- **Extensions and the Remote setting live with the container.** Rebuild
+  the image (5.1) or recreate the container (5.2) and you redo the two
+  extension installs and re-add the setting.
+- **File ownership on Linux hosts.** The container runs as root, so
+  `build/` folders it writes through the mount are root-owned on your
+  host. `sudo chown -R "$USER" .` from the repo root clears it if it gets
+  in your way.
