@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(clang++ --version)",
+      "Bash(cmake --version)",
+      "Read(//workspace/**)",
+      "Bash(clangd --version)",
+      "Read(//usr/bin/**)",
+      "Bash(grep -E '^\\(g\\\\+\\\\+|gcc|clang\\\\+\\\\+|clang\\)\\(-[0-9]+\\)?$')",
+      "Bash(gcc --version)",
+      "Bash(apt list *)",
+      "Read(//usr/include/c\\\\+\\\\+/**)",
+      "Read(//usr/lib/llvm-21/include/c\\\\+\\\\+/v1/**)",
+      "Bash(apt-get install *)",
+      "Read(//root/.vscode-server/extensions/**)",
+      "Read(//root/.vscode/**)",
+      "Read(//usr/lib/llvm-21/bin/**)",
+      "Bash(g++ -dumpfullversion)",
+      "Bash(/usr/bin/g++ --version)"
+    ]
+  }
+}
