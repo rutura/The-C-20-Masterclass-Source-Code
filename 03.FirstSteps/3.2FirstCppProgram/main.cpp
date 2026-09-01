@@ -1,5 +1,5 @@
 #include <iostream>
-#include <print>
+//#include <print>
 
 // This is a one-line comment: the compiler ignores everything after //.
 
@@ -20,14 +20,18 @@ int main() {
     // C++23 gives us std::println: no chaining, no manual "\n" juggling,
     // and it supports {}-style formatting like Python or Rust. This is
     // what we'll use for the rest of the course.
+    /*
     std::println("Hello, C++!");
     std::println("This is the modern way to print output.");
+    */
 
     std::string name{"Ada"};
     int age{28};
 
-	std::cout << name << " is " << age << " years old.\n";
+    std::cout << name << " is " << age << " years old.\n";
+    /*
     std::println("{} is {} years old.", name, age);
+    */
 
     // A compile-time error: uncomment to see the compiler refuse to build.
     // The mistake is caught before the program ever runs.

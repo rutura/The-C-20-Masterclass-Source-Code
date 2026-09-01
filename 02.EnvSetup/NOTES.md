@@ -35,8 +35,9 @@ You need three things to work through this course:
   - **VS Code** with C++ extensions — all platforms.
 
 This file walks through getting that stack running on Windows, Linux, and
-macOS, and then shows a Docker option for anyone who wants a modern
-compiler without touching their system install.
+macOS, then shows an online option for quick experiments with no install at
+all, and finally a Docker option for anyone who wants a modern compiler
+without touching their system install.
 
 Pick the section for your operating system. You do not need to read the
 others.
@@ -181,7 +182,51 @@ the **Docker** option below for an up to date Clang.
 3. Open a lecture's `CMakeLists.txt` with **File > Open File or Project**,
    choose the kit, and build and run with **Cmd+R**.
 
-## 4. Docker (optional, for a modern compiler)
+## 4. Online: Compiler Explorer (no install, single-file snippets only)
+
+Before setting up anything locally, [Compiler Explorer](https://godbolt.org)
+(also known as "Godbolt") is the fastest way to try a single-file snippet
+against a specific, very recent compiler version, right from a browser. It
+is not a substitute for the local setup above — the course's lecture
+folders are multi-file CMake projects, and Compiler Explorer only compiles
+one source pane — but it is the easiest way to check whether a particular
+C++23/26 feature is supported by a given compiler before you decide whether
+to chase a newer toolchain locally.
+
+1. Go to <https://godbolt.org>.
+2. In the compiler pane on the right, pick a compiler from the dropdown
+   (see recommendations below).
+3. Paste your code into the left pane. It compiles automatically as you
+   type; errors and warnings show inline and in the output pane.
+4. Set the language standard in the compiler's **options** box (the small
+   text field above the output, next to the compiler dropdown) since the
+   defaults are usually older standards:
+   - **GCC or Clang**: `-std=c++23` (or `-std=c++2b` on older compiler
+     builds that have not yet renamed the flag once C++23 was finalized).
+   - **MSVC**: `/std:c++latest` (MSVC's own `/std:c++23` also exists, but
+     `/std:c++latest` tracks whatever the newest draft/standard features
+     that build of MSVC supports, which is what the videos rely on for
+     bleeding-edge features).
+
+Recommended compilers to pick from the dropdown, matching what the videos
+use:
+
+- **GCC** — the newest **GCC 16** entry (trunk/snapshot builds are labelled
+  separately from numbered releases; prefer the highest-numbered stable
+  release, e.g. `x86-64 gcc 16.1`, over a trunk build unless you specifically
+  want bleeding-edge/unreleased features).
+- **Clang** — the newest stable numbered release in the dropdown (e.g.
+  `x86-64 clang 21.1.0`); avoid `clang (trunk)` unless a feature is missing
+  from the latest stable.
+- **MSVC** — the newest `x64 msvc v19.latest` entry. Compiler Explorer keeps
+  this pointed at the newest MSVC it has, which is the closest match to
+  what current Visual Studio ships.
+
+Since this is single-file only, use it to sanity-check a language feature
+or standard-library call in isolation, then bring the working code back
+into the matching lecture folder for the full CMake build.
+
+## 5. Docker (optional, for a modern compiler)
 
 If your system compiler is too old and you do not want to upgrade it, or
 you just want a clean throwaway environment, this repo ships two
@@ -199,7 +244,7 @@ You need **Docker** installed first: Docker Desktop on Windows and macOS
 (<https://www.docker.com/products/docker-desktop/>), or the Docker Engine
 package on Linux.
 
-### 4.1 Build an image
+### 5.1 Build an image
 
 Run these from the repo root. Each command names two paths:
 
@@ -229,7 +274,7 @@ docker build -t cpp-masterclass-clang -f 02.EnvSetup/clang/Dockerfile 02.EnvSetu
 `-t` names the image. You only need to do this once (or again after the
 Dockerfile changes). Check it landed with `docker images`.
 
-### 4.2 Create the container once
+### 5.2 Create the container once
 
 You create a **named** container one time, telling it then which host
 folder to mount. After that you never repeat this command: the name, the
@@ -265,7 +310,7 @@ For the Clang image, use `cpp-masterclass-clang` as the image and give the
 container a different name, for example `--name cpp-masterclass-clang`, so
 the two do not collide.
 
-### 4.3 Start the container every time after that
+### 5.3 Start the container every time after that
 
 Once the container exists, you do not need to be in the repo folder and
 you do not repeat the `-v` mapping. From anywhere:
@@ -283,7 +328,7 @@ exactly as it was, including anything extra you installed inside it with
 You only redo the `docker run --name` step from 4.2 if you delete the
 container (`docker rm cpp-masterclass`) or rebuild the image.
 
-### 4.4 Build and run a lecture inside the container
+### 5.4 Build and run a lecture inside the container
 
 Once you are at the container's `bash` prompt, you are sitting in
 `/workspace`, which is the repo. Change into any chapter and lecture and
