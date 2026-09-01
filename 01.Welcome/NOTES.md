@@ -58,9 +58,7 @@ questions carry over to every other language you will ever use.
 
 ## 4. Why this course exists
 
-This is not a brand-new course. It is a **live update of an existing
-one**: [The Modern C++20 Masterclass](https://www.udemy.com/course/the-modern-cpp-20-masterclass/?couponCode=26BBPAA2MX),
-which has been running for about five years.
+This is a live update of the late C++ 20 Masterclass on Udemy.
 
 That original course was built like a **reference manual**. It set out to
 cover nearly every feature of modern C++, one after another, in detail.
@@ -128,3 +126,6 @@ The goals:
 - **Open a Project and Work Through it folloing along with the video**: Do what we do in the course.
 - **Make it your own**: After watching the video, try to modify the code, add features, or experiment with different approaches.
 
+## 8. You can Speed up the Videos
+
+- **try different speeds.** Adjust the playback speed to match your comfort level and the complexity of the material.
