@@ -122,21 +122,3 @@ C. Both deduce to `const char*`
 D. `store_id` deduces to `std::string`; `customer_name` deduces to `const char*`
 
 **Answer: B** — a bare string literal deduces to `const char*`; the `s` suffix from `std::string_literals` makes it a `std::string` literal instead.
-
-### 14. `auto loyalty_points{350u};` followed by `loyalty_points = -10;` compiles and runs without crashing. What actually happens?
-
-A. The compiler rejects the assignment because `-10` is negative
-B. `loyalty_points` stores `-10` correctly since `auto` adjusts the type automatically
-C. `350u` deduces `loyalty_points` as `unsigned int`; assigning `-10` doesn't error, it silently wraps around to a huge positive number — a mistake that's easy to miss without checking what `auto` actually chose
-D. The program pauses and asks the user to confirm the negative assignment
-
-**Answer: C** — the `u` suffix deduces `unsigned int`; the deduced type sticks for the variable's lifetime, and `auto` doesn't change it afterward, so the wraparound bug is easy to miss.
-
-### 15. Which of these declarations follows this course's brace-initialization convention?
-
-A. `int age = 28;`
-B. `int age;`
-C. `int age{28};`
-D. `int age(28);`
-
-**Answer: C** — every variable declaration uses brace initialization (`{}`); `=`-style init is reserved only for deliberately demonstrating narrowing/overflow, and bare/uninitialized declarations are never acceptable.
