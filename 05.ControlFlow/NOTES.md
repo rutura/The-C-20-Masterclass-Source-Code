@@ -574,7 +574,48 @@ Guidance:
 
 Test **first**, then maybe run the body, then repeat.
 
+### The bare mechanics
+
+Before wiring `while` to anything useful, run it on its own. This loop
+just prints a number and counts up:
+
+```cpp
+int loop_count{0};
+while (loop_count < 5) {
+    std::println("loop_count: {}", loop_count);
+    ++loop_count;           // without this line, loop_count stays 0 forever
+}
+```
+
+Step through every pass:
+
+```
+   pass │ loop_count │ loop_count < 5 │ prints │ after ++loop_count
+   ─────┼────────────┼────────────────┼────────┼───────────────────
+    1   │     0      │     true       │   0    │        1
+    2   │     1      │     true       │   1    │        2
+    3   │     2      │     true       │   2    │        3
+    4   │     3      │     true       │   3    │        4
+    5   │     4      │     true       │   4    │        5
+    -   │     5      │     false      │   -    │  (loop exits)
+```
+
+Three moving parts, and every counter-controlled loop has all three:
+
+```
+   int loop_count{0};          ← 1. set the counter up before the loop
+   while (loop_count < 5) {     ← 2. a condition that will eventually be false
+       ...
+       ++loop_count;            ← 3. an update that moves toward that condition
+   }
+```
+
+Drop part 3 and `loop_count` is always `0`, the condition is always
+`true`, and the loop never ends.
+
 ### Counter-controlled iteration - count known up front
+
+Same three parts, now the body does real work - read a value each pass:
 
 ```
    int entered{0};              entered:  0 → 1 → 2 → 3 → 4 → 5

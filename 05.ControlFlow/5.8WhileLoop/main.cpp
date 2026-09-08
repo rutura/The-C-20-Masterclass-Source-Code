@@ -3,6 +3,15 @@
 
 int main() {
 
+    // --- Looping with while ---
+    // A while loop repeats a block of code while a condition is true.
+
+    int loop_count{0};
+    while (loop_count < 5) {
+        std::println("loop_count: {}", loop_count);
+        ++loop_count;           // increment the counter so the loop ends
+    }
+
     // --- Counter-controlled iteration: you know the count up front ---
     // Read exactly 5 scores and total them.
     int total{0};
