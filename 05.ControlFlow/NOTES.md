@@ -39,7 +39,7 @@ the other two things every program needs:
 
 ## 5.2 Arithmetic operators and input
 
-Two new things at once: **reading a value the user types**, and **doing
+What we do: **reading a value the user types**, and **doing
 arithmetic on it**.
 
 ### Input with `std::cin`
@@ -99,9 +99,7 @@ any fractional part is **discarded, not rounded**.
  7501 / 2   ─►  3750        (not 3750.5)  ◄── the "average" bug
 ```
 
-For the two salaries, `(salary1 + salary2) / 2` is the average pay. If
-the two add up to an odd number the result is rounded **down**:
-`3500 + 4001` is `7501`, and `7501 / 2` gives `3750`, losing the `.5`.
+For the two salaries, `(salary1 + salary2) / 2` is the average pay. If the sum is an odd number ─► the division by 2 gives a fractional result, but we are dealing with integers, so the computer throws away the fraction : `3500 + 4001` is `7501`, and `7501 / 2` gives `3750`, losing the `.5`.
 
 To keep the fraction, make at least one operand floating-point:
 
@@ -110,9 +108,6 @@ To keep the fraction, make at least one operand floating-point:
  7501 / 2.0   ─►  3750.5      int / double = double
  7501.0 / 2   ─►  3750.5      double / int = double
 ```
-
-This is the single most common bug in a beginner's first average. Show it
-live: print the wrong `3750`, then fix it with `/ 2.0`.
 
 ### The remainder operator `%`
 
@@ -125,9 +120,7 @@ live: print the wrong `3750`, then fix it with `/ 2.0`.
 ```
 
 In the example, `(salary1 + salary2) % 100` is the part of the combined
-pay that does not make up a full 100. The same "what's the remainder"
-idea comes back in the loop lectures - `counter % 2` to act on every
-second pass, `counter % 10` to do something once every ten iterations.
+pay that does not make up a full 100.
 
 ### Precedence and associativity
 
@@ -142,8 +135,7 @@ questions decide what it means:
    associative**, so `a + b - d` is `(a + b) - d`, not `a + (b - d)`.
 
 Here is the table for every operator in this chapter, highest precedence
-at the top. This is the same shape as the reference's table - keep it on
-screen and point at rows as you explain expressions.
+at the top. 
 
 | Level | Operators (same line = same precedence)      | Associativity  | Kind             |
 |:-----:|---------------------------------------------|----------------|------------------|
@@ -161,80 +153,15 @@ screen and point at rows as you explain expressions.
 | 12    | `=`  `+=`  `-=`  `*=`  `/=`  `%=`            | right to left  | assignment       |
 | 13    | `,`                                          | left to right  | comma            |
 
-Most rows are left-to-right. The two that are **right-to-left** are the
-ones to remember: **unary prefix** (`- -x` is `-(-x)`) and **assignment**
-(`a = b = 0` is `a = (b = 0)`).
+Most rows are left-to-right. We will unpack more of this as we go, but just be aware of the concept. 
 
-### Reading an expression against the table
-
-Method: find the **lowest-precedence** operator - that is the one that
-runs **last**, so it splits the expression into the two halves you
-evaluate first. Recurse into each half.
-
-Take one month of the first salary plus a full year of the second, minus
-a shared 1200 rent:
-
-```
-   salary1 + salary2 * 12 - 1200
-
-   step 1  lowest-precedence operators here are  +  and  -  (level 5).
-           they tie, so left-to-right associativity: the LAST one is the
-           rightmost  -  .  It splits the expression:
-
-               (salary1 + salary2 * 12)   -   1200
-               └──────────┬──────────┘         └─┬─┘
-                  evaluate this first         then subtract
-
-   step 2  inside the left half:  salary1 + salary2 * 12
-           lowest here is  +  (level 5), beating  *  (level 4):
-
-               salary1   +   (salary2 * 12)
-                             └──────┬──────┘
-                            *  runs first
-
-   step 3  fully parenthesized:
-
-               ((salary1) + ((salary2) * 12)) - (1200)
-```
-
-With `salary1 = 3500`, `salary2 = 4000`:
-
-```
-   salary2 * 12          ─►  48000
-   salary1 + 48000       ─►  51500
-   51500 - 1200         ─►  50300
-```
-
-A second example, this time mixing arithmetic, a comparison, and `&&` -
-the shape you write in an `if`:
-
-```
-   salary1 >= 3000 && salary1 % 100 == 0
-
-   lowest-precedence operator is  &&  (level 9) - runs last, splits here:
-
-       (salary1 >= 3000)   &&   (salary1 % 100 == 0)
-       └───────┬───────┘         └────────┬────────┘
-         left operand              right operand
-
-   left:   >=  (level 7) is the only operator          ─►  salary1 >= 3000
-   right:  %  (level 4) beats  ==  (level 8, lower)     ─►  (salary1 % 100) == 0
-
-   fully parenthesized:
-
-       (salary1 >= 3000) && ((salary1 % 100) == 0)
-```
-
-So this reads "at least 3000 **and** a round multiple of 100" - no
-parentheses needed, because precedence already groups it that way.
-
-### When to add parentheses anyway
+### We can add parentheses anyway
 
 You do not have to memorize the whole table. Two rules cover almost
 everything:
 
-- If precedence already groups it the way you mean (like the `&&`
-  example), leave it bare - extra parentheses just add noise.
+- If precedence already groups it the way you mean, leave 
+   it bare - extra parentheses just add noise.
 - If you have to stop and think about it, **add the parentheses**. They
   cost nothing at runtime and the next reader does not have to consult
   the table.
@@ -244,9 +171,6 @@ everything:
    (salary1 + salary2) * 12   ← parentheses REQUIRED to force + first
    (a + b) - c                ← redundant (left-to-right already), but harmless
 ```
-
-`(salary1 + salary2) * 12` is the example's household yearly total: add
-both monthly salaries, *then* multiply by 12.
 
 ### Compound assignment
 
@@ -265,12 +189,8 @@ In the example the two friends pool their pay into a `pot`:
 ```cpp
 int pot{salary1};
 pot += salary2;   // pot = pot + salary2
-pot -= 1200;      // shared rent comes out
+pot -= 1200;      // pot = pot - 1200
 ```
-
-Right now it just saves typing. Once loops arrive we add to a running
-total on almost every iteration, and `pot += payment` is the natural way
-to write it.
 
 ---
 
