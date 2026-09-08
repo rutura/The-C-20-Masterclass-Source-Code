@@ -235,7 +235,7 @@ counter++;   // this
 That standalone form is how you will write it ~95% of the time (stepping
 a loop counter). The prefix/postfix difference only matters when you read
 the result in the same expression - and code that does that is usually
-harder to read, so show it once, then avoid it.
+harder to read.
 
 ---
 
