@@ -285,20 +285,20 @@ Four shapes, built up one at a time.
 
 ```
         ┌───────────────┐  false
-   ────►│ grade >= 60 ? ├──────────►────┐
+   ────►│ age >= 18 ?   ├──────────►────┐
         └───────┬───────┘               │
                 │ true                  │
                 ▼                       │
         ┌───────────────┐               │
-        │ print "Passed"│               │
+        │ print "adult" │               │
         └───────┬───────┘               │
                 ▼                       ▼
                 └──────────►────────────┘
 ```
 
 ```cpp
-if (grade >= 60) {
-    std::println("Passed");
+if (age >= 18) {
+    std::println("adult");
 }
 ```
 
@@ -306,77 +306,78 @@ if (grade >= 60) {
 
 ```
       false   ┌───────────────┐   true
-   ┌──────────┤ grade >= 60 ? ├──────────┐
+   ┌──────────┤ age >= 18 ?   ├──────────┐
    ▼          └───────────────┘          ▼
 ┌───────────────┐              ┌───────────────┐
-│ print "Failed"│              │ print "Passed"│
+│ print "minor" │              │ print "adult" │
 └───────┬───────┘              └───────┬───────┘
         └──────────►────┬────◄─────────┘
                         ▼
 ```
 
 ```cpp
-if (grade >= 60) {
-    std::println("Passed");
+if (age >= 18) {
+    std::println("adult");
 }
 else {
-    std::println("Failed");
+    std::println("minor");
 }
 ```
 
 ### 3. `else if` ladder - the first true branch wins
 
 ```
-   grade = 95
+   age = 34
 
-   grade >= 90 ?  ──true──►  "A"   ──┐   (done - rest skipped)
-      │ false                        │
-   grade >= 80 ?                     │
-      │ false                        │
-   grade >= 70 ?                     │
-      │ false                        │
-   grade >= 60 ?                     │
-      │ false                        │
-   else ──────────►  "F"             │
-                                     ▼
+   age >= 65 ?  ──true──►  "senior"   ──┐   (done - rest skipped)
+      │ false                           │
+   age >= 18 ?  ──true──►  "adult"  ────┤
+      │ false                           │
+   age >= 13 ?                          │
+      │ false                           │
+   age >= 0  ?                          │
+      │ false                           │
+   else ──────────►  "invalid age"      │
+                                        ▼
 ```
 
 ```cpp
-if      (grade >= 90) { std::println("A"); }
-else if (grade >= 80) { std::println("B"); }
-else if (grade >= 70) { std::println("C"); }
-else if (grade >= 60) { std::println("D"); }
-else                  { std::println("F"); }
+if      (age >= 65) { std::println("senior"); }
+else if (age >= 18) { std::println("adult"); }
+else if (age >= 13) { std::println("teenager"); }
+else if (age >= 0)  { std::println("child"); }
+else                { std::println("invalid age"); }
 ```
 
 **Order matters.** Written the other way around:
 
 ```
-   if (grade >= 60) ... else if (grade >= 90) ...
+   if (age >= 0) ... else if (age >= 65) ...
        ▲
-       └─ grade 95 matches HERE first and prints "D"; the >= 90
+       └─ age 34 matches HERE first and prints "child"; the >= 65
           branch is never reached.
 ```
 
-Tests must go **most specific → least specific**.
+Tests must go **most specific → least specific** (here: highest bound
+first).
 
 ### 4. Nested `if` - a decision inside a branch
 
 ```
-   grade >= 60 ?
-   ├─ yes ─► grade >= 90 ?
-   │         ├─ yes ─► "Passed - honor roll"
-   │         └─ no  ─► "Passed"
+   age >= 18 ?
+   ├─ yes ─► age >= 21 ?
+   │         ├─ yes ─► "may enter the club"
+   │         └─ no  ─► "adult, but under 21"
    └─ no  ─► (nothing)
 ```
 
 ```cpp
-if (grade >= 60) {
-    if (grade >= 90) {
-        std::println("Passed - eligible for the honor roll.");
+if (age >= 18) {
+    if (age >= 21) {
+        std::println("Adult, and old enough to enter the club.");
     }
     else {
-        std::println("Passed.");
+        std::println("Adult, but under 21.");
     }
 }
 ```
@@ -386,16 +387,16 @@ if (grade >= 60) {
 A variable declared inside `{ }` exists **only** inside those braces:
 
 ```cpp
-if (grade >= 60) {
-    int margin{grade - 60};        // ┐ margin lives
-    std::println("+{} pts", margin);// │ only in here
-}                                   // ┘
-// margin does not exist here
+if (age >= 18) {
+    int years_since_adult{age - 18};              // ┐ lives only
+    std::println("adult for {} years", years_since_adult); // │ in here
+}                                                 // ┘
+// years_since_adult does not exist here
 ```
 
 ```
-   { ─────────────────────────── }
-     ^ margin born            ^ margin gone
+   { ────────────────────────────────── }
+     ^ years_since_adult born       ^ it's gone
 ```
 
 ---

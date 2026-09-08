@@ -3,57 +3,57 @@
 
 int main() {
 
-    std::print("Enter a numeric grade (0-100): ");
-    int grade{};
-    std::cin >> grade;
+    std::print("Enter your age in years: ");
+    int age{};
+    std::cin >> age;
 
     // --- Plain if: do something only when the condition holds ---
-    if (grade == 100) {
-        std::println("Perfect score!");
+    if (age == 18) {
+        std::println("Just became an adult!");
     }
 
     // --- if / else: one branch or the other ---
-    if (grade >= 60) {
-        std::println("Result: pass");
+    if (age >= 18) {
+        std::println("Status: adult");
     }
     else {
-        std::println("Result: fail");
+        std::println("Status: minor");
     }
 
     // --- else if ladder: the first matching branch wins, the rest are
     // skipped. Order matters - check from the top down. ---
-    if (grade >= 90) {
-        std::println("Letter: A");
+    if (age >= 65) {
+        std::println("Bracket: senior");
     }
-    else if (grade >= 80) {
-        std::println("Letter: B");
+    else if (age >= 18) {
+        std::println("Bracket: adult");
     }
-    else if (grade >= 70) {
-        std::println("Letter: C");
+    else if (age >= 13) {
+        std::println("Bracket: teenager");
     }
-    else if (grade >= 60) {
-        std::println("Letter: D");
+    else if (age >= 0) {
+        std::println("Bracket: child");
     }
     else {
-        std::println("Letter: F");
+        std::println("Bracket: invalid age");
     }
 
     // --- Nested if: a decision inside a branch ---
-    if (grade >= 60) {
-        if (grade >= 90) {
-            std::println("Passed, and eligible for the honor roll.");
+    if (age >= 18) {
+        if (age >= 21) {
+            std::println("Adult, and old enough to enter the club.");
         }
         else {
-            std::println("Passed.");
+            std::println("Adult, but under 21.");
         }
     }
 
     // A variable declared inside a branch's { } exists only there.
-    if (grade >= 60) {
-        int margin{grade - 60};
-        std::println("You cleared the pass mark by {} points.", margin);
+    if (age >= 18) {
+        int years_since_adult{age - 18};
+        std::println("You've been an adult for {} years.", years_since_adult);
     }
-    // `margin` is not in scope here.
+    // `years_since_adult` is not in scope here.
 
     return 0;
 }
