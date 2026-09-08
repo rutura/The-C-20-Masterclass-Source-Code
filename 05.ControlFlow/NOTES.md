@@ -674,63 +674,131 @@ else {
 
 ## 5.9 The `for` loop
 
-Same job as a counter-controlled `while`, with all three parts in one
-header:
+We have seen that a `while` loop has three parts: the setup above it, 
+the condition in the header, the update buriedin the body. `for` collects 
+all three into **one line** so you can see them together.
+
+```
+   the SAME loop, two ways
+   ───────────────────────
+
+   int page{1};                  ┌── for (int page{1}; page <= 10; ++page)
+   while (page <= 10) {          │        └───┬────┘  └────┬────┘  └──┬──┘
+       std::print("{} ", page);  │          setup      condition   update
+       ++page;                   │
+   }                             └── std::print("{} ", page);
+```
+
+### The three parts of the header
 
 ```
    for ( init ; condition ; update )
          │        │           │
-         │        │           └─ runs AFTER every pass
-         │        └───────────── checked BEFORE every pass
-         └────────────────────── runs ONCE, first
+         │        │           └─ runs AFTER every pass through the body
+         │        └───────────── checked BEFORE every pass (false ⇒ stop)
+         └────────────────────── runs ONCE, before the first check
 
-   for (int i{1}; i <= 10; ++i) { body }
+   for (int page{1}; page <= 10; ++page) { body }
+        └─────┬────┘  └────┬───┘  └──┬─┘
+         page starts   keep going   move page
+           at 1        while <= 10   on by 1
 ```
 
-Order of execution:
+### Order of execution
+
+`init` happens once. Then the loop cycles **condition → body → update**
+until the condition is false:
 
 ```
-   init ──► condition ──true──► body ──► update ──┐
-              ▲                                    │
-              └────────────────────────────────────┘
+        ┌───────────────────────────────────────┐
+        │                                       │
+   init ─► condition ──true──► body ──► update ─┘
               │
-             false ──► exit
+            false
+              │
+              ▼
+             exit
 ```
 
+Traced for `for (int page{1}; page <= 10; ++page)`:
+
 ```
-   i:      1   2   3   4   5   6   7   8   9   10   11
-   test:   T   T   T   T   T   T   T   T   T   T    F ─► exit
+   pass │ page (at check) │ page <= 10 │ body prints │ ++page ⇒
+   ─────┼─────────────────┼────────────┼─────────────┼─────────
+    1   │       1         │   true     │     1       │    2
+    2   │       2         │   true     │     2       │    3
+    3   │       3         │   true     │     3       │    4
+    …   │       …         │    …       │     …       │    …
+   10   │      10         │   true     │    10       │   11
+    -   │      11         │   false    │     -       │  (exit)
 ```
 
-Three variants to show:
+### Three variants, one shape
+
+The update does not have to be `++`, and the count does not have to go
+up:
 
 ```cpp
-for (int i{1}; i <= 10; ++i)          { std::print("{} ", i); }   // count up
-for (int n{2}; n <= 20; n += 2)       { total += n; }             // sum evens
-for (int c{5}; c >= 1; --c)           { std::print("{} ", c); }   // count down
+// count up 1..10
+for (int page{1}; page <= 10; ++page)          { std::print("{} ", page); }
+
+// step by 2 - only the left-hand (even) page numbers
+for (int page{2}; page <= 20; page += 2)       { left_page_total += page; }
+
+// count DOWN 5..1
+for (int chapters_left{5}; chapters_left >= 1; --chapters_left)
+                                              { std::print("{} ", chapters_left); }
 ```
 
-### Nested `for` - a table
+```
+   ++page      : 1 → 2 → 3 → 4 → 5 → ...        (condition: page <= 10)
+   page += 2   : 2 → 4 → 6 → 8 → 10 → ...       (condition: page <= 20)
+   --chapters  : 5 → 4 → 3 → 2 → 1 → 0          (condition: chapters_left >= 1)
+```
+
+### Nested `for` - building a table
+
+Put a `for` inside a `for`. The **outer** loop runs once per row; the
+**inner** loop runs fully each time, once per column. Here chapter `N`
+has `N` sections:
 
 ```
-   outer year = 1 ─► inner runs 1x
-   outer year = 2 ─► inner runs 2x
-   outer year = 3 ─► inner runs 3x
-   ...
+   outer chapter = 1 ─► inner runs 1x   (1 section)
+   outer chapter = 2 ─► inner runs 2x   (2 more sections)
+   outer chapter = 3 ─► inner runs 3x
+   outer chapter = 4 ─► inner runs 4x
+   outer chapter = 5 ─► inner runs 5x
+
+   sections_read grows:  1, 3, 6, 10, 15
 ```
 
 ```cpp
-for (int year{1}; year <= 5; ++year) {
-    double amount{principal};
-    for (int k{0}; k < year; ++k) {
-        amount *= 1.0 + rate;        // apply interest `year` times
+int sections_read{0};
+for (int chapter{1}; chapter <= 5; ++chapter) {
+    for (int section{1}; section <= chapter; ++section) {
+        ++sections_read;                 // inner loop runs `chapter` times
     }
-    std::println("Year {}: {:.2f}", year, amount);
+    std::println("After chapter {}: {} sections read", chapter, sections_read);
 }
 ```
 
-The loop variable's scope is the loop body - `i`, `n`, `c`, `year`, `k`
-are each gone once their loop ends.
+Walk the two counters together:
+
+```
+   chapter │ section goes │ ++sections_read this row │ running total
+   ────────┼──────────────┼─────────────────────────┼──────────────
+      1    │ 1            │           1             │      1
+      2    │ 1, 2         │           2             │      3
+      3    │ 1, 2, 3      │           3             │      6
+      4    │ 1, 2, 3, 4   │           4             │     10
+      5    │ 1,2,3,4,5    │           5             │     15
+```
+
+### Scope
+
+Each loop variable exists only inside its own loop body. Once the loop
+ends, `page`, `chapters_left`, `chapter`, `section` are all gone - you
+cannot read them afterward.
 
 ---
 

@@ -4,44 +4,42 @@ int main() {
 
     // A for loop packs the three pieces of a counter-controlled loop
     // into one header: initialization ; continuation condition ; update.
-    //   for (int i{1}; i <= 10; ++i) { ... }
-    //        \_______/  \______/   \_/
-    //          once    before each  after each
-    //                   iteration   iteration
+    //   for (int page{1}; page <= 10; ++page) { ... }
+    //        \__________/  \_________/   \____/
+    //           once       before each   after each
+    //                      iteration     iteration
 
-    // --- Count 1 through 10 ---
-    for (int i{1}; i <= 10; ++i) {
-        std::print("{} ", i);
+    // --- Read pages 1 through 10 ---
+    for (int page{1}; page <= 10; ++page) {
+        std::print("{} ", page);
     }
     std::println("");
 
-    // --- Sum the even integers from 2 through 20 ---
+    // --- Add up the left-hand (even) page numbers from 2 through 20 ---
     // The update step can be any expression - here it's += 2.
-    int total{0};
-    for (int number{2}; number <= 20; number += 2) {
-        total += number;
+    int left_page_total{0};
+    for (int page{2}; page <= 20; page += 2) {
+        left_page_total += page;
     }
-    std::println("Sum of evens 2..20: {}", total);
+    std::println("Sum of left-hand pages 2..20: {}", left_page_total);
 
-    // --- Count down ---
-    for (int countdown{5}; countdown >= 1; --countdown) {
-        std::print("{}... ", countdown);
+    // --- Count down the chapters left to read ---
+    for (int chapters_left{5}; chapters_left >= 1; --chapters_left) {
+        std::print("{} to go... ", chapters_left);
     }
-    std::println("liftoff");
+    std::println("done!");
 
-    // --- Compound-interest style table: one row per year ---
-    double principal{1000.00};
-    double rate{0.05};
-    for (int year{1}; year <= 5; ++year) {
-        double amount{principal};
-        for (int k{0}; k < year; ++k) {   // multiply by (1 + rate), year times
-            amount *= 1.0 + rate;
+    // --- One row per chapter: chapter N has N sections ---
+    int sections_read{0};
+    for (int chapter{1}; chapter <= 5; ++chapter) {
+        for (int section{1}; section <= chapter; ++section) {
+            ++sections_read;
         }
-        std::println("Year {}: {:.2f}", year, amount);
+        std::println("After chapter {}: {} sections read", chapter, sections_read);
     }
 
-    // The loop variable's scope is the loop body: `i`, `number`,
-    // `countdown`, `year`, `k` are each gone once their loop ends.
+    // The loop variable's scope is the loop body: `page`, `chapters_left`,
+    // `chapter`, `section` are each gone once their loop ends.
 
     return 0;
 }
