@@ -1100,25 +1100,99 @@ moving the nested loops into their own function and using `return`.
 We used `std::string` in passing in chapter 4. Here is its own moment
 before the chapter closes. Needs `<string>`.
 
+A `std::string` is an object that holds a piece of text - a sequence of
+characters - and manages its own memory. It grows and shrinks as needed;
+you never say how long it is up front. The example builds a filename out
+of a base name and an extension.
+
 ```cpp
-std::string first{"happy"};
-std::string second{" birthday"};
-std::string empty_one{};        // length 0
+std::string base{"report"};      // 6 characters
+std::string extension{".pdf"};   // 4 characters
+std::string suffix{};            // empty - no characters at all
 ```
 
-| Member            | Does                          | Example → result             |
-|-------------------|-------------------------------|------------------------------|
-| `.length()` / `.size()` | character count (same thing) | `first.length()` → `5`   |
-| `.empty()`        | `true` if no characters       | `empty_one.empty()` → `true` |
-| `==` / `!=`       | compare **contents**          | `first == second` → `false`  |
-| `+`               | join into a new string        | `first + second` → `"happy birthday"` |
-| `.starts_with(x)` | C++20 prefix check            | `phrase.starts_with("happy")` → `true` |
-| `.ends_with(x)`   | C++20 suffix check            | `phrase.ends_with("day")` → `true` |
+An empty string (`std::string suffix{};` or `std::string suffix{""};`)
+is a perfectly valid string; it just has length 0. It is not the same as
+an uninitialized variable - it is a real, usable object holding no text.
+
+### `.length()` and `.size()` - how many characters
+
+The two names do **exactly** the same thing; `.size()` is the name shared
+with the other standard containers, `.length()` reads more naturally for
+text. Pick one and be consistent.
 
 ```
-   "happy"  +  " birthday"   ─►   "happy birthday"
-   └──┬──┘     └────┬─────┘        └──────┬───────┘
-   first        second          a brand-new string
+   base       "report"    ─►  .length() == 6
+   extension  ".pdf"      ─►  .length() == 4   (the dot counts)
+   suffix     ""          ─►  .length() == 0
 ```
+
+### `.empty()` - is there any text at all
+
+`str.empty()` returns `true` when the string has zero characters. It is
+the clear way to ask that question - clearer than `str.length() == 0`,
+and (for large strings) cannot be slower.
+
+```
+   suffix.empty()      ─►  true
+   base.empty()        ─►  false
+```
+
+### `==` and `!=` - compare the contents
+
+For `std::string`, `==` compares the **text**, character by character -
+not the addresses, not the lengths alone. This is what you almost always
+want, and it works just like comparing two `int`s.
+
+```
+   base == extension    ─►  "report" vs ".pdf"   ─►  false
+   base != extension    ─►                            true
+   base == "report"     ─►  true   (compare against a literal directly)
+```
+
+### `+` - join two strings into a new one
+
+`a + b` (concatenation) produces a **brand-new** string containing all of
+`a` followed by all of `b`. Neither `a` nor `b` is modified.
+
+```
+   base        extension
+   "report"  +  ".pdf"     ─►   "report.pdf"
+   └──┬───┘    └──┬──┘          └─────┬────┘
+    unchanged   unchanged   a new string, length 6 + 4 = 10
+```
+
+```cpp
+std::string filename{base + extension};   // filename is "report.pdf"
+// base is still "report", extension is still ".pdf"
+```
+
+### `.starts_with(...)` and `.ends_with(...)` - C++20 prefix / suffix tests
+
+Each returns a `bool`: does the string begin (or end) with the given
+piece of text? Handy for checks like "is this a PDF?" without pulling in
+anything heavier.
+
+```
+   filename = "report.pdf"
+              └────┬───┘└┬─┘
+             starts_with  ends_with
+              ("report")   (".pdf")
+
+   filename.starts_with("report")  ─►  true
+   filename.ends_with(".pdf")      ─►  true
+   filename.ends_with(".txt")      ─►  false
+```
+
+### Summary
+
+| Member                  | Does                        | On `filename` = `"report.pdf"` |
+|-------------------------|-----------------------------|--------------------------------|
+| `.length()` / `.size()` | character count (same thing)| `10`                           |
+| `.empty()`              | `true` if no characters     | `false`                        |
+| `==` / `!=`             | compare **contents**        | `filename == "report.pdf"` → `true` |
+| `+`                     | join into a **new** string  | `base + extension` → `"report.pdf"` |
+| `.starts_with(x)`       | C++20 prefix check          | `.starts_with("report")` → `true` |
+| `.ends_with(x)`         | C++20 suffix check          | `.ends_with(".pdf")` → `true`   |
 
 Kept to just these members - the deeper string API is a later chapter.
