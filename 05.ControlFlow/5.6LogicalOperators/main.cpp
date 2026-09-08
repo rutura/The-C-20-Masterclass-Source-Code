@@ -20,23 +20,24 @@ int main() {
     std::println("!true  : {}", !true);
 
     // --- Combining conditions in a real check ---
-    int grade{72};
-    int attendance_pct{80};
+    int failed_attempts{2};
+    int minutes_since_reset{40};
 
-    bool passes{grade >= 60 && attendance_pct >= 75};
-    std::println("\npasses (grade AND attendance): {}", passes);
+    bool locked{failed_attempts >= 3 && minutes_since_reset < 15};
+    std::println("\nlocked (too many attempts AND reset too recent): {}", locked);
 
-    bool needs_review{grade < 60 || attendance_pct < 50};
-    std::println("needs_review (grade OR attendance): {}", needs_review);
+    bool allow_in{failed_attempts < 3 || minutes_since_reset >= 15};
+    std::println("allow_in (few attempts OR enough time passed): {}", allow_in);
 
     // --- Short-circuit evaluation ---
-    // && stops as soon as it sees a false: if `grade >= 0` is false, the
-    // right side is never evaluated. Likewise || stops on the first true.
-    // This lets you guard a risky check with a cheap one on its left,
-    // e.g. `count != 0 && total / count > threshold`.
-    int count{0};
-    bool safe{(count != 0) && ((100 / count) > 10)};   // right side skipped, no divide-by-zero
-    std::println("safe (guarded by count != 0): {}", safe);
+    // && stops as soon as it sees a false: if `sessions != 0` is false,
+    // the right side is never evaluated. Likewise || stops on the first
+    // true. This lets you guard a risky check with a cheap one on its
+    // left, e.g. `sessions != 0 && total_requests / sessions > threshold`.
+    int total_requests{4200};
+    int sessions{0};
+    bool heavy_user{(sessions != 0) && ((total_requests / sessions) > 100)};   // right side skipped, no divide-by-zero
+    std::println("heavy_user (guarded by sessions != 0): {}", heavy_user);
 
     return 0;
 }

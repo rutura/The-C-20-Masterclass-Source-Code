@@ -426,8 +426,8 @@ way to show them.
 ### Combining conditions
 
 ```cpp
-bool passes{grade >= 60 && attendance_pct >= 75};
-bool needs_review{grade < 60 || attendance_pct < 50};
+bool locked{failed_attempts >= 3 && minutes_since_reset < 15};
+bool allow_in{failed_attempts < 3 || minutes_since_reset >= 15};
 ```
 
 ### Short-circuit evaluation
@@ -438,35 +438,35 @@ whole `&&` is already `false` no matter what the right side is - so C++
 `true` on the left settles it, and the right side is skipped.
 
 ```
-   count != 0   &&   100 / count > 10
-   └────┬────┘        └───────┬──────┘
-   evaluated first     only reached if the left side was true
+   sessions != 0   &&   total_requests / sessions > 100
+   └─────┬─────┘        └────────────────┬────────────┘
+   evaluated first        only reached if the left side was true
 ```
 
-Now walk it with `count = 0`:
+Now walk it with `sessions = 0`:
 
 ```
-   step 1   count != 0        ─►  0 != 0  ─►  false
-   step 2   left side is false ─►  && is already false
-   step 3   100 / count       ─►  NEVER RUNS
+   step 1   sessions != 0            ─►  0 != 0  ─►  false
+   step 2   left side is false       ─►  && is already false
+   step 3   total_requests / sessions ─►  NEVER RUNS
 ```
 
-That last point is why this matters. `100 / count` with `count == 0` is
-`100 / 0`, a **divide-by-zero**, which crashes the program. Because the
-`count != 0` test sits on the **left** of the `&&`, the division on the
-right is only ever reached when `count` is non-zero. The cheap test is
-**guarding** the risky one.
+That last point is why this matters. `total_requests / sessions` with
+`sessions == 0` is a division by zero, which crashes the program. Because
+the `sessions != 0` test sits on the **left** of the `&&`, the division
+on the right is only ever reached when `sessions` is non-zero. The cheap
+test is **guarding** the risky one.
 
 ```cpp
-bool safe{count != 0 && 100 / count > 10};   // 100 / count skipped when count is 0
+bool heavy_user{sessions != 0 && total_requests / sessions > 100};
 ```
 
 Order matters. Flip the two sides:
 
 ```
-   100 / count > 10   &&   count != 0
-   └───────┬───────┘
-   runs FIRST, count is 0  ─►  100 / 0  ─►  crash
+   total_requests / sessions > 100   &&   sessions != 0
+   └──────────────┬──────────────┘
+   runs FIRST, sessions is 0  ─►  divide by zero  ─►  crash
 ```
 
 The guard only works when it is the left operand. This left-guard pattern
@@ -479,18 +479,18 @@ Back on the precedence table in 5.2, `&&` is **level 9** and `||` is
 and above only `?:`, assignment, and the comma. That is why
 
 ```
-   grade >= 60 && attendance_pct >= 75
+   failed_attempts >= 3 && minutes_since_reset < 15
 ```
 
-groups as `(grade >= 60) && (attendance_pct >= 75)` with no parentheses:
-both `>=` (level 7) run first, then `&&` combines the two `bool`s.
+groups as `(failed_attempts >= 3) && (minutes_since_reset < 15)` with no
+parentheses: both comparisons (level 7) run first, then `&&` combines the
+two `bool`s.
 
 `&&` also outranks `||`, so a mixed expression groups the `&&` parts
 first, exactly like `*` before `+`:
 
 ```
    a || b && c        ─►   a || (b && c)
-   passed a re-sit    OR   (passed the exam AND showed up)
 ```
 
 If you actually mean "(a or b) and c", you must parenthesize it.
