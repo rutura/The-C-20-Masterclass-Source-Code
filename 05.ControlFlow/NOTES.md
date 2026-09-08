@@ -869,35 +869,53 @@ Compare **one integer expression** against a list of constant `case`
 labels and jump to the match. Cleaner than a long `else if` chain of
 equality tests.
 
+The example buckets a review score (0-100) into a star rating. Dividing
+by 20 turns a whole range of scores into a single small number:
+
 ```
-   switch (grade / 10)         grade   grade/10   lands on
-   ┌────────────────┐          ────────────────────────────
-   │ case 10: ──┐   │           100       10       case 10
-   │ case  9: ──┴─► A│           95        9       case 9
-   │ case  8: ────► B│           83        8       case 8
-   │ case  7: ────► C│           71        7       case 7
-   │ case  6: ────► D│           64        6       case 6
-   │ default: ────► F│           42        4       default
-   └────────────────┘
+   score       score / 20    meaning
+   ────────────────────────────────────
+     0 .. 19       0          1 star
+    20 .. 39       1          2 stars
+    40 .. 59       2          3 stars
+    60 .. 79       3          4 stars
+    80 .. 99       4          5 stars
+    100            5          5 stars   ◄── note: 100/20 is a clean 5
+```
+
+```
+   switch (score / 20)          score   score/20   lands on
+   ┌──────────────────┐         ─────────────────────────────
+   │ case 0: ───► 1★   │          12        0        case 0
+   │ case 1: ───► 2★   │          33        1        case 1
+   │ case 2: ───► 3★   │          47        2        case 2
+   │ case 3: ───► 4★   │          65        3        case 3
+   │ case 4: ──┐       │          88        4        case 4 ─┐
+   │ case 5: ──┴► 5★   │         100        5        case 5 ─┴► same body
+   │ default: ─► ignore│          -7       -1        default
+   └──────────────────┘
 ```
 
 ```cpp
-switch (grade / 10) {
-    case 9:
-    case 10:               // 9 falls through into 10 - both mean A
-        ++aCount;
+switch (score / 20) {
+    case 0:
+        ++oneStar;
         break;
-    case 8:
-        ++bCount;
+    case 1:
+        ++twoStar;
         break;
-    case 7:
-        ++cCount;
+    case 2:
+        ++threeStar;
         break;
-    case 6:
-        ++dCount;
+    case 3:
+        ++fourStar;
         break;
-    default:
-        ++fCount;
+    case 4:                // 80-99  ─┐  both reach the same body,
+    case 5:                // 100    ─┘  so 4 "falls through" into 5
+        ++fiveStar;
+        break;
+    default:               // score outside 0-100
+        std::println("  ignoring out-of-range score {}", score);
         break;
 }
 ```
@@ -905,19 +923,24 @@ switch (grade / 10) {
 ### Fall-through
 
 ```
-   case 8:
-       ++bCount;
+   case 1:
+       ++twoStar;
        break;   ◄── STOP here, jump past the whole switch
 
-   case 8:
-       ++bCount;
+   case 1:
+       ++twoStar;
        ▼         ◄── NO break: execution falls straight into
-   case 7:           case 7's body and keeps going
-       ++cCount;
+   case 2:           case 2's body and runs ++threeStar too
+       ++threeStar;
 ```
 
-`break` ends a `case`. Leaving it out is **deliberate** for `case 9` into
-`case 10` above; nearly everywhere else it is a bug.
+Stacking `case 4:` directly on top of `case 5:` with nothing between them
+is fall-through used **on purpose**: `case 4` has an empty body, so
+control slides straight into `case 5`'s body. Both 80-99 and exactly 100
+end up counted as five stars.
+
+Forgetting a `break` in the middle of a normal `case` is the same
+mechanism happening **by accident**, and it is a classic bug.
 
 ### Rules
 
@@ -925,10 +948,10 @@ switch (grade / 10) {
 - The controlling expression must be an integer type (or `char`, or an
   `enum`).
 
-The example reads grades until end-of-file:
+The example reads scores until end-of-file:
 
 ```
-   while (std::cin >> grade)   ── true while a number was read
+   while (std::cin >> score)   ── true while a number was read
                               ── false at end-of-file:
                                     Windows      : Ctrl+Z then Enter
                                     macOS / Linux: Ctrl+D
