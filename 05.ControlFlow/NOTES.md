@@ -206,36 +206,37 @@ the operator sits inside a larger expression.
 | `--n`    | prefix decrement  | decrement first, then use |
 | `n--`    | postfix decrement | use current, then decrement |
 
-Trace it with `x` starting at 5:
+Trace it with `cars_owned` starting at 5 (someone about to buy one more):
 
 ```
-   int x{5};
-   int a{x++};      // a = 5   ← old value handed out
-                    // x = 6   ← then bumped
+   int cars_owned{5};
+   int handed_out{cars_owned++};   // handed_out = 5   ← old value handed out
+                                   // cars_owned = 6   ← then bumped
 
-   int x{5};
-   int b{++x};      // x = 6   ← bumped first
-                    // b = 6   ← new value handed out
+   int cars_owned{5};
+   int handed_out{++cars_owned};   // cars_owned = 6   ← bumped first
+                                   // handed_out = 6   ← new value handed out
 ```
 
 ```
-   postfix  x++ :   read ──► 5 ──► (use it)
-                          └──► x becomes 6
+   postfix  cars_owned++ :   read ──► 5 ──► (use it)
+                                   └──► cars_owned becomes 6
 
-   prefix   ++x :   x becomes 6 ──► read ──► 6 ──► (use it)
+   prefix   ++cars_owned :   cars_owned becomes 6 ──► read ──► 6 ──► (use it)
 ```
 
 As a **statement on its own line** the two forms are identical:
 
 ```cpp
-++counter;   // same effect as
-counter++;   // this
+++cars_owned;   // same effect as
+cars_owned++;   // this
 ```
 
 That standalone form is how you will write it ~95% of the time (stepping
 a loop counter). The prefix/postfix difference only matters when you read
 the result in the same expression - and code that does that is usually
-harder to read.
+harder to read. The example also decrements: `--cars_in_garage;` when one
+gets sold.
 
 ---
 

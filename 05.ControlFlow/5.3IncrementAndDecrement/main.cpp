@@ -7,23 +7,23 @@ int main() {
     // statement.
 
     // --- Postfix: use the old value, THEN change ---
-    int graded{5};
-    std::println("graded before postincrement : {}", graded);
-    std::println("value of graded++           : {}", graded++);   // yields 5
-    std::println("graded after postincrement  : {}", graded);     // now 6
+    int cars_owned{5};
+    std::println("cars owned before buying one : {}", cars_owned);
+    std::println("value of cars_owned++        : {}", cars_owned++);   // yields 5
+    std::println("cars owned after buying one  : {}", cars_owned);     // now 6
 
     // --- Prefix: change FIRST, then use the new value ---
-    graded = 5;
-    std::println("graded before preincrement  : {}", graded);
-    std::println("value of ++graded           : {}", ++graded);   // yields 6
-    std::println("graded after preincrement   : {}", graded);     // still 6
+    cars_owned = 5;
+    std::println("cars owned before buying one : {}", cars_owned);
+    std::println("value of ++cars_owned        : {}", ++cars_owned);   // yields 6
+    std::println("cars owned after buying one  : {}", cars_owned);     // still 6
 
     // As a standalone statement the two are interchangeable - this is by
     // far the most common way you'll use them, e.g. stepping a loop
     // counter later in this chapter.
-    int remaining{3};
-    --remaining;
-    std::println("remaining after --remaining : {}", remaining);
+    int cars_in_garage{3};
+    --cars_in_garage;   // one just got sold
+    std::println("cars in garage after selling one : {}", cars_in_garage);
 
     return 0;
 }
