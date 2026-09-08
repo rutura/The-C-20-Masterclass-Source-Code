@@ -199,12 +199,12 @@ pot -= 1200;      // pot = pot - 1200
 `++` adds 1, `--` subtracts 1. The catch is **prefix vs postfix** when
 the operator sits inside a larger expression.
 
-| Operator | Name              | In `... = ++n` / `... = n++` |
-|:--------:|-------------------|------------------------------|
-| `++n`    | prefix increment  | increment `n` first, **then** use the new value |
+| Operator | Name              | In `... = ++n` / `... = n++`                      |
+|:--------:|-------------------|---------------------------------------------------|
+| `++n`    | prefix increment  | increment `n` first, **then** use the new value   |
 | `n++`    | postfix increment | use the **current** value, **then** increment `n` |
-| `--n`    | prefix decrement  | decrement first, then use |
-| `n--`    | postfix decrement | use current, then decrement |
+| `--n`    | prefix decrement  | decrement first, then use                         |
+| `n--`    | postfix decrement | use current, then decrement                       |
 
 Trace it with `cars_owned` starting at 5 (someone about to buy one more):
 
@@ -235,8 +235,7 @@ cars_owned++;   // this
 That standalone form is how you will write it ~95% of the time (stepping
 a loop counter). The prefix/postfix difference only matters when you read
 the result in the same expression - and code that does that is usually
-harder to read. The example also decrements: `--cars_in_garage;` when one
-gets sold.
+harder to read. 
 
 ---
 
@@ -274,9 +273,7 @@ bool first_is_better{score1 > score2};
    if (x = 5)  { ... }     ← assigns 5 to x, condition is always true
    if (x == 5) { ... }     ← compares x with 5   ✓ what you meant
 ```
-
-Compilers warn about the first form, but the symbols look so similar it
-is worth calling out on camera.
+Be careful: `=` is assignment, `==` is equality. 
 
 ---
 
