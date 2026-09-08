@@ -126,29 +126,119 @@ The `n % 2` test comes back in the loop lectures whenever we want to act
 
 ### Precedence and associativity
 
-Operators higher in this table bind first:
+An expression like `a + b * c - d` has several operators in it. Two
+questions decide what it means:
+
+1. **Precedence** - *which operator acts first?* Higher-precedence
+   operators grab their operands before lower ones. `*` outranks `+`, so
+   `b * c` happens before either `+` or `-`.
+2. **Associativity** - *when two operators have the SAME precedence,
+   which side goes first?* `+` and `-` are equal rank and **left-to-right
+   associative**, so `a + b - d` is `(a + b) - d`, not `a + (b - d)`.
+
+Here is the table for every operator in this chapter, highest precedence
+at the top. This is the same shape as the reference's table - keep it on
+screen and point at rows as you explain expressions.
+
+| Level | Operators (same line = same precedence)      | Associativity  | Kind             |
+|:-----:|---------------------------------------------|----------------|------------------|
+| 1     | `::`                                        | left to right  | scope            |
+| 2     | `()`  `[]`  `.`  `->`  `x++`  `x--`         | left to right  | postfix          |
+| 3     | `++x`  `--x`  `+x`  `-x`  `!`  `static_cast`| right to left  | unary (prefix)   |
+| 4     | `*`  `/`  `%`                                | left to right  | multiplicative   |
+| 5     | `+`  `-`                                     | left to right  | additive         |
+| 6     | `<<`  `>>`                                   | left to right  | stream I/O       |
+| 7     | `<`  `<=`  `>`  `>=`                         | left to right  | relational       |
+| 8     | `==`  `!=`                                   | left to right  | equality         |
+| 9     | `&&`                                         | left to right  | logical AND      |
+| 10    | `\|\|`                                       | left to right  | logical OR       |
+| 11    | `?:`                                         | right to left  | conditional      |
+| 12    | `=`  `+=`  `-=`  `*=`  `/=`  `%=`            | right to left  | assignment       |
+| 13    | `,`                                          | left to right  | comma            |
+
+Most rows are left-to-right. The two that are **right-to-left** are the
+ones to remember: **unary prefix** (`- -x` is `-(-x)`) and **assignment**
+(`a = b = 0` is `a = (b = 0)`).
+
+### Reading an expression against the table
+
+Method: find the **lowest-precedence** operator - that is the one that
+runs **last**, so it splits the expression into the two halves you
+evaluate first. Recurse into each half.
+
+Take a weighted total where the second test counts double, minus a
+5-point late penalty:
 
 ```
-   ┌─────────────────────────────┬───────────────┐
-   │  ( )                        │  grouping     │  ← highest
-   │  *   /   %                  │  multiplicative│
-   │  +   -                      │  additive     │  ← lowest
-   └─────────────────────────────┴───────────────┘
-   Ties (e.g. a - b + c) group LEFT to RIGHT.
+   score1 + score2 * 2 - 5
+
+   step 1  lowest-precedence operators here are  +  and  -  (level 5).
+           they tie, so left-to-right associativity: the LAST one is the
+           rightmost  -  .  It splits the expression:
+
+               (score1 + score2 * 2)   -   5
+               └─────────┬─────────┘       └┬┘
+                  evaluate this first    then subtract
+
+   step 2  inside the left half:  score1 + score2 * 2
+           lowest here is  +  (level 5), beating  *  (level 4):
+
+               score1   +   (score2 * 2)
+                            └─────┬─────┘
+                          *  runs first
+
+   step 3  fully parenthesized:
+
+               ((score1) + ((score2) * 2)) - (5)
 ```
 
-```
-   score1 + score2 * 2
-   └──────┬──────┘
-          │  * binds first
-          ▼
-   score1 + (score2 * 2)      ← second test counts double
+With `score1 = 88`, `score2 = 92`:
 
-   (score1 + score2) * 2      ← parentheses force the addition first
+```
+   score2 * 2            ─►  184
+   score1 + 184          ─►  272
+   272 - 5              ─►  267
 ```
 
-You do not have to memorize a full table. When in doubt, parenthesize -
-it costs nothing at runtime and makes the intent obvious.
+A second example, this time mixing arithmetic, a comparison, and `&&` -
+the shape you write in an `if`:
+
+```
+   grade >= 60 && grade % 10 == 0
+
+   lowest-precedence operator is  &&  (level 9) - runs last, splits here:
+
+       (grade >= 60)   &&   (grade % 10 == 0)
+       └──────┬─────┘        └───────┬───────┘
+        left operand           right operand
+
+   left:   >=  (level 7) is the only operator          ─►  grade >= 60
+   right:  %  (level 4) beats  ==  (level 8-lower)      ─►  (grade % 10) == 0
+
+   fully parenthesized:
+
+       (grade >= 60) && ((grade % 10) == 0)
+```
+
+So this reads "passing **and** the grade is a multiple of 10" - no
+parentheses needed, because precedence already groups it that way.
+
+### When to add parentheses anyway
+
+You do not have to memorize the whole table. Two rules cover almost
+everything:
+
+- If precedence already groups it the way you mean (like the `&&`
+  example), leave it bare - extra parentheses just add noise.
+- If you have to stop and think about it, **add the parentheses**. They
+  cost nothing at runtime and the next reader does not have to consult
+  the table.
+
+```
+   score1 + score2 * 2        ← fine, * clearly binds first
+   (score1 + score2) * 2      ← parentheses REQUIRED to force + first
+   (a + b) - c                ← redundant (left-to-right already), but harmless
+```
 
 ### Compound assignment
 
@@ -428,23 +518,28 @@ bool safe{count != 0 && 100 / count > 10};   // divide-by-zero avoided
 Swap the two operands and the program crashes when `count` is `0`. This
 left-guard ordering is a real idiom, not a curiosity.
 
-### Precedence of everything so far
+### Where the logical operators sit
+
+Back on the precedence table in 5.2, `&&` is **level 9** and `||` is
+**level 10** - below every arithmetic, relational, and equality operator,
+and above only `?:`, assignment, and the comma. That is why
 
 ```
-   ( )                              ← highest
-   ++  --  (postfix)   static_cast
-   ++  --  !  (prefix, unary)
-   *   /   %
-   +   -
-   <<  >>              (stream I/O)
-   <   <=   >   >=
-   ==   !=
-   &&
-   ||
-   ?:
-   =  +=  -=  *=  /=  %=
-   ,                                ← lowest
+   grade >= 60 && attendance_pct >= 75
 ```
+
+groups as `(grade >= 60) && (attendance_pct >= 75)` with no parentheses:
+both `>=` (level 7) run first, then `&&` combines the two `bool`s.
+
+`&&` also outranks `||`, so a mixed expression groups the `&&` parts
+first, exactly like `*` before `+`:
+
+```
+   a || b && c        ─►   a || (b && c)
+   passed a re-sit    OR   (passed the exam AND showed up)
+```
+
+If you actually mean "(a or b) and c", you must parenthesize it.
 
 ---
 
