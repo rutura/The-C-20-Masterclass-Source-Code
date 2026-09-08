@@ -254,24 +254,24 @@ prints those as the words `true` and `false`.
 | ≠       | `!=` | `x != y`   | x is not equal to y              |
 
 ```
-   score1 = 88, score2 = 92
+   salary1 = 3500, salary2 = 4000
 
-   score1 <  score2   ──►  true
-   score1 == score2   ──►  false
-   score1 >= score2   ──►  false
+   salary1 <  salary2   ──►  true
+   salary1 == salary2   ──►  false
+   salary1 >= salary2   ──►  false
 ```
 
 The result is an ordinary value - name it and reuse it:
 
 ```cpp
-bool first_is_better{score1 > score2};
+bool first_earns_more{salary1 > salary2};
 ```
 
 ### `=` vs `==`
 
 ```
-   if (x = 5)  { ... }     ← assigns 5 to x, condition is always true
-   if (x == 5) { ... }     ← compares x with 5   ✓ what you meant
+   if (salary1 = salary2)  { ... }   ← assigns salary2 to salary1, result is that value
+   if (salary1 == salary2) { ... }   ← compares them   ✓ what you meant
 ```
 Be careful: `=` is assignment, `==` is equality. 
 
