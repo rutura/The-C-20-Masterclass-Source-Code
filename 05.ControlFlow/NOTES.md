@@ -827,14 +827,39 @@ Pick it when "do it, then decide whether to repeat" fits - the classic
 case is a prompt that must appear at least once:
 
 ```cpp
-int grade{};
+int guess{};
 do {
-    std::print("Enter a grade in the range 0-100: ");
-    std::cin >> grade;
-} while (grade < 0 || grade > 100);   // ◄── note the trailing ;
+    std::print("Guess the die roll (1-6): ");
+    std::cin >> guess;
+} while (guess < 1 || guess > 6);   // ◄── note the trailing ;
+```
+
+A plain `while` here would need the prompt written twice - once before
+the loop to prime it, once inside. `do...while` asks first, then only
+loops back if the answer was out of range:
+
+```
+   ask ──► read guess ──► guess valid? ──yes──► carry on
+              ▲                 │
+              │ no              │
+              └─────────────────┘
+
+   guess = 4   ─►  body runs once, 1..6 check passes, loop exits
+   guess = 9   ─►  body runs, check fails, "try again", body runs again
 ```
 
 The semicolon after `while (...)` is easy to forget.
+
+The counting example shows the other shape - a straight `for`-style loop
+written with `do...while`, which runs the body for `roll` = 1..10:
+
+```cpp
+int roll{1};
+do {
+    std::print("{} ", roll);
+    ++roll;
+} while (roll <= 10);
+```
 
 ---
 

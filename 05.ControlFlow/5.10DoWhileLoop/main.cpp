@@ -9,25 +9,25 @@ int main() {
     // while: when "do it, then decide whether to repeat" fits better
     // than "check, then maybe do it".
 
-    // --- Menu-style prompt: ask at least once, repeat until valid ---
-    int grade{};
+    // --- Prompt: ask at least once, repeat until the guess is valid ---
+    int guess{};
     do {
-        std::print("Enter a grade in the range 0-100: ");
-        std::cin >> grade;
+        std::print("Guess the die roll (1-6): ");
+        std::cin >> guess;
 
-        if (grade < 0 || grade > 100) {
-            std::println("  Out of range, try again.");
+        if (guess < 1 || guess > 6) {
+            std::println("  A die only shows 1-6, try again.");
         }
-    } while (grade < 0 || grade > 100);
+    } while (guess < 1 || guess > 6);
 
-    std::println("Accepted grade: {}", grade);
+    std::println("You guessed: {}", guess);
 
     // --- Same counting job as a for loop, in do...while form ---
-    int counter{1};
+    int roll{1};
     do {
-        std::print("{} ", counter);
-        ++counter;
-    } while (counter <= 10);
+        std::print("{} ", roll);
+        ++roll;
+    } while (roll <= 10);
     std::println("");
 
     return 0;
