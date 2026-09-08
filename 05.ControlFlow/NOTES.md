@@ -474,17 +474,37 @@ is a real idiom - you will see it again in 5.8 for sentinel loops.
 
 ### Where the logical operators sit
 
-Back on the precedence table in 5.2, `&&` is **level 9** and `||` is
-**level 10** - below every arithmetic, relational, and equality operator,
-and above only `?:`, assignment, and the comma. That is why
+Here is the same precedence table from 5.2 again, so you do not have to
+scroll back. Highest precedence at the top; operators on one line share a
+level.
+
+| Level | Operators (same line = same precedence)      | Associativity  | Kind             |
+|:-----:|---------------------------------------------|----------------|------------------|
+| 1     | `::`                                        | left to right  | scope            |
+| 2     | `()`  `[]`  `.`  `->`  `x++`  `x--`         | left to right  | postfix          |
+| 3     | `++x`  `--x`  `+x`  `-x`  `!`  `static_cast`| right to left  | unary (prefix)   |
+| 4     | `*`  `/`  `%`                                | left to right  | multiplicative   |
+| 5     | `+`  `-`                                     | left to right  | additive         |
+| 6     | `<<`  `>>`                                   | left to right  | stream I/O       |
+| 7     | `<`  `<=`  `>`  `>=`                         | left to right  | relational       |
+| 8     | `==`  `!=`                                   | left to right  | equality         |
+| 9     | `&&`                                         | left to right  | logical AND      |
+| 10    | `\|\|`                                       | left to right  | logical OR       |
+| 11    | `?:`                                         | right to left  | conditional      |
+| 12    | `=`  `+=`  `-=`  `*=`  `/=`  `%=`            | right to left  | assignment       |
+| 13    | `,`                                          | left to right  | comma            |
+
+`&&` is **level 9** and `||` is **level 10** - below every arithmetic,
+relational, and equality operator, and above only `?:`, assignment, and
+the comma. That is why
 
 ```
    failed_attempts >= 3 && minutes_since_reset < 15
 ```
 
 groups as `(failed_attempts >= 3) && (minutes_since_reset < 15)` with no
-parentheses: both comparisons (level 7) run first, then `&&` combines the
-two `bool`s.
+parentheses: both comparisons (level 7) run first, then `&&` (level 9)
+combines the two `bool`s.
 
 `&&` also outranks `||`, so a mixed expression groups the `&&` parts
 first, exactly like `*` before `+`:
