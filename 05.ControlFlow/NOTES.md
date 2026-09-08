@@ -398,9 +398,6 @@ if (grade >= 60) {
      ^ margin born            ^ margin gone
 ```
 
-That rule is exactly what makes the initializer form in 5.13 useful, so
-plant it here.
-
 ---
 
 ## 5.6 Logical operators
