@@ -961,59 +961,137 @@ The example reads scores until end-of-file:
 
 ## 5.12 `break` and `continue`
 
+Both of these are jump statements you put **inside a loop body** to
+change the normal flow:
+
+- **`break`** - abandon the loop completely. Execution jumps to the first
+  statement *after* the loop. No more iterations, no matter how far the
+  counter still has to go.
+- **`continue`** - abandon only the *current* pass through the body. The
+  loop itself keeps running: execution jumps to the loop's next step (the
+  `++i` update in a `for`, the condition re-check in a `while`).
+
+In the diagram below, "the body" is whatever statements sit between the
+loop's braces - the real work the loop does each pass. Reading them
+top to bottom, `break`/`continue` cut that top-to-bottom flow short:
+
 ```
-   break                          continue
-   ─────                          ────────
-   for (...) {                    for (...) {
-       if (x) break;  ──┐             if (x) continue; ──┐
-       stmtA;           │             stmtA;             │
-       stmtB;           │             stmtB;             │
-   }                    │         }   ▲                  │
-   nextThing;  ◄────────┘             └──────────────────┘
-   (leave the loop entirely)     (skip to the next iteration)
+   break                              continue
+   ─────                              ────────
+   for (...) {                        for (...) {
+       (first part of body)               (first part of body)
+       if (found it) break; ──┐           if (skip this one) continue; ─┐
+       (rest of body)         │           (rest of body)  ◄─ NOT run    │
+   }                          │       }        ▲                        │
+   (code after the loop) ◄────┘       (back to the for's ++ and re-test)┘
 ```
 
-The example walks page numbers 1..10. `break` stops at a torn-out page;
-`continue` skips a blank one.
+`break` leaves the loop entirely; `continue` only skips the *rest of this
+pass* and lets the loop carry on.
+
+### The page-reading example
+
+We walk page numbers 1..10. `break` stops at a torn-out page; `continue`
+skips a blank one.
 
 ```cpp
 int page{};
 for (page = 1; page <= 10; ++page) {
     if (page == 5) { break; }        // page torn out - stop reading
-    std::print("{} ", page);         // prints 1 2 3 4
+    std::print("{} ", page);         // only reached for pages 1..4
 }
-// page is still 5 here - declared outside the loop on purpose
+// page is still 5 here (see note below)
 
 for (int p{1}; p <= 10; ++p) {
     if (p == 5) { continue; }        // page 5 is blank - skip just this pass
-    std::print("{} ", p);            // prints 1 2 3 4 6 7 8 9 10
+    std::print("{} ", p);            // reached for every page except 5
 }
 ```
 
 ```
-   break at page 5:      1  2  3  4  ✗ (loop ends, pages 6..10 never seen)
+   break at page 5:      1  2  3  4  ✗
+                                     └─ loop ends; pages 6..10 never seen
 
-   continue at page 5:   1  2  3  4  ⤵  6  7  8  9  10
-                                    skip
+   continue at page 5:   1  2  3  4  ↷  6  7  8  9  10
+                                    │
+                                    └─ page 5's std::print is skipped,
+                                       but the loop keeps going
 ```
 
-### The `continue` gotcha
+**Why `page` is still `5` after the first loop.** The control variable is
+declared *before* the loop (`int page{};`), not in the header. So it
+outlives the loop, and you can read it afterward to find out *which*
+page you stopped on. If it were declared in the header
+(`for (int page = 1; ...)`) it would be gone the moment the loop ends,
+exactly like the loop variables in 5.9. Declaring it outside is a
+deliberate choice here so the "we stopped at page 5" information
+survives.
+
+### The `continue` gotcha in a `while` loop
+
+`continue` means "go to the loop's next step". In a `for` loop that next
+step is the update in the header, so the counter still moves:
 
 ```
-   for loop   : continue ──► still runs the update (++p) ──► re-test
-   while loop : continue ──► jumps STRAIGHT to the re-test
+   for (int p{1}; p <= 10; ++p) {
+       if (p == 5) continue;   ──►  runs ++p  ──►  re-checks p <= 10  ──►  next pass
+   }
 ```
+
+In a `while` loop there is no update in the header - *you* are
+responsible for advancing the counter inside the body. `continue` jumps
+straight back to the condition and skips whatever body code came after
+it, including your `++p`:
+
+```
+   while (p < 10) {
+       if (p == 5) continue;   ──►  jumps straight back to  p < 10
+       ++p;                     ▲         (this line is NEVER reached
+   }                            └──────────  once p becomes 5)
+```
+
+So this loop is an **infinite loop**:
 
 ```cpp
 int p{0};
 while (p < 10) {
-    if (p == 5) { continue; }   // ◄── BUG: ++p below is skipped forever
-    ++p;
+    if (p == 5) { continue; }   // when p == 5, we jump back to the top...
+    ++p;                        // ...and never get here to make p go past 5
+}
+// p is stuck at 5 forever; the program hangs
+```
+
+The fix is to advance the counter *before* the `continue`, or to
+restructure so the `++p` always runs:
+
+```cpp
+int p{0};
+while (p < 10) {
+    int current{p};
+    ++p;                        // advance FIRST, unconditionally
+    if (current == 5) { continue; }   // now safe - p has already moved
+    std::print("{} ", current);
 }
 ```
 
-Both `break` and `continue` act only on the **innermost** loop that
-contains them.
+### `break` and `continue` only affect the innermost loop
+
+When loops are nested, a `break` or `continue` inside the inner loop acts
+on the **inner** loop only. The outer loop is untouched:
+
+```cpp
+for (int row{1}; row <= 3; ++row) {
+    for (int col{1}; col <= 3; ++col) {
+        if (col == 2) { break; }   // breaks the col loop, NOT the row loop
+        std::print("({},{}) ", row, col);
+    }
+}
+// prints (1,1) (2,1) (3,1) - the outer loop still runs all 3 rows
+```
+
+There is no built-in "break out of both loops" statement. If you need
+that, the common options are a flag variable the outer loop checks, or
+moving the nested loops into their own function and using `return`.
 
 ---
 
