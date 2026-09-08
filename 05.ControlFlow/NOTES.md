@@ -1095,118 +1095,7 @@ moving the nested loops into their own function and using `return`.
 
 ---
 
-## 5.13 `if` and `switch` with an initializer
-
-Since C++17 you can declare a variable in the header, before the
-condition, separated by a `;`:
-
-```
-   if ( init-statement ; condition ) { ... } else { ... }
-        └─────┬───────┘
-        variable is in scope for the WHOLE if / else,
-        and nowhere after it
-```
-
-```cpp
-if (int grade{87}; grade >= 60) {
-    std::println("grade {} is a pass", grade);
-}
-else {
-    std::println("grade {} is a fail", grade);   // grade visible here too
-}
-// grade does not exist here
-```
-
-```
-   ┌── if (int grade{87}; grade >= 60) { ... } else { ... } ──┐
-   grade born                                          grade gone
-```
-
-`switch` takes the same form:
-
-```cpp
-switch (int score{73}; score / 10) {
-    case 10:
-    case 9:  std::println("{}: A", score); break;
-    // ...
-}
-```
-
-Use it whenever a value exists **only** to drive one decision - it keeps
-the variable's lifetime exactly as short as the decision. This is the
-block-scope idea from 5.5, applied to the condition itself.
-
----
-
-## 5.14 Floating-point pitfalls
-
-Floating-point types store values in **binary**. Most decimal fractions
-have **no exact binary form** - the same way 1/3 has no exact decimal
-form (0.3333...).
-
-```
-   0.1  in binary  = 0.0001100110011001100...   (repeats forever)
-   stored as       ≈ 0.1000000000000000055511151231257827
-```
-
-So small errors creep in and add up:
-
-```cpp
-double sum{0.1 + 0.2};
-std::println("{:.17f}", sum);    // 0.30000000000000004
-std::println("{}", sum == 0.3);  // false   ◄── surprise
-```
-
-```
-   0.1 + 0.2  ─►  0.30000000000000004
-        0.3   ─►  0.29999999999999999
-                  └──────────┬──────┘
-                  not bit-for-bit equal
-```
-
-### Never compare floating-point with `==`
-
-Check they are **close enough** - within a small tolerance (epsilon):
-
-```
-   | a - b |  <  epsilon        e.g. epsilon = 1e-9
-```
-
-```cpp
-bool close_enough{std::fabs(sum - 0.3) < 1e-9};   // <cmath>
-```
-
-### Money: format, don't round the value
-
-A compound-interest table, every amount to exactly 2 decimals:
-
-```
-   Year    Amount on deposit
-      1              1050.00
-      2              1102.50
-      3              1157.63
-     ...
-```
-
-```cpp
-std::println("{:>4}  {:>18.2f}", year, amount);   // {:.2f} = 2 decimals
-```
-
-Contrast the two styles - the one lecture where showing both earns its
-place:
-
-```
-   classic:  std::cout << std::fixed << std::setprecision(2);   // <iomanip>
-             std::cout << amount << "\n";
-             ▲ sets STREAM STATE - stays on until you change it back
-
-   modern:   std::println("{:.2f}", amount);
-             ▲ applies to just THIS value - nothing to set up or reset
-```
-
----
-
-## 5.15 First look at `std::string`
+## 5.13 First look at `std::string`
 
 We used `std::string` in passing in chapter 4. Here is its own moment
 before the chapter closes. Needs `<string>`.
@@ -1236,7 +1125,7 @@ Kept to just these members - the deeper string API is a later chapter.
 
 ---
 
-## 5.16 Assignment
+## 5.14 Assignment
 
 `main.cpp` holds six exercises as stubs; `main_solution.cpp` solves all
 six using only this chapter's tools. Built as two executables (`rooster`,
