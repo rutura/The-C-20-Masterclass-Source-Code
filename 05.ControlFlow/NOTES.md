@@ -1240,6 +1240,65 @@ back.
                                 per line
 ```
 
+### Two targets in one `CMakeLists.txt`
+
+Every lecture so far had one source file and one program. This one has
+**two** independent programs from one folder, so the `CMakeLists.txt`
+declares **two build targets** - one `add_executable` per `.cpp`:
+
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(rooster)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(rooster_write write.cpp)   # target 1
+add_executable(rooster_read  read.cpp)    # target 2
+```
+
+A **target** is just a named thing CMake knows how to build. Here each
+target is an executable: `rooster_write` compiled from `write.cpp`,
+`rooster_read` from `read.cpp`. They share nothing and build
+independently. 
+
+The shape is the same in every toolset: **one build step produces both
+executables**, then you **pick which one to run**, and run them in order
+- `rooster_write` first (it creates `names.txt`), then `rooster_read`.
+Here is where the buttons are.
+
+**Command line**
+
+- Build both: `cmake -B build`, then `cmake --build build` - this builds
+  *every* target.
+- Run: `./build/rooster_write`, then `./build/rooster_read`.
+- On Windows the exes are usually under a config folder:
+  `.\build\Debug\rooster_write.exe`, then `.\build\Debug\rooster_read.exe`.
+
+**Visual Studio** (open the folder as a CMake project)
+
+- Build both: *Build → Build All* compiles every target at once.
+- Run: choose the target in the **Startup Item** dropdown on the top
+  toolbar, run it, then switch the dropdown to the other target and run
+  again.
+
+**Qt Creator**
+
+- Build both: the hammer (Build) button builds every target in the
+  project.
+- Run: the green **Run** button only runs the *active* target. Set the
+  active one in the run selector at the bottom-left (the monitor icon),
+  or via *Projects → Build & Run → Run → Run configuration*.
+- Run `rooster_write`, then switch the active target to `rooster_read`
+  and run again.
+
+**VS Code + CMake Tools**
+
+- Build both: *CMake: Build*, or the **Build** button in the status bar -
+  builds all targets.
+- Run: click the **[launch target]** name in the status bar to pick one,
+  then press the ▶ button. Switch the target and run again.
+
 ### Writing - `write.cpp`
 
 ```cpp
