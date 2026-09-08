@@ -529,19 +529,27 @@ Unlike `if`, the whole thing **is a value**, so it drops straight into an
 initializer or a print call:
 
 ```cpp
-std::string result{grade >= 60 ? "pass" : "fail"};
-std::println("You {} the class.", grade >= 60 ? "passed" : "did not pass");
+std::string category{age >= 18 ? "adult" : "child"};
+std::println("You pay the {} rate.", age >= 18 ? "adult" : "child");
 ```
 
 Same thing the long way:
 
 ```
-   grade >= 60 ? "pass" : "fail"
+   age >= 18 ? "adult" : "child"
    ─────────────────────────────
    is equivalent to
 
-   if (grade >= 60)  result = "pass";
-   else              result = "fail";
+   if (age >= 18)  category = "adult";
+   else            category = "child";
+```
+
+Both branches must produce the **same type**. In the example the string
+version deduces `const char*` on both sides; a numeric version works the
+same way with two `int`s:
+
+```cpp
+int ticket_price{age >= 18 ? 12 : 7};
 ```
 
 Guidance:
