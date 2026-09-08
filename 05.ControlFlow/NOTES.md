@@ -1122,35 +1122,3 @@ std::string empty_one{};        // length 0
 ```
 
 Kept to just these members - the deeper string API is a later chapter.
-
----
-
-## 5.14 Assignment
-
-`main.cpp` holds six exercises as stubs; `main_solution.cpp` solves all
-six using only this chapter's tools. Built as two executables (`rooster`,
-`rooster_solution`) by the same `CMakeLists.txt` pattern as chapter 4's
-assignment.
-
-| # | Exercise                 | Tools exercised                                   |
-|---|--------------------------|--------------------------------------------------|
-| 1 | Letter grade classifier  | `else if` ladder + `?:` for the pass/fail line   |
-| 2 | Average of `n` scores    | counter-controlled `for`, real division, zero-guard |
-| 3 | Sentinel-controlled tally| primed `while`, `continue` to reject 0-100 outliers |
-| 4 | Grade histogram          | `while (std::cin >> grade)` + `switch` + inner bar loop |
-| 5 | Retry prompt             | `do...while` that always prompts once            |
-| 6 | String report line       | `+`, `.length()`, `.starts_with` / `.ends_with`  |
-
-Sample run of exercise 4:
-
-```
-   Enter grades, end-of-file to finish: 95 88 82 71 60 55 91 <Ctrl+Z>
-   A: ***
-   B: **
-   C: *
-   D: *
-   F: *
-```
-
-By the end of this chapter the student can express **decisions** and
-**repetition** - everything needed before moving on to functions.
