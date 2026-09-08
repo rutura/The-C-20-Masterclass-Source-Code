@@ -432,23 +432,45 @@ bool needs_review{grade < 60 || attendance_pct < 50};
 
 ### Short-circuit evaluation
 
-`&&` stops the instant it meets a `false`; `||` stops at the first
-`true`. The rest of the expression is **never evaluated**.
+`&&` evaluates its **left** side first. If the left side is `false`, the
+whole `&&` is already `false` no matter what the right side is - so C++
+**does not evaluate the right side at all**. `||` is the mirror image: a
+`true` on the left settles it, and the right side is skipped.
 
 ```
    count != 0   &&   100 / count > 10
    └────┬────┘        └───────┬──────┘
-   evaluated first     only evaluated if the left side was true
-
-   count == 0  ─►  left side false  ─►  division SKIPPED  (no crash)
+   evaluated first     only reached if the left side was true
 ```
+
+Now walk it with `count = 0`:
+
+```
+   step 1   count != 0        ─►  0 != 0  ─►  false
+   step 2   left side is false ─►  && is already false
+   step 3   100 / count       ─►  NEVER RUNS
+```
+
+That last point is why this matters. `100 / count` with `count == 0` is
+`100 / 0`, a **divide-by-zero**, which crashes the program. Because the
+`count != 0` test sits on the **left** of the `&&`, the division on the
+right is only ever reached when `count` is non-zero. The cheap test is
+**guarding** the risky one.
 
 ```cpp
-bool safe{count != 0 && 100 / count > 10};   // divide-by-zero avoided
+bool safe{count != 0 && 100 / count > 10};   // 100 / count skipped when count is 0
 ```
 
-Swap the two operands and the program crashes when `count` is `0`. This
-left-guard ordering is a real idiom, not a curiosity.
+Order matters. Flip the two sides:
+
+```
+   100 / count > 10   &&   count != 0
+   └───────┬───────┘
+   runs FIRST, count is 0  ─►  100 / 0  ─►  crash
+```
+
+The guard only works when it is the left operand. This left-guard pattern
+is a real idiom - you will see it again in 5.8 for sentinel loops.
 
 ### Where the logical operators sit
 

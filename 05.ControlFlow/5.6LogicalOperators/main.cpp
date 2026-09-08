@@ -35,7 +35,7 @@ int main() {
     // This lets you guard a risky check with a cheap one on its left,
     // e.g. `count != 0 && total / count > threshold`.
     int count{0};
-    bool safe{count != 0 && 100 / count > 10};   // right side skipped, no divide-by-zero
+    bool safe{(count != 0) && ((100 / count) > 10)};   // right side skipped, no divide-by-zero
     std::println("safe (guarded by count != 0): {}", safe);
 
     return 0;
