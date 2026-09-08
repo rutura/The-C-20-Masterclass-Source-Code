@@ -973,30 +973,42 @@ The example reads scores until end-of-file:
    (leave the loop entirely)     (skip to the next iteration)
 ```
 
-```cpp
-for (count = 1; count <= 10; ++count) {
-    if (count == 5) { break; }       // stop the whole loop at 5
-    std::print("{} ", count);        // prints 1 2 3 4
-}
+The example walks page numbers 1..10. `break` stops at a torn-out page;
+`continue` skips a blank one.
 
-for (int i{1}; i <= 10; ++i) {
-    if (i == 5) { continue; }        // skip just this pass
-    std::print("{} ", i);            // prints 1 2 3 4 6 7 8 9 10
+```cpp
+int page{};
+for (page = 1; page <= 10; ++page) {
+    if (page == 5) { break; }        // page torn out - stop reading
+    std::print("{} ", page);         // prints 1 2 3 4
 }
+// page is still 5 here - declared outside the loop on purpose
+
+for (int p{1}; p <= 10; ++p) {
+    if (p == 5) { continue; }        // page 5 is blank - skip just this pass
+    std::print("{} ", p);            // prints 1 2 3 4 6 7 8 9 10
+}
+```
+
+```
+   break at page 5:      1  2  3  4  ✗ (loop ends, pages 6..10 never seen)
+
+   continue at page 5:   1  2  3  4  ⤵  6  7  8  9  10
+                                    skip
 ```
 
 ### The `continue` gotcha
 
 ```
-   for loop   : continue ──► still runs the update (++i) ──► re-test
+   for loop   : continue ──► still runs the update (++p) ──► re-test
    while loop : continue ──► jumps STRAIGHT to the re-test
 ```
 
 ```cpp
-int i{0};
-while (i < 10) {
-    if (i == 5) { continue; }   // ◄── BUG: ++i below is skipped forever
-    ++i;
+int p{0};
+while (p < 10) {
+    if (p == 5) { continue; }   // ◄── BUG: ++p below is skipped forever
+    ++p;
 }
 ```
 
