@@ -1196,3 +1196,165 @@ anything heavier.
 | `.ends_with(x)`         | C++20 suffix check          | `.ends_with(".pdf")` → `true`   |
 
 Kept to just these members - the deeper string API is a later chapter.
+
+---
+
+## 5.15 A first taste of files
+
+Everything so far has read from the keyboard and written to the console.
+This lecture is a bonus - a bridge to the chapters ahead - that swaps
+those for a **file on disk**. It is the one piece of this chapter that is
+not in the core reference material; treat it as a preview, not something
+you will be tested on here.
+
+### A file is just another stream
+
+You already know two streams:
+
+```
+   std::cout  <<  "text"      characters go OUT  ──►  console
+   std::cin   >>  variable    characters come IN ◄──  keyboard
+```
+
+Files work the exact same way, with two new stream types from
+`<fstream>`:
+
+```
+   std::ofstream  out{"names.txt"};   out << "text";   ──►  the file
+   std::ifstream  in {"names.txt"};   getline(in, s);  ◄──  the file
+```
+
+- **`ofstream`** = *output* file stream. Same `<<` as `std::cout`, aimed
+  at a file. Opening it **creates the file if it does not exist, and
+  wipes it if it does.**
+- **`ifstream`** = *input* file stream. The file counterpart of
+  `std::cin`.
+
+The lecture is in two programs: `write.cpp` (builds `rooster_write`)
+creates `names.txt`, then `read.cpp` (builds `rooster_read`) reads it
+back.
+
+```
+   rooster_write ──writes──►  [ names.txt ]  ──read by──►  rooster_read
+                                one name
+                                per line
+```
+
+### Writing - `write.cpp`
+
+```cpp
+std::ofstream out{"names.txt"};
+if (!out) {                       // did the file actually open?
+    std::println("Could not open names.txt for writing.");
+    return 1;
+}
+
+for (const std::string& name : {"Ada", "Alan", "Grace", "Linus", "Bjarne"}) {
+    out << name << '\n';          // '\n' puts each name on its own line
+}
+out.close();
+```
+
+`if (!out)` is the same idea as guarding a division - check the operation
+is valid before you depend on it. A file open can fail (a read-only
+folder, a bad path), and writing to a failed stream silently does
+nothing.
+
+The `'\n'` after each name matters: it is what makes each name its own
+line, and `read.cpp` reads the file **one line at a time**.
+
+### Reading - `read.cpp`
+
+```cpp
+std::ifstream in{"names.txt"};
+if (!in) {
+    std::println("Could not open names.txt. Run rooster_write first.");
+    return 1;
+}
+
+std::string name{};
+int count{0};
+while (std::getline(in, name)) {  // one pass per line in the file
+    ++count;
+    std::println("{}: {}", count, name);
+}
+std::println("Read {} names from names.txt", count);
+```
+
+`std::getline(in, name)` reads characters into `name` up to (and
+discarding) the next newline. It returns the stream, and a stream tests
+`false` once it hits the end of the file - so `while (std::getline(...))`
+is the **same shape** as `while (std::cin >> grade)` from the `switch`
+lecture, just pulling lines from a file instead of numbers from the
+keyboard. The `count` is the counter pattern from 5.8, reused.
+
+### The working directory - where `names.txt` actually goes
+
+This trips up almost everyone the first time. The filename `"names.txt"`
+has **no folder in it**, so the program creates and looks for the file in
+its **working directory** (also called the "current directory") - and
+that is *not* necessarily the folder your `write.cpp` lives in.
+
+The working directory is: **the folder that was current in whatever
+launched the program.**
+
+| How you run it                         | Working directory is usually...                     |
+|----------------------------------------|-----------------------------------------------------|
+| Double-click the `.exe`                | the folder the `.exe` is in                         |
+| Terminal: `cd somewhere` then run it   | `somewhere` (wherever you `cd`'d to)                |
+| Visual Studio (F5 / Ctrl+F5)           | the project's build folder, e.g. `out/build/x64-Debug/` |
+| Qt Creator (green Run button)          | the **build** directory shown in *Projects → Build & Run*, not the source folder |
+| VS Code + CMake Tools                  | the folder set by `cmake.launchTargetPath` / your `launch.json` `cwd`, often `build/` |
+
+So after running `rooster_write`, `names.txt` will **not** appear next to
+`write.cpp`. It appears next to the compiled `rooster_write` executable,
+somewhere under your build folder.
+
+**How to find it, three reliable ways:**
+
+1. **Ask the program.** Add this near the top of `main` and run it once:
+
+   ```cpp
+   #include <filesystem>
+   std::println("working directory: {}",
+                std::filesystem::current_path().string());
+   ```
+
+   It prints the exact absolute path. `names.txt` is in that folder.
+
+2. **Search for it.** After running `rooster_write`, search your project
+   tree for `names.txt`:
+   - Windows Explorer search box, from the project root
+   - or a terminal: `dir /s /b names.txt` (Windows), `find . -name names.txt` (macOS/Linux)
+
+3. **Run from a folder you choose.** Open a terminal, `cd` into a folder
+   you can see (say the lecture folder), and run the executable **by its
+   full path** from there:
+
+   ```
+   cd  D:\...\05.ControlFlow\5.15FilesIntro
+   .\out\build\...\rooster_write.exe
+   ```
+
+   Now `names.txt` lands in `5.15FilesIntro`, because that is the working
+   directory you launched from.
+
+**Whatever you do, run `rooster_write` before `rooster_read`, from the
+same working directory.** If `read.cpp` prints "Could not open
+names.txt", it is almost always one of: you skipped `rooster_write`, or
+you ran the two programs from different directories.
+
+Two run of the pair, from the same directory:
+
+```
+   > rooster_write
+   Wrote 5 names to names.txt
+
+   > rooster_read
+   1: Ada
+   2: Alan
+   3: Grace
+   4: Linus
+   5: Bjarne
+   Read 5 names from names.txt
+```
