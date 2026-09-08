@@ -53,10 +53,10 @@ arithmetic on it**.
 ```
 
 ```cpp
-std::print("Enter two test scores (0-100), separated by a space: ");
-int score1{};
-int score2{};
-std::cin >> score1 >> score2;
+std::print("Enter two monthly salaries, separated by a space: ");
+int salary1{};
+int salary2{};
+std::cin >> salary1 >> salary2;
 ```
 
 - One `>>` reads **one** whitespace-separated token and converts it to
@@ -65,14 +65,14 @@ std::cin >> score1 >> score2;
   spaces **or** newlines - `>>` skips leading whitespace either way.
 - `std::cin` lives in `<iostream>`, so that header comes back for every
   lecture that takes input.
-- `int score1{};` brace-initializes to `0`, so the variable still holds
+- `int salary1{};` brace-initializes to `0`, so the variable still holds
   something defined if the read fails.
 
 ```
-   user types:   88   92 <Enter>
-                  │    │
-      score1 ◄────┘    │
-      score2 ◄─────────┘
+   user types:   3500   4000 <Enter>
+                   │      │
+      salary1 ◄────┘      │
+      salary2 ◄───────────┘
 ```
 
 ### The five arithmetic operators
@@ -94,35 +94,40 @@ When **both** operands of `/` are integers, the result is an integer and
 any fractional part is **discarded, not rounded**.
 
 ```
-   7 / 4   ─►  1        (not 1.75, not 2)
-  17 / 5   ─►  3        (not 3.4)
- 149 / 2   ─►  74       (not 74.5)  ◄── the "average" bug
+    7 / 4   ─►  1           (not 1.75, not 2)
+   17 / 5   ─►  3           (not 3.4)
+ 7501 / 2   ─►  3750        (not 3750.5)  ◄── the "average" bug
 ```
+
+For the two salaries, `(salary1 + salary2) / 2` is the average pay. If
+the two add up to an odd number the result is rounded **down**:
+`3500 + 4001` is `7501`, and `7501 / 2` gives `3750`, losing the `.5`.
 
 To keep the fraction, make at least one operand floating-point:
 
 ```
- 149 / 2     ─►  74        int / int   = int
- 149 / 2.0   ─►  74.5      int / double = double
- 149.0 / 2   ─►  74.5      double / int = double
+ 7501 / 2     ─►  3750        int / int    = int
+ 7501 / 2.0   ─►  3750.5      int / double = double
+ 7501.0 / 2   ─►  3750.5      double / int = double
 ```
 
 This is the single most common bug in a beginner's first average. Show it
-live: print the wrong `74`, then fix it with `/ 2.0`.
+live: print the wrong `3750`, then fix it with `/ 2.0`.
 
 ### The remainder operator `%`
 
 `%` gives what is left over after integer division. Integers only.
 
 ```
-  17 % 5  =  2          because 17 = 3*5 + 2
-  20 % 4  =  0          20 divides evenly
-   n % 2  =  0  ──►  n is even
-   n % 2  =  1  ──►  n is odd
+   17 % 5  =  2          because 17 = 3*5 + 2
+   20 % 4  =  0          20 divides evenly
+ 7501 % 100 =  1         7501 is seventy-five whole 100s, plus 1
 ```
 
-The `n % 2` test comes back in the loop lectures whenever we want to act
-"on every second pass".
+In the example, `(salary1 + salary2) % 100` is the part of the combined
+pay that does not make up a full 100. The same "what's the remainder"
+idea comes back in the loop lectures - `counter % 2` to act on every
+second pass, `counter % 10` to do something once every ten iterations.
 
 ### Precedence and associativity
 
@@ -166,61 +171,61 @@ Method: find the **lowest-precedence** operator - that is the one that
 runs **last**, so it splits the expression into the two halves you
 evaluate first. Recurse into each half.
 
-Take a weighted total where the second test counts double, minus a
-5-point late penalty:
+Take one month of the first salary plus a full year of the second, minus
+a shared 1200 rent:
 
 ```
-   score1 + score2 * 2 - 5
+   salary1 + salary2 * 12 - 1200
 
    step 1  lowest-precedence operators here are  +  and  -  (level 5).
            they tie, so left-to-right associativity: the LAST one is the
            rightmost  -  .  It splits the expression:
 
-               (score1 + score2 * 2)   -   5
-               └─────────┬─────────┘       └┬┘
-                  evaluate this first    then subtract
+               (salary1 + salary2 * 12)   -   1200
+               └──────────┬──────────┘         └─┬─┘
+                  evaluate this first         then subtract
 
-   step 2  inside the left half:  score1 + score2 * 2
+   step 2  inside the left half:  salary1 + salary2 * 12
            lowest here is  +  (level 5), beating  *  (level 4):
 
-               score1   +   (score2 * 2)
-                            └─────┬─────┘
-                          *  runs first
+               salary1   +   (salary2 * 12)
+                             └──────┬──────┘
+                            *  runs first
 
    step 3  fully parenthesized:
 
-               ((score1) + ((score2) * 2)) - (5)
+               ((salary1) + ((salary2) * 12)) - (1200)
 ```
 
-With `score1 = 88`, `score2 = 92`:
+With `salary1 = 3500`, `salary2 = 4000`:
 
 ```
-   score2 * 2            ─►  184
-   score1 + 184          ─►  272
-   272 - 5              ─►  267
+   salary2 * 12          ─►  48000
+   salary1 + 48000       ─►  51500
+   51500 - 1200         ─►  50300
 ```
 
 A second example, this time mixing arithmetic, a comparison, and `&&` -
 the shape you write in an `if`:
 
 ```
-   grade >= 60 && grade % 10 == 0
+   salary1 >= 3000 && salary1 % 100 == 0
 
    lowest-precedence operator is  &&  (level 9) - runs last, splits here:
 
-       (grade >= 60)   &&   (grade % 10 == 0)
-       └──────┬─────┘        └───────┬───────┘
-        left operand           right operand
+       (salary1 >= 3000)   &&   (salary1 % 100 == 0)
+       └───────┬───────┘         └────────┬────────┘
+         left operand              right operand
 
-   left:   >=  (level 7) is the only operator          ─►  grade >= 60
-   right:  %  (level 4) beats  ==  (level 8-lower)      ─►  (grade % 10) == 0
+   left:   >=  (level 7) is the only operator          ─►  salary1 >= 3000
+   right:  %  (level 4) beats  ==  (level 8, lower)     ─►  (salary1 % 100) == 0
 
    fully parenthesized:
 
-       (grade >= 60) && ((grade % 10) == 0)
+       (salary1 >= 3000) && ((salary1 % 100) == 0)
 ```
 
-So this reads "passing **and** the grade is a multiple of 10" - no
+So this reads "at least 3000 **and** a round multiple of 100" - no
 parentheses needed, because precedence already groups it that way.
 
 ### When to add parentheses anyway
@@ -235,10 +240,13 @@ everything:
   the table.
 
 ```
-   score1 + score2 * 2        ← fine, * clearly binds first
-   (score1 + score2) * 2      ← parentheses REQUIRED to force + first
+   salary1 + salary2 * 12     ← fine, * clearly binds first
+   (salary1 + salary2) * 12   ← parentheses REQUIRED to force + first
    (a + b) - c                ← redundant (left-to-right already), but harmless
 ```
+
+`(salary1 + salary2) * 12` is the example's household yearly total: add
+both monthly salaries, *then* multiply by 12.
 
 ### Compound assignment
 
@@ -252,9 +260,17 @@ Each of these rewrites `x = x OP y` in short form:
 | `x /= 3`  | `x = x / 3`     | 3             | 1     |
 | `x %= 2`  | `x = x % 2`     | 3             | 1     |
 
-Right now it saves typing. Once loops arrive we add to a running total on
-almost every iteration, and `total += score` is the natural way to write
-it.
+In the example the two friends pool their pay into a `pot`:
+
+```cpp
+int pot{salary1};
+pot += salary2;   // pot = pot + salary2
+pot -= 1200;      // shared rent comes out
+```
+
+Right now it just saves typing. Once loops arrive we add to a running
+total on almost every iteration, and `pot += payment` is the natural way
+to write it.
 
 ---
 
