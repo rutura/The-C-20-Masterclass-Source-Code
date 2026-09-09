@@ -296,14 +296,18 @@ the full definition) before the first call**. The standard arrangement:
 This keeps `main` at the top for the reader, and is the only way when
 two functions call each other.
 
-- Parameter **names** in a prototype are optional:
-  `double average(double, double, double);` is valid.
-- The **definition's first line must agree** with the prototype (return
-  type and parameter types).
+- Parameter **names** in a declaration are optional:
+  `double average(double, double, double);` is valid - only the types
+  matter.
+- The **definition's first line must agree** with the declaration
+  (return type and parameter types).
 
----
+### The signature is name + parameter types
 
-## 6.5 Argument evaluation and coercion
+The **return type is not part of the signature**. `double average(...)`
+and a hypothetical `int average(...)` with the same parameters would
+*clash*, not coexist. What lets two functions share a name is a
+*different parameter list* - see overloading (6.14).
 
 ### Argument coercion
 
@@ -311,21 +315,16 @@ If an argument's type differs from the parameter's, the compiler
 **converts** it - when a safe conversion exists.
 
 ```
-   double square(double value);
+   double average(double a, double b, double c);
 
-   square(4)     ← 4 is int; coerced to 4.0, then squared → 16.0
-   square(2.5)   ← already double → 6.25
+   average(4, 8, 15)   ← 4, 8, 15 are ints; each widened to double
+                         (4 → 4.0) before the call, giving 9.0
+   average(4.0, 8.0, 15.0)   ← already double
 ```
 
 Widening conversions (`int` → `double`, `char` → `int`) are safe and
 silent. Narrowing ones (`double` → `int`) lose information and should be
 made explicit with a cast.
-
-### The signature is name + parameter types
-
-The **return type is not part of the signature**. `int f(int)` and
-`double f(int)` have the *same* signature and cannot both exist - see
-overloading (6.15).
 
 ### Order of argument evaluation is unspecified
 
@@ -334,19 +333,14 @@ argument's side effect is observed by another, the result is not
 portable:
 
 ```cpp
-std::println("{} {}", n++, n);   // which reads n first? UNSPECIFIED - avoid
+average(n++, n, n);   // which reading of n goes where? UNSPECIFIED - avoid
 ```
 
-Do side-effecting work in its own statement:
-
-```cpp
-int a{n++};
-std::println("a = {}, n = {}", a, n);
-```
+Do side-effecting work in its own statement first.
 
 ---
 
-## 6.6 Standard library headers
+## 6.5 Standard library headers
 
 The library groups related functions and types into **headers**;
 `#include` the one you need. Early in this course:
@@ -368,7 +362,7 @@ All these names live in namespace `std`, so you qualify them:
 
 ---
 
-## 6.7 Random numbers
+## 6.6 Random numbers
 
 Random values come from **two pieces**:
 
@@ -392,13 +386,13 @@ for (int i{0}; i < 10; ++i) {
 ```
 
 - A **default-constructed engine replays the same sequence every run** -
-  useful while testing. Change that by seeding it (6.8).
+  useful while testing. Change that by seeding it (6.7).
 - A different range is just a different distribution:
   `uniform_int_distribution<int>{0, 100}`.
 
 ---
 
-## 6.8 Nondeterministic seeding
+## 6.7 Nondeterministic seeding
 
 To get a different sequence each run, **seed** the engine.
 
@@ -422,7 +416,7 @@ Use a **fixed seed while developing** (so a bug reproduces), and
 
 ---
 
-## 6.9 Game of chance and scoped `enum`
+## 6.8 Game of chance and scoped `enum`
 
 The craps example pulls three ideas together.
 
@@ -444,7 +438,7 @@ int roll_dice() {
 ```
 
 (The `static` locals mean the engine is set up **once**, not on every
-call - see 6.10.)
+call - see 6.9.)
 
 ### A scoped `enum`
 
@@ -472,7 +466,7 @@ after it.
 
 ---
 
-## 6.10 Scope rules
+## 6.9 Scope rules
 
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
@@ -519,7 +513,7 @@ void use_static_local() { static int x{50}; ++x; }   // 50→51, 51→52, 52→5
 
 ---
 
-## 6.11 Inline functions
+## 6.10 Inline functions
 
 `inline` on a function definition **permits that definition to appear in
 more than one translation unit** (typically because it sits in a header
@@ -545,7 +539,7 @@ its first line serves as one.
 
 ---
 
-## 6.12 Reference parameters
+## 6.11 Reference parameters
 
 The two ways an argument reaches a function.
 
@@ -597,7 +591,7 @@ than one result by writing through several reference parameters).
 
 ---
 
-## 6.13 Default arguments
+## 6.12 Default arguments
 
 A parameter can carry a **default**, used when the caller omits that
 argument.
@@ -623,7 +617,7 @@ Rules:
 
 ---
 
-## 6.14 Unary scope resolution operator
+## 6.13 Unary scope resolution operator
 
 When a local variable **hides** a global of the same name, the local
 wins inside its scope. `::name` reaches past the local to the **global**.
@@ -646,7 +640,7 @@ int main() {
 
 ---
 
-## 6.15 Function overloading
+## 6.14 Function overloading
 
 Several functions may **share a name** if their **parameter lists
 differ** (in count or type). The compiler picks the best match per call.
@@ -671,7 +665,7 @@ double square(double x) { return x * x; }
 
 ---
 
-## 6.16 Function templates
+## 6.15 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -702,7 +696,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.17 Recursion
+## 6.16 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -742,7 +736,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.18 Recursion vs iteration
+## 6.17 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -770,7 +764,7 @@ clearer.**
 
 ---
 
-## 6.19 The `[[nodiscard]]` attribute
+## 6.18 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -788,7 +782,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.20 Lambda functions
+## 6.19 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -835,7 +829,7 @@ supply it.
 
 ---
 
-## 6.21 Assignment
+## 6.20 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
