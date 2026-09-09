@@ -1712,7 +1712,21 @@ very far away.
 
 ### When the tree fans out: `fibonacci`
 
-`fibonacci` recurses **twice** per step:
+The **Fibonacci sequence** starts with `0, 1`, and every number after
+that is the **sum of the two before it**:
+
+```
+   index n:   0   1   2   3   4   5   6   7   8    9   10
+   fib(n):    0   1   1   2   3   5   8  13  21   34   55
+              └─┬─┘   │
+              the two │ 0 + 1
+              starts  └────────┐
+                    1 + 1 = 2  │  2 + 3 = 5  ...  each term = sum of the two on its left
+```
+
+Written as a recursion, that definition drops straight in - `fib(0)` and
+`fib(1)` are the two base cases, and every other term is `fib(n-1) +
+fib(n-2)`. Note that is **two** recursive calls per step:
 
 ```cpp
 long fibonacci(long n) {
