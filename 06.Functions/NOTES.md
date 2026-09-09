@@ -688,7 +688,7 @@ while (session == Session::open) {
 
 ---
 
-## 6.6 Scope rules
+## 6.6 Lifetime and scope
 
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
