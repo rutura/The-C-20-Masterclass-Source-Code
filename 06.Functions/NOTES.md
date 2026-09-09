@@ -87,11 +87,11 @@ Marking the function **`inline`** gives the compiler permission to skip
 the call: paste the function's body straight into the call site.
 
 ```cpp
-inline double cube(double side) {
-    return side * side * side;
+inline int sum(int a, int b) {
+    return a + b;
 }
 
-double v{cube(5.0)};   // compiler may compile this as: double v{5.0 * 5.0 * 5.0};
+int total{sum(3, 4)};   // compiler may compile this as: int total{3 + 4};
 ```
 
 Two things to keep straight:

@@ -19,8 +19,8 @@ int rectangle_perimeter(int width, int height) {
 // compiler permission to paste the body at the call site and skip the
 // jump. (Its formal job is a linker rule - see NOTES.md - but this is
 // the effect worth knowing here.)
-inline double cube(double side) {
-    return side * side * side;
+inline int sum(int a, int b) {
+    return a + b;
 }
 
 int main() {
@@ -31,7 +31,7 @@ int main() {
     std::println("perimeter of 10 x 10 = {}", rectangle_perimeter(10, 10));
     std::println("perimeter of  7 x  2 = {}", rectangle_perimeter(7, 2));
 
-    std::println("volume of a cube, side 5 = {}", cube(5.0));
+    std::println("sum of 3 and 4 = {}", sum(3, 4));
 
     return 0;
 }
