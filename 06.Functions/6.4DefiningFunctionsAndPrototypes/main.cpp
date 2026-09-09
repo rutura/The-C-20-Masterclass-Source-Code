@@ -10,31 +10,24 @@
 // reader looks first, and the compiler still knows how to check the
 // call.
 
-int maximum(int x, int y, int z);   // prototype
+double average(double a, double b, double c);   // prototype
 
 int main() {
 
-    std::print("Enter three integers: ");
-    int a{};
-    int b{};
-    int c{};
-    std::cin >> a >> b >> c;
+    std::print("Enter three numbers: ");
+    double x{};
+    double y{};
+    double z{};
+    std::cin >> x >> y >> z;
 
     // The compiler checks this call against the prototype above.
-    std::println("maximum is {}", maximum(a, b, c));
+    std::println("average is {}", average(x, y, z));
 
     return 0;
 }
 
 // FUNCTION DEFINITION: the prototype's signature plus the { body }.
 // Its first line must agree with the prototype.
-int maximum(int x, int y, int z) {
-    int largest{x};                 // assume x is the largest to start
-    if (y > largest) {
-        largest = y;
-    }
-    if (z > largest) {
-        largest = z;
-    }
-    return largest;
+double average(double a, double b, double c) {
+    return (a + b + c) / 3.0;
 }

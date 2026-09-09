@@ -270,14 +270,11 @@ hand-rolled version tends to miss.
 A function has two forms:
 
 ```
-   int maximum(int x, int y, int z);      ← PROTOTYPE: signature + ';', no body
-                                            everything a caller needs
+   double average(double a, double b, double c);   ← PROTOTYPE: signature + ';',
+                                                     no body. everything a caller needs
 
-   int maximum(int x, int y, int z) {     ← DEFINITION: prototype + { body }
-       int largest{x};
-       if (y > largest) { largest = y; }
-       if (z > largest) { largest = z; }
-       return largest;
+   double average(double a, double b, double c) {  ← DEFINITION: prototype + { body }
+       return (a + b + c) / 3.0;
    }
 ```
 
@@ -285,13 +282,13 @@ The compiler reads top to bottom and must have seen a **prototype (or
 the full definition) before the first call**. The standard arrangement:
 
 ```
-   int maximum(int x, int y, int z);   ← prototype up top
+   double average(double a, double b, double c);   ← prototype up top
 
    int main() {
-       ... maximum(a, b, c) ...        ← compiler checks this against the prototype
+       ... average(x, y, z) ...     ← compiler checks this call against the prototype
    }
 
-   int maximum(int x, int y, int z) {  ← definition below main
+   double average(double a, double b, double c) {  ← definition below main
        ...
    }
 ```
@@ -300,7 +297,7 @@ This keeps `main` at the top for the reader, and is the only way when
 two functions call each other.
 
 - Parameter **names** in a prototype are optional:
-  `int maximum(int, int, int);` is valid.
+  `double average(double, double, double);` is valid.
 - The **definition's first line must agree** with the prototype (return
   type and parameter types).
 
