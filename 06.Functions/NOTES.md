@@ -1796,21 +1796,130 @@ reads clearly. Even then, watch the depth.
 
 ---
 
-## 6.15 The `[[nodiscard]]` attribute
+## 6.15 Intro to C++ attributes
 
-Mark a function `[[nodiscard]]` when **ignoring its return value is
-almost certainly a bug** - the point of the call is the value it hands
-back. The compiler then warns if a caller drops it.
+An **attribute** is a note to the compiler, written in **double square
+brackets**: `[[name]]` or `[[name("some text")]]`. It does **not change
+what the code computes**. It tells the compiler something extra about a
+function, a variable, or a statement, so the compiler can **warn you
+better** (or, for a couple of them, optimise better).
+
+```
+   [[nodiscard]] bool username_is_available(std::string_view name);
+   └─────┬─────┘ └──────────────────────┬───────────────────────┘
+      the note        the thing it is attached to
+```
+
+Where an attribute can sit:
+
+```
+   [[nodiscard]] int f();          ← on a function
+   [[maybe_unused]] int x{0};      ← on a variable
+   [[deprecated]] void old_api();  ← on a declaration
+   switch (t) {
+       case A:
+           step();
+           [[fallthrough]];         ← on a statement, inside a switch
+       case B:
+           ...
+   }
+```
+
+You do not need to memorise every attribute. Learn what the `[[...]]`
+**shape** means - "hint to the compiler" - and the three below, and you
+can look up any others you meet.
+
+### `[[nodiscard]]` - don't throw the return value away
+
+The reason to call the function **is** its return value. If a caller
+ignores it, that is almost always a bug, so the compiler warns.
 
 ```cpp
-[[nodiscard]] int add(int a, int b) { return a + b; }
+[[nodiscard]] bool username_is_available(std::string_view name);
 
-int s{add(3, 4)};   // fine
-add(3, 4);          // warning: result of a [[nodiscard]] call is unused
+bool free{username_is_available("neo")};   // result used - fine
+username_is_available("neo");               // ⚠ warning: [[nodiscard]] result ignored
+```
+
+```
+   compiler sees a call to a [[nodiscard]] function
+        │
+        ├─ result is stored / tested / passed on   → fine
+        └─ result is dropped on the floor           → emit a warning
+```
+
+Since C++20 you can attach a reason, which appears in the warning text:
+
+```cpp
+[[nodiscard("check the result before saving the profile")]]
+bool profile_is_complete(std::string_view name, int age);
 ```
 
 Good on: pure computations, functions that report success/failure, and
-functions that return a resource the caller must handle.
+functions that hand back a resource the caller must deal with.
+
+### `[[maybe_unused]]` - "unused on purpose, don't warn"
+
+Compilers warn about a variable, parameter, or function that is never
+used - usually a real mistake. When it is **deliberate** (a value kept
+only for debugging, a parameter an interface forces you to accept),
+`[[maybe_unused]]` silences that one warning without silencing the
+others.
+
+```cpp
+[[maybe_unused]] bool verbose_logging{true};   // referenced only in debug builds
+
+int handle(int request, [[maybe_unused]] int flags) {   // flags ignored for now
+    return request * 2;
+}
+```
+
+```
+   without it :  warning: unused variable 'verbose_logging'   ← noise you learn to ignore
+   with it    :  (silent)  ← and the warnings that DO matter stay visible
+```
+
+### `[[deprecated]]` - "still works, but stop using it"
+
+Mark an old function (or type, or variable) `[[deprecated]]`. It keeps
+working, but **every use produces a warning**. The optional message
+points people at the replacement - this is how libraries retire an API
+without breaking existing code overnight.
+
+```cpp
+[[deprecated("use display_name() instead")]]
+std::string full_name(std::string_view first, std::string_view last);
+
+std::string display_name(std::string_view first, std::string_view last);
+```
+
+```cpp
+full_name("Thomas", "Anderson");
+// ⚠ warning: 'full_name' is deprecated: use display_name() instead
+```
+
+```
+   deprecated function still compiles and runs
+        └─ but each call site gets a warning nudging you to move off it
+```
+
+### Others you may spot
+
+You do not need these yet - just recognise them as the same idea, a hint
+to the compiler:
+
+```
+   [[fallthrough]]              in a switch: "the missing break here is intentional"
+                               (stops the compiler's fall-through warning - see 5.11)
+   [[noreturn]]                 on a function that never returns to its caller -
+                               it calls std::exit, throws, or loops forever
+   [[likely]] / [[unlikely]]    tag the common / rare branch of an if or switch;
+                               a pure optimisation hint, no effect on behaviour
+```
+
+An attribute the compiler does not recognise is **ignored**, not an
+error - so an unknown `[[something]]` in code you read is safe to move
+past and look up later.
 
 ---
 
