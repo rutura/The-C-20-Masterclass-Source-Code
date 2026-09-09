@@ -1941,6 +1941,43 @@ focus stays on *how the program is put together*, not on graphics.
    └───────────────────────────────────┘
 ```
 
+### A quick word on `std::vector`
+
+We need to hold a lot of bytes - one big run of them - and we do not know
+`width * height * 3` until the program runs. A raw array will not do
+that. **`std::vector<T>`** is the standard **growable collection**: a
+sequence of `T` values, all of one type, stored back-to-back, sized at
+run time. It gets a proper chapter later; here is the 1% you need now.
+
+```cpp
+#include <vector>
+
+std::vector<int> v{10, 20, 30};   // a vector of 3 ints
+
+v.size();      // 3      - how many elements
+v[0];          // 10     - element access by index, 0-based
+v[2] = 99;     // set element 2
+v.push_back(40);   // append - v is now {10, 20, 99, 40}, size 4
+
+// make one of a given size, every element the same value:
+std::vector<std::uint8_t> bytes(36, 0);   // 36 bytes, all 0
+```
+
+```
+   std::vector<std::uint8_t> bytes(36, 0);
+
+   index:   0    1    2    3    4    ...                        35
+          ┌────┬────┬────┬────┬────┬─────────────────────────┬────┐
+   bytes: │ 0  │ 0  │ 0  │ 0  │ 0  │  ...all zero...          │ 0  │
+          └────┴────┴────┴────┴────┴─────────────────────────┴────┘
+             ▲                                                  ▲
+          bytes[0]                                        bytes[35]
+          (bytes.data() points here - the address of the first element)
+```
+
+`bytes.data()` hands back a pointer to that first byte - which is how we
+give the whole block to a file writer in one call, later.
+
 ### The pixel model
 
 An image is a grid of pixels; each pixel is **three bytes** - red,
@@ -1956,6 +1993,55 @@ row by row, 3 bytes per pixel:
             ▲
             pixel (x, y) starts at byte  (y * width + x) * 3
                                           └── then +0 = R, +1 = G, +2 = B
+```
+
+#### Same picture, counting actual bytes
+
+The grid above is the *mental* model. In memory it is **one straight
+line of bytes** - the rows are laid end to end, no gaps. For a 4x3
+image, byte by byte:
+
+```
+   ┌──────────── row 0 (y=0) ───────────┬──────────── row 1 (y=1) ────────────┬─── row 2 ───┐
+   │ px(0,0)  px(1,0)  px(2,0)  px(3,0) │ px(0,1)  px(1,1)  px(2,1)  px(3,1)  │  px(0,2) ...│
+   │ R G B    R G B    R G B    R G B   │ R G B    R G B    R G B    R G B    │  R G B   ...│
+   byte 0..2  3..5     6..8     9..11     12..14   15..17   18..20   21..23      24..26
+```
+
+To find where pixel `(x, y)` starts, count the pixels **before** it and
+multiply by 3 (bytes per pixel):
+
+```
+   pixels before (x, y)  =  y * width      (all the full rows above it)
+                          + x              (the pixels to its left in its row)
+
+   byte offset           =  (y * width + x) * 3
+                            └─────┬──────┘
+                              pixel number, counting from 0
+
+   then:   offset + 0  →  the Red   byte
+           offset + 1  →  the Green byte
+           offset + 2  →  the Blue  byte
+```
+
+Worked example - pixel `(2, 1)` in the 4x3 image:
+
+```
+   y * width + x   =   1 * 4 + 2   =   6      ← it is the 6th pixel (0-based)
+   * 3             =   18                     ← its Red byte is bytes[18]
+
+   ┌────┬────┬────┐
+   │ 18 │ 19 │ 20 │   bytes[18] = R,  bytes[19] = G,  bytes[20] = B  of pixel (2,1)
+   └────┴────┴────┘
+```
+
+That is exactly what `set_pixel` computes:
+
+```cpp
+const std::size_t i{(static_cast<std::size_t>(y) * width + x) * 3};
+pixels[i + 0] = r;
+pixels[i + 1] = g;
+pixels[i + 2] = b;
 ```
 
 The helper functions are all pure chapter-6 material:
