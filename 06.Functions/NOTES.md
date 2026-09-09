@@ -1066,7 +1066,7 @@ program from four files of helpers plus `main.cpp`.
    └── CMakeLists.txt
 ```
 
-### Header and source: the split from 6.4, now in two files
+### Header and source
 
 The main idea is to **split the declaration from the definition**. We store 
 the **declarations** in a **header** (`.h`) and the **definitions** in a **source** (`.cpp`). 
@@ -1090,10 +1090,59 @@ the **declarations** in a **header** (`.h`) and the **definitions** in a **sourc
   these functions `#include`s it.
 - The **source** (`.cpp`) holds the definitions. It `#include`s its own
   header too, so the compiler checks the bodies against the promises.
-- **`#pragma once`** at the top of the header is an **include guard**: if
-  the same header gets pulled in twice in one file (directly and through
-  another header), its body is still processed only once. Without it you
-  would get "redefinition" errors.
+
+### Include guards
+
+`#include` is a blind text paste (next section). If one `.cpp` pulls in
+the same header **twice** - usually indirectly, `main.cpp` includes `a.h`
+and `b.h`, and both of those include `common.h` - the header's contents
+land in that file twice. For declarations that is harmless; for anything
+that can only appear once (a `struct` definition, an `enum`, a
+`constexpr` variable) the second copy is a **redefinition error**.
+
+An **include guard** makes a header paste its body **at most once per
+file**. Two ways to write one:
+
+**1. `#pragma once`** - one line at the very top. Every mainstream
+compiler supports it; it is what we use now.
+
+```cpp
+// geometry.h
+#pragma once
+
+double circle_area(double radius);
+double circle_circumference(double radius);
+```
+
+**2. The `#ifndef` / `#define` / `#endif` trio** - the portable classic,
+guaranteed by the standard. Wrap the whole file in a check on a macro
+name unique to that header:
+
+```cpp
+// geometry.h
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
+
+double circle_area(double radius);
+double circle_circumference(double radius);
+
+#endif  // GEOMETRY_H
+```
+
+How it works: the first `#include` finds `GEOMETRY_H` undefined, defines
+it, and processes the body. Any later `#include` in the **same** file
+finds `GEOMETRY_H` already defined and skips straight to `#endif`.
+
+```
+   main.cpp
+   ├─ #include "a.h"  ──► a.h  ──► #include "common.h"   GEOMETRY_H undefined → paste body, #define it
+   └─ #include "b.h"  ──► b.h  ──► #include "common.h"   GEOMETRY_H defined    → skip to #endif
+```
+
+Pick one, not both. `#pragma once` is shorter and has no name to clash;
+the `#ifndef` form works on the rare compiler that lacks `#pragma once`
+and shows exactly what the mechanism is. The macro name must be unique -
+`GEOMETRY_H` for `geometry.h`, `MONEY_H` for `money.h`.
 
 ### `#include` is copy-paste
 
@@ -1186,8 +1235,7 @@ translation unit that declares the same name links to it.
 
 That is the whole idea you need here: **functions are external by
 default, which is what lets you split them across files.** The full rules
-- internal linkage, the One Definition Rule, `inline` for definitions in
-headers - get a dedicated chapter later in the course.
+about linkage will be covered later in the course.
 
 ---
 
