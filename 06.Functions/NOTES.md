@@ -383,8 +383,39 @@ If an argument's type differs from the parameter's, the compiler
 ```
 
 Widening conversions (`int` → `double`, `char` → `int`) are safe and
-silent. Narrowing ones (`double` → `int`) lose information and should be
-made explicit with a cast.
+silent - no data is lost, which is why `average(4, 8, 15)` above just
+works. **Narrowing** ones go the other way (`double` → `int`) and *do*
+lose information, so the compiler makes you ask for them on purpose with
+**`static_cast<T>(value)`**.
+
+Say we also have a function that takes a whole number of people:
+
+```cpp
+double average(double a, double b, double c);
+void   report(int headcount);          // wants an int
+
+double mean{average(4, 8, 15)};        // 9.0
+
+// report(mean);                       // warning / error: 9.0 → int is narrowing
+report(static_cast<int>(mean));        // OK - you asked: 9.0 becomes 9
+```
+
+`static_cast<int>(mean)` means "I know this drops the fraction, do it
+anyway." The fraction is **truncated toward zero, not rounded**:
+`static_cast<int>(9.7)` is `9`, and `static_cast<int>(-9.7)` is `-9`.
+
+The other everyday use is the reverse - forcing a `double` context so
+integer division does not bite (the Chapter 5 pitfall):
+
+```cpp
+int total{4 + 8 + 15};                        // 27
+double bad{total / 3};                        // 9    - int / int, fraction lost
+double good{static_cast<double>(total) / 3};  // 9.0  - one operand is double now
+```
+
+The pattern to remember: **when a conversion might lose data, name it
+with `static_cast<TargetType>(...)`** so both the compiler and the next
+reader can see it was deliberate.
 
 ### Order of argument evaluation is unspecified
 
