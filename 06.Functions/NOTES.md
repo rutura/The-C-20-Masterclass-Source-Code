@@ -929,30 +929,7 @@ void charge(double& balance, double fee) {
 
 ---
 
-## 6.9 Unary scope resolution operator
-
-When a local variable **hides** a global of the same name, the local
-wins inside its scope. `::name` reaches past the local to the **global**.
-
-```cpp
-int value{7};              // global int
-
-int main() {
-    double value{10.5};    // local - hides the global in main
-
-    std::println("{}", value);     // 10.5   (the local)
-    std::println("{}", ::value);   // 7      (the global, via ::)
-}
-```
-
-```
-   value      → nearest declaration: the local
-   ::value    → skip locals: the global
-```
-
----
-
-## 6.10 Function overloading
+## 6.9 Function overloading
 
 Several functions may **share a name** if their **parameter lists
 differ** (in count or type). The compiler picks the best match per call.
@@ -977,7 +954,7 @@ double square(double x) { return x * x; }
 
 ---
 
-## 6.11 Function templates
+## 6.10 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -1008,7 +985,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.12 Recursion
+## 6.11 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -1048,7 +1025,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.13 Recursion vs iteration
+## 6.12 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -1076,7 +1053,7 @@ clearer.**
 
 ---
 
-## 6.14 The `[[nodiscard]]` attribute
+## 6.13 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -1094,7 +1071,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.15 Lambda functions
+## 6.14 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -1141,7 +1118,7 @@ supply it.
 
 ---
 
-## 6.16 Assignment
+## 6.15 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
