@@ -46,6 +46,64 @@ rectangle_perimeter(3, 4);      // 14
 rectangle_perimeter(10, 10);    // 40  - one formula, called again
 ```
 
+### The call stack
+
+When a function is called, the program does not just "jump" to it. It
+sets aside a block of memory - a **stack frame** - to hold that call's
+arguments, local variables, and the address to return to. Frames stack
+up as calls nest, and pop off as calls return.
+
+```
+   main() calls area(), which calls square()
+
+   ┌──────────────────────────┐  ← top of stack (most recent call)
+   │ square()                 │
+   │   n = 4                  │
+   │   return address → area  │
+   ├──────────────────────────┤
+   │ area()                   │
+   │   side = 4               │
+   │   return address → main  │
+   ├──────────────────────────┤
+   │ main()                   │
+   │   ...                    │
+   └──────────────────────────┘  ← bottom (first call)
+
+   square() returns → its frame pops → area() resumes
+   area()   returns → its frame pops → main() resumes
+```
+
+The stack grows and shrinks automatically; this is why a local variable
+vanishes when its function returns (its frame is gone) and why very deep
+recursion can **overflow the stack** - it runs out of room for frames.
+
+### Call overhead and `inline`
+
+Building a frame, jumping in, and tearing it down on return is cheap, but
+it is **not free**. For a tiny function - a one-liner called inside a
+tight loop - that setup can cost more than the work itself.
+
+Marking the function **`inline`** gives the compiler permission to skip
+the call: paste the function's body straight into the call site.
+
+```cpp
+inline double cube(double side) {
+    return side * side * side;
+}
+
+double v{cube(5.0)};   // compiler may compile this as: double v{5.0 * 5.0 * 5.0};
+```
+
+Two things to keep straight:
+
+- `inline` is a **permission, not a command**. The compiler already
+  decides on its own whether to inline any given call; the keyword does
+  not force it.
+- Its **formal** purpose is a linker rule, covered later: it lets one
+  function definition sit in a header included by many `.cpp` files
+  without a "multiple definition" error. The call-overhead effect above
+  is the everyday reason to reach for it.
+
 ---
 
 ## 6.3 Built-in functions
@@ -735,33 +793,7 @@ void grow_combo()  { static int high_score{50}; ++high_score; }   // 50→51, 51
 
 ---
 
-## 6.7 Inline functions
-
-`inline` on a function definition **permits that definition to appear in
-more than one translation unit** (typically because it sits in a header
-included by several `.cpp` files) without a "multiple definition" linker
-error. All copies must be identical; the linker folds them into one.
-
-It is **not** a command to paste the body at the call site - the
-optimizer already decides that on its own, `inline` or not.
-
-```cpp
-inline double cube(double side) {
-    return side * side * side;
-}
-```
-
-A function defined **before** its first use needs no separate prototype:
-its first line serves as one.
-
-```
-   constexpr  → "may be evaluated at compile time"      (a later topic)
-   inline     → "this definition may appear in many files; treat as one"
-```
-
----
-
-## 6.8 Reference parameters
+## 6.7 Reference parameters
 
 The two ways an argument reaches a function.
 
@@ -813,7 +845,7 @@ than one result by writing through several reference parameters).
 
 ---
 
-## 6.9 Default arguments
+## 6.8 Default arguments
 
 A parameter can carry a **default**, used when the caller omits that
 argument.
@@ -839,7 +871,7 @@ Rules:
 
 ---
 
-## 6.10 Unary scope resolution operator
+## 6.9 Unary scope resolution operator
 
 When a local variable **hides** a global of the same name, the local
 wins inside its scope. `::name` reaches past the local to the **global**.
@@ -862,7 +894,7 @@ int main() {
 
 ---
 
-## 6.11 Function overloading
+## 6.10 Function overloading
 
 Several functions may **share a name** if their **parameter lists
 differ** (in count or type). The compiler picks the best match per call.
@@ -887,7 +919,7 @@ double square(double x) { return x * x; }
 
 ---
 
-## 6.12 Function templates
+## 6.11 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -918,7 +950,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.13 Recursion
+## 6.12 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -958,7 +990,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.14 Recursion vs iteration
+## 6.13 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -986,7 +1018,7 @@ clearer.**
 
 ---
 
-## 6.15 The `[[nodiscard]]` attribute
+## 6.14 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -1004,7 +1036,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.16 Lambda functions
+## 6.15 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -1051,7 +1083,7 @@ supply it.
 
 ---
 
-## 6.17 Assignment
+## 6.16 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
