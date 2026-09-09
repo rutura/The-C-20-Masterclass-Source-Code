@@ -1459,48 +1459,147 @@ folds the duplicates into one.)
 
 ## 6.13 Lambda functions
 
-A **lambda** is a small function written **inline**, where it is used -
-usually to hand to another function. Shape:
+A **lambda** is a function written **inline** - defined right where you
+need it, with no name and no separate declaration. It exists because many
+functions (`std::sort`'s comparison, a "what to do with each element"
+step) are used **once**, next to the call, and giving each a top-level
+name just adds noise.
+
+### The shape
 
 ```
-   [ capture ] ( parameters ) { body }
-   └───┬────┘
-   which surrounding variables the lambda may use
+   [ capture ] ( parameters ) -> return  { body }
+   └────┬────┘  └────┬─────┘   └───┬───┘   └─┬─┘
+        │            │             │         │
+        │            │             │         the code to run
+        │            │             optional - usually deduced
+        │            same as any function's parameter list
+        │
+        which surrounding variables the body may use
+        (the part that makes a lambda more than a plain function)
 ```
+
+### A lambda is an object
+
+`[](int a, int b) { return a + b; }` is an **expression** - it evaluates
+to an unnamed function-like **object** you can store, copy, and call:
 
 ```cpp
-auto add = [](int a, int b) { return a + b; };
-add(3, 4);   // 7
+auto add = [](int a, int b) { return a + b; };   // store it
+add(3, 4);                                        // call it - 7
 ```
 
-### Captures
+```
+   auto add = [](int a, int b){ return a + b; };
+        │                    │
+        │                    └── this whole thing is a value
+        └── ...bound to a variable, like `int x = 5;` binds a value
+
+   add        ─ a callable object
+   add(3, 4)  ─ invoke it, same syntax as any function call
+```
+
+`auto` is doing real work here: every lambda has its own compiler-made
+type with no spelling you could write out, so you cannot name it - you
+let `auto` hold it (or `std::function`, later in the course).
+
+### Captures: reaching outside the body
+
+A lambda's parameters cover what the **caller** passes in. **Captures**
+cover variables from the **surrounding scope** that the body wants to use.
+List them in the `[ ]`.
 
 ```cpp
 int offset{10};
-auto shift = [=](int n) { return n + offset; };   // copies offset (snapshot: 10)
-offset = 999;                                      // shift still uses 10
 
-int total{0};
-auto accumulate = [&](int n) { total += n; };      // links to the real total
-accumulate(3); accumulate(4);                       // total is now 7
+auto shift_val = [ offset ](int n) { return n + offset; };   // by value
+auto shift_ref = [&offset ](int n) { return n + offset; };   // by reference
+```
+
+**By value** - the lambda stores its **own copy**, taken when the lambda
+is created. Later changes to the original do not reach it:
+
+```
+   int offset{10};
+   auto shift = [offset](int n){ return n + offset; };
+                   │
+                   └── copy made NOW → the lambda carries offset = 10
+
+   offset = 999;          ← changes the outer variable only
+   shift(5);              → 5 + 10  = 15   (still the snapshot)
+
+   outer:   offset  ┌────┐            lambda's copy:  ┌────┐
+                    │999 │                            │ 10 │
+                    └────┘                            └────┘
+                       (independent from here on)
+```
+
+**By reference** - the lambda stores a **link** to the original. It sees
+later changes, and its writes land on the original:
+
+```
+   int total{0};
+   auto add_to = [&total](int n){ total += n; };
+                    │
+                    └── link, not a copy
+
+   add_to(3);   ─┐
+   add_to(4);   ─┴─► both write through the link
+
+   outer:   total ◄──────────── lambda's &total
+            ┌────┐   same object
+            │ 7  │
+            └────┘
+```
+
+### Capture-list shorthands
+
+```
+   [x]     just x, by value        [&x]   just x, by reference
+   [x, &y] x by value, y by reference   ← mix freely
+   [=]     everything the body uses, by value    (each one snapshotted)
+   [&]     everything the body uses, by reference (each one linked)
+   [ ]     capture nothing - body may only touch its parameters
 ```
 
 ```
-   [=]   capture everything used, BY VALUE   (a snapshot)
-   [&]   capture everything used, BY REFERENCE (live link)
-   [x]   just x, by value       [&x]  just x, by reference
-   []    capture nothing
+                     copy in?              sees later changes?   can modify original?
+   ────────────────  ───────────────────   ──────────────────    ───────────────────
+   [x]  / [=]        yes, at creation      no                    no (copy is const-ish)
+   [&x] / [&]        no, stores a link     yes                   yes
 ```
 
-### Passing a lambda where a callable is expected
+A **`[&]` capture is only safe while the captured variable is still
+alive.** If the lambda outlives the scope it captured from - stored in a
+container, returned from a function - a `[&]` link becomes dangling.
+Prefer `[=]` (or naming exactly what you need) for a lambda that travels.
+
+### Where lambdas earn their keep: passing a callable
+
+Standard-library algorithms take a **callable** that decides ordering,
+which elements match, what to do with each. A lambda at the call site is
+the normal way to supply it - the logic sits right where it is used:
 
 ```cpp
-std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });   // descending
+std::vector<int> v{5, 2, 8, 1, 9, 3};
+
+std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
+//                            └──────────────┬───────────────┘
+//                        "a comes before b when a > b"  → sorts DESCENDING
 ```
 
-Standard-library algorithms take a callable to decide ordering,
-filtering, and so on; a lambda at the call site is the usual way to
-supply it.
+```
+   std::sort walks the range and, whenever it must order two elements,
+   calls your lambda:
+
+      compare(5, 2) → 5 > 2 → true  → 5 before 2
+      compare(8, 1) → true          → 8 before 1
+      ...
+   {5, 2, 8, 1, 9, 3}  ──sort with `a > b`──►  {9, 8, 5, 3, 2, 1}
+```
+
+The same slot takes any callable - a named function, a lambda, a functor
+(later chapter). The lambda just spares you naming a one-use comparison.
 
 ---
 
