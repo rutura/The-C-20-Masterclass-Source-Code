@@ -1503,6 +1503,31 @@ add(3, 4);                                        // call it - 7
 type with no spelling you could write out, so you cannot name it - you
 let `auto` hold it (or `std::function`, later in the course).
 
+### Define and call in one step
+
+Because the lambda literal is an expression, you can put an argument list
+`( )` right after it and call it **on the spot** - no variable, no name:
+
+```cpp
+int difference{ [](int a, int b) { return a - b; }(10, 4) };
+//              └──────────────┬──────────────────┘└──┬──┘
+//                       the lambda              call it now,
+//                                               a = 10, b = 4
+```
+
+```
+   [](int a, int b){ return a - b; } (10, 4)
+   └───────────────┬───────────────┘ └──┬──┘
+        makes the lambda object      invoke it immediately with
+                                     these arguments → 10 - 4 → 6
+```
+
+Useful when a variable needs a few lines of setup to compute its value:
+wrap the setup in a lambda, call it once with whatever inputs it needs,
+and the result initialises the variable - keeping the scratch work out of
+the surrounding scope. (This is sometimes called an *immediately-invoked
+lambda*.)
+
 ### Captures: reaching outside the body
 
 A lambda's parameters cover what the **caller** passes in. **Captures**

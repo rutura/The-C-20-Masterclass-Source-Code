@@ -15,6 +15,12 @@ int main() {
     auto add = [](int a, int b) { return a + b; };
     std::println("add(3, 4) = {}", add(3, 4));
 
+    // Or define and call it in one go - the trailing (10, 4) passes the
+    // arguments to the lambda right where it is written, so it never
+    // needs a name.
+    int difference{ [](int a, int b) { return a - b; }(10, 4) };
+    std::println("difference = {}", difference);   // 6
+
     // Capture by value: [=] takes a snapshot of `offset` (10).
     int offset{10};
     auto shift = [=](int n) { return n + offset; };
