@@ -96,13 +96,8 @@ int total{sum(3, 4)};   // compiler may compile this as: int total{3 + 4};
 
 Two things to keep straight:
 
-- `inline` is a **permission, not a command**. The compiler already
-  decides on its own whether to inline any given call; the keyword does
-  not force it.
-- Its **formal** purpose is a linker rule, covered later: it lets one
-  function definition sit in a header included by many `.cpp` files
-  without a "multiple definition" error. The call-overhead effect above
-  is the everyday reason to reach for it.
+- `inline` is a **suggestoion, not a command**. The compiler may still
+  decide to call it normally if it deems that better.
 
 ---
 
