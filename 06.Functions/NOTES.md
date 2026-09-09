@@ -442,18 +442,18 @@ an excuse to explore them, we will build a simple **fortune teller** program.
    ┌─────────────────────────────────────────────┐
    │            THE FORTUNE TELLER               │
    │                                             │
-   │   Your lucky number is  73.                 │
+   │   Your lucky numbers are:  73 12 45 ...     │
    │   The cards say:  "An old friend has        │
    │                    news you will want       │
    │                    to hear."                │
    └─────────────────────────────────────────────┘
              ▲                    ▲
              │                    │
-       a number in a       one entry picked
+       numbers in a        one entry picked
        range (1..99)       from a fixed list
 ```
 
-* We need to pick a random number in a range (1..99) for the lucky number.
+* We need to pick random numbers in a range (1..99) for the lucky numbers.
 * We need to pick a random index into a fixed list of fortunes, to choose one.
 
 ### The two pieces: engine and distribution
@@ -488,36 +488,47 @@ need - one for the lucky number, another for the fortune index.
 
 ### I need a random number between 1 and 99
 
-**You call the distribution with the engine as an argument**:
+**You call the distribution with the engine as an argument**. Call it
+again and again on the same engine and you get a sequence:
 
 ```cpp
-std::default_random_engine engine{};                     // Declare the engine 
+std::default_random_engine engine{};                     // Declare the engine
 std::uniform_int_distribution<int> lucky_number{1, 99};  // Declare the distribution
 
-std::println("Your lucky number is {}.", lucky_number(engine)); // Call the distribution with the engine 
-                                                                // to get a number in 1..99
-
-// A sequence of 10 lucky numbers, each in the range 1..99. 
+// A sequence of 10 lucky numbers, each in the range 1..99.
 std::print("Your lucky numbers are: ");
 for (int i{0}; i < 10; ++i) {
-   std::print("{} ", lucky_number(engine));
+   std::print("{} ", lucky_number(engine));   // call the distribution with the engine
 }
 std::println("");
 ```
 
 This will print something like:
 
-```   
-Your lucky number is 73.
-Your lucky numbers are: 73 12 45 67 89 34 56 78 90 23 
+```
+Your lucky numbers are: 73 12 45 67 89 34 56 78 90 23
+```
+
+Picking a fortune is the same idea with a different distribution - one
+that yields an **index** into a fixed list:
+
+```cpp
+constexpr std::array fortunes{
+    "A pleasant surprise is waiting for you.",
+    "Now is the time to try something new.",
+    // ...
+};
+std::uniform_int_distribution<std::size_t> pick{0, fortunes.size() - 1};
+
+std::println("The cards say: {}", fortunes[pick(engine)]);
 ```
 
 PROBLEM: Every time you run the program, you will get the **same sequence of numbers**.  
 
-### Different random numbers each run
+### Different random numbers each run (`main2.cpp`)
 
-What we want: a fresh fortune  number each run: 
-   * We hand the engine a **seed** value, which is the starting point for the random number sequence.
+What we want: a fresh fortune each run.
+   * We hand the engine a **seed** value, the starting point for the sequence.
 
 ```
    engine{}          → same fortune every run        (fixed, hidden seed)
@@ -525,86 +536,144 @@ What we want: a fresh fortune  number each run:
    engine{rd()}      → fresh fortune every run        (seed pulled from the OS)
 ```
 
-
 ```cpp
-// reproducible - the seeker types the seed ("birth number")
-int seed{ 222 };
-std::default_random_engine seeded{seed};
+// reproducible - a fixed seed: the same value always draws the same fortune
+unsigned int seed{100};
+std::default_random_engine seeded_engine{seed};
+std::println("For {}, the cards say: {}", seed, fortunes[pick(seeded_engine)]);
 
 // fresh each run - random_device is a nondeterministic source
 std::random_device rd{};
-std::default_random_engine fresh{rd()};   // rd() produces the seed
+std::default_random_engine fresh_engine{rd()};   // rd() produces the seed
+std::println("And a fresh draw for today: {}", fortunes[pick(fresh_engine)]);
 ```
 
-### Helper function + scoped `enum` + `switch` initializer (`main3.cpp`)
+### A fortune-teller game
 
-Now a fuller reading: the **three-card draw**. The seeker keeps drawing
-cards, and the layout decides how the reading goes:
+Now a fuller program. The teller greets you, then keeps asking whether to
+draw. You type `y` for another fortune, anything else to leave:
 
 ```
-   FIRST CARD
-   ┌──────────────────────────────────────────────┐
-   │  7 or 11   →  the cards favor you   (done)    │
-   │  1 or 13   →  the cards frown       (done)    │
-   │  anything  →  that value becomes your "sign"  │
-   └──────────────────────────────────────────────┘
-                          │
-                          ▼  keep drawing
-   ┌──────────────────────────────────────────────┐
-   │  draw your sign again  →  favor   (done)      │
-   │  draw a 7              →  frown   (done)      │
-   │  otherwise             →  draw again          │
-   └──────────────────────────────────────────────┘
+   Welcome my child.
+   Shall the cards speak? (y/n) y
+     The cards say: Now is the time to try something new.
+   Shall the cards speak? (y/n) y
+     The cards say: The obstacle in your path is smaller than it looks.
+   Shall the cards speak? (y/n) n
+   Bye!
 ```
 
-Three language features carry this:
-
-| Need | Feature |
-|------|---------|
-| draw a card in several places without repeating the setup | a **helper function** |
-| track the reading's state with named, un-mixable values | a **scoped `enum`** |
-| branch on the first card *and* keep it in scope for the loop | `switch` **with an initializer** |
-
-**A helper function.** `draw_card()` does one job - draw one card (1..13),
-show it, return its value - and `main` calls it wherever a card is needed:
+**A helper function.** `next_fortune()` does one job - roll an index into
+the list, return the matching line as a `std::string_view`:
 
 ```cpp
-int draw_card() {
+std::string_view next_fortune() {
+    static constexpr std::array lines{
+        "A pleasant surprise is waiting for you.",
+        // ...
+    };
     static std::random_device rd{};
     static std::default_random_engine engine{rd()};
-    static std::uniform_int_distribution<int> card{1, 13};
-    const int value{card(engine)};
-    std::println("  drew a {}", value);
-    return value;
+    static std::uniform_int_distribution<std::size_t> pick{0, lines.size() - 1};
+
+    return lines[pick(engine)];
 }
 ```
 
-(The `static` locals mean the engine is set up **once**, not on every
-call - see 6.6.)
+The engine and distribution are `static`: they survive between function calls. 
 
-**A scoped `enum`.**
+**Enumerations.**
+   * A way to give a name to a small set of values. Things like colors, states, or modes.
+
+Our session is either **running** or **finished**. We could track that with
+a `bool`, or with numbers:
 
 ```cpp
-enum class Reading { draw_again, fortune_favors, fortune_frowns };
+int state{0};   // 0 means open, 1 means closed... or was it the other way round?
+
+// later
+if (state == 1) { /* ...what does 1 mean again? */ }
 ```
 
-- The names live **inside** `Reading`: you write `Reading::fortune_favors`,
-  never a bare `fortune_favors`. No name clashes with anything else.
+Nothing here says what `0` and `1` *mean*. A reader has to remember the
+convention, and nothing stops `state = 7;`. An **enumeration** replaces the
+bare numbers with names:
+
+```cpp
+enum class Session { open, closed };   // two named values, nothing else is valid
+
+Session state{Session::open};
+
+if (state == Session::closed) { /* clear at a glance */ }
+```
+
+`Session` is now a distinct **type**. A variable of that type can only hold
+`Session::open` or `Session::closed` - the compiler rejects anything else.
+
+### Scoped vs unscoped
+
+The older form, **without** `class`, has two problems:
+
+```cpp
+enum Color  { red, green, blue };      // unscoped
+enum Fruit  { apple, banana, red };    // ERROR: 'red' already declared
+
+int n{green};                          // compiles: green silently becomes 1
+if (n == blue) { /* comparing an int to a Color, no complaint */ }
+```
+
+- The names **leak** into the surrounding scope - you write `red`, not
+  `Color::red` - so two enums cannot share a name.
+- The values **implicitly convert to `int`**, so nonsense comparisons and
+  assignments compile without warning.
+
+`enum class` (a **scoped** enum) fixes both:
+
+```cpp
+enum class Color { red, green, blue };
+enum class Fruit { apple, banana, red };   // fine - the two 'red's are separate
+
+Color c{Color::green};
+
+// int n{c};                 // ERROR: no implicit conversion to int
+// if (c == 1) { ... }       // ERROR: can't compare Color to int
+if (c == Color::green) { }   // this is how you compare
+int n{static_cast<int>(c)};  // explicit, if you really need the number (1)
+```
+
+So for `Session`:
+
+```cpp
+enum class Session { open, closed };
+```
+
+- The names live **inside** `Session`: you write `Session::open`, never a
+  bare `open`. No name clashes with anything else.
 - A scoped enum **does not implicitly convert to `int`**, so you cannot
-  accidentally compare it to a card value or a different enum.
+  accidentally compare it to a count or a different enum.
 
-**`switch` with an initializer.**
+Rule of thumb: **reach for `enum class` by default**; use a plain `enum`
+only when you specifically want the integer conversion.
+
+**The loop.** `main` keeps a `Session` and runs until it flips to
+`closed`:
 
 ```cpp
-switch (const int first{draw_card()}; first) {
-    case 7: case 11:  reading = Reading::fortune_favors;  break;
-    case 1: case 13:  reading = Reading::fortune_frowns;  break;
-    default:  sign = first;  break;   // remember the sign, draw again
+Session session{Session::open};
+while (session == Session::open) {
+    std::print("Shall the cards speak? (y/n) ");
+    char answer{};
+    std::cin >> answer;
+
+    if (answer == 'y' || answer == 'Y') {
+        std::println("  The cards say: {}", next_fortune());
+    }
+    else {
+        std::println("Bye!");
+        session = Session::closed;
+    }
 }
 ```
-
-`first` is drawn once, is in scope for the whole `switch`, and is gone
-after it.
 
 ---
 

@@ -1,63 +1,59 @@
+#include <array>
+#include <iostream>
 #include <print>
 #include <random>
 
-// The three-card draw. This binary pulls three things together:
-//   - a helper FUNCTION, draw_card(), that does one job and returns a value
-//   - a SCOPED ENUM (enum class) for how the reading is going
-//   - a switch with an initializer on the first card
+// A fortune-teller SESSION. Two ideas carry it:
+//   - a helper FUNCTION, next_fortune(), that does one job: roll a random
+//     number, use it to pick a line, hand the line back.
+//   - a SCOPED ENUM (enum class) for whether the session is still open.
+//
+// The player decides WHEN to draw (by typing y); the random number
+// decides WHICH fortune comes up.
 
-// A scoped enum: the names live inside Reading, so you write
-// Reading::fortune_favors, not a bare `fortune_favors`. They don't
-// implicitly convert to int, which keeps them from being mixed up with
-// card values.
-enum class Reading { draw_again, fortune_favors, fortune_frowns };
+// A scoped enum: the names live inside Session, so you write
+// Session::open, not a bare `open`. It does not implicitly convert to
+// int, so it can never be mixed up with a count or a card value.
+enum class Session { open, closed };
 
-// Draw one card (1..13, as in a suit), announce it, return its value.
-int draw_card() {
+// Roll once, use the roll to pick a fortune, return it. The engine and
+// distribution are `static` so they are built once, not on every call
+// (see 6.6) - otherwise every call would restart the same sequence.
+std::string_view next_fortune() {
+    static constexpr std::array lines{
+        "A pleasant surprise is waiting for you.",
+        "Now is the time to try something new.",
+        "Patience will be rewarded within the week.",
+        "An old friend has news you will want to hear.",
+        "Trust your first instinct on the next decision.",
+        "The obstacle in your path is smaller than it looks.",
+    };
     static std::random_device rd{};
     static std::default_random_engine engine{rd()};
-    static std::uniform_int_distribution<int> card{1, 13};
+    static std::uniform_int_distribution<std::size_t> pick{0, lines.size() - 1};
 
-    const int value{card(engine)};
-    std::println("  drew a {}", value);
-    return value;
+    return lines[pick(engine)];
 }
 
 int main() {
 
-    Reading reading{Reading::draw_again};
-    int sign{0};
+    std::println("Welcome my child.");
 
-    // The first card either settles the reading or becomes the "sign" the
-    // seeker must draw again to have the fortune favor them.
-    switch (const int first{draw_card()}; first) {
-        case 7:
-        case 11:
-            reading = Reading::fortune_favors;
-            break;
-        case 1:
-        case 13:
-            reading = Reading::fortune_frowns;
-            break;
-        default:
-            sign = first;
-            std::println("  your sign is {} - draw it again before a 7", sign);
-            break;
-    }
+    Session session{Session::open};
+    while (session == Session::open) {
+        std::print("Shall the cards speak? (y/n) ");
 
-    // Keep drawing until the sign comes back (favor) or a 7 shows (frown).
-    while (reading == Reading::draw_again) {
-        if (const int value{draw_card()}; value == sign) {
-            reading = Reading::fortune_favors;
+        char answer{};
+        std::cin >> answer;
+
+        if (answer == 'y' || answer == 'Y') {
+            std::println("  The cards say: {}", next_fortune());
         }
-        else if (value == 7) {
-            reading = Reading::fortune_frowns;
+        else {
+            std::println("Bye!");
+            session = Session::closed;
         }
     }
-
-    std::println("{}", reading == Reading::fortune_favors
-                           ? "The cards favor you."
-                           : "The cards are not with you today.");
 
     return 0;
 }
