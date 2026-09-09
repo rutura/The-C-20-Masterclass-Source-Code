@@ -693,12 +693,12 @@ while (session == Session::open) {
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
 
-| Kind | Scope | Lifetime |
-|------|-------|----------|
-| local variable | its enclosing `{ }` | until that block ends |
-| block variable | the inner `{ }` | until that inner block ends |
-| global variable | its declaration → end of file | whole program |
-| `static` local | its function | whole program (created once) |
+| Kind            | Scope                          | Lifetime                      |
+|-----------------|--------------------------------|-------------------------------|
+| local variable  | its enclosing `{ }`            | until that block ends         |
+| block variable  | the inner `{ }`                | until that inner block ends   |
+| global variable | its declaration → end of file  | whole program                 |
+| `static` local  | its function                   | whole program (created once)  |
 
 ### Hiding
 
