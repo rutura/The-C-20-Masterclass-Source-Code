@@ -302,12 +302,72 @@ two functions call each other.
 - The **definition's first line must agree** with the declaration
   (return type and parameter types).
 
-### The signature is name + parameter types
+### Two words to pin down: *declaration* and *signature*
 
-The **return type is not part of the signature**. `double average(...)`
-and a hypothetical `int average(...)` with the same parameters would
-*clash*, not coexist. What lets two functions share a name is a
-*different parameter list* - see overloading (6.14).
+**Declaration (prototype)** — a statement that names a function and
+gives its return type and parameter types, ending in `;`, with **no
+body**. It is a *promise*: "a function shaped like this exists somewhere;
+here is how to call it." The **definition** is the same first line plus
+the `{ }` body that actually does the work.
+
+```cpp
+double average(double a, double b, double c);   // declaration (prototype)
+
+double average(double a, double b, double c) {  // definition
+    return (a + b + c) / 3.0;
+}
+```
+
+A program can have the **declaration many times** (once per file that
+calls it) but **exactly one definition**. The two must match.
+
+**Signature** — the part of a function the compiler uses to tell one
+function from another: its **name** plus its **parameter types, in
+order**. That is *all*. The signature deliberately leaves out:
+
+```
+   double  average  ( double, double, double )
+   ──┬───  ───┬───    ──────────┬────────────
+   return    name       parameter types
+   type
+   (NOT in    └──────────┬──────────┘
+    the sig)         THE SIGNATURE
+```
+
+- **return type** — not in the signature
+- **parameter names** — not in the signature (`double average(double x,
+  double y, double z)` and `double average(double, double, double)` have
+  the identical signature)
+
+#### Why "return type is not in the signature" matters
+
+If the return type counted, these two would be different functions:
+
+```cpp
+int    parse(std::string_view text);   // returns an int
+double parse(std::string_view text);   // returns a double
+```
+
+They are **not** different - they have the same signature
+(`parse(std::string_view)`), so this is a **redefinition error**, not an
+overload. The compiler has no way to pick between them at a call site:
+`parse("42")` on its own does not say which return type you wanted.
+
+#### What *does* let two functions share a name
+
+A **different parameter list** - a different signature:
+
+```cpp
+int area(int side);              // signature: area(int)
+int area(int width, int height); // signature: area(int, int)   ← different, OK
+
+area(5);        // matches area(int)
+area(4, 6);     // matches area(int, int)
+```
+
+That is **overloading**, covered later in the chapter. The rule of thumb: change the
+*parameters* to make an overload; changing only the *return type* is not
+allowed.
 
 ### Argument coercion
 
