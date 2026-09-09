@@ -1,30 +1,70 @@
 #include <print>
+#include <string>
+#include <string_view>
 
-// [[nodiscard]] marks a function whose return value should NOT be
-// ignored. If a caller drops the result, the compiler issues a warning.
-// Use it when calling the function only for a side effect makes no sense
-// - the whole point of the call is the value it hands back.
+// An ATTRIBUTE is a note to the compiler, written in double square
+// brackets: [[name]]. It does not change what the code computes - it
+// tells the compiler something about a function, variable, or statement
+// so it can warn you (or optimise) more usefully.
+//
+// This lecture shows the three you will meet most often. Recognise the
+// [[...]] syntax and you can look the rest up when you see them.
 
-[[nodiscard]] int add(int a, int b) {
-    return a + b;
+// ---------------------------------------------------------------------
+// [[nodiscard]] - "do not throw this return value away"
+// The whole point of the call is the answer. Ignoring it is almost
+// always a bug, so the compiler warns.
+[[nodiscard]] bool username_is_available(std::string_view name) {
+    return !name.empty() && name != "admin" && name != "root";
 }
 
-// Also useful on functions that report success/failure or a computed
-// resource the caller must handle.
-[[nodiscard]] bool is_valid_age(int age) {
-    return age >= 0 && age <= 150;
+// [[nodiscard]] can carry a reason (C++20); it shows up in the warning.
+[[nodiscard("check the result before saving the profile")]]
+bool profile_is_complete(std::string_view name, int age) {
+    return !name.empty() && age > 0;
+}
+
+// ---------------------------------------------------------------------
+// [[deprecated]] - "this still works, but stop using it"
+// Any use triggers a warning. The message points at the replacement.
+[[deprecated("use display_name() instead")]]
+std::string full_name(std::string_view first, std::string_view last) {
+    return std::string{first} + " " + std::string{last};
+}
+
+std::string display_name(std::string_view first, std::string_view last) {
+    return std::string{last} + ", " + std::string{first};
 }
 
 int main() {
 
-    int sum{add(3, 4)};                        // result used - fine
-    std::println("sum = {}", sum);
+    // ---------------------------------------------------------------------
+    // [[maybe_unused]] - "I know this is not used; do not warn me"
+    // Handy for a value kept only for debugging, or a parameter a
+    // function must accept but does not need.
+    [[maybe_unused]] bool verbose_logging{true};
 
-    std::println("valid: {}", is_valid_age(42));   // result used - fine
+    std::string_view candidate{"neo"};
 
-    // add(10, 20);          // <- warning: ignoring the return value of a
-    //                       //    [[nodiscard]] function
-    // is_valid_age(200);    // <- same warning; the answer was the point
+    if (username_is_available(candidate)) {                 // return value used - fine
+        std::println("'{}' is free", candidate);
+    }
+
+    std::println("profile complete: {}",
+                 profile_is_complete(candidate, 30));       // return value used - fine
+
+    std::println("display name: {}", display_name("Thomas", "Anderson"));
+
+    // Each of these would produce a compiler diagnostic:
+    //
+    //   username_is_available("trinity");   // warning: [[nodiscard]] result ignored
+    //   full_name("Thomas", "Anderson");    // warning: 'full_name' is deprecated:
+    //                                       //          use display_name() instead
+
+    // You may also run into these - same idea, a hint to the compiler:
+    //   [[fallthrough]]         in a switch, "the missing break here is on purpose"
+    //   [[noreturn]]            on a function that never returns (calls exit, throws)
+    //   [[likely]] / [[unlikely]]  branch-prediction hint; ignore until you profile
 
     return 0;
 }
