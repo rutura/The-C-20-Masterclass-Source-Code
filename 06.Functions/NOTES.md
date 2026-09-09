@@ -853,55 +853,79 @@ void grow_combo()  { static int high_score{50}; ++high_score; }   // 50→51, 51
 
 ---
 
-## 6.8 Reference parameters
+## 6.8 Passing by value and reference
 
-The two ways an argument reaches a function.
+An argument reaches a function in one of two ways. 
 
-### Pass by value
+- **Pass by value**: the function gets a **copy** of the argument. Changes
+  inside the function do not affect the caller's variable.
 
-The parameter is a **copy** of the argument. Changing it does not touch
-the caller.
+- **Pass by reference**: the function gets an **alias** for the caller's
+  variable. Changes inside the function *do* affect the caller's variable.
 
-```
-   main:              square_by_value:
-   ┌─────────┐  copy   ┌──────────────┐
-   │  x  2   │────────►│ number  2    │
-   └─────────┘         └──────┬───────┘
-        ▲                     │ number *= number  → 4  (the COPY)
-        │                     ▼
-   x still 2               returned value is 4
-```
+### Pass by value - the function gets a copy
+
+The parameter is a **separate copy** of the argument. The function can
+scribble all over it; the caller's variable never sees it. The only way a
+result gets back is through the `return`.
 
 ```cpp
-int square_by_value(int number) {
-    number *= number;
-    return number;          // new value visible ONLY via the return
+double charged_copy(double balance, double fee) {
+    balance -= fee;
+    return balance;         // new value visible ONLY via the return
 }
 ```
 
-### Pass by reference
-
-The parameter, written `T&`, is an **alias** for the caller's variable.
-Changing it changes the original.
-
 ```
-   main:              square_by_reference:
-   ┌─────────┐         ┌──────────────────┐
-   │  z  4   │◄───────►│ ref  (alias of z)│
-   └─────────┘         └────────┬─────────┘
-        ▲                       │ ref *= ref
-        └───────────────────────┘  → z is now 16
+   caller                          charged_copy(checking, 15)
+   ──────                          ──────────────────────────
+   ┌───────────────────┐  copy      ┌───────────────────┐
+   │ checking  100.00  │ ─────────► │ balance   100.00  │
+   └───────────────────┘            └─────────┬─────────┘
+             │                                │  balance -= 15
+             │                                ▼
+             │                      ┌───────────────────┐
+             │                      │ balance    85.00  │ ── return ──┐
+             │                                                        │
+             ▼                                                        ▼
+   checking is STILL 100.00                        the returned 85.00 is
+   (the copy was thrown away)                      the caller's to use or ignore
 ```
+
+### Pass by reference - the function shares the variable
+
+Write the parameter as `T&` and it becomes an **alias**: another name for
+the caller's own variable. No copy. A change through the alias *is* a
+change to the original.
 
 ```cpp
-void square_by_reference(int& ref) {
-    ref *= ref;             // the caller's variable is modified in place
+void charge(double& balance, double fee) {
+    balance -= fee;         // lands on the caller's variable directly
 }
 ```
 
-Use **by value** for small inputs you only read; use **a reference**
-when the function must change the caller's variable (or hand back more
-than one result by writing through several reference parameters).
+```
+   caller                          charge(savings, 15)
+   ──────                          ───────────────────
+   ┌───────────────────┐           ┌───────────────────┐
+   │ savings   100.00  │ ◄───────► │ balance  (alias)  │
+   └───────────────────┘   same    └─────────┬─────────┘
+             ▲             object            │  balance -= 15
+             │                               │
+             └───────────────────────────────┘
+                     writes straight through
+
+   savings is now 85.00   (no return needed)
+```
+
+### Which to use
+
+- You only **read** the argument, and it is a small type (`int`,
+  `double`): pass **by value** - a plain copy.
+- The function must **change** the caller's variable: pass **by
+  reference** - `T&`.
+- You need more than one **result** out of one call: use several `T&`
+  out-parameters, each written through.
 
 ---
 
