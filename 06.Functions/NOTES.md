@@ -265,7 +265,7 @@ hand-rolled version tends to miss.
 
 ---
 
-## 6.4 Defining functions and prototypes
+## 6.4 Declaring and defining functions
 
 A function has two forms:
 
