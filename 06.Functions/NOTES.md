@@ -48,25 +48,60 @@ rectangle_perimeter(10, 10);    // 40  - one formula, called again
 
 ---
 
-## 6.3 Math library functions
+## 6.3 Built-in functions
 
-`<cmath>` is a large set of ready-made math functions. Calling them is no
-different from calling your own.
+You do not have to write everything. The Standard Library ships
+**thousands of ready-made functions** across many headers - and it keeps
+growing, every standard adds more. Calling any of them is no different
+from calling your own: `#include` the header, then `name(arguments)`.
 
-| Call | Returns | Example |
-|------|---------|---------|
+Here is a small tour. The `(C++NN)` tag marks a more recent addition.
+
+### Math — `<cmath>`, `<numbers>`
+
+| Call | Does | Example → result |
+|------|------|------------------|
 | `std::sqrt(x)` | square root | `sqrt(9.0)` → `3.0` |
 | `std::pow(b, e)` | b to the power e | `pow(2.0, 10.0)` → `1024.0` |
-| `std::ceil(x)` | round up | `ceil(2.3)` → `3.0` |
-| `std::floor(x)` | round down | `floor(2.8)` → `2.0` |
-| `std::fmod(a, b)` | floating remainder | `fmod(10.0, 3.0)` → `1.0` |
-| `std::abs(x)` | absolute value | `abs(-4.5)` → `4.5` |
+| `std::hypot(a, b)` | `sqrt(a*a + b*b)`, without overflow/underflow | `hypot(3.0, 4.0)` → `5.0` |
+| `std::lerp(a, b, t)` | linear blend from a to b by fraction t *(C++20)* | `lerp(0.0, 100.0, 0.25)` → `25.0` |
+| `std::midpoint(a, b)` | the average, computed safely (no overflow) *(C++20)* | `midpoint(10, 20)` → `15` |
+| `std::numbers::pi` | the constant π *(C++20)* | `3.14159...` |
 
-C++20 adds named constants in `<numbers>`:
+### Numeric helpers — `<numeric>`
 
-```cpp
-double area{std::numbers::pi * radius * radius};
-```
+| Call | Does | Example → result |
+|------|------|------------------|
+| `std::gcd(a, b)` | greatest common divisor *(C++17)* | `gcd(24, 36)` → `12` |
+| `std::lcm(a, b)` | least common multiple *(C++17)* | `lcm(4, 6)` → `12` |
+
+### Picking and bounding values — `<algorithm>`
+
+| Call | Does | Example → result |
+|------|------|------------------|
+| `std::min(a, b)` / `std::max(a, b)` | smaller / larger of two | `min(7, 3)` → `3` |
+| `std::clamp(v, lo, hi)` | pull v back into `[lo, hi]` *(C++17)* | `clamp(150, 0, 100)` → `100` |
+| `std::ranges::sort(v)` | sort a whole container in one call *(C++20)* | `{5,2,8}` → `{2,5,8}` |
+
+### Text queries — `<string>`
+
+| Call | Does | Example → result |
+|------|------|------------------|
+| `s.starts_with(p)` / `s.ends_with(p)` | prefix / suffix test *(C++20)* | `"hello world".starts_with("hello")` → `true` |
+| `s.contains(sub)` | is `sub` anywhere in `s`? *(C++23)* | `"hello world".contains("lo wo")` → `true` |
+
+### Bit inspection — `<bit>` *(C++20)*
+
+| Call | Does | Example → result |
+|------|------|------------------|
+| `std::popcount(x)` | how many bits are set | `popcount(0b10110100u)` → `4` |
+| `std::bit_width(x)` | bits needed to represent x | `bit_width(0b10110100u)` → `8` |
+| `std::has_single_bit(x)` | is x a power of two? | `has_single_bit(64u)` → `true` |
+
+The point: before writing a helper, check whether the library already
+has it. Very often it does - and its version handles the edge cases
+(`hypot` avoids overflow, `midpoint` avoids it too, `clamp` covers both
+bounds) that a quick hand-rolled version would miss.
 
 ---
 
