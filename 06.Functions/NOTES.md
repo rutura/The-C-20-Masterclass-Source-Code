@@ -16,7 +16,7 @@ name, hand it **arguments**, it runs, and it hands back a **result**.
         └──────result──────────┘◄───────────┘
 ```
 
-In this chapter, we dive deep into functions and see how you can break your program into **smaller, reusable pieces**. 
+In this chapter, we dive deep into functions and see how you can break your program into **smaller, reusable pieces**.
 
 ---
 
@@ -186,7 +186,7 @@ in between it is unchanged.
 ```
 
 **`std::ranges::sort(v)`** *(C++20)* — sort a whole container in one
-call, ascending by default. 
+call, ascending by default.
 
 ```
    {5, 2, 8, 1, 9, 3}   ──ranges::sort──►   {1, 2, 3, 5, 8, 9}
@@ -435,12 +435,13 @@ Do side-effecting work in its own statement first.
 
 ### What we are building
 
-In this lecture, we are exploring **random numbers** facilities in C++.  As 
-an excuse to explore them, we will build a simple **fortune teller** program.
+In this lecture, we are exploring the **random numbers** facilities in
+C++. As an excuse to explore them, we will build a simple **fortune
+teller** program.
 
 ```
    ┌─────────────────────────────────────────────┐
-   │            THE FORTUNE TELLER               │
+   │             THE FORTUNE TELLER              │
    │                                             │
    │   Your lucky numbers are:  73 12 45 ...     │
    │   The cards say:  "An old friend has        │
@@ -453,21 +454,28 @@ an excuse to explore them, we will build a simple **fortune teller** program.
        range (1..99)       from a fixed list
 ```
 
-* We need to pick random numbers in a range (1..99) for the lucky numbers.
-* We need to pick a random index into a fixed list of fortunes, to choose one.
+- We need to pick random numbers in a range (1..99) for the lucky
+  numbers.
+- We need to pick a random index into a fixed list of fortunes, to choose
+  one.
 
 ### The two pieces: engine and distribution
 
-Modern C++ (`<random>`) provides **entities** that work together to produce random numbers:
+Modern C++ (`<random>`) provides two **entities** that work together to
+produce random numbers:
 
-* An **engine:** implements a random-number generation algorithm we use to produce a stream
-   of numbers that **seem** like they are random.  
+- An **engine** implements a random-number generation algorithm. It
+  produces a stream of numbers that **seem** random.
+- A **distribution** takes the raw numbers from the engine and reshapes
+  them into the range and spread you want.
 
-* A **distribution:** takes the raw numbers from the engine and reshapes them into a range and spread we want.
+REMEMBER THIS: to get a random number, you call the **distribution** and
+give it the **engine** as an argument.
 
-REMEMBER THIS: To get a random number, you call the **distribution** and give it the **engine** as an argument.
-
-We have access to a variety of engines and distributions.  For example, the engine `std::default_random_engine` is a good general-purpose engine, and the distribution `std::uniform_int_distribution<int>{1, 99}` will give us integers in the range 1..99.
+There is a variety of engines and distributions to choose from. For
+example, `std::default_random_engine` is a good general-purpose engine,
+and `std::uniform_int_distribution<int>{1, 99}` gives integers in the
+range 1..99.
 
 ```
    ENGINE                         DISTRIBUTION
@@ -523,12 +531,13 @@ std::uniform_int_distribution<std::size_t> pick{0, fortunes.size() - 1};
 std::println("The cards say: {}", fortunes[pick(engine)]);
 ```
 
-PROBLEM: Every time you run the program, you will get the **same sequence of numbers**.  
+PROBLEM: every time you run the program, you get the **same sequence of
+numbers**.
 
 ### Different random numbers each run (`main2.cpp`)
 
-What we want: a fresh fortune each run.
-   * We hand the engine a **seed** value, the starting point for the sequence.
+What we want is a fresh fortune each run. We hand the engine a **seed**
+value: the starting point for the sequence.
 
 ```
    engine{}          → same fortune every run        (fixed, hidden seed)
@@ -580,13 +589,15 @@ std::string_view next_fortune() {
 }
 ```
 
-The engine and distribution are `static`: they survive between function calls. 
+The engine and distribution are `static`: they survive between function
+calls, so they are set up once rather than rebuilt (and restarted from
+the same seed) on every call. The next lecture (6.6) covers this in full.
 
-**Enumerations.**
-   * A way to give a name to a small set of values. Things like colors, states, or modes.
+**Enumerations** give a name to a small set of values - things like
+colors, states, or modes.
 
-Our session is either **running** or **finished**. We could track that with
-a `bool`, or with numbers:
+Our session is either **running** or **finished**. We could track that
+with a `bool`, or with numbers:
 
 ```cpp
 int state{0};   // 0 means open, 1 means closed... or was it the other way round?
@@ -607,12 +618,12 @@ Session state{Session::open};
 if (state == Session::closed) { /* clear at a glance */ }
 ```
 
-`Session` is now a distinct **type**. A variable of that type can only hold
-`Session::open` or `Session::closed` - the compiler rejects anything else.
+`Session` is now a distinct **type**. A variable of that type can only
+hold `Session::open` or `Session::closed` - the compiler rejects anything
+else.
 
-### Scoped vs unscoped
-
-The older form, **without** `class`, has two problems:
+**Scoped vs unscoped.** The older form, **without** `class`, has two
+problems:
 
 ```cpp
 enum Color  { red, green, blue };      // unscoped
@@ -656,7 +667,7 @@ Rule of thumb: **reach for `enum class` by default**; use a plain `enum`
 only when you specifically want the integer conversion.
 
 **The loop.** `main` keeps a `Session` and runs until it flips to
-`closed`:
+`Session::closed`:
 
 ```cpp
 Session session{Session::open};
