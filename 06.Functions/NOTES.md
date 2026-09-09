@@ -1923,7 +1923,252 @@ past and look up later.
 
 ---
 
-## 6.16 Assignment
+## 6.16 Project: writing an image
+
+Everything in this chapter comes together in one small program that
+**draws a picture and saves it to a file**. The picture is deliberately
+plain - a left-to-right colour gradient with a solid frame - so the
+focus stays on *how the program is put together*, not on graphics.
+
+```
+   ┌───────────────────────────────────┐   width  = 400
+   │███████████████████████████████████│   height = 300
+   │██                               ██│
+   │██   blue ───────────► orange    ██│   gradient across x
+   │██                               ██│
+   │██        (8-px white frame)     ██│
+   │███████████████████████████████████│
+   └───────────────────────────────────┘
+```
+
+### The pixel model
+
+An image is a grid of pixels; each pixel is **three bytes** - red,
+green, blue. We store the whole grid in **one flat `std::vector<...>`**,
+row by row, 3 bytes per pixel:
+
+```
+   width = 4, height = 3    →    vector of 4 * 3 * 3 = 36 bytes
+
+   row 0:  [R G B][R G B][R G B][R G B]
+   row 1:  [R G B][R G B][R G B][R G B]
+   row 2:  [R G B][R G B][R G B][R G B]
+            ▲
+            pixel (x, y) starts at byte  (y * width + x) * 3
+                                          └── then +0 = R, +1 = G, +2 = B
+```
+
+The helper functions are all pure chapter-6 material:
+
+```cpp
+std::vector<std::uint8_t> make_canvas(int w, int h);          // all-zero buffer
+void set_pixel(buf&, int w, int h, int x, int y, r, g, b);    // one pixel, bounds-checked
+void draw_gradient(buf&, int w, int h, /* two colours */);    // fill, blend across x
+void draw_border(buf&, int w, int h, int thickness, r,g,b);   // frame
+```
+
+- a **header / source split** (6.10): declarations in `image.h`, bodies
+  in `image.cpp`
+- functions take the buffer **by reference** (6.8) and scalars by value
+- `draw_gradient` blends two colours with a **lambda** (6.13):
+
+  ```cpp
+  const double t{static_cast<double>(x) / (width - 1)};   // 0.0 .. 1.0 across x
+  const auto mix = [t](std::uint8_t a, std::uint8_t c) {
+      return static_cast<std::uint8_t>(a + t * (c - a));   // linear blend
+  };
+  ```
+
+**What changes between the three versions is only the last step - how
+the pixel buffer becomes a file.** Same helpers, three ways to get the
+output written.
+
+```
+   make_canvas → draw_gradient → draw_border → ┌─ A: write_ppm()      hand-rolled, no library
+                                               ├─ B: stbi_write_png() vendored header
+                                               └─ C: stbi_write_png() header fetched by CMake
+```
+
+### A. No dependency at all (`6.16ProjectImageWriter`)
+
+The simplest image format, **PPM**, is short enough to write by hand: a
+tiny text header, then the raw RGB bytes.
+
+```
+   P6\n              ← "P6" = binary RGB PPM
+   400 300\n         ← width height
+   255\n             ← max value per channel
+   <180000 bytes>    ← width * height * 3, straight from our vector
+```
+
+```cpp
+bool write_ppm(std::string_view name, int w, int h, const buf& pixels) {
+    std::ofstream out{std::string{name}, std::ios::binary};
+    out << "P6\n" << w << ' ' << h << "\n255\n";
+    out.write(reinterpret_cast<const char*>(pixels.data()), pixels.size());
+    return out.good();
+}
+```
+
+`CMakeLists.txt` lists only our own files - there is nothing else:
+
+```cmake
+add_executable(rooster main.cpp image.cpp image.h)
+```
+
+The lesson: **a dependency is a cost.** When the job is small and stable,
+a dozen lines of your own code beats pulling in a library. Open
+`image.ppm` in an image viewer (or `magick image.ppm image.png` to
+convert).
+
+### B. A vendored single-header library (`6.17ProjectVendoredHeader`)
+
+PPM files are large and few programs open them. To write a **PNG** we
+use a real library - **`stb_image_write.h`** by Sean Barrett - but we
+**vendor** it: the one header file is committed straight into the
+project under `vendor/`.
+
+```
+   6.17ProjectVendoredHeader/
+   ├── vendor/
+   │   ├── stb_image_write.h   ← the library, committed with our code
+   │   └── LICENSE
+   ├── image.h  image.cpp      ← our helpers (write_png calls stbi_write_png)
+   ├── stb_impl.cpp            ← see below
+   ├── main.cpp
+   └── CMakeLists.txt
+```
+
+**The single-header pattern.** A single-header library ships as *one
+file* that is both the header and the source. By default `#include`ing
+it gives you only **declarations**. In **exactly one** `.cpp` you write
+`#define STB_IMAGE_WRITE_IMPLEMENTATION` *before* the include, and that
+translation unit gets the **function bodies** too.
+
+```
+   stb_impl.cpp                       image.cpp, main.cpp, ...
+   ────────────                       ───────────────────────
+   #define STB_IMAGE_WRITE_IMPLEMENTATION
+   #include "stb_image_write.h"       #include "stb_image_write.h"
+        │                                  │
+        ▼                                  ▼
+   declarations + DEFINITIONS         declarations only
+   → the bodies compile here          → calls left for the linker
+
+   linker: main.o / image.o's calls ──► resolved by stb_impl.o
+```
+
+Put the `#define` in two `.cpp`s and the bodies compile twice - a
+"multiple definition" linker error. One file, always.
+
+Our `write_png` just forwards to the library:
+
+```cpp
+bool write_png(std::string_view name, int w, int h, const buf& pixels) {
+    return stbi_write_png(std::string{name}.c_str(),
+                          w, h, 3,               // 3 = RGB channels
+                          pixels.data(), w * 3)  // stride: one row in bytes
+           != 0;
+}
+```
+
+`CMakeLists.txt` adds the implementation file and the include path:
+
+```cmake
+add_executable(rooster
+    main.cpp image.cpp image.h
+    stb_impl.cpp                 # the one file that compiles stb's bodies
+    vendor/stb_image_write.h
+)
+target_include_directories(rooster SYSTEM PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor
+)
+```
+
+- **`SYSTEM`** marks `vendor/` as third-party, so `-Wall -Wextra` do not
+  flag warnings inside stb's own code.
+- **No linking.** The header is compiled *from source* with our
+  compiler, our flags, our standard library. There is no `.lib` / `.a` /
+  `.dll` in the picture, so there is **no ABI mismatch** possible - the
+  class of "nasty linker error" that comes from mixing a prebuilt binary
+  with a different toolchain simply cannot happen here.
+
+### C. Fetched by CMake (`6.18ProjectFetchContent`)
+
+The C++ code is **identical to B** - `image.h`, `image.cpp`,
+`stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no
+longer committed here. CMake pulls it **at configure time** with
+**`FetchContent`**.
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG        2c980bb59875b0d32144a71867fbdebb2f77cd20   # an exact commit
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(stb)                               # → ${stb_SOURCE_DIR}
+
+target_include_directories(rooster SYSTEM PRIVATE ${stb_SOURCE_DIR})
+```
+
+What happens when you press *Configure*:
+
+```
+   cmake -S . -B build
+        │
+        ▼
+   FetchContent_Declare   "here is a repo and an exact commit"
+        │
+        ▼
+   FetchContent_MakeAvailable
+        │   git clone --depth 1 https://github.com/nothings/stb.git
+        │   git checkout 2c980bb...
+        ▼
+   build/_deps/stb-src/stb_image_write.h        ← now on disk
+        │
+        ▼
+   ${stb_SOURCE_DIR} = build/_deps/stb-src   → added to the include path
+
+   then the normal build: stb_impl.cpp #includes it and compiles the
+   bodies, exactly as in version B.
+```
+
+- **`GIT_TAG` is pinned to a commit hash, not a branch.** A branch name
+  would mean "whatever that branch points at the day you build" - the
+  build stops being reproducible. Pin it.
+- stb is header-only, so `MakeAvailable` has **no build step** - it just
+  puts the files on disk. It is still **compiled from source in our
+  build**, so the no-ABI-mismatch guarantee from B still holds.
+- The download happens **once**, into `build/_deps/`. Later configures
+  reuse it. Deleting `build/` forces a fresh fetch.
+- Trade-off vs. B: version C needs network access and `git` the first
+  time it configures; version B builds offline forever. Real projects
+  usually accept that trade for not carrying copies of their
+  dependencies in their own repo.
+
+### The three side by side
+
+```
+                      A: hand-rolled     B: vendored        C: FetchContent
+   ─────────────────  ───────────────    ───────────────    ────────────────
+   output             PPM                PNG                PNG
+   library code       none               in vendor/,        not in our repo;
+                                         committed          cloned to build/
+   gets the library   —                  git add            CMake, at configure
+   offline build      yes                yes                first build needs net
+   reproducible       yes                yes (file frozen)  yes (commit pinned)
+   compiled here?     yes                yes                yes  → no ABI risk
+```
+
+Rule of thumb: **no dependency if the code is small (A). Vendor a single
+header when it is small and you want zero build-time surprises (B).
+FetchContent once dependencies are big enough that copying them into
+your repo is the bigger cost (C).**
+
+---
+
+## 6.19 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
