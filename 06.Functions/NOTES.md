@@ -433,6 +433,16 @@ Do side-effecting work in its own statement first.
 
 ## 6.5 Random numbers
 
+Running example: a **fortune teller**. Three binaries in this lecture,
+each one demo:
+
+- `main.cpp`  — engine + distribution
+- `main2.cpp` — seeding the engine
+- `main3.cpp` — a helper function, a scoped `enum`, `switch` with an
+  initializer
+
+### Engine + distribution (`main.cpp`)
+
 Random values come from **two pieces**:
 
 ```
@@ -446,33 +456,31 @@ Random values come from **two pieces**:
 ```
 
 ```cpp
-std::default_random_engine engine{};              // the source
-std::uniform_int_distribution<int> die{1, 6};     // shape: ints 1..6, equal odds
+std::default_random_engine engine{};                     // the source
+std::uniform_int_distribution<int> lucky_number{1, 99};  // shape: ints 1..99
 
-for (int i{0}; i < 10; ++i) {
-    std::print("{} ", die(engine));               // call the distribution with the engine
-}
+std::println("Your lucky number is {}.", lucky_number(engine));
 ```
 
 - A **default-constructed engine replays the same sequence every run** -
-  useful while testing. Change that by seeding it (6.6).
-- A different range is just a different distribution:
-  `uniform_int_distribution<int>{0, 100}`.
+  useful while testing a reading, so the fortune does not change from
+  under you. Change that by seeding it (below).
+- A different range is just a different distribution - e.g. an index into
+  a fixed `std::array` of fortune strings:
+  `uniform_int_distribution<std::size_t>{0, fortunes.size() - 1}`.
 
----
+### Nondeterministic seeding (`main2.cpp`)
 
-## 6.6 Nondeterministic seeding
-
-To get a different sequence each run, **seed** the engine.
+To get a different reading each run, **seed** the engine.
 
 ```
-   engine{}          → same sequence every run
-   engine{seed}      → reproducible: same seed value ⇒ same sequence
-   engine{rd()}      → fresh sequence every run (rd is a std::random_device)
+   engine{}          → same fortune every run
+   engine{seed}      → reproducible: same seed value ⇒ same fortune
+   engine{rd()}      → fresh fortune every run (rd is a std::random_device)
 ```
 
 ```cpp
-// reproducible - the user picks the seed
+// reproducible - the seeker types the seed ("birth number")
 std::default_random_engine seeded{seed};
 
 // fresh each run - random_device is a nondeterministic source
@@ -483,59 +491,54 @@ std::default_random_engine fresh{rd()};   // rd() produces the seed
 Use a **fixed seed while developing** (so a bug reproduces), and
 `random_device` for the shipped program.
 
----
+### Helper function + scoped `enum` + `switch` initializer (`main3.cpp`)
 
-## 6.7 Game of chance and scoped `enum`
+The "three-card draw" pulls three ideas together.
 
-The craps example pulls three ideas together.
-
-### A helper function
-
-`roll_dice()` does one job - roll two dice, show them, return the sum -
-and `main` calls it wherever a roll is needed:
+**A helper function.** `draw_card()` does one job - draw one card (1..13),
+show it, return its value - and `main` calls it wherever a card is needed:
 
 ```cpp
-int roll_dice() {
+int draw_card() {
     static std::random_device rd{};
     static std::default_random_engine engine{rd()};
-    static std::uniform_int_distribution<int> die{1, 6};
-    const int d1{die(engine)};
-    const int d2{die(engine)};
-    std::println("  rolled {} + {} = {}", d1, d2, d1 + d2);
-    return d1 + d2;
+    static std::uniform_int_distribution<int> card{1, 13};
+    const int value{card(engine)};
+    std::println("  drew a {}", value);
+    return value;
 }
 ```
 
 (The `static` locals mean the engine is set up **once**, not on every
-call - see 6.8.)
+call - see 6.6.)
 
-### A scoped `enum`
+**A scoped `enum`.**
 
 ```cpp
-enum class Status { keep_rolling, won, lost };
+enum class Reading { draw_again, fortune_favors, fortune_frowns };
 ```
 
-- The names live **inside** `Status`: you write `Status::won`, never a
-  bare `won`. No name clashes with anything else.
+- The names live **inside** `Reading`: you write `Reading::fortune_favors`,
+  never a bare `fortune_favors`. No name clashes with anything else.
 - A scoped enum **does not implicitly convert to `int`**, so you cannot
-  accidentally compare it to a number or a different enum.
+  accidentally compare it to a card value or a different enum.
 
-### `switch` with an initializer
+**`switch` with an initializer.**
 
 ```cpp
-switch (const int first{roll_dice()}; first) {
-    case 7: case 11:  status = Status::won;  break;
-    case 2: case 3: case 12:  status = Status::lost;  break;
-    default:  point = first;  break;   // remember the point, keep rolling
+switch (const int first{draw_card()}; first) {
+    case 7: case 11:  reading = Reading::fortune_favors;  break;
+    case 1: case 13:  reading = Reading::fortune_frowns;  break;
+    default:  sign = first;  break;   // remember the sign, draw again
 }
 ```
 
-`first` is rolled once, is in scope for the whole `switch`, and is gone
+`first` is drawn once, is in scope for the whole `switch`, and is gone
 after it.
 
 ---
 
-## 6.8 Scope rules
+## 6.6 Scope rules
 
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
@@ -582,7 +585,7 @@ void use_static_local() { static int x{50}; ++x; }   // 50→51, 51→52, 52→5
 
 ---
 
-## 6.9 Inline functions
+## 6.7 Inline functions
 
 `inline` on a function definition **permits that definition to appear in
 more than one translation unit** (typically because it sits in a header
@@ -608,7 +611,7 @@ its first line serves as one.
 
 ---
 
-## 6.10 Reference parameters
+## 6.8 Reference parameters
 
 The two ways an argument reaches a function.
 
@@ -660,7 +663,7 @@ than one result by writing through several reference parameters).
 
 ---
 
-## 6.11 Default arguments
+## 6.9 Default arguments
 
 A parameter can carry a **default**, used when the caller omits that
 argument.
@@ -686,7 +689,7 @@ Rules:
 
 ---
 
-## 6.12 Unary scope resolution operator
+## 6.10 Unary scope resolution operator
 
 When a local variable **hides** a global of the same name, the local
 wins inside its scope. `::name` reaches past the local to the **global**.
@@ -709,7 +712,7 @@ int main() {
 
 ---
 
-## 6.13 Function overloading
+## 6.11 Function overloading
 
 Several functions may **share a name** if their **parameter lists
 differ** (in count or type). The compiler picks the best match per call.
@@ -734,7 +737,7 @@ double square(double x) { return x * x; }
 
 ---
 
-## 6.14 Function templates
+## 6.12 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -765,7 +768,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.15 Recursion
+## 6.13 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -805,7 +808,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.16 Recursion vs iteration
+## 6.14 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -833,7 +836,7 @@ clearer.**
 
 ---
 
-## 6.17 The `[[nodiscard]]` attribute
+## 6.15 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -851,7 +854,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.18 Lambda functions
+## 6.16 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -898,7 +901,7 @@ supply it.
 
 ---
 
-## 6.19 Assignment
+## 6.17 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
