@@ -1457,93 +1457,7 @@ folds the duplicates into one.)
 
 ---
 
-## 6.13 Recursion
-
-A **recursive** function calls itself. Every one needs:
-
-- a **base case** that returns without recursing (ends the chain), and
-- a **recursive step** that calls itself with an argument closer to the
-  base case.
-
-```cpp
-long factorial(int number) {
-    if (number <= 1) { return 1; }              // base case
-    return number * factorial(number - 1);      // recursive step
-}
-```
-
-```
-   factorial(4)
-   = 4 * factorial(3)
-       = 3 * factorial(2)
-           = 2 * factorial(1)
-               = 1                 ← base case; unwinding begins
-           = 2 * 1  = 2
-       = 3 * 2  = 6
-   = 4 * 6  = 24
-```
-
-`fibonacci` has **two** base cases:
-
-```cpp
-long fibonacci(long n) {
-    if (n == 0 || n == 1) { return n; }
-    return fibonacci(n - 1) + fibonacci(n - 2);
-}
-```
-
-Miss the base case, or fail to move toward it, and the calls never stop:
-a **stack overflow** - the recursive cousin of an infinite loop.
-
----
-
-## 6.14 Recursion vs iteration
-
-The same `factorial`, both ways:
-
-```cpp
-long factorial_recursive(int n) {
-    if (n <= 1) { return 1; }
-    return n * factorial_recursive(n - 1);
-}
-
-long factorial_iterative(int n) {
-    long result{1};
-    for (int i{2}; i <= n; ++i) { result *= i; }
-    return result;
-}
-```
-
-| | Recursion | Iteration |
-|--|-----------|-----------|
-| stack use | one frame per call - deep input can overflow | constant |
-| speed | function-call overhead per step | usually faster |
-| clarity | natural for recursive structures (trees, divide-and-conquer) | natural for counting/accumulating |
-
-Rule of thumb: **iterate by default; recurse when it makes the problem
-clearer.**
-
----
-
-## 6.15 The `[[nodiscard]]` attribute
-
-Mark a function `[[nodiscard]]` when **ignoring its return value is
-almost certainly a bug** - the point of the call is the value it hands
-back. The compiler then warns if a caller drops it.
-
-```cpp
-[[nodiscard]] int add(int a, int b) { return a + b; }
-
-int s{add(3, 4)};   // fine
-add(3, 4);          // warning: result of a [[nodiscard]] call is unused
-```
-
-Good on: pure computations, functions that report success/failure, and
-functions that return a resource the caller must handle.
-
----
-
-## 6.16 Lambda functions
+## 6.13 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -1587,6 +1501,92 @@ std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });   // descendi
 Standard-library algorithms take a callable to decide ordering,
 filtering, and so on; a lambda at the call site is the usual way to
 supply it.
+
+---
+
+## 6.14 Recursion
+
+A **recursive** function calls itself. Every one needs:
+
+- a **base case** that returns without recursing (ends the chain), and
+- a **recursive step** that calls itself with an argument closer to the
+  base case.
+
+```cpp
+long factorial(int number) {
+    if (number <= 1) { return 1; }              // base case
+    return number * factorial(number - 1);      // recursive step
+}
+```
+
+```
+   factorial(4)
+   = 4 * factorial(3)
+       = 3 * factorial(2)
+           = 2 * factorial(1)
+               = 1                 ← base case; unwinding begins
+           = 2 * 1  = 2
+       = 3 * 2  = 6
+   = 4 * 6  = 24
+```
+
+`fibonacci` has **two** base cases:
+
+```cpp
+long fibonacci(long n) {
+    if (n == 0 || n == 1) { return n; }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+```
+
+Miss the base case, or fail to move toward it, and the calls never stop:
+a **stack overflow** - the recursive cousin of an infinite loop.
+
+---
+
+## 6.15 Recursion vs iteration
+
+The same `factorial`, both ways:
+
+```cpp
+long factorial_recursive(int n) {
+    if (n <= 1) { return 1; }
+    return n * factorial_recursive(n - 1);
+}
+
+long factorial_iterative(int n) {
+    long result{1};
+    for (int i{2}; i <= n; ++i) { result *= i; }
+    return result;
+}
+```
+
+| | Recursion | Iteration |
+|--|-----------|-----------|
+| stack use | one frame per call - deep input can overflow | constant |
+| speed | function-call overhead per step | usually faster |
+| clarity | natural for recursive structures (trees, divide-and-conquer) | natural for counting/accumulating |
+
+Rule of thumb: **iterate by default; recurse when it makes the problem
+clearer.**
+
+---
+
+## 6.16 The `[[nodiscard]]` attribute
+
+Mark a function `[[nodiscard]]` when **ignoring its return value is
+almost certainly a bug** - the point of the call is the value it hands
+back. The compiler then warns if a caller drops it.
+
+```cpp
+[[nodiscard]] int add(int a, int b) { return a + b; }
+
+int s{add(3, 4)};   // fine
+add(3, 4);          // warning: result of a [[nodiscard]] call is unused
+```
+
+Good on: pure computations, functions that report success/failure, and
+functions that return a resource the caller must handle.
 
 ---
 
