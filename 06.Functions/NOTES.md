@@ -1346,32 +1346,114 @@ add_executable(rooster
 
 ## 6.12 Function templates
 
-A **function template** is a pattern with the type left blank. `T` is a
-placeholder the compiler fills in from the call's arguments, generating a
-concrete function on demand. One template stands in for a whole **family
-of overloads** you would otherwise hand-write.
+Say you need "is this value between these two bounds?" for `int`, for
+`double`, for `char`. Overloading (6.9) means writing the same body three
+times:
+
+```cpp
+bool in_range(int    v, int    lo, int    hi) { return lo <= v && v <= hi; }
+bool in_range(double v, double lo, double hi) { return lo <= v && v <= hi; }
+bool in_range(char   v, char   lo, char   hi) { return lo <= v && v <= hi; }
+```
+
+A **function template** writes it **once, with the type left blank**:
 
 ```cpp
 template <typename T>
-T maximum(T a, T b, T c) {
-    T largest{a};
-    if (b > largest) { largest = b; }
-    if (c > largest) { largest = c; }
-    return largest;
+bool in_range(T value, T low, T high) {
+    return low <= value && value <= high;
 }
 ```
 
+`T` is a placeholder. It is not a function yet - it is a **recipe** for
+making one.
+
+### Instantiation: the compiler stamps out a version per call
+
+At each call the compiler **deduces `T`** from the argument types and
+**instantiates** the template - generates a concrete function with `T`
+replaced throughout - then compiles that.
+
 ```
-   maximum(3, 9, 5)          T deduced = int      → generates maximum<int>
-   maximum(2.5, 1.1, 3.8)    T deduced = double   → generates maximum<double>
-   maximum('q', 'a', 'm')    T deduced = char     → generates maximum<char>
+   your call                deduced        the compiler generates
+   ─────────                ───────        ──────────────────────
+   in_range(5, 1, 10)    →   T = int    →   bool in_range<int>(int, int, int)
+   in_range(2.5,0.,1.)   →   T = double →   bool in_range<double>(double, double, double)
+   in_range('g','a','m') →   T = char   →   bool in_range<char>(char, char, char)
 ```
 
-- The compiler **deduces `T`** from the arguments. All three must agree:
-  `maximum(3, 9.0, 5)` (int, double, int) fails to deduce one `T`.
-- State it explicitly to force a type: `maximum<double>(3, 9, 5)`.
-- The body must be valid for whatever `T` is - `maximum` needs `>` to
-  work on `T`, which it does for the numeric types and `std::string`.
+Each distinct `T` produces its own function in the final program - the
+same set you would have hand-written as overloads, just generated.
+
+- **All arguments tied to `T` must agree.** `in_range(5, 1, 10.0)` -
+  `int, int, double` - gives the compiler two candidates for one `T`, so
+  deduction fails. Fix by making them match, or state the type:
+  `in_range<double>(5, 1, 10)` (the `int`s then convert to `double`).
+- **The body must compile for the `T` you use.** `in_range` needs `<=`
+  to work on `T`; fine for the numeric types, `char`, `std::string`. Call
+  it on a type without `<=` and the error points *into the template body*
+  at the offending line.
+
+### Where the template must live: a header
+
+An ordinary function can be **declared** in a header and **defined** in
+one `.cpp` - the linker joins the two. A template cannot work that
+way, and the reason follows straight from instantiation:
+
+> The compiler can only instantiate `in_range<int>` at a spot where it
+> can **see the template body**.
+
+So the body must be visible in **every `.cpp` that calls the template**.
+In practice: put the whole template in a **header** and `#include` it
+wherever it is used.
+
+```
+   in_range.h                       main.cpp
+   ──────────                       ───────
+   #pragma once                     #include "in_range.h"   ← body pasted in
+
+   template <typename T>            int main() {
+   bool in_range(T v, T lo, T hi) {     ... in_range(5, 1, 10) ...
+       return lo <= v && v <= hi;           │
+   }                                        └─ compiler has the body here,
+                                               so it instantiates in_range<int>
+```
+
+### What goes wrong if you put the body in a `.cpp`
+
+Split it like an ordinary function - declaration in `in_range.h`, body in
+`in_range.cpp` - and it compiles but **fails to link**:
+
+```
+   in_range.h     template <typename T> bool in_range(T,T,T);   ← declaration only
+   in_range.cpp   #include "in_range.h"
+                  template <typename T>
+                  bool in_range(T v,T lo,T hi){ return lo<=v && v<=hi; }
+
+        compile in_range.cpp ──►  in_range.o
+                                  │
+                                  └─ no call to in_range in this file
+                                     → nothing to instantiate
+                                     → in_range.o contains NO in_range<int>
+
+        compile main.cpp     ──►  main.o
+                                  │
+                                  └─ sees the declaration, call type-checks,
+                                     leaves an unresolved reference
+
+        link  main.o + in_range.o ──►  ERROR
+               undefined reference to `bool in_range<int>(int, int, int)`
+```
+
+`in_range.cpp` had the body but no reason to stamp out any version;
+`main.cpp` needed `in_range<int>` but never saw the body. Neither object
+file ends up with the function.
+
+Keeping the whole template in the header sidesteps this: every `.cpp`
+that calls it gets the body and instantiates what it needs. (If two
+`.cpp`s both instantiate `in_range<int>`, that is *not* an ODR violation
+- the compiler marks template instantiations so the linker silently
+folds the duplicates into one.)
 
 ---
 

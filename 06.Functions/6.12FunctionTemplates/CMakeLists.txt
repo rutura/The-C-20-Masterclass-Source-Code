@@ -7,8 +7,10 @@ project(rooster)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Create executable
-add_executable(rooster main.cpp)
-
-# For multi-file projects with headers and separate .cpp files
-# add_executable(rooster main.cpp dog.cpp dog.h cat.cpp cat.h)
+# in_range.h is header-only: there is no in_range.cpp, because a template
+# body must be visible wherever it is called (see the header's comment).
+# It is listed here only so IDEs show it in the project tree.
+add_executable(rooster
+    main.cpp
+    in_range.h
+)
