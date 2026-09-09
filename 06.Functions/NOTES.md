@@ -1029,6 +1029,25 @@ MSVC produces something like `?area@@YAHH@Z` for the same function.
 Everything linked into one program must therefore be built with the same
 compiler (and settings), or the symbols will not match up.
 
+### This is only the start
+
+What we have seen here - overloading on the **number** and **plain type**
+of parameters - is the everyday case, but the parameter list can differ
+in more ways than that. As the course goes on and the type system grows,
+you will see the same name overloaded on:
+
+- **by value vs. by reference**: `f(Widget)` vs. `f(Widget&)`
+- **pointer vs. reference vs. value**: `f(Widget*)`, `f(Widget&)`, `f(Widget)`
+- **`const`-ness**: `f(const std::string&)` vs. `f(std::string&)`, and
+  `const` vs. non-`const` member functions
+- **lvalue vs. rvalue**: `f(const T&)` vs. `f(T&&)` - the basis of move
+  semantics
+
+Each of these is a distinct signature, so each is a valid overload. Come
+back to this section once those types are on the table; the resolution
+rules are the same, there are just more ways for two signatures to
+differ.
+
 ---
 
 ## 6.10 Function templates
