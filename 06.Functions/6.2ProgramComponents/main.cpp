@@ -9,21 +9,17 @@
 // then call it wherever you need it instead of copying the code.
 
 // A function definition: name, parameter list, return type, body.
-double average_of_three(double a, double b, double c) {
-    return (a + b + c) / 3.0;
+int rectangle_perimeter(int width, int height) {
+    return 2 * (width + height);
 }
 
 int main() {
 
-    // Call our own function three times with different data - the logic
-    // lives in one place.
-    std::println("avg(2, 4, 9)     = {}", average_of_three(2, 4, 9));
-    std::println("avg(10, 10, 10)  = {}", average_of_three(10, 10, 10));
-    std::println("avg(1.5, 2.5, 8) = {}", average_of_three(1.5, 2.5, 8));
-
-    // std::println itself is a library function we have been calling
-    // since chapter 3. Calling library functions works exactly the same
-    // way as calling our own.
+    // Call our own function for several rectangles - the formula lives
+    // in one place, not copied three times.
+    std::println("perimeter of  3 x  4 = {}", rectangle_perimeter(3, 4));
+    std::println("perimeter of 10 x 10 = {}", rectangle_perimeter(10, 10));
+    std::println("perimeter of  7 x  2 = {}", rectangle_perimeter(7, 2));
 
     return 0;
 }

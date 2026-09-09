@@ -1,8 +1,6 @@
 # Functions
 
-Up to now every program has lived inside `main`. That does not scale:
-the same lines get copied around, `main` grows into a wall, and one
-change has to be made in five places.
+Up to now every program has lived inside `main`. That does not scale.
 
 A **function** is a named, reusable piece of work. You **call** it by
 name, hand it **arguments**, it runs, and it hands back a **result**.
@@ -18,33 +16,7 @@ name, hand it **arguments**, it runs, and it hands back a **result**.
         └──────result──────────┘◄───────────┘
 ```
 
-This chapter follows the reference (Deitel ch05): program components and
-the math library, defining functions and prototypes, argument coercion,
-the standard-library headers, random numbers, scope rules, `inline`,
-reference parameters, default arguments, the `::` operator, overloading,
-templates, recursion, `[[nodiscard]]`, and a look at lambdas.
-
-| Lecture | Outline § | Reference figure |
-|---|---|---|
-| 6.2 Program components | 5.2 | prose |
-| 6.3 Math library functions | 5.3 | prose |
-| 6.4 Defining functions and prototypes | 5.4 | fig05_01 |
-| 6.5 Argument evaluation and coercion | 5.5, 5.6 | fig05_01 |
-| 6.6 Standard library headers | 5.7 | table |
-| 6.7 Random numbers | 5.8 | fig05_02–04 |
-| 6.8 Nondeterministic seeding | 5.10 | fig05_05 |
-| 6.9 Game of chance + scoped `enum` | 5.9 | fig05_05 |
-| 6.10 Scope rules | 5.11 | fig05_06 |
-| 6.11 Inline functions | 5.12 | fig05_07 |
-| 6.12 Reference parameters | 5.13 | fig05_08 |
-| 6.13 Default arguments | 5.14 | fig05_09 |
-| 6.14 Unary scope resolution | 5.15 | fig05_10 |
-| 6.15 Function overloading | 5.16 | fig05_11, fig05_12 |
-| 6.16 Function templates | 5.17 | fig05_14, maximum.h |
-| 6.17 Recursion | 5.18, 5.19 | fig05_15, fig05_16 |
-| 6.18 Recursion vs iteration | 5.20 | fig05_17 |
-| 6.19 `[[nodiscard]]` | 5.21 | prose |
-| 6.20 Lambda functions | — | (practical add-on) |
+In this chapter, we dive deep into functions and see how you can break your program into **smaller, reusable pieces**. 
 
 ---
 
@@ -57,18 +29,21 @@ arguments in parentheses.
 
 ```
    library function you call:   std::sqrt(2.0)
-   your function you call:       average_of_three(2, 4, 9)
-                                 └──────┬───────┘ └───┬───┘
-                                     name          arguments
+   your function you call:       rectangle_perimeter(3, 4)
+                                 └────────┬────────┘ └─┬─┘
+                                       name        arguments
 ```
 
 The reason to write your own: **reuse**. Define the work once, call it
 wherever you need it, instead of copy-pasting the body.
 
 ```cpp
-double average_of_three(double a, double b, double c) {
-    return (a + b + c) / 3.0;
+int rectangle_perimeter(int width, int height) {
+    return 2 * (width + height);
 }
+
+rectangle_perimeter(3, 4);      // 14
+rectangle_perimeter(10, 10);    // 40  - one formula, called again
 ```
 
 ---
