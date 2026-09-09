@@ -431,29 +431,7 @@ Do side-effecting work in its own statement first.
 
 ---
 
-## 6.5 Standard library headers
-
-The library groups related functions and types into **headers**;
-`#include` the one you need. Early in this course:
-
-| Header | Provides |
-|--------|----------|
-| `<iostream>` | `std::cin`, `std::cout` |
-| `<print>` | `std::print`, `std::println` (C++23) |
-| `<string>` | `std::string` |
-| `<string_view>` | `std::string_view` |
-| `<vector>` | `std::vector` |
-| `<cmath>` | `sqrt`, `pow`, `abs`, `ceil`, `floor`, `fmod`, … |
-| `<numbers>` | `numbers::pi` and friends (C++20) |
-| `<random>` | engines, distributions, `random_device` |
-| `<algorithm>` | `sort`, `find`, `count`, `min`, `max`, … |
-
-All these names live in namespace `std`, so you qualify them:
-`std::sqrt`, `std::vector`, `std::sort`.
-
----
-
-## 6.6 Random numbers
+## 6.5 Random numbers
 
 Random values come from **two pieces**:
 
@@ -477,13 +455,13 @@ for (int i{0}; i < 10; ++i) {
 ```
 
 - A **default-constructed engine replays the same sequence every run** -
-  useful while testing. Change that by seeding it (6.7).
+  useful while testing. Change that by seeding it (6.6).
 - A different range is just a different distribution:
   `uniform_int_distribution<int>{0, 100}`.
 
 ---
 
-## 6.7 Nondeterministic seeding
+## 6.6 Nondeterministic seeding
 
 To get a different sequence each run, **seed** the engine.
 
@@ -507,7 +485,7 @@ Use a **fixed seed while developing** (so a bug reproduces), and
 
 ---
 
-## 6.8 Game of chance and scoped `enum`
+## 6.7 Game of chance and scoped `enum`
 
 The craps example pulls three ideas together.
 
@@ -529,7 +507,7 @@ int roll_dice() {
 ```
 
 (The `static` locals mean the engine is set up **once**, not on every
-call - see 6.9.)
+call - see 6.8.)
 
 ### A scoped `enum`
 
@@ -557,7 +535,7 @@ after it.
 
 ---
 
-## 6.9 Scope rules
+## 6.8 Scope rules
 
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
@@ -604,7 +582,7 @@ void use_static_local() { static int x{50}; ++x; }   // 50→51, 51→52, 52→5
 
 ---
 
-## 6.10 Inline functions
+## 6.9 Inline functions
 
 `inline` on a function definition **permits that definition to appear in
 more than one translation unit** (typically because it sits in a header
@@ -630,7 +608,7 @@ its first line serves as one.
 
 ---
 
-## 6.11 Reference parameters
+## 6.10 Reference parameters
 
 The two ways an argument reaches a function.
 
@@ -682,7 +660,7 @@ than one result by writing through several reference parameters).
 
 ---
 
-## 6.12 Default arguments
+## 6.11 Default arguments
 
 A parameter can carry a **default**, used when the caller omits that
 argument.
@@ -708,7 +686,7 @@ Rules:
 
 ---
 
-## 6.13 Unary scope resolution operator
+## 6.12 Unary scope resolution operator
 
 When a local variable **hides** a global of the same name, the local
 wins inside its scope. `::name` reaches past the local to the **global**.
@@ -731,7 +709,7 @@ int main() {
 
 ---
 
-## 6.14 Function overloading
+## 6.13 Function overloading
 
 Several functions may **share a name** if their **parameter lists
 differ** (in count or type). The compiler picks the best match per call.
@@ -756,7 +734,7 @@ double square(double x) { return x * x; }
 
 ---
 
-## 6.15 Function templates
+## 6.14 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -787,7 +765,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.16 Recursion
+## 6.15 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -827,7 +805,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.17 Recursion vs iteration
+## 6.16 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -855,7 +833,7 @@ clearer.**
 
 ---
 
-## 6.18 The `[[nodiscard]]` attribute
+## 6.17 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -873,7 +851,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.19 Lambda functions
+## 6.18 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -920,7 +898,7 @@ supply it.
 
 ---
 
-## 6.20 Assignment
+## 6.19 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
