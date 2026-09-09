@@ -1007,12 +1007,20 @@ overloads cannot collide.
 
    breaking down  _Z4areai :
 
-      _Z     4        area      i
-      ───    ───      ────      ───────────────────────────────
-      tag    name     name      parameter-type codes, in order:
-             length             i = int   d = double   c = char
-                                f = float   Ri = int&   Rd = double&
+      _Z     4              area      i
+      ───    ───            ────      ─────────────────────────
+      tag    length of      the       parameter-type codes,
+             the name       name      in order:
+             (how many                i = int   d = double
+             chars follow             c = char  f = float
+             before the               Ri = int&   Rd = double&
+             type codes)
 ```
+
+That number is the **character count of the function name** - it tells
+the demangler how many of the following characters are the name before
+the parameter codes start. `area` is 4 chars, so `_Z4area...`; `square`
+would be `_Z6square...`.
 
 `main` is the exception - it is never mangled.
 
