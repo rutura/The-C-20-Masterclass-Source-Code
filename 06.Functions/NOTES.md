@@ -705,15 +705,15 @@ exists.
 An inner name **hides** an outer one of the same name:
 
 ```cpp
-int x{1};                 // global
+int high_score{1};                // global
 
 int main() {
-    int x{5};             // hides the global inside main
+    int high_score{5};            // hides the global inside main
     {
-        int x{7};         // hides both, inside this block
-        std::println("{}", x);   // 7
+        int high_score{7};        // hides both, inside this block
+        std::println("{}", high_score);   // 7
     }
-    std::println("{}", x);       // 5  (block's x is gone)
+    std::println("{}", high_score);       // 5  (block's high_score is gone)
 }
 ```
 
@@ -723,8 +723,8 @@ An ordinary local is **recreated every call**. A `static` local is
 created **once**, on the first call, and keeps its value between calls:
 
 ```cpp
-void use_local()        { int x{25};        ++x; }   // 25→26 every call
-void use_static_local() { static int x{50}; ++x; }   // 50→51, 51→52, 52→53 …
+void tally_round() { int high_score{25};        ++high_score; }   // 25→26 every call
+void grow_combo()  { static int high_score{50}; ++high_score; }   // 50→51, 51→52, 52→53 …
 ```
 
 ```
