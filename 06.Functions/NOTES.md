@@ -1636,73 +1636,153 @@ comparison.
 
 ## 6.14 Recursion
 
-A **recursive** function calls itself. Every one needs:
+A **recursive** function calls itself. Every one needs two parts:
 
-- a **base case** that returns without recursing (ends the chain), and
-- a **recursive step** that calls itself with an argument closer to the
-  base case.
+- a **base case** - a plain answer it returns *without* recursing. This
+  stops the chain.
+- a **recursive step** - it calls itself with an argument **closer to the
+  base case**, and builds its answer from what that call returns.
 
 ```cpp
-long factorial(int number) {
-    if (number <= 1) { return 1; }              // base case
-    return number * factorial(number - 1);      // recursive step
+long sum_to(int n) {
+    if (n <= 0) { return 0; }        // base case
+    return n + sum_to(n - 1);        // recursive step - n, then the rest
 }
 ```
 
+`sum_to(n)` reads as its own definition: "the sum up to `n` is `n` plus
+the sum up to `n - 1`, and the sum up to `0` is `0`."
+
+### Following a call: the wind-down and the wind-up
+
+A recursive call goes **down** to the base case, then the returns come
+**back up**, each level finishing its `n + ...` with the value it got:
+
 ```
-   factorial(4)
-   = 4 * factorial(3)
-       = 3 * factorial(2)
-           = 2 * factorial(1)
-               = 1                 ← base case; unwinding begins
-           = 2 * 1  = 2
-       = 3 * 2  = 6
-   = 4 * 6  = 24
+   sum_to(4)
+   │  return 4 + sum_to(3)
+   │             │  return 3 + sum_to(2)
+   │             │             │  return 2 + sum_to(1)
+   │             │             │             │  return 1 + sum_to(0)
+   │             │             │             │             │  return 0   ← base case
+   │             │             │             │             ▼
+   │             │             │             │  1 + 0  = 1
+   │             │             │  2 + 1  = 3
+   │             │  3 + 3  = 6
+   │  4 + 6  = 10
+   ▼
+   10
 ```
 
-`fibonacci` has **two** base cases:
+Going down, nothing is added yet - each `n +` is **pending**, waiting on
+the call below it. The additions only happen on the way back up.
+
+### Each pending call is a stack frame
+
+Those pending calls are not free. Every one is a live **stack frame**
+- its own `n`, its own "return here" address - and they all sit on
+the stack **at the same time**, until the base case lets them unwind.
+
+```
+   sum_to(4) running, at the deepest point:
+
+        stack grows ↓
+   ┌───────────────────────────┐
+   │ sum_to(0)   n=0           │  ← base case, about to return 0
+   ├───────────────────────────┤
+   │ sum_to(1)   n=1   waiting │
+   ├───────────────────────────┤
+   │ sum_to(2)   n=2   waiting │
+   ├───────────────────────────┤
+   │ sum_to(3)   n=3   waiting │
+   ├───────────────────────────┤
+   │ sum_to(4)   n=4   waiting │
+   ├───────────────────────────┤
+   │ main()                    │
+   └───────────────────────────┘
+
+   depth of the recursion  =  number of frames stacked  =  memory used
+```
+
+`sum_to(4)` stacks 5 frames. `sum_to(100000)` stacks 100000 - and the
+stack has a fixed size (often ~1 MB). Run out of room and the program
+dies with a **stack overflow**: the recursive cousin of an infinite
+loop. It happens when the base case is missing, unreachable, or just
+very far away.
+
+### When the tree fans out: `fibonacci`
+
+`fibonacci` recurses **twice** per step:
 
 ```cpp
 long fibonacci(long n) {
-    if (n == 0 || n == 1) { return n; }
-    return fibonacci(n - 1) + fibonacci(n - 2);
+    if (n == 0 || n == 1) { return n; }          // two base cases
+    return fibonacci(n - 1) + fibonacci(n - 2);   // TWO calls
 }
 ```
 
-Miss the base case, or fail to move toward it, and the calls never stop:
-a **stack overflow** - the recursive cousin of an infinite loop.
+The stack depth is only about `n` (one branch runs fully before the
+other starts), but the **total number of calls** explodes, because the
+same values get recomputed on every branch:
 
----
+```
+                     fib(5)
+              ┌─────────┴─────────┐
+           fib(4)               fib(3)
+        ┌────┴────┐           ┌────┴────┐
+     fib(3)     fib(2)     fib(2)     fib(1)
+    ┌──┴──┐    ┌──┴──┐    ┌──┴──┐
+ fib(2) fib(1) fib(1) fib(0) fib(1) fib(0)
+ ┌─┴─┐
+fib1 fib0
 
-## 6.15 Recursion vs iteration
+   fib(5): 15 calls.   fib(10): 177.   fib(20): 21891.
+   fib(n): grows like 2ⁿ.   fib(40) is over 300 million calls.
+```
 
-The same `factorial`, both ways:
+`fib(3)` alone is computed 3 times here. Nothing is *wrong* with the
+code - it just does exponential work for a problem a loop does in `n`
+steps.
+
+### Recursion vs iteration
+
+Any recursion can be rewritten as a loop. `sum_to`, both ways:
 
 ```cpp
-long factorial_recursive(int n) {
-    if (n <= 1) { return 1; }
-    return n * factorial_recursive(n - 1);
+long sum_to(int n) {                      // recursive
+    if (n <= 0) { return 0; }
+    return n + sum_to(n - 1);
 }
 
-long factorial_iterative(int n) {
-    long result{1};
-    for (int i{2}; i <= n; ++i) { result *= i; }
-    return result;
+long sum_to_iterative(int n) {            // iterative
+    long total{0};
+    for (int i{1}; i <= n; ++i) { total += i; }
+    return total;
 }
 ```
 
-| | Recursion | Iteration |
-|--|-----------|-----------|
-| stack use | one frame per call - deep input can overflow | constant |
-| speed | function-call overhead per step | usually faster |
-| clarity | natural for recursive structures (trees, divide-and-conquer) | natural for counting/accumulating |
+```
+                  recursion                      iteration
+   ──────────  ─────────────────────────────  ──────────────────────
+   stack use    one frame per level of depth   one frame, always
+                → deep input can overflow
+   speed        a call + return every step      just the loop body
+                (setup/teardown overhead)      → usually faster
+   state        held implicitly in the         held in explicit
+                pending frames                 variables (accumulator)
+   reads well   for things defined in terms    for counting and
+                of themselves - trees,         accumulating over a
+                divide-and-conquer, parsing    range
+```
 
-Rule of thumb: **iterate by default; recurse when it makes the problem
-clearer.**
+**Rule of thumb: iterate by default. Reach for recursion when the
+problem is itself recursive** - walking a tree, `x^n` as `x * x^(n-1)`,
+splitting a range in half - and the recursive version is the one that
+reads clearly. Even then, watch the depth.
 
 ---
 
-## 6.16 The `[[nodiscard]]` attribute
+## 6.15 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -1720,7 +1800,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.17 Assignment
+## 6.16 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
