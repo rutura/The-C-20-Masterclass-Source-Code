@@ -1,4 +1,6 @@
 #include <print>
+#include <string>
+#include <string_view>
 
 // A parameter can have a DEFAULT value, used when the caller omits that
 // argument. Rules:
@@ -6,19 +8,20 @@
 //   - only TRAILING parameters may have defaults
 //   - callers fill arguments left to right; you cannot skip a middle one
 
-int box_volume(int length = 1, int width = 1, int height = 1);   // defaults here
+std::string greet(std::string_view name,
+                  std::string_view greeting = "Hello",
+                  char punctuation = '!');   // defaults here, in the declaration
 
 int main() {
 
-    std::println("box_volume()         = {}", box_volume());         // 1 * 1 * 1
-    std::println("box_volume(10)       = {}", box_volume(10));        // 10 * 1 * 1
-    std::println("box_volume(10, 5)    = {}", box_volume(10, 5));     // 10 * 5 * 1
-    std::println("box_volume(10, 5, 2) = {}", box_volume(10, 5, 2));  // 10 * 5 * 2
+    std::println("{}", greet("Sara"));                 // Hello, Sara!
+    std::println("{}", greet("Sara", "Welcome"));      // Welcome, Sara!
+    std::println("{}", greet("Sara", "Goodbye", '.')); // Goodbye, Sara.
 
     return 0;
 }
 
 // The definition does NOT repeat the defaults.
-int box_volume(int length, int width, int height) {
-    return length * width * height;
+std::string greet(std::string_view name, std::string_view greeting, char punctuation) {
+    return std::string{greeting} + ", " + std::string{name} + punctuation;
 }

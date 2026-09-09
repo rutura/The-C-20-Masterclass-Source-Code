@@ -18,7 +18,7 @@ enum class Session { open, closed };
 
 // Roll once, use the roll to pick a fortune, return it. The engine and
 // distribution are `static` so they are built once, not on every call
-// (see 6.6) - otherwise every call would restart the same sequence.
+// (see 6.7) - otherwise every call would restart the same sequence.
 std::string_view next_fortune() {
     static constexpr std::array lines{
         "A pleasant surprise is waiting for you.",

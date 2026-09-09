@@ -484,7 +484,72 @@ Do side-effecting work in its own statement first.
 
 ---
 
-## 6.5 Random numbers
+## 6.5 Default arguments
+
+A parameter can carry a **default** value. If the caller leaves that
+argument out, the default is used in its place - so one function can be
+called several ways without writing overloads.
+
+```cpp
+std::string greet(std::string_view name,
+                  std::string_view greeting = "Hello",
+                  char punctuation = '!');
+```
+
+```
+   greet("Sara")                 → "Hello, Sara!"
+   greet("Sara", "Welcome")      → "Welcome, Sara!"
+   greet("Sara", "Goodbye", '.') → "Goodbye, Sara."
+```
+
+### The rules
+
+**1. Defaults go in the declaration, and only there.** Put them on the
+prototype; the definition repeats the parameters *without* the `= ...`.
+
+```cpp
+std::string greet(std::string_view name,
+                  std::string_view greeting = "Hello",   // default: here
+                  char punctuation = '!');
+
+// definition - no defaults repeated, or the compiler errors
+std::string greet(std::string_view name,
+                  std::string_view greeting,
+                  char punctuation) {
+    return std::string{greeting} + ", " + std::string{name} + punctuation;
+}
+```
+
+(If a function has no separate prototype - it is defined before its first
+use - then the defaults go on that definition, since it is also the
+declaration.)
+
+**2. Only trailing parameters may have a default.** Once one parameter
+has a default, every parameter after it must have one too.
+
+```cpp
+void f(int a, int b = 2, int c = 3);   // OK  - defaults are trailing
+void g(int a = 1, int b, int c = 3);   // ERROR - b has no default but c does
+```
+
+**3. Arguments fill left to right - you cannot skip one.** There is no
+syntax for "use the default for the middle argument but pass the last."
+
+```cpp
+greet("Sara");             // name="Sara", greeting="Hello", punctuation='!'
+greet("Sara", "Hi");       // name="Sara", greeting="Hi",    punctuation='!'
+greet("Sara", "Hi", '?');  // all three supplied
+// greet("Sara", , '?');   // ERROR - no way to skip 'greeting'
+```
+
+**4. Order the parameters so the ones most often left to default come
+last.** That is what makes the short calls read well - `greet("Sara")` is
+the common case, so `name` comes first and the rarely-changed
+`punctuation` comes last.
+
+---
+
+## 6.6 Random numbers
 
 ### What we are building
 
@@ -644,7 +709,7 @@ std::string_view next_fortune() {
 
 The engine and distribution are `static`: they survive between function
 calls, so they are set up once rather than rebuilt (and restarted from
-the same seed) on every call. The next lecture (6.6) covers this in full.
+the same seed) on every call. Lecture 6.7 covers this in full.
 
 **Enumerations** give a name to a small set of values - things like
 colors, states, or modes.
@@ -741,7 +806,7 @@ while (session == Session::open) {
 
 ---
 
-## 6.6 Lifetime and scope
+## 6.7 Lifetime and scope
 
 **Scope** = where a name is visible. **Lifetime** = how long the object
 exists.
@@ -788,7 +853,7 @@ void grow_combo()  { static int high_score{50}; ++high_score; }   // 50→51, 51
 
 ---
 
-## 6.7 Reference parameters
+## 6.8 Reference parameters
 
 The two ways an argument reaches a function.
 
@@ -837,32 +902,6 @@ void square_by_reference(int& ref) {
 Use **by value** for small inputs you only read; use **a reference**
 when the function must change the caller's variable (or hand back more
 than one result by writing through several reference parameters).
-
----
-
-## 6.8 Default arguments
-
-A parameter can carry a **default**, used when the caller omits that
-argument.
-
-```cpp
-int box_volume(int length = 1, int width = 1, int height = 1);
-```
-
-```
-   box_volume()          → 1 * 1 * 1  = 1
-   box_volume(10)        → 10 * 1 * 1 = 10
-   box_volume(10, 5)     → 10 * 5 * 1 = 50
-   box_volume(10, 5, 2)  → 10 * 5 * 2 = 100
-```
-
-Rules:
-
-- Defaults live in the **prototype**, written once (not repeated in the
-  definition).
-- Only **trailing** parameters may have defaults, so arguments fill
-  **left to right**. `box_volume(10, , 2)` is invalid.
-- Put the parameters most often left default **last**.
 
 ---
 
