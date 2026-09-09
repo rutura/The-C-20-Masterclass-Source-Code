@@ -931,26 +931,95 @@ void charge(double& balance, double fee) {
 
 ## 6.9 Function overloading
 
-Several functions may **share a name** if their **parameter lists
-differ** (in count or type). The compiler picks the best match per call.
+C++ lets **several functions share one name**, as long as they differ in
+their **parameter lists**. At each call the compiler looks at the
+**number, types, and order** of the arguments and selects the version
+that fits. This is **function overloading**.
+
+It exists for one idea applied to different inputs - the same reason the
+standard math library ships `float`, `double`, and `long double` versions
+of its functions under one name each. Overloading closely-related work
+keeps the call site readable: you write `area(...)` and let the argument
+say which shape.
 
 ```cpp
-int    square(int x)    { return x * x; }
-double square(double x) { return x * x; }
+int    area(int side)               { return side * side; }        // square
+double area(double radius)          { return 3.14159 * radius * radius; }  // circle
+int    area(int width, int height)  { return width * height; }     // rectangle
 ```
 
 ```
-   square(7)     → argument is int    → int version
-   square(7.5)   → argument is double → double version
-   square(7.0f)  → float promotes to double → double version
+   call             arguments        picked
+   ────             ─────────        ──────
+   area(4)      →    one int      →   area(int)            → square
+   area(2.5)    →    one double   →   area(double)         → circle
+   area(3, 6)   →    two ints     →   area(int, int)       → rectangle
 ```
 
-- The **return type alone cannot distinguish overloads**:
-  `int f(int);` and `double f(int);` together is an error.
+### What the compiler compares: the signature
+
+A **signature** is a function's **name plus its parameter types, in
+order**. That - and only that - is what tells two overloads apart.
+
+```
+   int    area    (int, int)
+   ───    ────     ──────────
+    │      │           │
+    │      │           └── parameter types, in order
+    │      └── name
+    └── return type — NOT part of the signature
+```
+
+Consequences:
+
+- **The return type alone cannot distinguish overloads.** `int area(int)`
+  and `double area(int)` in the same program is a compile error - the
+  call `area(4)` gives the compiler no way to choose. Overloads *may*
+  have different return types, but only when their parameter lists also
+  differ.
+- **Overloads need not take the same number of parameters** - `area(int)`
+  and `area(int, int)` above.
 - If no overload matches exactly, the compiler tries conversions to find
-  the best; an ambiguous tie is a compile error.
-- Internally the compiler gives each overload a distinct mangled name
-  from its parameter types, so the versions never collide at link time.
+  the best one. If two are equally good, that is an **ambiguous call** -
+  a compile error, not a silent pick.
+- A parameterless function and an all-defaults overload **clash** when
+  called with no arguments:
+
+  ```cpp
+  void reset();                 // (a)
+  void reset(int level = 0);    // (b)
+  reset();                      // ERROR: ambiguous - (a) or (b) with its default?
+  ```
+
+### Type-safe linkage and name mangling
+
+The compiler enforces overloading by **encoding each function's name
+together with its parameter types** into a single internal symbol - **name
+mangling**. The linker then only ever sees distinct names, so the
+overloads cannot collide.
+
+```
+   your code                    GNU C++ mangled symbol
+   ─────────                    ──────────────────────
+   int    area(int)        →    _Z4areai
+   double area(double)     →    _Z4aread
+   int    area(int, int)   →    _Z4areaii
+
+   breaking down  _Z4areai :
+
+      _Z     4        area      i
+      ───    ───      ────      ───────────────────────────────
+      tag    name     name      parameter-type codes, in order:
+             length             i = int   d = double   c = char
+                                f = float   Ri = int&   Rd = double&
+```
+
+`main` is the exception - it is never mangled.
+
+**This encoding is compiler-specific.** GNU C++ produces `_Z4areai`;
+MSVC produces something like `?area@@YAHH@Z` for the same function.
+Everything linked into one program must therefore be built with the same
+compiler (and settings), or the symbols will not match up.
 
 ---
 
