@@ -1050,7 +1050,253 @@ differ.
 
 ---
 
-## 6.10 Function templates
+## 6.10 Functions across files
+
+So far every function has shared one `main.cpp`. Real programs spread
+functions across many files, grouped by topic. This lecture builds a
+program from four files of helpers plus `main.cpp`.
+
+```
+   6.10FunctionsAcrossFiles/
+   ├── geometry.h      circle_area(), circle_circumference()   ← declarations
+   ├── geometry.cpp    ... their bodies                        ← definitions
+   ├── money.h         add_tax(), apply_discount()             ← declarations
+   ├── money.cpp       ... their bodies                        ← definitions
+   ├── main.cpp        #include "geometry.h"  #include "money.h"
+   └── CMakeLists.txt
+```
+
+### Header and source: the split from 6.4, now in two files
+
+The main idea is to **split the declaration from the definition**. We store 
+the **declarations** in a **header** (`.h`) and the **definitions** in a **source** (`.cpp`). 
+
+```
+   geometry.h                       geometry.cpp
+   ──────────                       ────────────
+   #pragma once                     #include "geometry.h"
+
+   double circle_area(double r);    double circle_area(double r) {
+   double circle_circumference(         return pi * r * r;
+                    double r);      }
+                                    double circle_circumference(double r) {
+   the DECLARATIONS - what a            return 2 * pi * r;
+   caller needs to compile         }
+
+                                    the DEFINITIONS - the actual work
+```
+
+- The **header** (`.h`) holds declarations. Anyone who wants to call
+  these functions `#include`s it.
+- The **source** (`.cpp`) holds the definitions. It `#include`s its own
+  header too, so the compiler checks the bodies against the promises.
+- **`#pragma once`** at the top of the header is an **include guard**: if
+  the same header gets pulled in twice in one file (directly and through
+  another header), its body is still processed only once. Without it you
+  would get "redefinition" errors.
+
+### `#include` is copy-paste
+
+`#include "geometry.h"` is not a link or an import. The preprocessor
+literally **pastes the text of `geometry.h`** into `main.cpp` at that
+line, before the compiler proper runs. After that paste, `main.cpp`
+contains the declarations, so every call in it can be type-checked.
+
+```
+   main.cpp  (what the compiler actually sees, after preprocessing)
+   ┌─────────────────────────────────────────┐
+   │ double circle_area(double r);           │ ← pasted from geometry.h
+   │ double circle_circumference(double r);   │
+   │ double add_tax(double, double);          │ ← pasted from money.h
+   │ double apply_discount(double, double);   │
+   │                                         │
+   │ int main() {                            │
+   │     ... circle_area(2.0) ...            │ ← checks against the pasted decl
+   │ }                                       │
+   └─────────────────────────────────────────┘
+```
+
+The bodies are **not** here. The compiler emits `main.o` with the calls
+left as **unresolved references** - "someone provides `circle_area`, fill
+this in later."
+
+### Separate compilation, then linking
+
+Each `.cpp` is a **translation unit**, compiled on its own into an
+**object file** (`.o` / `.obj`). The **linker** then stitches the object
+files together, matching each unresolved reference to the definition that
+supplies it.
+
+```
+   geometry.cpp ──compile──► geometry.o ─┐
+   money.cpp    ──compile──► money.o   ──┼──link──► rooster (executable)
+   main.cpp     ──compile──► main.o    ──┘
+                              │            ▲
+                    main.o needs           │
+                    circle_area, add_tax  linker finds them
+                    (unresolved)          in geometry.o / money.o
+```
+
+Two failure modes worth recognising:
+
+- **Compile error** - a call in `main.cpp` does not match any
+  declaration it can see (wrong argument count, typo in the name). Caught
+  per file, before linking.
+- **Linker error: "undefined reference to `circle_area`"** - the call
+  type-checked (the declaration was there) but no object file defined it.
+  Usually means the `.cpp` was left out of the build.
+
+### Telling CMake about the extra files
+
+`add_executable` lists **every `.cpp` that contributes code**. Miss one
+and you get the linker error above.
+
+```cmake
+add_executable(rooster
+    main.cpp
+    geometry.cpp
+    money.cpp
+    geometry.h      # headers are optional here - listing them only makes
+    money.h         # IDEs show them in the project tree; they are not compiled
+)
+```
+
+CMake compiles each listed `.cpp` separately and links the results - the
+pipeline in the diagram above.
+
+### A first look at linkage
+
+Why can a call in `main.cpp` reach a function defined in `geometry.cpp`
+at all? Because an ordinary function has **external linkage**: its name
+is published in its object file for the linker to see, and any other
+translation unit that declares the same name links to it.
+
+```
+   external linkage   name is visible to the LINKER, across .cpp files
+                      → ordinary functions and globals. This is the
+                        default, and what makes multi-file programs work.
+
+   internal linkage   name is private to its own .cpp - other files
+                      cannot link to it even if they declare it
+                      → marked with `static` at file scope, or put in an
+                        unnamed namespace
+
+   no linkage         local variables - not a linker concept at all
+```
+
+That is the whole idea you need here: **functions are external by
+default, which is what lets you split them across files.** The full rules
+- internal linkage, the One Definition Rule, `inline` for definitions in
+headers - get a dedicated chapter later in the course.
+
+---
+
+## 6.11 Files in subfolders
+
+The same four helpers, but now organised into folders by area:
+
+```
+   6.11FilesNested/
+   ├── geometry/
+   │   ├── geometry.h
+   │   └── geometry.cpp
+   ├── finance/
+   │   ├── money.h
+   │   └── money.cpp
+   ├── main.cpp
+   └── CMakeLists.txt
+```
+
+`main.cpp` is unchanged - it still says:
+
+```cpp
+#include "geometry.h"
+#include "money.h"
+```
+
+no `geometry/` prefix. For that to compile, the compiler has to be told
+where to look.
+
+### The header search path
+
+When the preprocessor hits `#include "geometry.h"` it searches a list of
+folders **in order** and pastes the first match:
+
+```
+   #include "geometry.h"
+        │
+        ▼
+   1. the folder of the file doing the #include   (here: 6.11FilesNested/)
+   2. every folder added by -I on the compiler command line
+   3. the system/standard-library folders
+        │
+        ▼
+   not found in any → #error: geometry.h: No such file or directory
+```
+
+Out of the box, step 1 looks next to `main.cpp` and finds nothing -
+`geometry.h` is one level down in `geometry/`. We need to add
+`geometry/` and `finance/` to the step-2 list.
+
+### `target_include_directories`
+
+CMake's `target_include_directories` adds folders to that search path for
+one target - it becomes `-I<folder>` on every compile of that target.
+
+```cmake
+target_include_directories(rooster PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry
+    ${CMAKE_CURRENT_SOURCE_DIR}/finance
+)
+```
+
+```
+   compiling main.cpp, the compiler is now invoked as:
+
+     c++ ... -I .../6.11FilesNested/geometry
+             -I .../6.11FilesNested/finance
+             -c main.cpp
+
+   so #include "geometry.h"  →  .../geometry/geometry.h    ✓
+      #include "money.h"      →  .../finance/money.h        ✓
+```
+
+- **`${CMAKE_CURRENT_SOURCE_DIR}`** is the folder containing this
+  `CMakeLists.txt`, so the paths work no matter where the project is
+  checked out.
+- **`PRIVATE`** means "for building `rooster` only." (The other scopes,
+  `PUBLIC` and `INTERFACE`, matter when a target is a library that other
+  targets link against - not our case here.)
+
+### The alternative: path in the `#include`
+
+You can skip `target_include_directories` and write the path instead:
+
+```cpp
+#include "geometry/geometry.h"
+#include "finance/money.h"
+```
+
+This resolves by step 1 alone (relative to `main.cpp`). It is fine for a
+small project. The include-path approach wins once many files in many
+folders include each other: every file uses the bare name, and moving a
+header to a different folder is a one-line CMake change instead of an
+edit to every `#include` that mentions it.
+
+The `.cpp` paths in `add_executable` are always relative to the
+`CMakeLists.txt` and are not affected by any of this:
+
+```cmake
+add_executable(rooster
+    main.cpp
+    geometry/geometry.cpp
+    finance/money.cpp
+)
+```
+
+---
+
+## 6.12 Function templates
 
 A **function template** is a pattern with the type left blank. `T` is a
 placeholder the compiler fills in from the call's arguments, generating a
@@ -1081,7 +1327,7 @@ T maximum(T a, T b, T c) {
 
 ---
 
-## 6.11 Recursion
+## 6.13 Recursion
 
 A **recursive** function calls itself. Every one needs:
 
@@ -1121,7 +1367,7 @@ a **stack overflow** - the recursive cousin of an infinite loop.
 
 ---
 
-## 6.12 Recursion vs iteration
+## 6.14 Recursion vs iteration
 
 The same `factorial`, both ways:
 
@@ -1149,7 +1395,7 @@ clearer.**
 
 ---
 
-## 6.13 The `[[nodiscard]]` attribute
+## 6.15 The `[[nodiscard]]` attribute
 
 Mark a function `[[nodiscard]]` when **ignoring its return value is
 almost certainly a bug** - the point of the call is the value it hands
@@ -1167,7 +1413,7 @@ functions that return a resource the caller must handle.
 
 ---
 
-## 6.14 Lambda functions
+## 6.16 Lambda functions
 
 A **lambda** is a small function written **inline**, where it is used -
 usually to hand to another function. Shape:
@@ -1214,7 +1460,7 @@ supply it.
 
 ---
 
-## 6.15 Assignment
+## 6.17 Assignment
 
 `main.cpp` has six stubbed exercises, each with its problem statement and
 a sample run in a comment; `main_solution.cpp` solves all six with the
