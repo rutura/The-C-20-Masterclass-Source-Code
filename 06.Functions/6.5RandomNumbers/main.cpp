@@ -20,9 +20,16 @@ int main() {
     std::default_random_engine engine{};
 
     // A distribution that yields ints 1..99, each equally likely - the
-    // seeker's lucky number.
+    // seeker's lucky numbers. Call it again and again on the same engine
+    // and you get a sequence.
     std::uniform_int_distribution<int> lucky_number{1, 99};
-    std::println("Your lucky number is {}.", lucky_number(engine));
+
+    // A sequence of 10 lucky numbers, each in the range 1..99. 
+    std::print("Your lucky numbers are: ");
+    for (int i{0}; i < 10; ++i) {
+        std::print("{} ", lucky_number(engine));
+    }
+    std::println("");
 
     // A different range is just a different distribution. Here: an index
     // into the fortunes list below.

@@ -433,54 +433,102 @@ Do side-effecting work in its own statement first.
 
 ## 6.5 Random numbers
 
-Running example: a **fortune teller**. Three binaries in this lecture,
-each one demo:
+### What we are building
 
-- `main.cpp`  — engine + distribution
-- `main2.cpp` — seeding the engine
-- `main3.cpp` — a helper function, a scoped `enum`, `switch` with an
-  initializer
-
-### Engine + distribution (`main.cpp`)
-
-Random values come from **two pieces**:
+In this lecture, we are exploring **random numbers** facilities in C++.  As 
+an excuse to explore them, we will build a simple **fortune teller** program.
 
 ```
-   ENGINE         produces raw random bits
-        │
-        ▼
-   DISTRIBUTION   shapes those bits into the range/shape you asked for
-        │
-        ▼
-   one value      distribution(engine)
+   ┌─────────────────────────────────────────────┐
+   │            THE FORTUNE TELLER               │
+   │                                             │
+   │   Your lucky number is  73.                 │
+   │   The cards say:  "An old friend has        │
+   │                    news you will want       │
+   │                    to hear."                │
+   └─────────────────────────────────────────────┘
+             ▲                    ▲
+             │                    │
+       a number in a       one entry picked
+       range (1..99)       from a fixed list
 ```
+
+* We need to pick a random number in a range (1..99) for the lucky number.
+* We need to pick a random index into a fixed list of fortunes, to choose one.
+
+### The two pieces: engine and distribution
+
+Modern C++ (`<random>`) provides **entities** that work together to produce random numbers:
+
+* An **engine:** implements a random-number generation algorithm we use to produce a stream
+   of numbers that **seem** like they are random.  
+
+* A **distribution:** takes the raw numbers from the engine and reshapes them into a range and spread we want.
+
+REMEMBER THIS: To get a random number, you call the **distribution** and give it the **engine** as an argument.
+
+We have access to a variety of engines and distributions.  For example, the engine `std::default_random_engine` is a good general-purpose engine, and the distribution `std::uniform_int_distribution<int>{1, 99}` will give us integers in the range 1..99.
+
+```
+   ENGINE                         DISTRIBUTION
+   ──────                         ────────────
+   generates raw (non ranged)    ►    reshapes each raw number into the
+   random numbers                     range and spread you asked for,
+                                      fairly
+
+   std::default_random_engine     std::uniform_int_distribution<int>{1, 99}
+        │                              │
+        └──────────────┬───────────────┘
+                       ▼
+              distribution(engine)   → one value in 1..99
+```
+
+You keep **one engine** and point as many distributions at it as you
+need - one for the lucky number, another for the fortune index.
+
+### I need a random number between 1 and 99
+
+**You call the distribution with the engine as an argument**:
 
 ```cpp
-std::default_random_engine engine{};                     // the source
-std::uniform_int_distribution<int> lucky_number{1, 99};  // shape: ints 1..99
+std::default_random_engine engine{};                     // Declare the engine 
+std::uniform_int_distribution<int> lucky_number{1, 99};  // Declare the distribution
 
-std::println("Your lucky number is {}.", lucky_number(engine));
+std::println("Your lucky number is {}.", lucky_number(engine)); // Call the distribution with the engine 
+                                                                // to get a number in 1..99
+
+// A sequence of 10 lucky numbers, each in the range 1..99. 
+std::print("Your lucky numbers are: ");
+for (int i{0}; i < 10; ++i) {
+   std::print("{} ", lucky_number(engine));
+}
+std::println("");
 ```
 
-- A **default-constructed engine replays the same sequence every run** -
-  useful while testing a reading, so the fortune does not change from
-  under you. Change that by seeding it (below).
-- A different range is just a different distribution - e.g. an index into
-  a fixed `std::array` of fortune strings:
-  `uniform_int_distribution<std::size_t>{0, fortunes.size() - 1}`.
+This will print something like:
 
-### Nondeterministic seeding (`main2.cpp`)
+```   
+Your lucky number is 73.
+Your lucky numbers are: 73 12 45 67 89 34 56 78 90 23 
+```
 
-To get a different reading each run, **seed** the engine.
+PROBLEM: Every time you run the program, you will get the **same sequence of numbers**.  
+
+### Different random numbers each run
+
+What we want: a fresh fortune  number each run: 
+   * We hand the engine a **seed** value, which is the starting point for the random number sequence.
 
 ```
-   engine{}          → same fortune every run
-   engine{seed}      → reproducible: same seed value ⇒ same fortune
-   engine{rd()}      → fresh fortune every run (rd is a std::random_device)
+   engine{}          → same fortune every run        (fixed, hidden seed)
+   engine{seed}      → same seed value ⇒ same fortune (fixed, YOU chose it)
+   engine{rd()}      → fresh fortune every run        (seed pulled from the OS)
 ```
+
 
 ```cpp
 // reproducible - the seeker types the seed ("birth number")
+int seed{ 222 };
 std::default_random_engine seeded{seed};
 
 // fresh each run - random_device is a nondeterministic source
@@ -488,12 +536,34 @@ std::random_device rd{};
 std::default_random_engine fresh{rd()};   // rd() produces the seed
 ```
 
-Use a **fixed seed while developing** (so a bug reproduces), and
-`random_device` for the shipped program.
-
 ### Helper function + scoped `enum` + `switch` initializer (`main3.cpp`)
 
-The "three-card draw" pulls three ideas together.
+Now a fuller reading: the **three-card draw**. The seeker keeps drawing
+cards, and the layout decides how the reading goes:
+
+```
+   FIRST CARD
+   ┌──────────────────────────────────────────────┐
+   │  7 or 11   →  the cards favor you   (done)    │
+   │  1 or 13   →  the cards frown       (done)    │
+   │  anything  →  that value becomes your "sign"  │
+   └──────────────────────────────────────────────┘
+                          │
+                          ▼  keep drawing
+   ┌──────────────────────────────────────────────┐
+   │  draw your sign again  →  favor   (done)      │
+   │  draw a 7              →  frown   (done)      │
+   │  otherwise             →  draw again          │
+   └──────────────────────────────────────────────┘
+```
+
+Three language features carry this:
+
+| Need | Feature |
+|------|---------|
+| draw a card in several places without repeating the setup | a **helper function** |
+| track the reading's state with named, un-mixable values | a **scoped `enum`** |
+| branch on the first card *and* keep it in scope for the loop | `switch` **with an initializer** |
 
 **A helper function.** `draw_card()` does one job - draw one card (1..13),
 show it, return its value - and `main` calls it wherever a card is needed:
