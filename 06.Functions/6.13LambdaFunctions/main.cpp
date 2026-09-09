@@ -28,10 +28,11 @@ int main() {
     accumulate(4);
     std::println("total = {}", total);         // 7
 
-    // Passing a lambda where a callable is expected: std::sort takes one
-    // to decide ordering.
+    // Passing a lambda where a callable is expected: std::ranges::sort
+    // takes one to decide ordering. It accepts the container directly -
+    // no begin()/end() pair to spell out.
     std::vector<int> v{5, 2, 8, 1, 9, 3};
-    std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });   // descending
+    std::ranges::sort(v, [](int a, int b) { return a > b; });   // descending
     std::print("sorted: ");
     for (int n : v) {
         std::print("{} ", n);

@@ -1583,13 +1583,18 @@ the normal way to supply it - the logic sits right where it is used:
 ```cpp
 std::vector<int> v{5, 2, 8, 1, 9, 3};
 
-std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
-//                            └──────────────┬───────────────┘
-//                        "a comes before b when a > b"  → sorts DESCENDING
+std::ranges::sort(v, [](int a, int b) { return a > b; });
+//                │  └──────────────┬───────────────┘
+//                │           "a comes before b when a > b"  → DESCENDING
+//                └── the whole container - no begin()/end() pair
 ```
 
+`std::ranges::sort` *(C++20)* takes the **container itself**. The older
+`std::sort(v.begin(), v.end(), ...)` needs a start/end iterator pair;
+`ranges::sort(v, ...)` is the same call with that boilerplate gone.
+
 ```
-   std::sort walks the range and, whenever it must order two elements,
+   ranges::sort walks the range and, whenever it must order two elements,
    calls your lambda:
 
       compare(5, 2) → 5 > 2 → true  → 5 before 2
@@ -1598,8 +1603,9 @@ std::sort(v.begin(), v.end(), [](int a, int b) { return a > b; });
    {5, 2, 8, 1, 9, 3}  ──sort with `a > b`──►  {9, 8, 5, 3, 2, 1}
 ```
 
-The same slot takes any callable - a named function, a lambda, a functor
-(later chapter). The lambda just spares you naming a one-use comparison.
+The comparison slot takes any callable - a named function, a lambda, a
+functor (later chapter). The lambda just spares you naming a one-use
+comparison.
 
 ---
 
