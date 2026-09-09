@@ -55,53 +55,213 @@ You do not have to write everything. The Standard Library ships
 growing, every standard adds more. Calling any of them is no different
 from calling your own: `#include` the header, then `name(arguments)`.
 
-Here is a small tour. The `(C++NN)` tag marks a more recent addition.
+Here is a small tour. The `(C++NN)` tag marks a more recent addition. Go
+through them one at a time on camera - each is just a function call, but
+knowing it *exists* saves writing (and debugging) it yourself.
+
+---
 
 ### Math — `<cmath>`, `<numbers>`
 
-| Call | Does | Example → result |
-|------|------|------------------|
-| `std::sqrt(x)` | square root | `sqrt(9.0)` → `3.0` |
-| `std::pow(b, e)` | b to the power e | `pow(2.0, 10.0)` → `1024.0` |
-| `std::hypot(a, b)` | `sqrt(a*a + b*b)`, without overflow/underflow | `hypot(3.0, 4.0)` → `5.0` |
-| `std::lerp(a, b, t)` | linear blend from a to b by fraction t *(C++20)* | `lerp(0.0, 100.0, 0.25)` → `25.0` |
-| `std::midpoint(a, b)` | the average, computed safely (no overflow) *(C++20)* | `midpoint(10, 20)` → `15` |
-| `std::numbers::pi` | the constant π *(C++20)* | `3.14159...` |
+**`std::sqrt(x)`** — the square root. The number that, multiplied by
+itself, gives `x`.
+
+```
+   sqrt(9.0)  →  3.0        because 3.0 * 3.0 == 9.0
+   sqrt(2.0)  →  1.41421...
+```
+
+**`std::pow(b, e)`** — `b` raised to the power `e`: `b` multiplied by
+itself `e` times.
+
+```
+   pow(2.0, 10.0)  →  1024.0
+
+   2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2
+   └────────────── ten 2s ──────────────┘
+```
+
+The exponent can be fractional, too: `pow(x, 0.5)` is another way to
+write `sqrt(x)`.
+
+**`std::hypot(a, b)`** — the length of the hypotenuse of a right
+triangle with legs `a` and `b`. Mathematically `sqrt(a*a + b*b)`, but it
+computes it *without* the intermediate `a*a` overflowing or underflowing.
+
+```
+        │\
+        │ \   hypot(3, 4) = 5
+      4 │  \
+        │   \        (the classic 3-4-5 triangle)
+        │____\
+          3
+```
+
+**`std::lerp(a, b, t)`** *(C++20)* — **l**inear int**erp**olation. Slide
+from `a` to `b` by the fraction `t`, where `t = 0` gives `a`, `t = 1`
+gives `b`, and `t = 0.5` gives the point exactly halfway.
+
+```
+   lerp(0, 100, t):
+
+   t:   0.0      0.25      0.5       0.75      1.0
+        │─────────┼─────────┼─────────┼─────────│
+   a=0 ─┘         │         │         │         └─ b=100
+              lerp = 25   lerp = 50  lerp = 75
+
+```
+
+Used for smooth movement, fades, blending a value from one setting to
+another over time.
+
+**`std::midpoint(a, b)`** *(C++20)* — the value exactly between `a` and
+`b`. Conceptually `(a + b) / 2`, but written so that `a + b` cannot
+overflow (for huge ints) and with correct rounding.
+
+```
+   midpoint(10, 20)  →  15
+
+   10 ──────────●────────── 20
+               15
+```
+
+**`std::numbers::pi`** *(C++20)* — the constant π as a `double`, to full
+precision.
+
+```cpp
+double area{std::numbers::pi * radius * radius};   // πr²
+```
+
+`<numbers>` also has `e`, `sqrt2`, `phi` (the golden ratio), and more.
+
+---
 
 ### Numeric helpers — `<numeric>`
 
-| Call | Does | Example → result |
-|------|------|------------------|
-| `std::gcd(a, b)` | greatest common divisor *(C++17)* | `gcd(24, 36)` → `12` |
-| `std::lcm(a, b)` | least common multiple *(C++17)* | `lcm(4, 6)` → `12` |
+**`std::gcd(a, b)`** *(C++17)* — the **g**reatest **c**ommon
+**d**ivisor: the largest whole number that divides both `a` and `b`
+evenly.
+
+```
+   gcd(24, 36)  →  12
+
+   divisors of 24:  1  2  3  4  6  [8]  12  24
+   divisors of 36:  1  2  3  4  6  [9]  12  18  36
+                    └─ common: 1 2 3 4 6 12 ─┘   largest = 12
+```
+
+**`std::lcm(a, b)`** *(C++17)* — the **l**east **c**ommon **m**ultiple:
+the smallest number that both `a` and `b` divide into.
+
+```
+   lcm(4, 6)  →  12
+
+   multiples of 4:  4  8  [12]  16  20  24 ...
+   multiples of 6:  6  [12]  18  24 ...
+                        └─ smallest shared = 12
+```
+
+---
 
 ### Picking and bounding values — `<algorithm>`
 
-| Call | Does | Example → result |
-|------|------|------------------|
-| `std::min(a, b)` / `std::max(a, b)` | smaller / larger of two | `min(7, 3)` → `3` |
-| `std::clamp(v, lo, hi)` | pull v back into `[lo, hi]` *(C++17)* | `clamp(150, 0, 100)` → `100` |
-| `std::ranges::sort(v)` | sort a whole container in one call *(C++20)* | `{5,2,8}` → `{2,5,8}` |
+**`std::min(a, b)` / `std::max(a, b)`** — the smaller / larger of two
+values.
+
+```
+   min(7, 3) → 3          max(7, 3) → 7
+```
+
+**`std::clamp(v, lo, hi)`** *(C++17)* — force `v` into the range
+`[lo, hi]`. Below `lo` it becomes `lo`; above `hi` it becomes `hi`;
+in between it is unchanged.
+
+```
+   clamp(v, 0, 100):
+
+   v:   -30     0        55       100     150
+        ●───────┿━━━━━━━━━━━━━━━━━┿───────●
+        │       │                │       │
+      → 0      0                100     100      (● snapped to the edge)
+```
+
+**`std::ranges::sort(v)`** *(C++20)* — sort a whole container in one
+call, ascending by default. 
+
+```
+   {5, 2, 8, 1, 9, 3}   ──ranges::sort──►   {1, 2, 3, 5, 8, 9}
+```
+
+---
 
 ### Text queries — `<string>`
 
-| Call | Does | Example → result |
-|------|------|------------------|
-| `s.starts_with(p)` / `s.ends_with(p)` | prefix / suffix test *(C++20)* | `"hello world".starts_with("hello")` → `true` |
-| `s.contains(sub)` | is `sub` anywhere in `s`? *(C++23)* | `"hello world".contains("lo wo")` → `true` |
+These are member functions you call on a `std::string`.
+
+**`s.starts_with(p)` / `s.ends_with(p)`** *(C++20)* — does the string
+begin / end with `p`? Returns a `bool`.
+
+```
+   "hello world"
+    └───┘     └───┘
+  starts_with  ends_with
+   ("hello")    ("world")   → both true
+```
+
+**`s.contains(sub)`** *(C++23)* — is `sub` found *anywhere* inside `s`?
+
+```
+   "hello world".contains("lo wo")
+
+    h e l l o   w o r l d
+        └─ l o _ w o ─┘        found → true
+```
+
+Before C++23 you wrote `s.find(sub) != std::string::npos` for this;
+`contains` says what you mean.
+
+---
 
 ### Bit inspection — `<bit>` *(C++20)*
 
-| Call | Does | Example → result |
-|------|------|------------------|
-| `std::popcount(x)` | how many bits are set | `popcount(0b10110100u)` → `4` |
-| `std::bit_width(x)` | bits needed to represent x | `bit_width(0b10110100u)` → `8` |
-| `std::has_single_bit(x)` | is x a power of two? | `has_single_bit(64u)` → `true` |
+These look at the binary representation of an unsigned integer.
 
-The point: before writing a helper, check whether the library already
-has it. Very often it does - and its version handles the edge cases
-(`hypot` avoids overflow, `midpoint` avoids it too, `clamp` covers both
-bounds) that a quick hand-rolled version would miss.
+**`std::popcount(x)`** — the **pop**ulation **count**: how many bits are
+set to `1`.
+
+```
+   popcount(0b1011'0100u)
+
+   1 0 1 1 0 1 0 0
+   ▲   ▲ ▲   ▲            four 1s  →  4
+```
+
+**`std::bit_width(x)`** — how many bits it takes to represent `x`: the
+position of the highest set bit, plus one.
+
+```
+   bit_width(0b1011'0100u)
+
+   1 0 1 1 0 1 0 0
+   ▲
+   highest 1 is in bit 7 (counting from 0)  →  width 8
+```
+
+**`std::has_single_bit(x)`** — is exactly one bit set? Equivalently, is
+`x` a power of two (1, 2, 4, 8, 16, ...)?
+
+```
+   64  = 0b0100'0000   → one bit set   → true
+   65  = 0b0100'0001   → two bits set  → false
+```
+
+---
+
+The takeaway: **before writing a helper, check whether the library
+already has it.** Very often it does - and the library version handles
+the edge cases (`hypot` avoids overflow, `midpoint` avoids the
+`(a + b)` overflow, `clamp` gets both comparisons right) that a quick
+hand-rolled version tends to miss.
 
 ---
 
