@@ -1,191 +1,193 @@
 # Chapter 6 Quiz — Functions
 
-20 multiple-choice questions covering **Chapter 6 (Functions)**: program
-components, the math library, prototypes and definitions, argument
-coercion and evaluation order, standard-library headers, random numbers,
-scope rules and static locals, `inline`, reference parameters, default
-arguments, the `::` operator, overloading, templates, recursion,
-`[[nodiscard]]`, and lambdas. Each question is followed immediately by
-its correct answer and a short explanation.
+20 multiple-choice questions covering **Chapter 6 (Functions)** as it now
+stands: program components and the call stack, the standard-library tour
+(`<cmath>`/`<numbers>`, `<numeric>`, `<algorithm>`, `<string>`, `<bit>`),
+declarations vs signatures, argument coercion and evaluation order,
+default arguments, random numbers, scope / `static` locals / `::`,
+passing by value vs reference, overloading, function templates, recursion,
+attributes, and the image project (fixed-width integer types, the 2D→1D
+pixel mapping, stride). Each question is followed immediately by its
+correct answer and a short explanation.
 
 ---
 
-### 1. What is the main reason to write your own function rather than repeat the code inline?
+### 1. Why factor a repeated block of code into a function?
 
-A. Functions run faster than the equivalent inline code
-B. Reuse — define the work once and call it wherever it is needed, so a change is made in one place
-C. The compiler requires all programs to have at least three functions
-D. Inline code cannot use variables
+A. Functions always run faster than the same code written inline
+B. Reuse — one definition to write, read, and change, called from wherever it is needed
+C. The compiler rejects any function longer than 20 lines unless it is split up
+D. Only functions are allowed to declare local variables
 
-**Answer: B** — factoring repeated work into a function means one definition to write, read, and change, instead of copies scattered through the program.
+**Answer: B** — a function gives repeated work a single home. A fix or change happens in one place instead of in every copy.
 
-### 2. `std::sqrt(2.0)` and a function you wrote yourself are called...
+### 2. Calling `std::clamp(v, 0, 100)` versus calling a function you wrote yourself is...
 
-A. with different syntax — library functions need `call` in front
-B. the same way: name, then arguments in parentheses
-C. only from `main`
-D. library functions cannot take arguments
+A. different — library calls need the keyword `call` in front
+B. the same syntax: the name, then the arguments in parentheses
+C. only possible from `main`
+D. slower, because library functions live in a separate file
 
-**Answer: B** — calling a standard-library function is identical to calling your own: `name(arguments)`. The library did the work of writing it.
+**Answer: B** — `#include` the header, then `name(arguments)`. A standard-library call looks exactly like a call to your own function; the library just already wrote it.
 
-### 3. Which header provides `std::sqrt`, `std::pow`, `std::ceil`, and `std::fmod`?
+### 3. Which header would you include for `std::gcd` and `std::lcm`?
 
-A. `<math>`
-B. `<cmath>`
-C. `<numbers>`
-D. `<random>`
+A. `<cmath>`
+B. `<numeric>`
+C. `<algorithm>`
+D. `<numbers>`
 
-**Answer: B** — `<cmath>` is the C++ math-function header. `<numbers>` (C++20) holds math *constants* like `std::numbers::pi`.
+**Answer: B** — `<numeric>` holds the numeric helpers `std::gcd` (greatest common divisor) and `std::lcm` (least common multiple). `<cmath>` is floating-point math functions; `<numbers>` is math *constants* like `std::numbers::pi`.
 
-### 4. What is a function prototype?
+### 4. `std::lerp(0.0, 100.0, 0.25)` produces...
 
-A. The full function including its body
-B. The signature (return type, name, parameter types) followed by a semicolon, with no body
-C. The first call to the function
-D. A comment describing the function
+A. `0.25`
+B. `25.0` — a quarter of the way from `0` to `100`
+C. `100.0`
+D. a compile error — `lerp` takes two arguments
 
-**Answer: B** — a prototype tells the compiler everything a caller needs before the function is defined. Parameter names in it are optional.
+**Answer: B** — `std::lerp(a, b, t)` (C++20) slides from `a` to `b` by the fraction `t`: `t = 0` gives `a`, `t = 1` gives `b`, `t = 0.25` gives `25.0`.
 
-### 5. Why put the prototype above `main` and the definition below it?
+### 5. What does `std::clamp(v, lo, hi)` return when `v` is above `hi`?
 
-A. The compiler runs faster that way
-B. It keeps `main` at the top where a reader looks first, and it is the only arrangement that works when two functions call each other
-C. Definitions are not allowed above `main`
-D. It is required by the C++ standard
+A. `v` unchanged
+B. `hi`
+C. `lo`
+D. the midpoint of `lo` and `hi`
 
-**Answer: B** — the compiler only needs a prototype before the first call; the definition can come later. This keeps `main` prominent and handles mutual recursion.
+**Answer: B** — `clamp` (C++17) forces `v` into `[lo, hi]`: below `lo` it returns `lo`, above `hi` it returns `hi`, otherwise `v` itself. Exercise 2's `bar()` uses it so the bar length can never exceed the width.
 
-### 6. In `double square(double value);`, what does the call `square(4)` do with the `int` argument `4`?
+### 6. `s.starts_with("http")` and `s.contains("lo wo")` on a `std::string` were added in which standards?
 
-A. Fails to compile — the types don't match
-B. Coerces `4` to `4.0` (a safe widening conversion) and squares it
-C. Truncates the result to an `int`
-D. Calls a different overload
+A. Both in C++11
+B. `starts_with` / `ends_with` in C++20, `contains` in C++23
+C. Both in C++23
+D. Neither exists — you must use `s.find(...)`
 
-**Answer: B** — argument coercion converts the `int` to the parameter's `double` type. `int`→`double` is a safe widening conversion, done silently.
+**Answer: B** — `starts_with` and `ends_with` arrived in C++20; `contains` in C++23. Before `contains`, the idiom was `s.find(sub) != std::string::npos`.
 
-### 7. Is the return type part of a function's signature?
+### 7. `std::popcount(x)` from `<bit>` (C++20) tells you...
 
-A. Yes — it is the first thing in the signature
-B. No — the signature is the name plus the parameter types; two functions differing only in return type cannot coexist
-C. Only for `void` functions
-D. Only for template functions
+A. the value of `x` doubled
+B. how many bits of `x` are set to `1`
+C. the position of the lowest set bit
+D. whether `x` is negative
 
-**Answer: B** — `int f(int)` and `double f(int)` have the same signature and are a conflict, not an overload.
+**Answer: B** — `popcount` is the population count: the number of `1` bits. `std::has_single_bit(x)` is the related "is exactly one bit set", i.e. "is `x` a power of two".
 
-### 8. What does the C++ standard say about the order in which a call's arguments are evaluated?
+### 8. What is a function *prototype* (declaration)?
+
+A. The full function including its `{ }` body
+B. The signature — return type, name, parameter types — ended with a semicolon, no body
+C. The first call to the function in the program
+D. A comment above the function describing what it does
+
+**Answer: B** — a prototype is a promise that a function of this shape exists somewhere. Parameter names in it are optional; only the types matter. A program may repeat the declaration but must have exactly one definition.
+
+### 9. Why is the return type *not* part of a function's signature?
+
+A. It is — the return type is the first element of the signature
+B. Because two functions differing only in return type could not be told apart at a call site, so the language forbids that pair
+C. Only `void` is excluded from the signature
+D. Return types are only ignored for templates
+
+**Answer: B** — `int parse(std::string_view)` and `double parse(std::string_view)` have the same signature `parse(std::string_view)`. `parse("42")` alone cannot say which you meant, so this is a redefinition error, not an overload.
+
+### 10. Given `void bar(int value, int width = 40, char fill = '*');`, where do the default values belong, and what does `bar(10)` do?
+
+A. In the definition; it is an error to omit an argument
+B. In the prototype only (not repeated in the definition); `bar(10)` uses `width = 40`, `fill = '*'`
+C. In both the prototype and the definition, with identical values
+D. Anywhere, and `bar(10)` is a compile error
+
+**Answer: B** — defaults are written once, on the prototype. Arguments fill in left to right, so `bar(10)` leaves `width` and `fill` at their defaults. Repeating the defaults on the definition is an error.
+
+### 11. In `double square(double v);`, what happens at the call `square(4)`?
+
+A. It fails to compile — `int` is not `double`
+B. Argument coercion widens `4` to `4.0` (a safe `int`→`double` conversion) and squares it
+C. The result is silently truncated back to an `int`
+D. It calls a different, `int`-taking overload
+
+**Answer: B** — argument coercion converts the `int` to the parameter's type. `int`→`double` is a safe widening conversion, applied silently. This is also why `describe(4.0)` in Exercise 4 needs the `.0`: `describe(4)` would coerce nothing and just match `describe(int)`.
+
+### 12. What does the standard guarantee about the order in which a call's arguments are evaluated?
 
 A. Strictly left to right
 B. Strictly right to left
-C. It is unspecified — the compiler may choose any order, so arguments must not have side effects other arguments observe
-D. Alphabetical by parameter name
+C. Nothing — the order is unspecified, so arguments must not have side effects that another argument can observe
+D. The order the parameters were declared in
 
-**Answer: C** — `f(n++, n)` is not portable because which argument reads `n` first is unspecified. Do side-effecting work in its own statement.
+**Answer: C** — `f(n++, n)` is not portable: which argument reads `n` first is unspecified. Do any side-effecting work in its own statement first.
 
-### 9. A `std::default_random_engine` that is default-constructed (`engine{}`) produces...
+### 13. A default-constructed `std::default_random_engine engine{};` (no seed) produces...
 
-A. a different sequence of numbers every run
-B. the same sequence of numbers every run
-C. only zeros
-D. a compile error — it must be seeded
+A. a different sequence every run
+B. the same sequence every run
+C. only zeros until it is seeded
+D. a compile error — engines must be seeded
 
-**Answer: B** — an unseeded engine replays the same sequence each run, which is handy while testing. Seed it to vary the output.
+**Answer: B** — an unseeded engine has a fixed hidden starting point and replays the same sequence each run. Handy for reproducible tests; seed it to vary the output.
 
-### 10. What are the two cooperating pieces you need to generate a random die roll?
+### 14. How do you make the engine produce a fresh sequence on each run?
 
-A. Two engines
-B. An engine (raw random bits) and a distribution (shapes them into the range 1..6)
-C. A distribution and a seed only
-D. `rand()` and `srand()`
-
-**Answer: B** — you call the distribution, passing it the engine: `die(engine)`. The engine supplies randomness; the distribution maps it to `{1, 6}`.
-
-### 11. How do you get a *different* random sequence on every run?
-
-A. Call the distribution more times
-B. Seed the engine from a nondeterministic source such as `std::random_device` — `std::default_random_engine engine{rd()};`
-C. Use a larger distribution range
+A. Call the distribution more times before using its result
+B. Seed the engine from a nondeterministic source: `std::default_random_engine engine{std::random_device{}()};`
+C. Widen the distribution's range
 D. You cannot — engines are always deterministic
 
-**Answer: B** — `std::random_device` provides a nondeterministic value to seed the engine with, giving a fresh sequence each run. A fixed seed instead gives reproducibility.
+**Answer: B** — `std::random_device` yields a nondeterministic value to seed with, giving a different sequence every run. A fixed integer seed instead gives reproducibility. Exercise 5 seeds a `static` local engine this way, once.
 
-### 12. What does `enum class Status { keep_rolling, won, lost };` (a scoped enum) give you over a plain `enum`?
+### 15. In Exercise 5, `next_roll()` declares its engine and distribution as `static` locals. What does that achieve?
 
-A. Faster comparisons
-B. The names are scoped (`Status::won`, not a bare `won`) and it does not implicitly convert to `int`, preventing accidental mix-ups
-C. It can hold string values
-D. Nothing — they are identical
+A. Nothing — `static` on a local has no effect
+B. They are constructed once, on the first call, and reused on every later call, so the engine is seeded a single time and the sequence continues across calls
+C. It makes the engine visible to other functions in the file
+D. It resets the engine to its seed on every call
 
-**Answer: B** — a scoped enum keeps its enumerators out of the surrounding scope and refuses silent conversion to integers, so you can't accidentally compare it to a number.
+**Answer: B** — a `static` local is initialized the first time control passes its declaration and keeps its state between calls. Without `static`, each call would build and reseed a new engine and you would get the same first roll every time.
 
-### 13. An ordinary local variable versus a `static` local variable in a function — what is the difference?
-
-A. There is none
-B. An ordinary local is recreated fresh on every call; a `static` local is created once (first call) and keeps its value between calls
-C. A `static` local is visible outside the function
-D. An ordinary local lives for the whole program
-
-**Answer: B** — `static int x{50};` initializes once; subsequent calls see whatever value it last held. An ordinary local starts over each call.
-
-### 14. When a local variable hides a global of the same name, how do you access the global?
+### 16. A local variable named `count` hides a global also named `count`. How do you name the global inside that scope?
 
 A. You cannot — the global is permanently shadowed
-B. With the unary scope resolution operator: `::name`
-C. By renaming the local
-D. With `global::name`
+B. `::count` — the unary scope-resolution operator skips local declarations
+C. Rename the local
+D. `global::count`
 
-**Answer: B** — `::value` skips local declarations and refers to the global. Inside the local's scope, a bare `value` still means the local.
+**Answer: B** — `::count` refers to the global. A bare `count` in that scope still means the local.
 
-### 15. What does `inline` on a function actually permit?
+### 17. After `int by_value(int n) { n *= n; return n; }` is called as `by_value(x)` with `x == 3`, what is `x`?
 
-A. It forces the compiler to paste the function body at every call site
-B. It lets the function's definition appear in multiple translation units (e.g. a header included by many files) without a "multiple definition" linker error
-C. It makes the function run at compile time
-D. It makes the function private
-
-**Answer: B** — `inline` relaxes the one-definition rule for that function. Whether the body is literally inlined at call sites is the optimizer's decision, keyword or not.
-
-### 16. After `square_by_value(x)` with `int square_by_value(int number) { number *= number; return number; }` and `x` equal to `2`, what is `x`?
-
-A. `4`
-B. `2` — `number` is a copy; the caller's `x` is unchanged
+A. `9`
+B. `3` — `n` is a copy; the caller's `x` is untouched
 C. `0`
 D. undefined
 
-**Answer: B** — pass by value copies the argument. `number *= number` changes the copy; the new value is only visible through the return.
+**Answer: B** — pass by value copies the argument. `n *= n` changes the copy; the new value is only visible through the return.
 
-### 17. `void square_by_reference(int& ref) { ref *= ref; }` called as `square_by_reference(z)` with `z` equal to `4` leaves `z` as...
+### 18. `void stats(const std::vector<int>& data, int& low, int& high, double& mean)` (Exercise 1) uses `int&` / `double&` parameters in order to...
 
-A. `4`
-B. `16` — `ref` is an alias for `z`, so `z` itself is modified
-C. `8`
-D. a compile error
+A. avoid copying the large vector
+B. return more than one result — the function writes `low`, `high`, and `mean` back through the references, into the caller's own variables
+C. make the arguments optional
+D. force the caller to pass literals
 
-**Answer: B** — `int&` makes `ref` refer to the caller's `z`. Modifying `ref` modifies `z` in place.
+**Answer: B** — a reference parameter is an alias for the caller's variable, so writing to it updates the original. That is how one call fills three outputs. (The separate `const std::vector<int>&` is the "avoid the copy, don't modify it" use of references.)
 
-### 18. Given `int box_volume(int length = 1, int width = 1, int height = 1);`, where must the default values be written, and what does `box_volume(10, 5)` compute?
+### 19. What does the compiler do with `template <typename T> T clamp_to(T v, T lo, T hi)` when you call `clamp_to(120, 0, 100)` and later `clamp_to(-2.5, 0.0, 1.0)`?
 
-A. In the definition; `10 * 5` = `50`
-B. In the prototype (once); `10 * 5 * 1` = `50` (height defaults)
-C. In both prototype and definition; `10 * 5 * 5` = `250`
-D. Anywhere; it is a compile error to omit an argument
+A. Runs the template directly, deducing types at run time
+B. Instantiates two concrete functions — one with `T = int`, one with `T = double` — and compiles each
+C. Rejects the second call — a template can only be used for one type per program
+D. Converts the doubles to `int` to match the first instantiation
 
-**Answer: B** — defaults go in the prototype, not repeated in the definition. Arguments fill left to right, so `height` takes its default `1`.
+**Answer: B** — a template is a pattern. Each distinct set of type arguments makes the compiler stamp out and compile a separate function. This is also why a template's body must be visible where it is used — hence templates live in headers, not `.cpp` files.
 
-### 19. Every recursive function must have...
+### 20. Every recursive function needs which two parts?
 
-A. exactly one parameter
-B. a base case that returns without recursing, plus a recursive step that moves toward that base case
-C. a loop inside it
-D. a `static` local
+A. Exactly one parameter and a `static` local
+B. A base case that returns without recursing, and a recursive step that moves toward that base case
+C. A loop and an accumulator
+D. Two recursive calls per step
 
-**Answer: B** — without a reachable base case the calls never stop and the call stack overflows — the recursive form of an infinite loop.
-
-### 20. In a lambda, what is the difference between `[=]` and `[&]` in the capture list?
-
-A. `[=]` captures nothing; `[&]` captures everything
-B. `[=]` captures used variables by value (a snapshot); `[&]` captures them by reference (a live link to the originals)
-C. `[=]` is for numbers, `[&]` is for strings
-D. They are interchangeable
-
-**Answer: B** — with `[=]`, later changes to the outside variable don't affect the lambda's copy. With `[&]`, the lambda reads and writes the actual variable.
+**Answer: B** — `digit_sum` (Exercise 6): the base case is `n < 10` returning `n`; the step is `(n % 10) + digit_sum(n / 10)`, with `n / 10` closer to the base case each time. Without a reachable base case the calls never stop and the stack overflows.

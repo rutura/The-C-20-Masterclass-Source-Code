@@ -2568,19 +2568,27 @@ What happens when you press *Configure*:
 
 ## 6.19 Assignment
 
-`main.cpp` has six stubbed exercises, each with its problem statement and
-a sample run in a comment; `main_solution.cpp` solves all six with the
-statements repeated above each solution. Built as two executables
-(`rooster`, `rooster_solution`).
+One small program - a terminal stats / bar-chart tool over a fixed list
+of numbers - built in eight steps. `main.cpp` has the eight stubbed
+exercises, each with its problem statement and a sample run in a
+comment; `main_solution.cpp` solves all eight with the statements
+repeated above each solution. Built as two executables (`rooster`,
+`rooster_solution`).
 
 | # | Exercise | Tools |
 |---|----------|-------|
-| 1 | `hypotenuse` | prototype below `main`, `<cmath>` `std::sqrt` |
-| 2 | roll histogram | `random_device` seed, `uniform_int_distribution`, counting |
-| 3 | `announce` call counter | `static` local |
-| 4 | `to_minutes_seconds` | reference parameters (two outputs) |
-| 5 | `line` + `max3<T>` | default arguments + a function template |
-| 6 | `power` + a lambda | recursion, `[[nodiscard]]`, a `[]` lambda |
+| 1 | `stats()` | prototype below `main`, reference out-parameters (three outputs), `<algorithm>` `std::min`/`max` |
+| 2 | `bar()` | default arguments (prototype only), `<algorithm>` `std::clamp` |
+| 3 | `clamp_to<T>()` | a function template instantiated for `int` and `double`, next to `std::clamp` |
+| 4 | `describe()` | overloading (`int` / `double` / `string_view`), argument coercion, `<string>` `starts_with` |
+| 5 | `next_roll()` | `static` local RNG (engine + distribution built once), `random_device` seed |
+| 6 | `digit_sum()` | recursion (base case + step) with its iterative twin, `[[nodiscard]]` |
+| 7 | `checksum()` | `[[nodiscard]]`, a `[&]` lambda accumulating over a range |
+| 8 | `pack_rgb()` / `channel()` | `<bit>` `popcount`/`has_single_bit`, `std::uint8_t`/`std::uint32_t` and shifts - mirrors the image project's byte packing |
+
+The quiz (`QUIZ.md`) is 20 multiple-choice questions across the whole
+chapter, including the expanded library tour and the image-project
+concepts.
 
 After this chapter the student can factor code into functions, pass and
 return data, and is ready for classes.
