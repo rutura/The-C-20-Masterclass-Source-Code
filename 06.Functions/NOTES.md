@@ -2491,7 +2491,7 @@ target_include_directories(rooster SYSTEM PRIVATE
 - **`SYSTEM`** marks `vendor/` as third-party, so `-Wall -Wextra` do not
   flag warnings inside stb's own code.
 - **No linking.** The header is compiled *from source* with our
-  compiler, our flags, our standard library. There is no `.lib` / `.a` /
+  compiler, our flags, our standard library. There is no external `.lib` / `.a` /
   `.dll` in the picture, so there is **no ABI mismatch** possible - the
   class of "nasty linker error" that comes from mixing a prebuilt binary
   with a different toolchain simply cannot happen here.
