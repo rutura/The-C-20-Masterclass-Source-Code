@@ -1982,10 +1982,18 @@ give the whole block to a file writer in one call, later.
 
 An image is a grid of pixels; each pixel is **three bytes** - red,
 green, blue. We store the whole grid in **one flat `std::vector<...>`**,
-row by row, 3 bytes per pixel:
+row by row, 3 bytes per pixel.
+
+The picture this project actually draws is **`width = 400`,
+`height = 300`** (see `main.cpp`), so its vector is
+`400 * 300 * 3 = 360'000` bytes - `make_canvas(400, 300)` allocates
+exactly that, all zero. A grid that size will not fit on this page, so
+the diagrams below shrink it to **4x3**. The arithmetic is identical -
+only `width` and `height` change.
 
 ```
-   width = 4, height = 3    →    vector of 4 * 3 * 3 = 36 bytes
+   the real image: width = 400, height = 300  →  400 * 300 * 3 = 360'000 bytes
+   shrunk to fit:  width = 4,   height = 3     →    4 * 3 * 3   =      36 bytes
 
    row 0:  [R G B][R G B][R G B][R G B]
    row 1:  [R G B][R G B][R G B][R G B]
@@ -1998,8 +2006,8 @@ row by row, 3 bytes per pixel:
 #### Same picture, counting actual bytes
 
 The grid above is the *mental* model. In memory it is **one straight
-line of bytes** - the rows are laid end to end, no gaps. For a 4x3
-image, byte by byte:
+line of bytes** - the rows are laid end to end, no gaps. For the
+shrunk 4x3 image, byte by byte:
 
 ```
    ┌──────────── row 0 (y=0) ───────────┬──────────── row 1 (y=1) ────────────┬─── row 2 ───┐
@@ -2024,7 +2032,7 @@ multiply by 3 (bytes per pixel):
            offset + 2  →  the Blue  byte
 ```
 
-Worked example - pixel `(2, 1)` in the 4x3 image:
+Worked example - pixel `(2, 1)` in the shrunk 4x3 image:
 
 ```
    y * width + x   =   1 * 4 + 2   =   6      ← it is the 6th pixel (0-based)
@@ -2035,7 +2043,17 @@ Worked example - pixel `(2, 1)` in the 4x3 image:
    └────┴────┴────┘
 ```
 
-That is exactly what `set_pixel` computes:
+Same arithmetic, this project's real `width = 400` - the centre pixel
+`(200, 150)` of the 400x300 image:
+
+```
+   y * width + x   =   150 * 400 + 200   =   60'200     ← the 60'200th pixel
+   * 3             =   180'600                          ← its Red byte is bytes[180'600]
+                                                          (right in the middle of the 360'000)
+```
+
+That is exactly what `set_pixel` computes (`width` is the same argument
+you pass to `make_canvas`):
 
 ```cpp
 const std::size_t i{(static_cast<std::size_t>(y) * width + x) * 3};
@@ -2044,22 +2062,34 @@ pixels[i + 1] = g;
 pixels[i + 2] = b;
 ```
 
-The helper functions are all pure chapter-6 material:
+The helper functions are all pure chapter-6 material (signatures as in
+`image.h`):
 
 ```cpp
-std::vector<std::uint8_t> make_canvas(int w, int h);          // all-zero buffer
-void set_pixel(buf&, int w, int h, int x, int y, r, g, b);    // one pixel, bounds-checked
-void draw_gradient(buf&, int w, int h, /* two colours */);    // fill, blend across x
-void draw_border(buf&, int w, int h, int thickness, r,g,b);   // frame
+std::vector<std::uint8_t> make_canvas(int w, int h);              // all-zero buffer
+void set_pixel(buf&, int w, int h, int x, int y, r, g, b);        // one pixel, bounds-checked
+void draw_gradient(buf&, int w, int h, l_r,l_g,l_b, r_r,r_g,r_b); // fill, blend left→right
+void draw_border(buf&, int w, int h, int thickness, r,g,b);       // frame
+```
+
+And `main.cpp` calls them with this project's actual numbers:
+
+```cpp
+auto pixels = make_canvas(400, 300);                 // 360'000 bytes, all 0
+draw_gradient(pixels, 400, 300,  20, 30, 90,         // left  colour: deep blue
+                                240, 140, 40);       // right colour: warm orange
+draw_border(pixels, 400, 300, 8, 255, 255, 255);     // 8-px white frame
 ```
 
 - a **header / source split** (6.10): declarations in `image.h`, bodies
   in `image.cpp`
 - functions take the buffer **by reference** (6.8) and scalars by value
-- `draw_gradient` blends two colours with a **lambda** (6.13):
+- `draw_gradient` blends the two colours with a **lambda** (6.13) - for
+  the call above, `mix` runs `20 → 240` on red, `30 → 140` on green,
+  `90 → 40` on blue as `x` sweeps `0 → 399`:
 
   ```cpp
-  const double t{static_cast<double>(x) / (width - 1)};   // 0.0 .. 1.0 across x
+  const double t{static_cast<double>(x) / (width - 1)};   // 0.0 at x=0 .. 1.0 at x=399
   const auto mix = [t](std::uint8_t a, std::uint8_t c) {
       return static_cast<std::uint8_t>(a + t * (c - a));   // linear blend
   };
