@@ -96,7 +96,7 @@ int total{sum(3, 4)};   // compiler may compile this as: int total{3 + 4};
 
 Two things to keep straight:
 
-- `inline` is a **suggestoion, not a command**. The compiler may still
+- `inline` is a **suggestion, not a command**. The compiler may still
   decide to call it normally if it deems that better.
 
 ---

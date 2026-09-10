@@ -58,7 +58,7 @@ int main() {
     // Each of these would produce a compiler diagnostic:
     //
     //   username_is_available("trinity");   // warning: [[nodiscard]] result ignored
-    //   full_name("Thomas", "Anderson");    // warning: 'full_name' is deprecated:
+    full_name("Thomas", "Anderson");    // warning: 'full_name' is deprecated:
     //                                       //          use display_name() instead
 
     // You may also run into these - same idea, a hint to the compiler:

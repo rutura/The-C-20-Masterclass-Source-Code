@@ -25,7 +25,7 @@ int main() {
 
     // Option A: seed from the seeker - the same number always draws the
     // same fortune.
-    unsigned int seed{ 100 };
+    unsigned int seed{ 10 };
 
     std::default_random_engine seeded_engine{seed};
     std::println("For {}, the cards say: {}", seed, fortunes[pick(seeded_engine)]);
