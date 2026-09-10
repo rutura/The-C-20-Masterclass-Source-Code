@@ -2400,8 +2400,7 @@ the data.
 add_executable(rooster main.cpp image.cpp image.h)
 ```
 
-The lesson: **a dependency is a cost.** When the job is small and stable,
-a dozen lines of your own code beats pulling in a library.
+The lesson: Writting your ppm file by hand. 
 
 ### B. A vendored single-header library (`6.17ProjectVendoredHeader`)
 
