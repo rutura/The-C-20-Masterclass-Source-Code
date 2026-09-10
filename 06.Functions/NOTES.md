@@ -2159,7 +2159,7 @@ tiny text header, then the raw RGB bytes.
    P6\n              ← "P6" = binary RGB PPM
    400 300\n         ← width height
    255\n             ← max value per channel
-   <180000 bytes>    ← width * height * 3, straight from our vector
+   <360'000 bytes>   ← width * height * 3 = 400 * 300 * 3, straight from our vector
 ```
 
 ```cpp
