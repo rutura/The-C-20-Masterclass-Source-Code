@@ -18,10 +18,10 @@ int main() {
 
     // Deep blue on the left, warm orange on the right.
     draw_gradient(pixels, width, height,
-                  20, 30, 90,       // left  colour
-                  240, 140, 40);    // right colour
+                  255, 0, 0,       // left  colour
+                  0, 255, 0);    // right colour
 
-    draw_border(pixels, width, height, 8, 255, 255, 255);   // white frame
+    draw_border(pixels, width, height, 8, 0, 0, 255);   // white frame
 
     if (write_ppm("image.ppm", width, height, pixels)) {
         std::println("wrote image.ppm ({} x {})", width, height);
