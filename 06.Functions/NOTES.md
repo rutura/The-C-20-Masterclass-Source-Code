@@ -1978,89 +1978,134 @@ std::vector<std::uint8_t> bytes(36, 0);   // 36 bytes, all 0
 `bytes.data()` hands back a pointer to that first byte - which is how we
 give the whole block to a file writer in one call, later.
 
-### The pixel model
+### The pixel model: mapping 2D `(x, y)` onto a 1D vector
 
-An image is a grid of pixels; each pixel is **three bytes** - red,
-green, blue. We store the whole grid in **one flat `std::vector<...>`**,
-row by row, 3 bytes per pixel.
+We think about a picture in **two dimensions**: column `x` going right,
+row `y` going down, a pixel addressed as `(x, y)`. But a
+`std::vector` is **one dimension** - a single straight line of bytes,
+index `0` to `size - 1`. So the whole job of the pixel model is a
+mapping:
+
+```
+        a 2D position (x, y)   ───────►   a 1D index into the byte vector
+```
+
+Every time `set_pixel` is asked to colour `(x, y)`, it has to work out
+*which byte* in that flat line the pixel lands on. Get that mapping
+right and everything else (gradient, border) is just calling
+`set_pixel` in a loop.
+
+Two facts fix the mapping:
+
+- **each pixel is 3 bytes** - red, then green, then blue, in that order
+- **rows are stored one after another**, top row first, no gaps - this
+  is called *row-major* order
 
 The picture this project actually draws is **`width = 400`,
-`height = 300`** (see `main.cpp`), so its vector is
-`400 * 300 * 3 = 360'000` bytes - `make_canvas(400, 300)` allocates
-exactly that, all zero. A grid that size will not fit on this page, so
-the diagrams below shrink it to **4x3**. The arithmetic is identical -
-only `width` and `height` change.
+`height = 300`** (see `main.cpp`), so `make_canvas(400, 300)` allocates
+`400 * 300 * 3 = 360'000` bytes, all zero.
+
+#### The two views, side by side
+
+A grid 400 wide will not fit on this page, so the next few diagrams use
+a **4x3** image (`width = 4`, `height = 3`, `4 * 3 * 3 = 36` bytes).
+Only the numbers shrink - the mapping is identical.
+
+**View 1 - the 2D grid we picture.** `x` is the column (0 on the left,
+`width - 1` on the right); `y` is the row (0 at the top, `height - 1`
+at the bottom):
 
 ```
-   the real image: width = 400, height = 300  →  400 * 300 * 3 = 360'000 bytes
-   shrunk to fit:  width = 4,   height = 3     →    4 * 3 * 3   =      36 bytes
-
-   row 0:  [R G B][R G B][R G B][R G B]
-   row 1:  [R G B][R G B][R G B][R G B]
-   row 2:  [R G B][R G B][R G B][R G B]
-            ▲
-            pixel (x, y) starts at byte  (y * width + x) * 3
-                                          └── then +0 = R, +1 = G, +2 = B
+              x = 0        x = 1        x = 2        x = 3
+            ┌──────────┬──────────┬──────────┬──────────┐
+   y = 0    │  (0,0)   │  (1,0)   │  (2,0)   │  (3,0)   │
+            ├──────────┼──────────┼──────────┼──────────┤
+   y = 1    │  (0,1)   │  (1,1)   │  (2,1)   │  (3,1)   │
+            ├──────────┼──────────┼──────────┼──────────┤
+   y = 2    │  (0,2)   │  (1,2)   │  (2,2)   │  (3,2)   │
+            └──────────┴──────────┴──────────┴──────────┘
+   ──────────────────────────────────────────────────────►  x (column), 0 .. width-1
+   │
+   ▼  y (row), 0 .. height-1
 ```
 
-#### Same picture, counting actual bytes
-
-The grid above is the *mental* model. In memory it is **one straight
-line of bytes** - the rows are laid end to end, no gaps. For the
-shrunk 4x3 image, byte by byte:
-
-```
-   ┌──────────── row 0 (y=0) ───────────┬──────────── row 1 (y=1) ────────────┬─── row 2 ───┐
-   │ px(0,0)  px(1,0)  px(2,0)  px(3,0) │ px(0,1)  px(1,1)  px(2,1)  px(3,1)  │  px(0,2) ...│
-   │ R G B    R G B    R G B    R G B   │ R G B    R G B    R G B    R G B    │  R G B   ...│
-   byte 0..2  3..5     6..8     9..11     12..14   15..17   18..20   21..23      24..26
-```
-
-To find where pixel `(x, y)` starts, count the pixels **before** it and
-multiply by 3 (bytes per pixel):
+**View 2 - the 1D vector it actually lives in.** Take the rows above
+and lay them end to end, left to right, top row first. Then expand each
+pixel into its 3 bytes. This is the entire 36-byte vector, nothing
+hidden:
 
 ```
-   pixels before (x, y)  =  y * width      (all the full rows above it)
-                          + x              (the pixels to its left in its row)
-
-   byte offset           =  (y * width + x) * 3
-                            └─────┬──────┘
-                              pixel number, counting from 0
-
-   then:   offset + 0  →  the Red   byte
-           offset + 1  →  the Green byte
-           offset + 2  →  the Blue  byte
+   ┌─────────────── row y=0 (4 pixels) ──────────────┬─────────────── row y=1 (4 pixels) ─────────────┬─────────────── row y=2 (4 pixels) ──────────────┐
+   │  (0,0)     (1,0)     (2,0)     (3,0)            │  (0,1)     (1,1)     (2,1)     (3,1)           │  (0,2)     (1,2)     (2,2)     (3,2)            │
+   │ R  G  B   R  G  B   R  G  B   R  G  B           │ R  G  B   R  G  B   R  G  B   R  G  B          │ R  G  B   R  G  B   R  G  B   R  G  B           │
+   byte:                                                                                                                                                   
+   │ 0  1  2   3  4  5   6  7  8   9  10 11          │ 12 13 14  15 16 17  18 19 20  21 22 23         │ 24 25 26  27 28 29  30 31 32  33 34 35          │
+   └─────────────────────────────────────────────────┴────────────────────────────────────────────────┴─────────────────────────────────────────────────┘
+     ▲                                                  ▲                                                  ▲
+   pixel 0                                            pixel 4                                            pixel 8
+   (start of row 0)                                   (start of row 1)                                   (start of row 2)
 ```
 
-Worked example - pixel `(2, 1)` in the shrunk 4x3 image:
+Notice row `y` starts at pixel `y * width`: row 0 at pixel 0, row 1 at
+pixel `1 * 4 = 4`, row 2 at pixel `2 * 4 = 8`. That is the whole trick.
+
+#### The mapping formula
+
+To turn `(x, y)` into a byte index, count the **pixels before it**,
+then multiply by 3:
 
 ```
-   y * width + x   =   1 * 4 + 2   =   6      ← it is the 6th pixel (0-based)
-   * 3             =   18                     ← its Red byte is bytes[18]
+   pixels before (x, y)  =  y * width      ← all the full rows above it (row-major!)
+                          + x              ← the pixels to its left in its own row
+                          ─────────────
+                          =  the pixel's number, counting from 0
 
-   ┌────┬────┬────┐
-   │ 18 │ 19 │ 20 │   bytes[18] = R,  bytes[19] = G,  bytes[20] = B  of pixel (2,1)
-   └────┴────┴────┘
+   byte index of its RED byte   =  (y * width + x) * 3
+
+   then:   + 0  →  Red
+           + 1  →  Green
+           + 2  →  Blue
 ```
 
-Same arithmetic, this project's real `width = 400` - the centre pixel
-`(200, 150)` of the 400x300 image:
+**Worked example 1 - pixel `(2, 1)` in the 4x3 image.** From View 1 it
+is the 3rd pixel of the 2nd row; from View 2 we can literally count to
+it:
 
 ```
-   y * width + x   =   150 * 400 + 200   =   60'200     ← the 60'200th pixel
-   * 3             =   180'600                          ← its Red byte is bytes[180'600]
-                                                          (right in the middle of the 360'000)
+   y * width + x   =   1 * 4 + 2   =   6        ← pixel number 6 (0-based)
+   * 3             =   18                       ← its Red byte is index 18
+
+   ...  16  17 │ 18  19  20 │ 21  22  ...
+               │  R   G   B │
+               └── pixel (2,1) ──┘              bytes[18]=R  bytes[19]=G  bytes[20]=B
 ```
 
-That is exactly what `set_pixel` computes (`width` is the same argument
-you pass to `make_canvas`):
+Check it against View 2 above: pixel `(2,1)` sits at bytes `18..20`. It
+matches.
+
+**Worked example 2 - the real image, `width = 400`.** Same formula, the
+centre pixel `(200, 150)` of the 400x300 picture:
+
+```
+   y * width + x   =   150 * 400 + 200   =   60'200      ← the 60'200th pixel
+   * 3             =   180'600                           ← its Red byte is index 180'600
+                                                           (dead centre of the 360'000)
+```
+
+That is exactly what `set_pixel` computes - `width` here is the same
+value passed to `make_canvas`:
 
 ```cpp
 const std::size_t i{(static_cast<std::size_t>(y) * width + x) * 3};
-pixels[i + 0] = r;
-pixels[i + 1] = g;
-pixels[i + 2] = b;
+pixels[i + 0] = r;   // Red
+pixels[i + 1] = g;   // Green
+pixels[i + 2] = b;   // Blue
 ```
+
+The `static_cast<std::size_t>` matters: `y * width` for the real image
+is `149 * 400 ≈ 59'600` and the final index passes 180'000 - fine for
+`std::size_t`, but doing the multiply in `int` first is a habit worth
+dropping early.
 
 The helper functions are all pure chapter-6 material (signatures as in
 `image.h`):
