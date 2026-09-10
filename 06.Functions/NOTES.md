@@ -2294,6 +2294,106 @@ corrupt the image. `reinterpret_cast<const char*>` is needed because
 `ostream::write` deals in `char`, while our buffer is `std::uint8_t` -
 same one byte, different type name, so the cast is safe here.
 
+#### Optional: reading the file we just wrote in a hex editor
+
+*This part is a detour - skip it if you only care about the picture. But
+if you have never looked at a binary file's raw bytes, a PPM is a
+perfect first one, because half of it is text you can read and half is
+data you cannot.*
+
+Open `image.ppm` in a **hex editor** (in VS Code: install the Microsoft
+**Hex Editor** extension, then right-click the open `image.ppm` tab ▸
+*Reopen Editor With...* ▸ *Hex Editor*). You will see three columns:
+
+```
+   00000000   50 36 0A 34 30 30 20 33 30 30 0A 32 35 35 0A FF   P6.400 300.255..
+   └───┬────┘  └──────────────────┬───────────────────────┘   └───────┬──────┘
+    offset            16 bytes, each shown in hex              same bytes as text
+   (address of                                                (a '.' = not printable)
+    the first byte
+    on this row)
+```
+
+**1. Every pair of characters is one byte, written in hexadecimal.**
+`50` is not "fifty" - it is the hex number `0x50`, which is `80` in
+decimal. One byte holds `0x00`..`0xFF`, i.e. `0`..`255`. The editor
+shows bytes in hex because it is compact and lines up in columns; the
+value is the same number your C++ code would call `80` or `0x50`.
+
+**2. The left column is the offset - use it to locate any byte.**
+The offset is the position of the **first** byte on that row, counted
+from the start of the file, and it too is written in hex. Rows are 16
+bytes wide, so the offsets go `00000000`, `00000010`, `00000020`, ...
+(that is `+16` each time: `0x10` = 16). To find the offset of a
+specific byte:
+
+```
+   byte offset  =  row offset  +  column number
+
+   e.g. the byte in row 0x00000020, column 0x0A
+        = 0x20 + 0x0A = 0x2A            (42 in decimal - the 43rd byte)
+```
+
+Going the other way, to jump to "byte number 10'000" (decimal): 10'000
+= `0x2710`, so it is in the row whose offset is `0x2710` rounded down to
+a multiple of 16 (`0x2710`), at column `0x00`. Most hex editors have a
+*Go to offset* command (often `Ctrl+G`) that takes the number directly.
+
+**3. The header is ASCII - printed characters, not numbers.** Look at
+the decoded-text column for the first row: `P6.400 300.255.`. Our code
+wrote `out << "P6\n" << 400 << ' ' << 300 << "\n255\n";`. The stream
+turned the **number** `400` into the **three characters** `'4'`, `'0'`,
+`'0'`, and those are the bytes on disk:
+
+```
+   text:   P     6    \n    4     0     0    ' '    3     0     0    \n    2     5     5    \n
+   hex:   50    36    0A    34    30    30    20    33    30    30    0A    32    35    35    0A
+   dec:   80    54    10    52    48    48    32    51    48    48    10    50    53    53    10
+```
+
+`'4'` is the byte `0x34` (52), **not** `0x04`. `'0'` is `0x30` (48).
+This is the ASCII table at work: character `'0'` through `'9'` are bytes
+48 through 57. `0x0A` is `'\n'`, a control character with no glyph, so
+the text column shows it as `.`. The header ends at the `0x0A` at
+offset `0x0E` - **15 bytes** in total (`P6\n` = 3, `400 300\n` = 8,
+`255\n` = 4).
+
+**4. After the header it is raw pixel bytes - not text.** From offset
+`0x0F` on, the decoded-text column is mostly dots, because pixel values
+like `0xFF` or `0x18` are not printable characters - they are just
+numbers. Three bytes per pixel, R then G then B:
+
+```
+   offset 0x0F:  FF FF FF  FF FF FF  FF FF FF   ...
+                 └pixel 0┘ └pixel 1┘ └pixel 2┘
+                  R  G  B
+```
+
+`FF FF FF` is `(255, 255, 255)` - white. That is the 8-pixel border
+`draw_border` painted, so the file opens with a long run of `FF`. Scroll
+down: around offset `0x25A7` the border ends and the gradient begins -
+the first non-white bytes are `18 20 58` = `(24, 32, 88)`, our deep-blue
+left colour. Keep scrolling and each pixel's bytes drift up toward
+`F0 8C 28` = `(240, 140, 40)`, the orange right colour, then snap back
+to `FF FF FF` at the right border and the start of the next row.
+
+**5. Watch the row wrap.** The hex view shows 16 bytes per row, but a
+pixel is 3 bytes and `16 / 3` is not whole, so pixels straddle the row
+boundary. A row starting `20 58 18 20 58 19 ...` has begun in the
+*middle* of a pixel. Only the arithmetic in step 4 tells you where a
+pixel starts - never assume a display row does.
+
+**6. Check the total size.** Header (15) + pixels (`400 * 300 * 3` =
+360'000) = **360'015 bytes**. The last byte sits at offset `360'014` =
+`0x57E4E`. If the file is that many bytes, `write_ppm` wrote exactly
+what it should.
+
+The point: a binary file is just **a numbered sequence of bytes**. The
+offset column is the numbering; whether a run of bytes "means" text or
+pixels or something else is a matter of which part of the format you are
+looking at. PPM makes that split obvious - a readable text header, then
+the data.
+
 `CMakeLists.txt` lists only our own files - there is nothing else:
 
 ```cmake
