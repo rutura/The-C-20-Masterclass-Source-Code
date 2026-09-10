@@ -2455,6 +2455,35 @@ bool write_png(std::string_view name, int w, int h, const buf& pixels) {
 }
 ```
 
+**What the last argument, the "stride", means.** `stbi_write_png` gets a
+bare pointer to our bytes (`pixels.data()`) and the width and height -
+but a pointer alone does not say *where each row ends and the next
+begins*. The stride is that missing piece: **the number of bytes from
+the start of one row to the start of the next row.** The library uses it
+to step down the image - row 1 starts `stride` bytes after row 0, row 2
+starts `stride` bytes after row 1, and so on.
+
+For us the rows are packed end to end with no gap, so one row is exactly
+`width * 3` bytes (one pixel = 3 bytes), and that is the stride we pass:
+
+```
+   width = 4, stride = 4 * 3 = 12
+
+   byte:  0         12        24
+          ▼         ▼         ▼
+          [row 0 ][row 1 ][row 2 ]     ← +12 each time gets you to the next row
+```
+
+Stride is a *separate* argument from width because they are not always
+equal. Some image libraries pad every row out to a round number of bytes
+(4- or 8-byte aligned) for speed, so a 400-pixel-wide RGB row that
+*should* be `1200` bytes might actually occupy `1200` rounded up to
+`1200`... or `1204`, or `1208`. In that case `stride` would be the
+padded size and `width * 3` would be wrong. Our buffer has no padding,
+so `stride == width * 3` here - but the parameter exists so the library
+can also read row-padded buffers. Pass `0` and stb assumes "tightly
+packed", i.e. `width * 3`; we pass it explicitly to be clear.
+
 `CMakeLists.txt` adds the implementation file and the include path:
 
 ```cmake
