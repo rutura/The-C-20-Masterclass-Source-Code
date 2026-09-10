@@ -2564,11 +2564,6 @@ What happens when you press *Configure*:
    compiled here?     yes                yes                yes  → no ABI risk
 ```
 
-Rule of thumb: **no dependency if the code is small (A). Vendor a single
-header when it is small and you want zero build-time surprises (B).
-FetchContent once dependencies are big enough that copying them into
-your repo is the bigger cost (C).**
-
 ---
 
 ## 6.19 Assignment
