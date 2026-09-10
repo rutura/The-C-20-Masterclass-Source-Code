@@ -1,6 +1,7 @@
 #include <fstream>
 #include <print>
 #include <string>
+#include <filesystem>
 
 // Part 1 of the file lecture: write a list of names to a text file.
 //
@@ -9,6 +10,10 @@
 // with the same << operator.
 
 int main() {
+
+    // Working directory
+    std::println("Working directory: {}",
+        std::filesystem::current_path().string());
 
     // Opening the stream with a filename creates (or truncates) the file
     // in the program's working directory - see the lecture notes for

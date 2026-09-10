@@ -1,6 +1,7 @@
 #include <fstream>
 #include <print>
 #include <string>
+#include <filesystem>
 
 // Part 2 of the file lecture: read the names back out and print them.
 //
@@ -8,6 +9,11 @@
 // counterpart of std::cin. std::getline reads one whole line at a time.
 
 int main() {
+
+    // Working directory
+    std::println("Working directory: {}",
+        std::filesystem::current_path().string());
+
 
     std::ifstream in{"names.txt"};
 

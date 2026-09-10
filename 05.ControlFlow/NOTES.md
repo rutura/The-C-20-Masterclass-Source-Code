@@ -866,7 +866,7 @@ do {
 ## 5.11 The `switch` statement
 
 Compare **one integer expression** against a list of constant `case`
-labels and jump to the match. Cleaner than a long `else if` chain of
+labels and jump to the match. This is cleaner than a long `else if` chain of
 equality tests.
 
 The example buckets a review score (0-100) into a star rating. Dividing
