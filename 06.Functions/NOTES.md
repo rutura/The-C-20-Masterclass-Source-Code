@@ -1978,6 +1978,69 @@ std::vector<std::uint8_t> bytes(36, 0);   // 36 bytes, all 0
 `bytes.data()` hands back a pointer to that first byte - which is how we
 give the whole block to a file writer in one call, later.
 
+### A quick word on the types: `std::uint8_t` and `std::size_t`
+
+`image.h` and `image.cpp` use two type names you have not met yet:
+`std::uint8_t` for colour bytes and `std::size_t` for the vector index.
+Neither is a new *kind* of type - both are just **aliases for built-in
+integer types you already know**, given clearer names.
+
+**`std::uint8_t`** (from `<cstdint>`) means "an **u**nsigned **int**eger
+exactly **8** bits wide" - so its range is `0` to `255`, exactly one
+byte. On every compiler you will use, that is a plain `unsigned char`:
+
+```cpp
+#include <cstdint>
+
+std::uint8_t red{255};        // same object as:  unsigned char red{255};
+unsigned char also_a_byte{0}; // the two names are interchangeable here
+```
+
+We use `std::uint8_t` instead of `unsigned char` for two reasons.
+First, **intent**: `unsigned char` reads like text handling; a pixel
+channel is a small number, and `uint8_t` says "one byte of data, 0-255"
+out loud. Second, **the range is guaranteed in the name** - `char` is
+only *required* to be at least 8 bits, and whether plain `char` is
+signed is compiler-dependent; `std::uint8_t` pins both down. The `8` is
+the whole point: `240` fits, `256` wraps back to `0`, which is why
+`draw_gradient` casts its blended result back to `std::uint8_t`
+deliberately.
+
+Related fixed-width aliases, all from `<cstdint>`, all just renamings of
+built-in types:
+
+```
+   std::uint8_t   std::int8_t     8-bit   ( unsigned / signed char )
+   std::uint16_t  std::int16_t   16-bit   ( unsigned / signed short )
+   std::uint32_t  std::int32_t   32-bit   ( unsigned / signed int, usually )
+   std::uint64_t  std::int64_t   64-bit   ( unsigned / signed long long, usually )
+```
+
+**`std::size_t`** (from `<cstddef>`, and pulled in by `<vector>` etc.)
+is an **unsigned** integer type big enough to hold the size of any
+object in memory - on a 64-bit build, a 64-bit unsigned integer, so
+roughly `unsigned long long`. It is the type `vector::size()` returns
+and the type `vector::operator[]` expects:
+
+```cpp
+std::vector<std::uint8_t> pixels(360'000, 0);
+
+std::size_t n{pixels.size()};   // 360'000, as an unsigned 64-bit value
+pixels[n - 1] = 255;            // the index is a std::size_t
+```
+
+Why not just `int`? An `int` is signed and, on Windows/MSVC, only
+32 bits - fine for this project's `360'000`, but a 6000x4000 photo is
+72 million bytes and a 4-byte-per-pixel buffer index blows past
+`int`'s ~2.1-billion limit. `std::size_t` has the same reach as the
+memory it is indexing, and matches the vector's own API so you get no
+signed/unsigned comparison warnings. This is exactly why `set_pixel`
+computes its index as `std::size_t` (see the pixel model below).
+
+You will still learn and use `short`, `int`, `long long`, `unsigned`,
+`char` directly - these aliases are the same types wearing a name that
+states their size and signedness at the point of use.
+
 ### The pixel model: mapping 2D `(x, y)` onto a 1D vector
 
 We think about a picture in **two dimensions**: column `x` going right,
@@ -2152,15 +2215,69 @@ output written.
 
 ### A. No dependency at all (`6.16ProjectImageWriter`)
 
-The simplest image format, **PPM**, is short enough to write by hand: a
-tiny text header, then the raw RGB bytes.
+#### What PPM is, and how it compares
+
+**PPM** (Portable Pixmap) is about the simplest image format that
+exists. A PPM file is a **tiny text header** followed by the **raw RGB
+bytes**, with no compression and no metadata:
 
 ```
-   P6\n              ← "P6" = binary RGB PPM
-   400 300\n         ← width height
-   255\n             ← max value per channel
+   P6\n              ← magic number: "P6" = binary RGB pixmap
+   400 300\n         ← width height, in ASCII text
+   255\n             ← the maximum value of one colour channel
    <360'000 bytes>   ← width * height * 3 = 400 * 300 * 3, straight from our vector
 ```
+
+That is the *entire* specification we need. There is no table of
+contents, no checksum, no colour profile - the pixels are stored
+exactly as they sit in our `std::vector`, in the same row-major order.
+That is why `write_ppm` is six lines: build the header string, dump the
+buffer.
+
+How it stacks up against formats you have heard of:
+
+```
+   format   compression        what it's for                        write it by hand?
+   ──────   ────────────        ─────────────                        ─────────────────
+   PPM      none                learning, pipelines, quick dumps     yes - a few lines
+   BMP      none (usually)      old Windows bitmaps                   almost - fiddly header
+   PNG      lossless (DEFLATE)  screenshots, line art, transparency   no - needs a library
+   JPEG     lossy (DCT)         photographs                          no - needs a library
+   GIF      lossless, ≤256 col  simple animation                     no - needs a library
+   TIFF     optional            scanning, print, archival            no - complex container
+```
+
+The trade is stark. Our 400x300 image is **360 KB as PPM** and would be
+perhaps **15-40 KB as PNG** - PPM pays for its simplicity in file size,
+every time, because it never compresses. In exchange, *you can write the
+encoder yourself in an afternoon*, which is the entire point of this
+first version. PNG and JPEG buy small files and wide compatibility at
+the cost of a real dependency - that is versions B and C.
+
+PPM is also a genuinely useful **interchange format**: many
+command-line image tools read and write it precisely because parsing it
+is trivial, so it shows up as the "plumbing" between programs in image
+pipelines.
+
+#### Opening a `.ppm` file
+
+PPM is not a format your OS previews by default, but plenty of software
+reads it:
+
+- **Krita** (free, cross-platform) - opens PPM directly via `File ▸ Open`.
+- **GIMP** (free, cross-platform) - same, built-in PPM support.
+- **IrfanView** (free, Windows) and **XnView MP** (free, cross-platform)
+  - lightweight viewers that both handle PPM.
+- **ImageMagick** (`magick image.ppm image.png`) and **FFmpeg** -
+  command-line, convert PPM to anything.
+- **macOS Preview** opens PPM; **Windows Photos** does **not** - convert
+  first, or use one of the viewers above.
+- Most code editors with an image preview (VS Code with an extension,
+  for instance) will not show PPM - don't be surprised by that.
+
+If in doubt, convert once with ImageMagick and view the PNG.
+
+#### The code and the build
 
 ```cpp
 bool write_ppm(std::string_view name, int w, int h, const buf& pixels) {
@@ -2171,6 +2288,12 @@ bool write_ppm(std::string_view name, int w, int h, const buf& pixels) {
 }
 ```
 
+`std::ios::binary` matters on Windows: without it the stream would
+translate every `0x0A` byte in the pixel data into `0x0D 0x0A` and
+corrupt the image. `reinterpret_cast<const char*>` is needed because
+`ostream::write` deals in `char`, while our buffer is `std::uint8_t` -
+same one byte, different type name, so the cast is safe here.
+
 `CMakeLists.txt` lists only our own files - there is nothing else:
 
 ```cmake
@@ -2178,14 +2301,14 @@ add_executable(rooster main.cpp image.cpp image.h)
 ```
 
 The lesson: **a dependency is a cost.** When the job is small and stable,
-a dozen lines of your own code beats pulling in a library. Open
-`image.ppm` in an image viewer (or `magick image.ppm image.png` to
-convert).
+a dozen lines of your own code beats pulling in a library.
 
 ### B. A vendored single-header library (`6.17ProjectVendoredHeader`)
 
-PPM files are large and few programs open them. To write a **PNG** we
-use a real library - **`stb_image_write.h`** by Sean Barrett - but we
+As we just saw, PPM is bulky and not something most people can
+double-click to open. To write a compressed, universally-supported
+**PNG** we use a real library - **`stb_image_write.h`** by Sean Barrett
+- but we
 **vendor** it: the one header file is committed straight into the
 project under `vendor/`.
 
