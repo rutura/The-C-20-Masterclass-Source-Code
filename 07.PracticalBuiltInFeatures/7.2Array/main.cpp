@@ -5,66 +5,63 @@ int main() {
 
     // std::array<T, N> - a fixed-size sequence of N values of type T,
     // stored inline (no separate heap allocation). N is part of the type.
-    std::array<int, 5> scores{};   // {} zero-initializes every element
+    std::println("tallying six dice rolls:");
+    std::array<int, 6> rollTally{};   // {} zero-initializes every element
 
-    for (std::size_t i{0}; i < scores.size(); ++i) {
-        scores[i] = 0;
+    for (std::size_t face{0}; face < rollTally.size(); ++face) {
+        rollTally[face] = 0;
     }
 
-    std::println("{:>7}{:>10}", "Element", "Value");
-    for (std::size_t i{0}; i < scores.size(); ++i) {
-        std::println("{:>7}{:>10}", i, scores[i]);
+    // A roll of the die at index 2 (face value 3) comes up four times.
+    rollTally[2] = 4;
+
+    for (std::size_t face{0}; face < rollTally.size(); ++face) {
+        std::println("face {}: {} times", face + 1, rollTally[face]);
     }
 
-    // .at(i) is the same idea as [i], but it checks the index and throws
-    // std::out_of_range instead of silently reading past the array.
-    std::println("");
-    std::println("{:>7}{:>10}", "Element", "Value");
-    for (std::size_t i{0}; i < scores.size(); ++i) {
-        std::println("{:>7}{:>10}", i, scores.at(i));
+    // .at(face) is the same idea as [face], but it checks the index and
+    // throws std::out_of_range instead of silently reading past the array.
+    std::println("\nsame tally, read through .at():");
+    for (std::size_t face{0}; face < rollTally.size(); ++face) {
+        std::println("face {}: {} times", face + 1, rollTally.at(face));
     }
 
-    // Class template argument deduction (CTAD): the element type and N
-    // are both inferred from the braced initializer - no <int, 5> needed.
-    std::array highScores{32, 27, 64, 18, 95};
+    // rollTally.at(6) would throw std::out_of_range here - a die only has
+    // 6 faces, valid indices 0..5. Uncomment to see it:
+    // rollTally.at(6);
 
-    std::print("\nhighScores: ");
-    for (std::size_t i{0}; i < highScores.size(); ++i) {
-        std::print("{}  ", highScores.at(i));
-    }
-    std::println("");
+    // Class template argument deduction (CTAD): once you know what
+    // std::array<T, N> actually means, the compiler can often infer both
+    // T and N for you from a braced initializer - no <int, 6> needed.
+    std::array luckyNumbers{7, 13, 21, 3, 42, 9};
 
     // Range-based for reads more naturally once you don't need the index.
     // A `const int&` element avoids copying (irrelevant for int, habitual
     // for larger element types).
-    std::print("highScores (range-based for): ");
-    for (const int& score : highScores) {
-        std::print("{} ", score);
+    std::print("\nlucky numbers: ");
+    for (const int& number : luckyNumbers) {
+        std::print("{} ", number);
     }
     std::println("");
 
     // A non-const reference lets the loop body modify the array in place.
-    for (int& score : highScores) {
-        score *= 2;
+    for (int& number : luckyNumbers) {
+        number += 100;
     }
 
-    std::print("highScores (doubled): ");
-    for (const int& score : highScores) {
-        std::print("{} ", score);
+    std::print("shifted by 100: ");
+    for (const int& number : luckyNumbers) {
+        std::print("{} ", number);
     }
     std::println("");
 
     // A running total, computed with a range-based for that also declares
     // its own accumulator - the "for (init; cond; range)" form from C++20.
     std::println("\nrunning total:");
-    for (int total{0}; const int& score : highScores) {
-        total += score;
-        std::println("score: {}; running total: {}", score, total);
+    for (int total{0}; const int& number : luckyNumbers) {
+        total += number;
+        std::println("number: {}, running total: {}", number, total);
     }
-
-    // scores.at(10) would throw std::out_of_range here - scores only has
-    // 5 elements. Uncomment to see it:
-    // scores.at(10);
 
     return 0;
 }
