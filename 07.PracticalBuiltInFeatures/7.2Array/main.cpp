@@ -22,6 +22,12 @@ int main() {
     // Each roll's face value (1..6) becomes the index (face - 1) whose
     // count gets incremented.
     constexpr std::array<int, 10> rolls{3, 3, 1, 6, 3, 2, 3, 5, 4, 3};
+
+    for (std::size_t i{0}; i < rolls.size(); ++i) {
+        std::println("roll at index {}: {}", i, rolls[i]);
+    }
+
+    // Tally the rolls into roll_tally, using a range-based for loop.
     for (int roll : rolls) {
         ++roll_tally[roll - 1];
     }
