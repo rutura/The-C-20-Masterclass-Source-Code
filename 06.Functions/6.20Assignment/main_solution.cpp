@@ -251,11 +251,11 @@ long digit_sum_iterative(long n) {
 }
 
 // ---------------------------------------------------------------------
-// Exercise 8 - the 6.18 image project, pulled in as a dependency and
+// Exercise 8 - the 6.19 image project, pulled in as a dependency and
 // extended with two new drawing functions
 //
 // image.h / image.cpp / stb_impl.cpp are copied verbatim from
-// 06.Functions/6.18ProjectFetchContent, and CMakeLists.txt gained the
+// 06.Functions/6.19ProjectFetchContent, and CMakeLists.txt gained the
 // same FetchContent(stb) block plus the new sources on the
 // add_executable(...) calls - see that file for the "wire up the
 // dependency" half of this exercise. draw_background and draw_rectangle

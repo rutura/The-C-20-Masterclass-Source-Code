@@ -249,7 +249,7 @@ int main() {
 
 
     /*
-        Exercise 8 - bringing in the image project from 6.18, and adding
+        Exercise 8 - bringing in the image project from 6.19, and adding
         a new shape to it
 
         This one is different from the rest: instead of writing a
@@ -258,14 +258,14 @@ int main() {
         "using a library" looks like in real code.
 
         1) Copy image.h and image.cpp from
-           06.Functions/6.18ProjectFetchContent into this folder. Those
+           06.Functions/6.19ProjectFetchContent into this folder. Those
            two files already know how to build an image in memory (a
            canvas of pixels), draw a color gradient, draw a border around
            the edge, and save the result as a PNG file. You are not
            rewriting any of that - you are reusing it.
 
         2) Update THIS folder's CMakeLists.txt so it builds with the new
-           files. Copy the FetchContent block from 6.18's CMakeLists.txt
+           files. Copy the FetchContent block from 6.19's CMakeLists.txt
            (it downloads the small stb library that actually writes the
            PNG file to disk), add image.cpp / image.h to the
            add_executable(...) call, and add the
@@ -315,12 +315,12 @@ int main() {
 
         4) In main(), build a 400x300 image:
              - draw_background(...) with a mid gray, e.g. (200, 200, 200)
-             - keep calling draw_border(...) exactly as in 6.18, so the
+             - keep calling draw_border(...) exactly as in 6.19, so the
                whole canvas still gets an outer edge
              - call your new draw_rectangle(...) to draw one rectangle
                at position (100, 100), sized 120 x 80, with a visible
                outline thickness (e.g. 4) and any color you like
-             - write_png("image.png", ...) to save it, same as 6.18
+             - write_png("image.png", ...) to save it, same as 6.19
 
         Sample output:
             wrote image.png (400 x 300) - gray background with a bordered rectangle

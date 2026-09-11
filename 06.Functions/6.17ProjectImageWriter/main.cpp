@@ -5,8 +5,8 @@
 // PROJECT (version A): write an image with NO third-party library at all.
 //
 // The whole program is functions from this chapter: a header/source
-// split (6.10), plain functions taking scalars and a std::vector by
-// reference (6.8), a lambda inside draw_gradient (6.13). The output
+// split (6.11), plain functions taking scalars and a std::vector by
+// reference (6.8), a lambda inside draw_gradient (6.14). The output
 // format, PPM, is simple enough to write by hand.
 
 int main() {

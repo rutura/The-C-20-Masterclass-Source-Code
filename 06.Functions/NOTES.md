@@ -1050,14 +1050,230 @@ differ.
 
 ---
 
-## 6.10 Functions across files
+## 6.10 Const variables and parameters
+
+`const` has shown up already, in passing - `const std::vector<int>&`
+parameters, `constexpr std::array` sizes. This lecture makes it a
+first-class topic: what `const` actually promises on a plain variable,
+what it promises (and does not promise) on a function parameter, and how
+`constexpr` is a stronger, different guarantee than `const`.
+
+This section stays on **free functions and plain variables**. `const`
+also shows up on class member functions (`void draw() const`) - that is
+its own topic, covered later once classes are on the table
+(`21.ConstAndStaticMembers`).
+
+### Const standalone variables
+
+```cpp
+const int max_players{4};
+int current_players{1};   // NOT const - this one is meant to change
+```
+
+`const` is a compiler-enforced promise: **this variable's value will not
+change after initialization.** Try to assign to it later and the
+compiler rejects the program outright - this is caught at compile time,
+not left as a bug waiting to happen at run time.
+
+```
+   const int max_players{4};
+   max_players = 5;
+        │
+        ▼
+   COMPILE ERROR: cannot assign to variable 'max_players'
+                  with const-qualified type 'const int'
+
+   int current_players{1};
+   current_players = 2;
+        │
+        ▼
+   fine - current_players was never const
+```
+
+### Const function parameters - by value
+
+```cpp
+int square_by_value(const int x) {
+    // x = x + 1;   // would not compile
+    return x * x;
+}
+```
+
+Here is the part worth being precise about: **`const` on a by-value
+parameter does not protect the caller's variable.** It never could -
+pass-by-value already makes a fresh **copy** the instant the function is
+called, so the caller's original was never reachable from inside the
+function, `const` or not.
+
+```
+   caller                          square_by_value(n)
+   ──────                          ───────────────────
+   ┌──────────┐        copy         ┌──────────┐
+   │ n   6    │ ─────────────────►  │ x   6    │   const on x protects
+   └──────────┘                     └──────────┘   THIS copy from being
+        │                                 │         reassigned INSIDE
+        │ untouched no matter                the function body -
+        │ what happens to x                  n was never at risk,
+        ▼                                     with or without const
+   n is still 6
+```
+
+What `const` *does* protect is the function's own local copy from an
+**accidental** reassignment inside its own body - a typo like `x = x + 1;`
+when `return x * x;` was intended gets caught immediately, instead of
+silently computing the wrong thing. It is a self-imposed discipline on
+the function's own logic, not a promise the caller can rely on.
+
+### Const function parameters - by reference
+
+```cpp
+void print_label(const std::string& label) {
+    // label += "!";   // would not compile
+    std::println("label: {}", label);
+}
+```
+
+A reference parameter is an **alias** for the caller's own object - no
+copy is made. This is the case where `const` is not just internal
+housekeeping; it is the actual promise the caller depends on:
+
+```
+   caller                          print_label(name)
+   ──────                          ──────────────────
+   ┌────────────┐      alias        ┌────────────┐
+   │ name  "Ada"│ ◄───────────────► │ label      │   const on label means
+   └────────────┘      same          └────────────┘   the function CANNOT
+        ▲              object              │           write through this
+        │                                  │           alias back into
+        └──────────────────────────────────┘           the caller's own
+                writes through label WOULD land               string
+                on the caller's name - const rules
+                this out
+```
+
+```
+   const int x           (by value)     const std::string& label  (by reference)
+   ──────────────                       ─────────────────────────
+   protects a COPY the function          protects the CALLER's own object -
+   already owns - the caller was         this is the promise a reference
+   never at risk either way              parameter actually needs const for
+```
+
+Combining `const` with `&` gets both things at once: the no-copy speed
+of a reference, and the safety of pass-by-value. This is exactly the
+`const std::vector<int>&`, `const std::string&` pattern already seen on
+function parameters throughout this course - now with the reasoning
+behind it made explicit.
+
+### Constexpr variables: compile-time, not just unchanging
+
+`const` says a value will not change after it is set - but that value
+can still come from somewhere only known while the program is *running*:
+
+```cpp
+const int seed{current_players * 7};   // fine: computed from a runtime value
+```
+
+`constexpr` demands more: the compiler must be able to compute the value
+**itself, while compiling** - before the program ever runs.
+
+```cpp
+constexpr int board_size{8 * 8};       // fine: knowable right now
+// constexpr int bad_seed{current_players * 7};   // would NOT compile
+```
+
+```
+   const int seed{current_players * 7};
+        │
+        └─ current_players is a runtime value - fine for const,
+           because const only promises "won't change AFTER this point"
+
+   constexpr int bad_seed{current_players * 7};
+        │
+        └─ COMPILE ERROR: constexpr variable 'bad_seed' must be
+           initialized by a constant expression
+           (current_players is not known until the program runs)
+```
+
+Every `constexpr` value is also implicitly `const` - immutability is
+part of the deal - but not every `const` value is `constexpr`. `const`
+is about the promise *after* initialization; `constexpr` is about *when*
+the value can be computed.
+
+### Constexpr functions: compile time when possible, runtime otherwise
+
+```cpp
+constexpr int cube(int x) {
+    return x * x * x;
+}
+```
+
+A `constexpr` function **can** run at compile time - but only when every
+argument it is called with is itself known at compile time. Called with
+a runtime value, the exact same function just runs normally, like any
+other function:
+
+```cpp
+constexpr int compile_time_cube{cube(3)};   // 3 is a literal
+int runtime_cube{cube(side)};               // side is a runtime value
+```
+
+```
+   cube(3)                              cube(side)
+   ───────                              ──────────
+   3 is a literal - known               side is only known once
+   right now, while compiling            the program is running
+        │                                      │
+        ▼                                      ▼
+   compiler evaluates cube(3)            ordinary function call,
+   ITSELF; 27 lands in the               happens at run time,
+   binary - no runtime cost              same result either way
+```
+
+Same function, same result - the only difference is *when* the
+computation happens, decided entirely by what the caller passes in.
+
+### A brief word on `consteval` and `constinit` (C++20)
+
+Two more C++20 keywords sit near `constexpr`, worth recognizing even
+without a dedicated example here:
+
+- **`consteval`** - like `constexpr`, but stronger: a `consteval`
+  function *must* run at compile time, every time, with no runtime
+  fallback. Calling it with a value only known at runtime is a compile
+  error, not a graceful drop to ordinary execution.
+- **`constinit`** - guarantees a variable with static storage duration
+  is initialized at compile time (avoiding the "static initialization
+  order fiasco" across files), but - unlike `const`/`constexpr` -
+  **does not make the variable immutable**. A `constinit` variable can
+  still be reassigned later; only its *initialization* is pinned to
+  compile time.
+
+```
+   const        constexpr        consteval           constinit
+   ─────        ─────────        ─────────           ─────────
+   value fixed  value fixed,     FUNCTION must        variable's
+   after init,  computed at      run at compile        INITIAL value
+   value itself compile time     time - no             fixed at compile
+   may be a     (implies const)  runtime fallback      time - variable
+   runtime                       allowed                itself is NOT
+   value                                                immutable
+```
+
+Neither gets a full treatment in this lecture - `constexpr` covers the
+everyday need; these two are worth being able to recognize when they
+show up in other people's code.
+
+---
+
+## 6.11 Functions across files
 
 So far every function has shared one `main.cpp`. Real programs spread
 functions across many files, grouped by topic. This lecture builds a
 program from four files of helpers plus `main.cpp`.
 
 ```
-   6.10FunctionsAcrossFiles/
+   6.11FunctionsAcrossFiles/
    ├── geometry.h      circle_area(), circle_circumference()   ← declarations
    ├── geometry.cpp    ... their bodies                        ← definitions
    ├── money.h         add_tax(), apply_discount()             ← declarations
@@ -1239,12 +1455,12 @@ about linkage will be covered later in the course.
 
 ---
 
-## 6.11 Files in subfolders
+## 6.12 Files in subfolders
 
 The same four helpers, but now organised into folders by area:
 
 ```
-   6.11FilesNested/
+   6.12FilesNested/
    ├── geometry/
    │   ├── geometry.h
    │   └── geometry.cpp
@@ -1274,7 +1490,7 @@ folders **in order** and pastes the first match:
    #include "geometry.h"
         │
         ▼
-   1. the folder of the file doing the #include   (here: 6.11FilesNested/)
+   1. the folder of the file doing the #include   (here: 6.12FilesNested/)
    2. every folder added by -I on the compiler command line
    3. the system/standard-library folders
         │
@@ -1301,8 +1517,8 @@ target_include_directories(rooster PRIVATE
 ```
    compiling main.cpp, the compiler is now invoked as:
 
-     c++ ... -I .../6.11FilesNested/geometry
-             -I .../6.11FilesNested/finance
+     c++ ... -I .../6.12FilesNested/geometry
+             -I .../6.12FilesNested/finance
              -c main.cpp
 
    so #include "geometry.h"  →  .../geometry/geometry.h    ✓
@@ -1344,7 +1560,7 @@ add_executable(rooster
 
 ---
 
-## 6.12 Function templates
+## 6.13 Function templates
 
 Say you need "is this value between these two bounds?" for `int`, for
 `double`, for `char`. Overloading (6.9) means writing the same body three
@@ -1457,7 +1673,7 @@ folds the duplicates into one.)
 
 ---
 
-## 6.13 Lambda functions
+## 6.14 Lambda functions
 
 A **lambda** is a function written **inline** - defined right where you
 need it, with no name and no separate declaration. It exists because many
@@ -1634,7 +1850,7 @@ comparison.
 
 ---
 
-## 6.14 Recursion
+## 6.15 Recursion
 
 A **recursive** function calls itself. Every one needs two parts:
 
@@ -1796,7 +2012,7 @@ reads clearly. Even then, watch the depth.
 
 ---
 
-## 6.15 Intro to C++ attributes
+## 6.16 Intro to C++ attributes
 
 An **attribute** is a note to the compiler, written in **double square
 brackets**: `[[name]]` or `[[name("some text")]]`. It does **not change
@@ -1923,7 +2139,7 @@ past and look up later.
 
 ---
 
-## 6.16 Project: writing an image
+## 6.17 Project: writing an image
 
 Everything in this chapter comes together in one small program that
 **draws a picture and saves it to a file**. The picture is deliberately
@@ -2189,10 +2405,10 @@ draw_gradient(pixels, 400, 300,  20, 30, 90,         // left  colour: deep blue
 draw_border(pixels, 400, 300, 8, 255, 255, 255);     // 8-px white frame
 ```
 
-- a **header / source split** (6.10): declarations in `image.h`, bodies
+- a **header / source split** (6.11): declarations in `image.h`, bodies
   in `image.cpp`
 - functions take the buffer **by reference** (6.8) and scalars by value
-- `draw_gradient` blends the two colours with a **lambda** (6.13) - for
+- `draw_gradient` blends the two colours with a **lambda** (6.14) - for
   the call above, `mix` runs `20 → 240` on red, `30 → 140` on green,
   `90 → 40` on blue as `x` sweeps `0 → 399`:
 
@@ -2213,7 +2429,7 @@ output written.
                                                └─ C: stbi_write_png() header fetched by CMake
 ```
 
-### A. No dependency at all (`6.16ProjectImageWriter`)
+### A. No dependency at all (`6.17ProjectImageWriter`)
 
 #### What PPM is, and how it compares
 
@@ -2402,7 +2618,7 @@ add_executable(rooster main.cpp image.cpp image.h)
 
 The lesson: Writting your ppm file by hand. 
 
-### B. A vendored single-header library (`6.17ProjectVendoredHeader`)
+### B. A vendored single-header library (`6.18ProjectVendoredHeader`)
 
 As we just saw, PPM is bulky and not something most people can
 double-click to open. To write a compressed, universally-supported
@@ -2412,7 +2628,7 @@ double-click to open. To write a compressed, universally-supported
 project under `vendor/`.
 
 ```
-   6.17ProjectVendoredHeader/
+   6.18ProjectVendoredHeader/
    ├── vendor/
    │   ├── stb_image_write.h   ← the library, committed with our code
    │   └── LICENSE
@@ -2496,7 +2712,7 @@ target_include_directories(rooster SYSTEM PRIVATE
   class of "nasty linker error" that comes from mixing a prebuilt binary
   with a different toolchain simply cannot happen here.
 
-### C. Fetched by CMake (`6.18ProjectFetchContent`)
+### C. Fetched by CMake (`6.19ProjectFetchContent`)
 
 The C++ code is **identical to B** - `image.h`, `image.cpp`,
 `stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no
@@ -2566,7 +2782,7 @@ What happens when you press *Configure*:
 
 ---
 
-## 6.19 Assignment
+## 6.20 Assignment
 
 One small program - a terminal stats / bar-chart tool over a fixed list
 of numbers - built in eight steps. `main.cpp` has the eight stubbed

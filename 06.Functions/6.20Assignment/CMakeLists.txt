@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # --- Fetch stb at configure time (needed for Exercise 8's write_png) -----
-# Same setup as 6.18ProjectFetchContent: stb is header-only, so there is
+# Same setup as 6.19ProjectFetchContent: stb is header-only, so there is
 # no build step, just sources dropped into the build tree. GIT_TAG is
 # pinned to an exact commit for a reproducible build.
 include(FetchContent)
