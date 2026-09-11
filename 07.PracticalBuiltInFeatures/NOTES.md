@@ -457,39 +457,6 @@ catch (const std::out_of_range& ex) {
                                    (program keeps running, does not crash)
 ```
 
-### A `const&` parameter forces `const` on everything it hands out
-
-`print_stock` takes its vector `const std::vector<int>& stock` - a
-promise not to modify `stock`. That promise is not just enforced on
-`stock` itself; it reaches into the range-based for that reads it too:
-
-```cpp
-void print_stock(const std::vector<int>& stock) {
-    for (const int& quantity : stock) {   // must be const int& (or plain int)
-        std::print("{} ", quantity);
-    }
-}
-```
-
-7.2 dropped the reference for a read-only `int` loop variable, since a
-plain `int` copy costs nothing extra to make. Try that same drop here
-with a *writable* reference instead, and it will not compile:
-
-```
-   for (int& quantity : stock) { ... }        stock is const std::vector<int>&
-        │                                          │
-        └─ asks for a WRITABLE alias               └─ begin()/end() on a const
-           into stock's elements                       vector hand out const_iterator -
-                                                         every element comes back const
-
-   ERROR: binding reference of type 'int' to value of type 'const int'
-          drops 'const' qualifier
-```
-
-`const int& quantity` (or a plain `int` copy, for the same read-only
-reason as 7.2) is what is actually allowed - `const` on the parameter
-propagates into the loop, not just onto the parameter name itself.
-
 ---
 
 ## 7.5 Sorting, searching, and `accumulate`
