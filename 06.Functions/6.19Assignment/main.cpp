@@ -52,11 +52,18 @@ int main() {
 
             void bar(int value, int width = 40, char fill = '*');
 
-        It prints a bar: `value` clamped into [0, width] with
-        std::clamp (<algorithm>), then that many `fill` characters, then
-        a newline. The default width is 40, the default fill is '*'.
-        Defaults go in the PROTOTYPE only, never repeated in the
-        definition.
+        Think of it as drawing one row of a text bar chart: it prints
+        `fill` repeated `value` times, so bar(5) prints "*****".
+
+        `width` is the cap - the longest the bar is allowed to be. If
+        `value` is bigger than `width`, only print `width` characters
+        (so the bar never runs longer than the row it's drawn in); if
+        `value` is negative, print nothing. Use std::clamp (<algorithm>)
+        to turn `value` into that final character count in one line
+        instead of writing the if/else yourself.
+
+        The default width is 40, the default fill is '*'. Defaults go
+        in the PROTOTYPE only, never repeated in the definition.
 
         Call it: once for each value in `samples` scaled down by 2
         (so 42 -> 21 stars), using all defaults; then once as
