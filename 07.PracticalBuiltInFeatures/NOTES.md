@@ -79,6 +79,18 @@ scores.at(10);   // 5-element array - out of range
 
 ### CTAD: skip the `<T, N>`
 
+In plain terms: normally you have to tell `std::array` two things up
+front - what type it holds and how many elements it has
+(`std::array<int, 5>`). CTAD (Class Template Argument Deduction) 
+means the compiler can often **figure both of those out by itself**, 
+just by looking at what you put in the braces
+- so you get to skip typing them.
+
+`std::array` is a **class template** - a blueprint that needs some
+**arguments** filled in (`T` and `N`) before it becomes a real type. CTAD
+is the compiler's ability to **deduce** those arguments on its own,
+instead of requiring you to write them by hand every time.
+
 ```cpp
 std::array highScores{32, 27, 64, 18, 95};   // inferred: array<int, 5>
 ```
