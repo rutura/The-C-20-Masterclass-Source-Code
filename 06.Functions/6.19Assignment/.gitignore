@@ -77,3 +77,7 @@ Makefile
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# Generated image output from Exercise 8
+*.ppm
+*.png

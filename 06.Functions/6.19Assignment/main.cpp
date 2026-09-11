@@ -6,6 +6,8 @@
 #include <string_view>
 #include <vector>
 
+#include "image.h"
+
 /*
     Chapter 6 assignment - Functions
 
@@ -243,6 +245,87 @@ int main() {
             checksum(samples) = <some int>       (deterministic - same every run)
     */
     std::println("\n--- Exercise 7: checksum ---");
+    // TODO
+
+
+    /*
+        Exercise 8 - bringing in the image project from 6.18, and adding
+        a new shape to it
+
+        This one is different from the rest: instead of writing a
+        function from scratch, you are going to pull in a small existing
+        project as a DEPENDENCY and extend it - which is closer to what
+        "using a library" looks like in real code.
+
+        1) Copy image.h and image.cpp from
+           06.Functions/6.18ProjectFetchContent into this folder. Those
+           two files already know how to build an image in memory (a
+           canvas of pixels), draw a color gradient, draw a border around
+           the edge, and save the result as a PNG file. You are not
+           rewriting any of that - you are reusing it.
+
+        2) Update THIS folder's CMakeLists.txt so it builds with the new
+           files. Copy the FetchContent block from 6.18's CMakeLists.txt
+           (it downloads the small stb library that actually writes the
+           PNG file to disk), add image.cpp / image.h to the
+           add_executable(...) call, and add the
+           target_include_directories(...) line so the compiler can find
+           stb's header. This is the "wire up the dependency" step - the
+           functions in image.h are useless to main.cpp until CMake knows
+           to compile and link them in.
+
+        3) Add two new functions to image.h / image.cpp, next to the
+           ones that are already there:
+
+               void draw_background(std::vector<std::uint8_t>& pixels,
+                                     int width, int height,
+                                     std::uint8_t r, std::uint8_t g, std::uint8_t b);
+
+           Fills the ENTIRE canvas with one solid color - loop over every
+           x, y and call set_pixel. This is what gives you a plain gray
+           background instead of the default black canvas.
+
+               void draw_rectangle(std::vector<std::uint8_t>& pixels,
+                                    int width, int height,
+                                    int x, int y,
+                                    int rect_width, int rect_height,
+                                    int thickness,
+                                    std::uint8_t r, std::uint8_t g, std::uint8_t b);
+
+           Draws an OUTLINED rectangle: (x, y) is its top-left corner,
+           rect_width/rect_height is its size, thickness is how many
+           pixels thick the outline is, and r/g/b is the outline color -
+           the inside of the rectangle is left untouched.
+
+           Note there are TWO different sizes in this signature, and
+           they mean different things: width/height (like every other
+           function here) is the size of the WHOLE CANVAS - still needed
+           so set_pixel can bounds-check and compute the right index.
+           rect_width/rect_height is the size of just this one rectangle
+           you are drawing on top of that canvas. A call like
+           draw_rectangle(pixels, 400, 300, 100, 100, 120, 80, ...) means
+           "on a 400x300 canvas, draw a 120x80 rectangle at (100, 100)."
+
+           Look at how draw_border already does this for the whole
+           canvas: it colors a pixel only when it is within `thickness`
+           pixels of an edge. draw_rectangle needs the same idea, just
+           measured from the rectangle's own four edges instead of the
+           canvas's edges, and offset by (x, y) so it can be placed
+           anywhere.
+
+        4) In main(), build a 400x300 image:
+             - draw_background(...) with a mid gray, e.g. (200, 200, 200)
+             - keep calling draw_border(...) exactly as in 6.18, so the
+               whole canvas still gets an outer edge
+             - call your new draw_rectangle(...) to draw one rectangle
+               at position (100, 100), sized 120 x 80, with a visible
+               outline thickness (e.g. 4) and any color you like
+             - write_png("image.png", ...) to save it, same as 6.18
+
+        Sample output:
+            wrote image.png (400 x 300) - gray background with a bordered rectangle
+    */
+    std::println("\n--- Exercise 8: image project (background + rectangle) ---");
     // TODO
 
     return 0;
