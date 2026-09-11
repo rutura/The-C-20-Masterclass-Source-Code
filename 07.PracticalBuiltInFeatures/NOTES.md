@@ -25,7 +25,12 @@ on a real dataset - the Titanic passenger manifest.
 
 ---
 
-## 7.2 `std::array`
+## 7.2 `std::array` and range-based for loops
+
+This lecture covers two things together: **`std::array`**, the
+fixed-size container, and **range-based `for`**, the loop shape you will
+reach for most often to walk one. They are introduced side by side
+because a container is only as useful as the loops that read it.
 
 **`std::array<T, N>`** is a **fixed-size** sequence of `N` values of type
 `T`, stored **inline** - the elements sit directly inside the `array`
