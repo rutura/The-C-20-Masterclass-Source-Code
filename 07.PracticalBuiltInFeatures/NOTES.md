@@ -28,25 +28,52 @@ moves on to pointers and classes.
 ## 7.2 `std::array`
 
 **`std::array<T, N>`** is a **fixed-size** sequence of `N` values of type
-`T`, stored inline - no separate heap allocation, unlike a raw pointer to
-dynamically allocated memory. `N` is part of the type: `std::array<int, 5>`
-and `std::array<int, 10>` are different types.
+`T`, stored **inline** - the elements sit directly inside the `array`
+object, back to back, no separate heap allocation. `N` is part of the
+type: `std::array<int, 5>` and `std::array<int, 10>` are different types,
+the same way `int` and `double` are different types.
 
 ```cpp
 std::array<int, 5> scores{};   // {} zero-initializes every element
 ```
 
+```
+   std::array<int, 5> scores{};
+
+   index:    0     1     2     3     4
+           ┌─────┬─────┬─────┬─────┬─────┐
+   scores: │  0  │  0  │  0  │  0  │  0  │      one block, 5 ints,
+           └─────┴─────┴─────┴─────┴─────┘      sitting right here
+            ▲                             ▲
+        scores[0]                    scores[4]
+                      size() == 5, fixed forever
+```
+
 ### Access: `[]` vs `.at()`
 
-`scores[i]` is unchecked - fast, but an out-of-range `i` is undefined
-behavior. `scores.at(i)` is the same idea, bounds-checked: an out-of-range
-index throws `std::out_of_range` instead of reading garbage.
+`scores[i]` is **unchecked** - fast, but an out-of-range `i` is undefined
+behavior: the program might crash, or might silently read whatever
+garbage happens to sit past the array in memory. `scores.at(i)` is the
+same idea, **bounds-checked**: an out-of-range index throws
+`std::out_of_range` instead of reading garbage.
 
 ```
-   scores.at(10)   on a 5-element array
+   scores[i]              i in range        →  reads scores[i], no check
+                           i out of range    →  UNDEFINED BEHAVIOR (danger)
+
+   scores.at(i)            i in range        →  reads scores[i]
+                           i out of range    →  throws std::out_of_range
+```
+
+```cpp
+scores.at(10);   // 5-element array - out of range
+```
+
+```
+   scores.at(10)   on a 5-element array (valid indices 0..4)
         │
         ▼
-   throws std::out_of_range   (instead of silently reading past the end)
+   throws std::out_of_range   ("array::at: __n (which is 10) >= _Nm (which is 5)")
 ```
 
 ### CTAD: skip the `<T, N>`
@@ -55,27 +82,51 @@ index throws `std::out_of_range` instead of reading garbage.
 std::array highScores{32, 27, 64, 18, 95};   // inferred: array<int, 5>
 ```
 
-Class template argument deduction reads the braced initializer and infers
-both the element type and the count - no need to spell out
-`<int, 5>` yourself.
+**Class template argument deduction (CTAD)** reads the braced initializer
+and infers both the element type and the count for you:
 
-### Range-based for
+```
+   std::array highScores{32, 27, 64, 18, 95};
+                          └──────────┬──────────┘
+                          5 ints in the braces
+                                     │
+                                     ▼
+                     compiler infers: std::array<int, 5>
+```
+
+### Range-based for: reference vs. const reference
 
 ```cpp
 for (const int& score : highScores) { /* read-only */ }
 for (int& score : highScores)       { score *= 2; }   // modifies in place
 ```
 
-A `const T&` element avoids a copy per iteration; a non-`const` `T&`
-lets the loop body write back into the array. The C++20
-`for (init; cond; range)` form lets a loop declare its own accumulator
-right where it is used:
+```
+   const int& score : highScores        int& score : highScores
+   ──────────────────────────           ──────────────────────
+   score is a READ-ONLY alias           score is a WRITABLE alias
+   for each element in turn             for each element in turn
+
+   highScores: 32  27  64  18  95       highScores: 32  27  64  18  95
+                │                                     │
+                └─ score "looks at"                   └─ score *= 2 writes
+                   each one, cannot                      straight back into
+                   change it                             the array
+                                                    →   64  54 128  36 190
+```
+
+The C++20 `for (init; cond; range)` form lets a loop declare its own
+accumulator right where it is used, instead of one line above the loop:
 
 ```cpp
 for (int total{0}; const int& score : highScores) {
     total += score;
-    // ...
 }
+```
+
+```
+   score:    32    27    64    18    95
+   total:     0 → 32 → 59 → 123 → 141 → 236     (running total, traced step by step)
 ```
 
 ---
@@ -83,18 +134,40 @@ for (int total{0}; const int& score : highScores) {
 ## 7.3 `std::vector`
 
 **`std::vector<T>`** is the growable counterpart to `std::array`: its
-elements live on the heap, and it can grow or shrink at run time. Where
-`std::array`'s size is fixed forever, `std::vector` is the default choice
-whenever you do not know the count up front, or need to add to it later.
+elements live on the **heap**, and it can grow or shrink at run time.
+Where `std::array`'s size is baked into its type, `std::vector` is the
+default choice whenever you do not know the count up front, or need to
+add to it later.
+
+```
+   std::array<int, 5>                    std::vector<int>
+   ───────────────────                   ────────────────
+   size fixed at compile time            size can change at run time
+   elements stored inline                elements stored on the heap
+   N is part of the type                 no size in the type at all
+   cannot grow                           push_back() grows it
+```
+
+### `(7)` vs. `{7}` - a common first mistake
 
 ```cpp
 std::vector<int> readings(7);    // 7 elements, each value-initialized to 0
-std::vector<int> other{7};       // ONE element, valued 7 - braces mean
-                                  // "these are the elements", not a count
+std::vector<int> other{7};       // ONE element, valued 7
 ```
 
-That distinction - `(7)` sizes the vector, `{7}` is a one-element list -
-is worth calling out explicitly; it is a common first mistake.
+```
+   readings(7)   →  ┌───┬───┬───┬───┬───┬───┬───┐
+                    │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │     SEVEN elements
+                    └───┴───┴───┴───┴───┴───┴───┘     (7) sizes the vector
+
+   other{7}      →  ┌───┐
+                    │ 7 │                              ONE element
+                    └───┘                              {7} is the element list
+```
+
+Parentheses `()` size the vector; braces `{}` list its elements. The two
+look almost identical and mean very different things - worth a second
+look every time.
 
 ### Comparing, copying, assigning
 
@@ -105,26 +178,54 @@ std::vector c{a};       // copy constructor - c owns its own copy of a's data
 a = b;                  // assignment - a's old contents are replaced
 ```
 
+```
+   std::vector c{a};
+
+   a: ┌───┬───┬───┬───┬───┐         c: ┌───┬───┬───┬───┬───┐
+      │ 0 │ 0 │ 0 │ 0 │ 0 │            │ 0 │ 0 │ 0 │ 0 │ 0 │
+      └───┴───┴───┴───┴───┘            └───┴───┴───┴───┴───┘
+        own block of memory              a SEPARATE block - c's own copy
+        changing a later does NOT touch c, and vice versa
+```
+
 ### Growing: `push_back`
 
 ```cpp
-std::println("size before: {}", readings.size());
 readings.push_back(1000);   // appends one element, resizing as needed
-std::println("size after: {}", readings.size());
+```
+
+```
+   before:  ┌───┬───┬───┬───┬───┬───┬───┐             size() == 7
+            │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │
+            └───┴───┴───┴───┴───┴───┴───┘
+
+   readings.push_back(1000);
+
+   after:   ┌───┬───┬───┬───┬───┬───┬───┬──────┐      size() == 8
+            │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 1000 │
+            └───┴───┴───┴───┴───┴───┴───┴──────┘
 ```
 
 This is the one thing `std::array` fundamentally cannot do - its size is
-fixed at compile time.
+fixed at compile time, while `push_back` grows a `vector` on demand.
 
 ### `.at()` still bounds-checks
 
 ```cpp
 try {
-    readings.at(15);   // out of range
+    readings.at(15);   // out of range - readings only has 8 elements
 }
 catch (const std::out_of_range& ex) {
     std::println("An exception occurred: {}", ex.what());
 }
+```
+
+```
+   readings.at(15)  on an 8-element vector
+        │
+        ▼
+   throws std::out_of_range  ──►  caught by catch  ──►  ex.what() printed
+                                   (program keeps running, does not crash)
 ```
 
 ---
@@ -138,16 +239,39 @@ std::array fruits{"mango"s, "kiwi"s, "fig"s, "date"s, "apple"s};
 std::ranges::sort(fruits);   // ascending, in place
 ```
 
+```
+   before sort:  mango  kiwi  fig  date  apple
+                   │      │    │    │      │
+                   └──────┴────┴────┴──────┘
+                        std::ranges::sort(fruits)
+                   ┌──────┬────┬────┬──────┐
+                   ▼      ▼    ▼    ▼      ▼
+   after sort:   apple  date  fig  kiwi  mango
+```
+
 ### Searching sorted data with `std::ranges::binary_search`
 
-`binary_search` repeatedly halves the search range - which only gives a
-correct answer when the data is **already sorted**. That is the trade a
-sort buys you: `O(log n)` lookups instead of scanning every element.
+`binary_search` repeatedly **halves** the search range - which only gives
+a correct answer when the data is already sorted.
+
+```
+   searching sorted {apple, date, fig, kiwi, mango} for "kiwi"
+
+   step 1:  apple  date  [fig]  kiwi  mango     middle = fig, "kiwi" > "fig" → search right half
+   step 2:  ......  kiwi  mango                 middle = kiwi, MATCH → true
+
+   only 2 comparisons instead of checking all 5, one by one
+```
 
 ```cpp
 std::ranges::binary_search(fruits, "kiwi"s);   // true
 std::ranges::binary_search(fruits, "guava"s);  // false
 ```
+
+That halving is the trade a sort buys you: `O(log n)` lookups instead of
+scanning every element - but only correct on **already-sorted** data.
+Run `binary_search` on unsorted data and it can wrongly report "not
+found" even when the value is there.
 
 ### Folding a range into one value with `std::accumulate`
 
@@ -182,6 +306,18 @@ std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting fro
    loop, running variable,                 "reduce quantities to one
    +=, off-by-one risk on                  value, starting from 0" -
    every hand-written loop like it         accumulate owns the loop
+```
+
+Traced on `quantities = {10, 20, 30, 40}`:
+
+```
+   step         acc + element        acc afterward
+   ────         ─────────────        ─────────────
+   start        (init)                0
+   1            0 + 10                10
+   2            10 + 20               30
+   3            30 + 30               60
+   4            60 + 40               100   ◄── final result
 ```
 
 `accumulate` hides ("internalizes") the loop and the running total from
@@ -254,12 +390,26 @@ loops.
    numbers | std::views::filter(even) | std::views::transform(square)
 ```
 
-A **view** is a lazy wrapper around a range: it does not build a new
-container up front, it produces values on demand as something iterates it.
+### A view does not build a container - it wraps one, lazily
 
 ```cpp
 auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
 ```
+
+```
+   std::views::iota(1, 11)
+
+   NOT this (eager - builds the whole thing up front):
+      ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐
+      │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │    a real std::vector<int>
+      └───┴───┴───┴───┴───┴───┴───┴───┴───┴────┘
+
+   THIS (lazy - a tiny object that knows the RULE):
+      counted = "start at 1, stop before 11, +1 each step"
+                 no elements exist yet - they are generated as you iterate
+```
+
+### Piping views together
 
 `std::views::filter` and `std::views::transform` wrap a range the same
 way, and chain together with `|`, read left to right like a pipeline.
@@ -277,11 +427,31 @@ auto evenSquares{
 ```
    counted ──filter(even)──► evens ──transform(square)──► evenSquares
 
-   1 2 3 4 5 6 7 8 9 10 ──► 2 4 6 8 10 ──► 4 16 36 64 100
+    1  2  3  4  5  6  7  8  9  10
+       │     │     │     │     │
+       ▼     ▼     ▼     ▼     ▼
+       2     4     6     8     10          (filter kept only these)
+       │     │     │     │     │
+       ▼     ▼     ▼     ▼     ▼
+       4    16    36    64    100          (transform squared each one)
 ```
 
-Nothing is computed until `evenSquares` is actually iterated - by a
-range-based for, by `std::accumulate`, or by copying it into a
+### Laziness: nothing runs until you actually iterate
+
+```
+   auto evenSquares{ counted | filter(...) | transform(...) };
+        │
+        └─  at THIS line: nothing has been filtered, nothing squared -
+            evenSquares is just a recipe wrapping counted
+
+   for (int x : evenSquares) { ... }
+        │
+        └─  NOW, one element at a time, as the loop asks for the next
+            value: pull from counted → test filter → apply transform
+```
+
+`evenSquares` is only ever iterated by something that asks for values -
+a range-based for, `std::accumulate`, or copying it into a
 `std::vector`. The same pipeline works over a real container, not just a
 generated sequence like `iota`:
 
@@ -323,10 +493,31 @@ title.append("acomb");      // "cat" -> "catacomb"
 first.swap(second);         // exchange contents, no copy of the data
 ```
 
+```
+   before:  first = "one"     second = "two"
+
+   first.swap(second);
+
+   after:   first = "two"     second = "one"
+            (the underlying character buffers trade places - no
+             character is copied to do it)
+```
+
 ### `substr`: pull out a piece
 
 ```cpp
 filename.substr(0, 6);   // "report_final.pdf" -> "report"
+```
+
+```
+   filename:  r  e  p  o  r  t  _  f  i  n  a  l  .  p  d  f
+   index:     0  1  2  3  4  5  6  7  8  9  ...
+
+   substr(0, 6)
+          │  └── take 6 characters
+          └───── starting at index 0
+
+   result:    r  e  p  o  r  t              "report"
 ```
 
 ### The `find` family: locate things inside a string
@@ -337,14 +528,43 @@ log.rfind("is");                   // last occurrence, from the back
 log.find_first_not_of("noon is "); // first character NOT in this set
 ```
 
+```
+   log:  n  o  o  n     i  s     1  2  p  m  ;     m  i  d  n  i  g  h  t     i  s     n  o  t
+   idx:  0  1  2  3  4  5  6  7  8  9  10 ...                              23 24            ...
+
+   log.find("is")     →  5     (first "is": "noon [is] 12pm...")
+   log.rfind("is")    →  23    (last "is": "...midnight [is] not")
+```
+
 Every `find`-family function returns **`std::string::npos`** when nothing
-matches - always check for it before using the result as an index.
+matches:
+
+```
+   log.find("xyz")
+        │
+        ▼
+   std::string::npos   ("not found" sentinel - always check before using
+                         the result as an index, or a bug hides silently)
+```
 
 ### `erase` / `replace`: edit in place
 
 ```cpp
 sentence.erase(19);                          // drop everything from index 19 on
 sentence.replace(position, 1, "_");          // 1 char at position -> "_"
+```
+
+```
+   sentence:  The quick brown fox jumps over the lazy dog
+   index:     0         1         2         3
+              0123456789012345678901234567890...
+                                ▲
+                               19
+
+   sentence.erase(19);
+                │
+                ▼
+   sentence:  The quick brown fox        (everything from index 19 on: GONE)
 ```
 
 Looping a `find` + `replace` together is the everyday pattern for
@@ -358,21 +578,60 @@ while (pos != std::string::npos) {
 }
 ```
 
+```
+   "The quick brown fox"
+       ▲
+       find(' ') = 3 ──replace──► "The_quick brown fox"
+                                       ▲
+                          find(' ', 4) = 9 ──replace──► "The_quick_brown fox"
+                                                               ▲
+                                                  find(' ', 10) = 15 ──replace──► "The_quick_brown_fox"
+                                                                                        ▲
+                                                                        find(' ', 16) = npos → loop ends
+```
+
 ### `insert`: splice text into the middle
 
 ```cpp
 greeting.insert(7, "World");   // "Hello, !" -> "Hello, World!"
 ```
 
+```
+   greeting:  H  e  l  l  o  ,     !
+   index:     0  1  2  3  4  5  6  7
+                                ▲
+                                7
+
+   greeting.insert(7, "World");
+                    │
+                    └── everything from index 7 on is pushed right,
+                        "World" is spliced in at that gap
+
+   result:    H  e  l  l  o  ,     W  o  r  l  d  !
+```
+
 ### String streams: build and parse without hand-rolled loops
 
 `std::ostringstream` accumulates pieces of different types into one
-string, using the same `<<` `std::cout` uses:
+string, using the same `<<` `std::cout` uses - just aimed at a string
+instead of the console:
 
 ```cpp
 std::ostringstream receipt;
 receipt << "Order #" << 42 << ": " << "coffee" << " - $" << 4.5;
 receipt.str();   // the accumulated string
+```
+
+```
+   std::cout  <<  value   →  value goes to the SCREEN
+   receipt    <<  value   →  value goes into receipt's own STRING BUFFER
+
+   receipt << "Order #" << 42 << ": " << "coffee" << " - $" << 4.5;
+                  │        │      │         │           │      │
+                  └────────┴──────┴─────────┴───────────┴──────┘
+                                    │
+                                    ▼
+   receipt.str()  ==  "Order #42: coffee - $4.5"
 ```
 
 `std::istringstream` runs the idea backwards - pulling typed values out of
@@ -383,12 +642,23 @@ std::istringstream record{"Ada 3 19.99"};
 record >> item >> quantity >> price;
 ```
 
+```
+   record:  "Ada 3 19.99"
+             │   │  │
+   item  ◄───┘   │  │        item     (std::string)  = "Ada"
+   quantity  ◄───┘  │        quantity (int)           = 3
+   price  ◄─────────┘        price    (double)        = 19.99
+
+   >> splits on whitespace and converts to each variable's type,
+   same as std::cin >> - just reading from a string instead of the keyboard
+```
+
 ---
 
 ## 7.7 `std::string_view`
 
-A **`std::string_view`** does not own characters - it is a `(pointer,
-length)` pair pointing at characters owned by someone else: a
+A **`std::string_view`** does not own characters - it is a
+`(pointer, length)` pair pointing at characters owned by someone else: a
 `std::string`, a string literal, or part of either. No allocation, no
 copy.
 
@@ -397,34 +667,109 @@ std::string color{"red"};
 std::string_view colorView{color};   // "sees" color's own characters
 ```
 
-Because `colorView` points at `color`'s data, a change to `color` shows up
-through the view:
+```
+   std::string color{"red"};              (owns its own character buffer)
+
+   color: ┌───┬───┬───┐
+          │ r │ e │ d │
+          └───┴───┴───┘
+            ▲
+            │
+   std::string_view colorView{color};
+
+   colorView:  { pointer ──────────────┘ , length: 3 }
+               (no characters of its own - just POINTS at color's)
+```
+
+### A view sees every later change - it has no data of its own to go stale
 
 ```cpp
 color.at(0) = 'R';
 // colorView now reads "Red" too - it has no data of its own to be stale
 ```
 
-`remove_prefix`/`remove_suffix` shrink the view's window in `O(1)` -
-nothing is copied or erased, the window just moves:
+```
+   color.at(0) = 'R';
+
+   color: ┌───┬───┬───┐
+          │ R │ e │ d │        ← color's own buffer changed
+          └───┴───┴───┘
+            ▲
+            │
+   colorView still points HERE  →  colorView now reads "Red"
+
+   compare with std::string colorCopy{color}; (a REAL copy, made earlier):
+   colorCopy has its OWN buffer - color.at(0) = 'R' does not touch it
+```
+
+### `remove_prefix`/`remove_suffix`: move the window, touch nothing
 
 ```cpp
 colorView.remove_prefix(1);
 colorView.remove_suffix(1);
 ```
 
+```
+   colorView over "Red":     R  e  d
+                             ▲        ▲
+                          start      end
+
+   remove_prefix(1)  →         e  d
+                                ▲     ▲
+                             start   end     (window shrinks from the front)
+
+   remove_suffix(1)  →         e
+                                ▲  ▲
+                             start end       (window shrinks from the back)
+
+   "Red" itself is never touched - only colorView's own (pointer, length)
+   moved, in O(1), no characters copied or erased
+```
+
 A `string_view` can wrap a plain literal with no `std::string` created at
-all, and supports the same `find`/`starts_with`/iteration you would expect.
+all, and supports the same `find`/`starts_with`/iteration you would
+expect:
+
+```
+   std::string_view label{"C++ course"};   // no std::string exists anywhere
+                            └──────┬─────┘
+                       label points directly at the
+                       literal's own storage
+```
+
 Prefer it for a function parameter that only **reads** text and does not
-need to keep it around - it avoids a copy the caller never asked for.
+need to keep it around - it avoids a copy the caller never asked for:
+
+```
+   void describe(const std::string& s)      COPIES only if the caller
+                                             passes something that needs
+                                             converting to std::string
+
+   void describe(std::string_view s)        NEVER copies - works directly
+                                             on a std::string, a literal,
+                                             or a slice of either
+```
 
 ---
 
 ## 7.8 Files revisited
 
-Chapter 5 wrote and read plain lines of text with `std::getline`. A file
-can hold several **fields per line** instead - the same `<<`/`>>` you
-already know from `std::cout`/`std::cin`, aimed at a file stream.
+Chapter 5 wrote and read plain lines of text with `std::getline` - one
+whole line, one `std::string`. A file can hold several **fields per
+line** instead - the same `<<`/`>>` you already know from
+`std::cout`/`std::cin`, aimed at a file stream.
+
+```
+   chapter 5:  ONE field per line               this lecture: SEVERAL fields per line
+
+   names.txt:                                   accounts.txt:
+     Ada                                          100 Jones 24.98
+     Alan                                         200 Doe 345.67
+     Grace                                        300 White 0.0
+
+   read with:  std::getline(in, name)            read with:  in >> account >> name >> balance
+              (one std::string per read)                     (three typed reads per record)
+```
 
 ```cpp
 // write.cpp
@@ -439,22 +784,59 @@ while (in >> number >> name >> balance) {   // one whitespace-delimited,
 }
 ```
 
+```
+   accounts.txt:   100 Jones 24.98
+                    │    │     │
+   in >> number ◄───┘    │     │      number  (int)         = 100
+   in >> name   ◄─────────┘     │      name    (std::string) = "Jones"
+   in >> balance ◄──────────────┘      balance (double)      = 24.98
+```
+
 `>>` splits on whitespace and converts to each variable's type as it
 reads - three reads per record, instead of `getline`'s one string per
 line. The stream itself turns false once there is nothing left to read,
 so the `while` loop runs once per complete record - the same shape as
-chapter 5's `while (std::getline(in, name))`.
+chapter 5's `while (std::getline(in, name))`:
+
+```
+   while (in >> number >> name >> balance) {
+       ...
+   }
+        │
+        └── the whole expression (in >> number >> name >> balance)
+            evaluates to the stream itself, which tests true while
+            reads keep succeeding, false once the file runs out
+```
 
 ---
 
 ## 7.9 Reading CSV data
 
 A CSV file's quoting and embedded-comma rules are easy to get subtly
-wrong with hand-rolled `stringstream` splitting. **`rapidcsv`** is a
-small, header-only library that already solved that - it is **vendored**
-into this project (the same pattern as `6.17ProjectVendoredHeader`): the
-header sits in `vendor/`, committed alongside our own code, nothing
-downloaded.
+wrong with hand-rolled `stringstream` splitting:
+
+```
+   what a naive split-on-comma gets WRONG:
+
+   100,"Smith, Jr.",24.98
+        └────┬────┘
+        one field, but it CONTAINS a comma inside quotes -
+        a naive split(',') would wrongly cut it into two fields
+```
+
+**`rapidcsv`** is a small, header-only library that already solved that -
+it is **vendored** into this project (the same pattern as
+`6.17ProjectVendoredHeader`): the header sits in `vendor/`, committed
+alongside our own code, nothing downloaded.
+
+```
+   7.9ReadingCSV/
+   ├── vendor/
+   │   └── rapidcsv.h          ← third-party, committed, nothing downloaded
+   ├── accounts.csv
+   ├── main.cpp                ← #include "rapidcsv.h"
+   └── CMakeLists.txt
+```
 
 ```cpp
 #include "rapidcsv.h"
@@ -466,11 +848,24 @@ std::vector<std::string> names{document.GetColumn<std::string>("name")};
 std::vector<double> balances{document.GetColumn<double>("balance")};
 ```
 
-`GetColumn<T>("name")` reads an entire named column - addressed by the
-CSV's header row - into a `std::vector<T>`, converting each cell from text
-to `T` along the way. Being header-only, `rapidcsv.h` needs no separate
-implementation file to compile, unlike `stb_image_write.h` in chapter 6 -
-just the include path pointed at `vendor/`:
+```
+   accounts.csv:
+   account,name,balance
+   100,Jones,24.98
+   200,Doe,345.67
+   300,White,0.0
+
+   GetColumn<int>("account")     →  std::vector<int>{100, 200, 300}
+   GetColumn<std::string>("name")→  std::vector<std::string>{"Jones", "Doe", "White"}
+   GetColumn<double>("balance")  →  std::vector<double>{24.98, 345.67, 0.0}
+
+   the header row NAMES each column - GetColumn<T>("name") looks it up
+   by that name and converts every cell in it to T
+```
+
+Being header-only, `rapidcsv.h` needs no separate implementation file to
+compile, unlike `stb_image_write.h` in chapter 6 - just the include path
+pointed at `vendor/`:
 
 ```cmake
 target_include_directories(rooster SYSTEM PRIVATE
@@ -483,8 +878,8 @@ target_include_directories(rooster SYSTEM PRIVATE
 ## 7.10 Regex
 
 A **regular expression** describes the *shape* of text, not literal
-characters - "a capital letter, then one or more lowercase letters",
-not one specific word.
+characters - "a capital letter, then one or more lowercase letters", not
+one specific word.
 
 ```cpp
 std::regex properName{"[A-Z][a-z]+"};
@@ -492,9 +887,36 @@ std::regex_match("Wally", properName);   // true  - the WHOLE string fits
 std::regex_match("E", properName);       // false - no lowercase letters follow
 ```
 
+```
+   pattern:  [A-Z]     [a-z]+
+             one       one or more
+             CAPITAL   lowercase letters
+             letter
+
+   "Wally"   W  a  l  l  y
+             ▲  └──┬──┘
+          [A-Z]  [a-z]+ (4 lowercase letters, "one or more" satisfied)
+                                                    → MATCH, true
+
+   "E"       E
+             ▲
+          [A-Z] matches, but nothing is left for [a-z]+ to match
+          (it needs AT LEAST one)                 → NO MATCH, false
+```
+
 `regex_match` requires the **entire** string to satisfy the pattern.
 `regex_search` looks for a match **anywhere** inside it, and can capture
 what it found in a `std::smatch`:
+
+```
+   regex_match("Programming is fun", regex{"fun"})    → false
+                                                          (the WHOLE string
+                                                           is not just "fun")
+
+   regex_search("Programming is fun", regex{"fun"})   → true
+                                                          (found "fun"
+                                                           SOMEWHERE inside)
+```
 
 ```cpp
 std::smatch match;
@@ -504,6 +926,20 @@ while (std::regex_search(contact, match, phoneNumber)) {
 }
 ```
 
+```
+   contact: "Ada Lovelace, Home: 555-555-1234, Work: 555-555-4321"
+
+   search 1:  finds "555-555-1234"
+              match.suffix() = ", Work: 555-555-4321"   ← everything AFTER the match
+
+   contact = match.suffix();
+
+   search 2 (on the new, shorter contact):  finds "555-555-4321"
+              match.suffix() = ""
+
+   search 3:  nothing left to find → loop ends
+```
+
 `regex_replace` rewrites every match in a **copy** of the string, leaving
 the original untouched:
 
@@ -511,8 +947,21 @@ the original untouched:
 std::regex_replace(data, std::regex{"\t"}, ",");   // tabs -> commas
 ```
 
-Common building blocks: `\d` (a digit), `{n}` (exactly n), `{n,}` (n or
-more), `{n,m}` (n to m inclusive), `[A-Z]`/`[a-z]` (character ranges).
+```
+   data:                "1\t2\t3\t4"        (unchanged after the call)
+   regex_replace result: "1,2,3,4"          (a brand new string)
+```
+
+Common building blocks:
+
+| Pattern piece | Means                          |
+|----------------|--------------------------------|
+| `\d`           | a single digit                 |
+| `[A-Z]`        | one uppercase letter (a range) |
+| `[a-z]`        | one lowercase letter (a range) |
+| `{n}`          | exactly `n` occurrences        |
+| `{n,}`         | `n` or more occurrences        |
+| `{n,m}`        | between `n` and `m`, inclusive |
 
 ---
 
@@ -530,38 +979,85 @@ from 7.9.
                                                     survival statistics
 ```
 
-- **Missing data**: some `age` values are unparseable (`"?"` in the raw
-  file). `rapidcsv::ConverterParams{true}` turns those into `NaN` instead
-  of throwing, and a `std::views::filter` drops them before any statistic
-  is computed - the same lazy-view idea from 7.5, now filtering out bad
-  data instead of picking out even numbers.
+### Missing data: filtering out `NaN` before it corrupts a statistic
 
-  ```cpp
-  auto knownAges{age | std::views::filter([](double a) { return !std::isnan(a); })};
-  std::vector<double> cleanAges{knownAges.begin(), knownAges.end()};
-  ```
+Some `age` values are unparseable (`"?"` in the raw file).
+`rapidcsv::ConverterParams{true}` turns those into `NaN` instead of
+throwing, and a `std::views::filter` drops them before any statistic is
+computed - the same lazy-view idea from 7.5, now filtering out bad data
+instead of picking out even numbers.
 
-- **Descriptive statistics**: `std::ranges::sort` the cleaned ages, then
-  `std::accumulate` for the average, `.front()`/`.back()` for min/max, and
-  the sorted vector's middle element(s) for the median.
+```cpp
+auto knownAges{age | std::views::filter([](double a) { return !std::isnan(a); })};
+std::vector<double> cleanAges{knownAges.begin(), knownAges.end()};
+```
 
-- **Counting with a condition**: `std::ranges::count_if` counts how many
-  elements satisfy a predicate - "how many passengers were in 1st class",
-  "how many survived" - in one call, no hand-written loop and counter.
+```
+   age column (raw):    29   0.9   NaN    2    30   NaN   25   ...
+                          │    │    ✗     │     │    ✗     │
+   views::filter(!isnan)  ▼    ▼          ▼     ▼          ▼
+   knownAges (lazy view): 29  0.9         2    30          25   ...
 
-  ```cpp
-  std::ranges::count_if(passengerClass, [](int c) { return c == 1; });
-  ```
+   one NaN slipping through would poison std::accumulate's sum with NaN,
+   and would throw off std::ranges::sort's ordering - filtering FIRST
+   avoids both
+```
 
-- **Cross-referencing columns by index**: `survived`, `sex`, and
-  `passengerClass` are parallel vectors - the same row `i` in each one
-  describes the same passenger - so answering "what fraction of survivors
-  were women" means walking `i` across all three together.
+### Descriptive statistics: sort, then read off the shape
+
+```
+   cleanAges, sorted ascending:
+
+   [ 0.17  0.42  1.00  ...  28.00  ...  79.00  80.00 ]
+     ▲                        ▲                  ▲
+   .front()                middle               .back()
+   = minimum                                   = maximum
+                    (median = the middle element,
+                     or the average of the two middle
+                     elements if the count is even)
+
+   average = std::accumulate(cleanAges, 0.0) / cleanAges.size()
+```
+
+### Counting with a condition: `std::ranges::count_if`
+
+```cpp
+std::ranges::count_if(passengerClass, [](int c) { return c == 1; });
+```
+
+```
+   passengerClass:  1   3   1   2   3   3   1   2  ...
+                    │       │       │       │
+                    ▼       ▼       ▼       ▼
+                count_if(== 1) counts only these matches
+
+   result: however many elements satisfied the predicate -
+           no hand-written loop, no manually incremented counter
+```
+
+### Cross-referencing parallel columns by index
+
+`survived`, `sex`, and `passengerClass` are separate `std::vector`s, but
+row `i` in each one describes the **same passenger** - so answering "what
+fraction of survivors were women" means walking `i` across all three
+together.
+
+```
+   index i:          0        1        2        3       ...
+                      │        │        │        │
+   survived[i]:       1        1        0        1
+   sex[i]:          female    male    female    male
+   passengerClass[i]:  1        1        1        2
+
+   passenger 0: survived=1, sex="female", class=1   ─┐
+   passenger 1: survived=1, sex="male",   class=1    ├─ same i, same person,
+   passenger 3: survived=1, sex="male",   class=2   ─┘   three parallel vectors
+```
 
 The result is a small report: passenger counts by class, an overall
-survival rate, and a breakdown of who survived by sex and by class -
-real answers pulled out of a real dataset using nothing but the tools
-from this chapter.
+survival rate, and a breakdown of who survived by sex and by class - real
+answers pulled out of a real dataset using nothing but the tools from
+this chapter.
 
 ---
 
