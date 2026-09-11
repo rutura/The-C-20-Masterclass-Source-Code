@@ -1,7 +1,7 @@
 # Practical Built-In Features
 
 Every program so far has worked on a handful of loose variables. Real data
-comes in **collections** - a list of scores, a column from a spreadsheet, a
+often comes in **collections** - a list of scores, a column from a spreadsheet, a
 whole passenger manifest - and real programs spend most of their time
 loading it, cleaning it, and pulling answers out of it.
 
@@ -16,13 +16,12 @@ loading it, cleaning it, and pulling answers out of it.
 
 This chapter is a tour of the **standard library's everyday tools** for
 that job: fixed and growable containers, sorting and searching, the
-functional-style ranges/views pipeline, strings beyond what chapter 5
-introduced, the `std::format` spec grammar, non-owning views into text,
+functional-style ranges/views pipeline, strings beyond what we have seen so far.
+Things like the `std::format` spec grammar, non-owning views into text,
 `std::chrono` for durations/clocks/calendar dates, files revisited with
-formatted input, reading real CSV data, and pattern matching with regular
+formatted input, reading structured data, and pattern matching with regular
 expressions. It closes with a small project that puts all of it to work
-on a real dataset - the Titanic passenger manifest - before the course
-moves on to pointers and classes.
+on a real dataset - the Titanic passenger manifest.
 
 ---
 
