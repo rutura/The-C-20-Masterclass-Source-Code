@@ -17,8 +17,9 @@ loading it, cleaning it, and pulling answers out of it.
 This chapter is a tour of the **standard library's everyday tools** for
 that job: fixed and growable containers, sorting and searching, the
 functional-style ranges/views pipeline, strings beyond what chapter 5
-introduced, non-owning views into text, files revisited with formatted
-input, reading real CSV data, and pattern matching with regular
+introduced, the `std::format` spec grammar, non-owning views into text,
+`std::chrono` for durations/clocks/calendar dates, files revisited with
+formatted input, reading real CSV data, and pattern matching with regular
 expressions. It closes with a small project that puts all of it to work
 on a real dataset - the Titanic passenger manifest - before the course
 moves on to pointers and classes.
@@ -655,7 +656,131 @@ record >> item >> quantity >> price;
 
 ---
 
-## 7.7 `std::string_view`
+## 7.7 String formatting with `std::format`
+
+`std::print`/`std::println` already cover the everyday case - build a
+formatted result and send it straight to the console. **`std::format`**
+does the same formatting work, but **returns a `std::string`** instead
+of printing, for when the text is not going straight to the screen: a
+log line, part of a file, a label built up piece by piece.
+
+```
+   std::println("Hello, {}!", name);     WRITES to stdout, returns nothing
+
+   std::string s{std::format("Hello, {}!", name)};
+                                          BUILDS a std::string, prints nothing
+                                          - you decide what happens to it next
+```
+
+### The format-spec grammar
+
+Every `{}` can carry a colon-introduced **spec** describing exactly how
+to lay out that one argument:
+
+```
+   {  :  fill align  width . precision  type  }
+      │  │    │        │       │         │
+      │  │    │        │       │         └─ how to interpret it: d, f, x, b, ...
+      │  │    │        │       └─ digits after '.', or max chars for a string
+      │  │    │        └─ minimum field width
+      │  │    └─ < left, > right, ^ center
+      │  └─ the character used to pad (default: space)
+      └─ every spec starts with a colon
+```
+
+### Width and alignment
+
+```cpp
+std::println("[{:10}]", 42);     // "[        42]"  width 10, default align
+std::println("[{:<10}]", 42);    // "[42        ]"  < left
+std::println("[{:>10}]", 42);    // "[        42]"  > right (default for numbers)
+std::println("[{:^10}]", 42);    // "[    42    ]"  ^ center
+std::println("[{:*^10}]", 42);   // "[****42****]"  '*' as fill, centered
+```
+
+```
+   {:*^10}   on 42
+
+   field:  [ *  *  *  *  4  2  *  *  *  * ]
+             └───┬───┘  └┬┘  └────┬──────┘
+              fill pad  value   fill pad
+                        (centered inside a 10-wide field)
+```
+
+### Precision
+
+```cpp
+std::println("{:.2f}", 3.14159);   // "3.14" - digits after the decimal
+std::println("{:.3}", "abcdefg");  // "abc"  - max characters, for a string
+```
+
+### Sign flags and the alternate form
+
+```cpp
+std::println("{:+d}  {:+d}", 42, -42);   // "+42  -42" - always show a sign
+std::println("{: d}  {: d}", 42, -42);   // " 42  -42" - space reserves +'s column
+
+std::println("{:#x}", 255);   // "0xff"  - hex, alternate form shows the 0x
+std::println("{:#o}", 8);     // "010"   - octal, alternate form shows the 0
+std::println("{:#b}", 5);     // "0b101" - binary, alternate form shows the 0b
+```
+
+```
+   {:+d}         {: d}
+   ─────         ─────
+   42  → "+42"   42  → " 42"     (space reserved where a sign WOULD go)
+  -42  → "-42"  -42  → "-42"     (a '-' always prints regardless)
+```
+
+### Positional arguments: reuse or reorder
+
+```cpp
+std::println("{0} bought {1} for {0}'s {2}.", "Ada", "flowers", "mother");
+// "Ada bought flowers for Ada's mother."
+```
+
+```
+   {0} bought {1} for {0}'s {2}.
+    │          │        │    │
+    │          │        │    └── args[2] = "mother"
+    │          │        └─────── args[0] = "Ada"     (REUSED - same index twice)
+    │          └──────────────── args[1] = "flowers"
+    └─────────────────────────── args[0] = "Ada"
+```
+
+Without positional indices, `{}` always consumes the next argument in
+order - positional indices let you reuse one argument twice, or print
+them in a different order than they were passed.
+
+### `std::format_to`: write into a buffer instead of allocating fresh
+
+`std::format` allocates a brand-new `std::string` every call.
+`std::format_to` writes into somewhere that **already exists**, through
+an output iterator - useful for building up one buffer across several
+calls without a fresh allocation each time:
+
+```cpp
+std::string buffer;
+std::format_to(std::back_inserter(buffer), "{}={} ", "width", 400);
+std::format_to(std::back_inserter(buffer), "{}={}", "height", 300);
+// buffer == "width=400 height=300"
+```
+
+```
+   buffer:  ""
+       │
+       format_to(back_inserter(buffer), "{}={} ", "width", 400)
+       ▼
+   buffer:  "width=400 "
+       │
+       format_to(back_inserter(buffer), "{}={}", "height", 300)
+       ▼
+   buffer:  "width=400 height=300"      (appended, not replaced)
+```
+
+---
+
+## 7.8 `std::string_view`
 
 A **`std::string_view`** does not own characters - it is a
 `(pointer, length)` pair pointing at characters owned by someone else: a
@@ -752,7 +877,185 @@ need to keep it around - it avoids a copy the caller never asked for:
 
 ---
 
-## 7.8 Files revisited
+## 7.9 `std::chrono`
+
+Time shows up everywhere in real programs - how long an operation took,
+what the timestamp on a log line should read, what today's date is.
+**`<chrono>`** is the standard library's time toolkit: **durations**
+(an amount of time), **clocks** (a source of "now"), and, since C++20,
+genuine **calendar dates**.
+
+### Durations: an amount of time, with the unit baked into the type
+
+```cpp
+std::chrono::seconds fiveSeconds{5};
+std::chrono::milliseconds fiveThousandMs{5000};
+```
+
+```
+   std::chrono::duration<Rep, Period>
+                  │        │
+                  │        └── the tick length: what ONE tick means
+                  │             (seconds, milliseconds, minutes, ...)
+                  └─────────── the number of ticks (a plain integer or double)
+
+   seconds{5}         ==  5 ticks, each tick = 1 second
+   milliseconds{5000} ==  5000 ticks, each tick = 1 millisecond
+                            │
+                            both represent the SAME amount of time,
+                            just counted in different-sized units
+```
+
+Different duration *types* holding the same amount of time still compare
+equal - the library converts for you:
+
+```cpp
+fiveSeconds == fiveThousandMs;   // true
+```
+
+`duration_cast<T>` converts explicitly between duration types, the same
+spirit as `static_cast` - going from a smaller unit to a bigger one can
+lose information (leftover milliseconds do not fit in whole seconds), so
+it is never implicit:
+
+```cpp
+auto raceDuration{90min + 32s};                    // chrono_literals: 90 minutes, 32 seconds
+std::chrono::duration_cast<std::chrono::seconds>(raceDuration).count();  // 5432
+```
+
+```
+   90min + 32s
+      │      │
+      │      └── 32 seconds
+      └───────── 90 minutes  =  5400 seconds
+                                   │
+                              5400 + 32  =  5432 seconds total
+```
+
+### Benchmarking a block of code with `steady_clock`
+
+```cpp
+const auto start{std::chrono::steady_clock::now()};
+// ... the work being timed ...
+const auto end{std::chrono::steady_clock::now()};
+
+const auto elapsed{std::chrono::duration_cast<std::chrono::milliseconds>(end - start)};
+```
+
+```
+   timeline:   start ────────────── work happens ────────────── end
+                 │                                                │
+                 └──────────────────  elapsed = end - start ──────┘
+                                       (a duration, not a time_point)
+
+   steady_clock NEVER goes backward - it is not tied to the wall clock,
+   so a system-clock adjustment (NTP sync, a user changing the time)
+   cannot make elapsed come out negative. Use it whenever you are
+   MEASURING elapsed time, never system_clock.
+```
+
+### Wall-clock time with `system_clock`
+
+```cpp
+const auto now{std::chrono::system_clock::now()};   // a time_point
+```
+
+```
+   steady_clock::now()     answers "how much time has passed?"
+                            - use for benchmarking / timeouts
+
+   system_clock::now()     answers "what time is it right now?"
+                            - use for timestamps / logging
+                            - CAN jump (clock sync, user changes it) -
+                              never use it to measure elapsed time
+```
+
+`std::format` understands a `time_point` directly, using the same
+`{:...}` spec grammar from 7.7 - `%` codes take the place of a type
+letter like `f` or `d`:
+
+```cpp
+std::println("Right now: {:%Y-%m-%d %H:%M:%S}", now);
+// "Right now: 2026-09-11 06:49:25"
+```
+
+```
+   {:%Y-%m-%d %H:%M:%S}
+      │  │  │   │  │  │
+      │  │  │   │  │  └── seconds
+      │  │  │   │  └───── minutes
+      │  │  │   └──────── hours (24-hour)
+      │  │  └──────────── day of month
+      │  └─────────────── month
+      └────────────────── year
+```
+
+A raw `time_point` carries sub-second precision (down to nanoseconds on
+most systems) - `time_point_cast<seconds>(now)` rounds it down to whole
+seconds first, so the printed time stays readable instead of trailing
+nine digits of fractional noise.
+
+### C++20 calendar dates: `year_month_day`
+
+A `time_point` is a point on an abstract timeline; **`year_month_day`**
+is a genuine **calendar date** - built from chrono's own `year`, `month`,
+and `day` building blocks:
+
+```cpp
+const std::chrono::year_month_day releaseDate{
+    std::chrono::year{2020}, std::chrono::month{9}, std::chrono::day{15}};
+
+std::println("C++20 was published around: {:%B %d, %Y}", releaseDate);
+// "C++20 was published around: September 15, 2020"
+```
+
+```
+   year_month_day{ year{2020}, month{9}, day{15} }
+                       │            │        │
+                       2020         September 15th
+
+   {:%B %d, %Y}  formats it as  "September 15, 2020"
+        │
+        %B = full month name (vs. %m for the numeric month, "09")
+```
+
+Going from a `time_point` to a calendar date needs one more step -
+**`floor<days>`** truncates the `time_point` down to midnight, since a
+`time_point` alone carries no notion of "which calendar day" until it is
+rounded to that granularity:
+
+```cpp
+const std::chrono::year_month_day today{
+    std::chrono::floor<std::chrono::days>(now)};
+```
+
+```
+   now (a time_point, includes hours/minutes/seconds/...)
+       │
+       floor<days>(now)   ──►  truncates to midnight of that day
+       │
+       year_month_day{...}  ──►  a genuine calendar date: today
+```
+
+Calendar arithmetic in whole days works directly on the floored value -
+no hand-rolled "how many days in this month" logic required:
+
+```cpp
+const std::chrono::year_month_day nextWeek{
+    std::chrono::floor<std::chrono::days>(now) + std::chrono::days{7}};
+```
+
+```
+   floor<days>(now)  +  days{7}
+          │                │
+       today's           add 7        →  year_month_day{...}  = one week
+       midnight          whole days       from today, correct across a
+                                           month or year boundary
+```
+
+---
+
+## 7.10 Files revisited
 
 Chapter 5 wrote and read plain lines of text with `std::getline` - one
 whole line, one `std::string`. A file can hold several **fields per
@@ -810,7 +1113,7 @@ chapter 5's `while (std::getline(in, name))`:
 
 ---
 
-## 7.9 Reading CSV data
+## 7.11 Reading CSV data
 
 A CSV file's quoting and embedded-comma rules are easy to get subtly
 wrong with hand-rolled `stringstream` splitting:
@@ -830,7 +1133,7 @@ it is **vendored** into this project (the same pattern as
 alongside our own code, nothing downloaded.
 
 ```
-   7.9ReadingCSV/
+   7.11ReadingCSV/
    ├── vendor/
    │   └── rapidcsv.h          ← third-party, committed, nothing downloaded
    ├── accounts.csv
@@ -875,7 +1178,7 @@ target_include_directories(rooster SYSTEM PRIVATE
 
 ---
 
-## 7.10 Regex
+## 7.12 Regex
 
 A **regular expression** describes the *shape* of text, not literal
 characters - "a capital letter, then one or more lowercase letters", not
@@ -965,7 +1268,7 @@ Common building blocks:
 
 ---
 
-## 7.11 Project: Titanic dataset analysis
+## 7.13 Project: Titanic dataset analysis
 
 Everything in this chapter comes together on one real dataset: the
 Titanic passenger manifest, loaded with the same vendored `rapidcsv`
@@ -1061,12 +1364,12 @@ this chapter.
 
 ---
 
-## 7.12 Assignment
+## 7.14 Assignment
 
-Six exercises building toward the same kind of work as the Titanic
-project, on a smaller dataset. `main.cpp` has the six stubbed exercises,
+Eight exercises building toward the same kind of work as the Titanic
+project, on a smaller dataset. `main.cpp` has the eight stubbed exercises,
 each with its problem statement and a sample run in a comment;
-`main_solution.cpp` solves all six with the statements repeated above
+`main_solution.cpp` solves all eight with the statements repeated above
 each solution. Built as two executables (`rooster`, `rooster_solution`).
 
 | # | Exercise | Tools |
@@ -1077,9 +1380,12 @@ each solution. Built as two executables (`rooster`, `rooster_solution`).
 | 4 | `clean_label()` | `find`/`erase`, `find`/`replace` in a loop |
 | 5 | `extract_reading()` | parsing one line of text with `std::istringstream` |
 | 6 | `flagged_accounts()` | `rapidcsv::Document` + `std::regex_match`, on `accounts.csv` |
+| 7 | `format_receipt()` | `std::format`'s fill/align/width/precision spec grammar |
+| 8 | `days_until()` | `std::chrono::year_month_day`, `sys_days` conversion, calendar-day arithmetic |
 
-The quiz (`QUIZ.md`) is 18 multiple-choice questions across the whole
-chapter, including the CSV/vendoring pattern and the Titanic project's
+The quiz (`QUIZ.md`) is 23 multiple-choice questions across the whole
+chapter, including the format-spec grammar, chrono durations/clocks/
+calendar dates, the CSV/vendoring pattern, and the Titanic project's
 ranges/statistics.
 
 After this chapter the student can hold, sort, search, and summarize real

@@ -1,12 +1,13 @@
-# Chapter 7 Quiz — Practical Built-In Features
+# Chapter 7 Quiz - Practical Built-In Features
 
-18 multiple-choice questions covering **Chapter 7 (Practical Built-In
+23 multiple-choice questions covering **Chapter 7 (Practical Built-In
 Features)**: `std::array` vs `std::vector`, sorting/searching/`accumulate`,
 ranges and views, strings beyond the basics (`find`/`erase`/`replace`/
-`insert`, string streams), `std::string_view`, files with formatted `>>`/
-`<<`, reading CSV data with a vendored library, `<regex>`, and the Titanic
-dataset project. Each question is followed immediately by its correct
-answer and a short explanation.
+`insert`, string streams), the `std::format` spec grammar, `std::string_view`,
+`std::chrono` (durations, clocks, C++20 calendar dates), files with
+formatted `>>`/`<<`, reading CSV data with a vendored library, `<regex>`,
+and the Titanic dataset project. Each question is followed immediately by
+its correct answer and a short explanation.
 
 ---
 
@@ -166,8 +167,53 @@ D. Views cannot hold `double` values otherwise
 ### 18. `std::ranges::count_if(survived, [](int s){ return s != 0; })` in the Titanic project computes...
 
 A. The total number of passengers, survivors or not
-B. How many entries in `survived` are non-zero — i.e. how many passengers survived
+B. How many entries in `survived` are non-zero - i.e. how many passengers survived
 C. The sum of the `survived` column
 D. Whether at least one passenger survived (a `bool`)
 
-**Answer: B** — `count_if` counts how many elements satisfy the predicate. Here that predicate is "is this passenger's `survived` value non-zero", so the result is the survivor count.
+**Answer: B** - `count_if` counts how many elements satisfy the predicate. Here that predicate is "is this passenger's `survived` value non-zero", so the result is the survivor count.
+
+### 19. How does `std::format` differ from `std::print`/`std::println`?
+
+A. They are identical - `format` is just an older, deprecated name for `print`
+B. `std::format` returns a `std::string` built from the spec; `std::print`/`std::println` write formatted output straight to the console
+C. `std::format` can only format numbers, never strings
+D. `std::print` returns a `std::string`; `std::format` writes to the console
+
+**Answer: B** - `format` hands back a `std::string` for you to store, log, or build further; `print`/`println` skip that step and write the result straight to stdout.
+
+### 20. In the format spec `{:*^10}`, what does each part mean?
+
+A. `*` is the value being formatted, `^10` is ignored
+B. `*` is the fill character, `^` centers the value, `10` is the minimum field width
+C. `*10` means "repeat the value 10 times", `^` is a typo
+D. This spec is invalid - fill characters are not allowed with `^`
+
+**Answer: B** - the format-spec grammar is `{:fill align width.precision type}`. Here the fill character is `*`, `^` requests centered alignment, and `10` is the field's minimum width - so a short value gets padded with `*` on both sides until the field is 10 characters wide.
+
+### 21. Why does `steady_clock`, not `system_clock`, get used to measure how long a block of code takes?
+
+A. `steady_clock` has nanosecond precision and `system_clock` does not
+B. `steady_clock` never goes backward - it is unaffected by the system clock being adjusted (NTP sync, a user changing the time), so an elapsed-time measurement can never come out negative
+C. `system_clock` cannot be subtracted from itself
+D. There is no difference - either clock works identically for benchmarking
+
+**Answer: B** - `system_clock` tracks wall-clock time and can jump forward or backward if the system clock is corrected. `steady_clock` is guaranteed monotonic, which is exactly what a correct elapsed-time measurement needs.
+
+### 22. What does `std::chrono::duration_cast<std::chrono::seconds>(raceDuration)` do if `raceDuration` is `90min + 32s`?
+
+A. Nothing - `duration_cast` only works on `system_clock` values
+B. Converts the duration to a count of whole seconds - `5432` in this case
+C. Rounds `raceDuration` to the nearest minute
+D. Throws an exception, since minutes cannot convert to seconds
+
+**Answer: B** - `duration_cast<T>` explicitly converts between duration types, the same spirit as `static_cast`. `90min + 32s` is `5400 + 32 = 5432` seconds total, so `.count()` on the cast result gives `5432`.
+
+### 23. Why does converting a `system_clock::time_point` to a `std::chrono::year_month_day` require `floor<days>(...)` first?
+
+A. `floor` is required to silence a compiler warning, nothing more
+B. A `time_point` carries sub-day precision (hours, minutes, seconds, ...); `year_month_day` represents a calendar DAY, so the time_point must be truncated down to midnight of that day before it can convert
+C. `year_month_day` cannot be constructed from a `time_point` under any circumstances
+D. `floor` rounds the year up to the nearest decade
+
+**Answer: B** - a raw `time_point` has no notion of "which calendar day" until it is rounded to day granularity. `floor<days>(now)` truncates to midnight, giving a value that can convert to `year_month_day` (via `sys_days`).

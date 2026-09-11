@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <chrono>
+#include <format>
 #include <numeric>
 #include <print>
 #include <ranges>
@@ -144,7 +146,7 @@ int main() {
         Exercise 6 - flagged_accounts(): CSV + regex together
 
         accounts.csv (already in this folder) has columns account, name,
-        balance. Load it with rapidcsv::Document, same as 7.9ReadingCSV,
+        balance. Load it with rapidcsv::Document, same as 7.11ReadingCSV,
         and get the "name" and "balance" columns as vectors.
 
         A name is "flagged" if it matches this regex, checked with
@@ -161,6 +163,63 @@ int main() {
             Rich: 224.62
     */
     std::println("\n--- Exercise 6: flagged_accounts ---");
+    // TODO
+
+
+    /*
+        Exercise 7 - format_receipt(): std::format spec grammar
+
+        Write:
+
+            std::string format_receipt(const std::string& item,
+                                        int quantity, double price);
+
+        Using std::format (not std::print - this function RETURNS a
+        string), build one line shaped like a receipt row:
+
+          - the item name, left-aligned, in a field 12 characters wide
+          - the quantity, right-aligned, in a field 4 characters wide
+          - the price, right-aligned, in a field 8 characters wide, with
+            exactly 2 digits after the decimal point
+
+        Call it three times, with ("coffee", 2, 4.5), ("bagel", 1, 3.25),
+        and ("tea", 10, 2.0), and print each returned string.
+
+        Sample output:
+            coffee         2    4.50
+            bagel          1    3.25
+            tea           10    2.00
+    */
+    std::println("\n--- Exercise 7: format_receipt ---");
+    // TODO
+
+
+    /*
+        Exercise 8 - days_until(): std::chrono calendar arithmetic
+
+        Write:
+
+            long days_until(std::chrono::year_month_day target);
+
+        It should:
+          1. get "today" as a year_month_day - system_clock::now(),
+             floored to std::chrono::days, same as the lecture
+          2. convert BOTH today and target to std::chrono::sys_days
+             (year_month_day converts to sys_days implicitly through
+             static_cast<std::chrono::sys_days>(...))
+          3. subtract them (sys_days supports -, giving a std::chrono::days)
+             and return .count() as a long
+
+        Call it with a target date of your choosing that is after today
+        (e.g. std::chrono::year{2026}/12/25 for a December 25 target -
+        year_month_day can be built with the y/m/d operator/ syntax, not
+        just the three-argument constructor from the lecture), and print
+        the result.
+
+        Sample output (the number will differ depending on today's date):
+            42 days until 2026-12-25
+    */
+    std::println("\n--- Exercise 8: days_until ---");
     // TODO
 
     return 0;

@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <chrono>
+#include <format>
 #include <numeric>
 #include <print>
 #include <ranges>
@@ -16,6 +18,8 @@
 std::vector<int> grow_readings(const std::vector<int>& source, int extra);
 void warmest_and_coolest(const std::vector<int>& data, int& coolest, int& warmest);
 std::string clean_label(std::string label);
+std::string format_receipt(const std::string& item, int quantity, double price);
+long days_until(std::chrono::year_month_day target);
 
 int main() {
 
@@ -85,6 +89,17 @@ int main() {
         }
     }
 
+    // --- Exercise 7 ---------------------------------------------------------
+    std::println("\n--- Exercise 7: format_receipt ---");
+    std::println("{}", format_receipt("coffee", 2, 4.5));
+    std::println("{}", format_receipt("bagel", 1, 3.25));
+    std::println("{}", format_receipt("tea", 10, 2.0));
+
+    // --- Exercise 8 -----------------------------------------------------------
+    std::println("\n--- Exercise 8: days_until ---");
+    const std::chrono::year_month_day target{std::chrono::year{2026} / 12 / 25};
+    std::println("{} days until {}", days_until(target), target);
+
     return 0;
 }
 
@@ -123,4 +138,20 @@ std::string clean_label(std::string label) {
     }
 
     return label;
+}
+
+// Left-aligns the name, right-aligns quantity and price into fixed-width
+// fields using the {:...} spec grammar - no manual padding.
+std::string format_receipt(const std::string& item, int quantity, double price) {
+    return std::format("{:<12}{:>4}{:>8.2f}", item, quantity, price);
+}
+
+// Converts both dates to sys_days (a count of days since the epoch) so
+// they can be subtracted directly; year_month_day itself has no -.
+long days_until(std::chrono::year_month_day target) {
+    const auto today{std::chrono::floor<std::chrono::days>(
+        std::chrono::system_clock::now())};
+    const auto targetDays{static_cast<std::chrono::sys_days>(target)};
+
+    return (targetDays - today).count();
 }
