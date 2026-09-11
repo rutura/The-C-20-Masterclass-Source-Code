@@ -3,15 +3,6 @@
 #include <vector>
 
 void print_stock(const std::vector<int>& stock) {
-    // 7.2 dropped the reference here because number was only ever READ,
-    // never written - a plain `int number` copy was enough. This loop
-    // looks the same, but stock's PARAMETER is `const std::vector<int>&`:
-    // stock itself cannot be modified inside this function. Because of
-    // that, the compiler will not let quantity be a writable `int&`
-    // either - a reference into data you promised not to touch would
-    // let you break that promise. `const int&` is what is actually
-    // allowed here; the plain `int` copy below works too, for the same
-    // reason it did in 7.2 - quantity is still only being read.
     for (const int& quantity : stock) {
         std::print("{} ", quantity);
     }
