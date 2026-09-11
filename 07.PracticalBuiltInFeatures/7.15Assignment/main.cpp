@@ -146,7 +146,7 @@ int main() {
         Exercise 6 - flagged_accounts(): CSV + regex together
 
         accounts.csv (already in this folder) has columns account, name,
-        balance. Load it with rapidcsv::Document, same as 7.11ReadingCSV,
+        balance. Load it with rapidcsv::Document, same as 7.12ReadingCSV,
         and get the "name" and "balance" columns as vectors.
 
         A name is "flagged" if it matches this regex, checked with

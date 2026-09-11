@@ -7,7 +7,7 @@ project(rooster)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# rapidcsv is VENDORED - same setup as 7.11ReadingCSV.
+# rapidcsv is VENDORED - same setup as 7.12ReadingCSV.
 add_executable(rooster
     main.cpp
     vendor/rapidcsv.h

@@ -50,7 +50,7 @@ int main() {
     const auto now{system_clock::now()};
 
     // std::format understands time_point directly, using the same {:...}
-    // spec grammar from 7.7, with % chrono format codes instead of a type
+    // spec grammar from 7.8, with % chrono format codes instead of a type
     // letter like 'f' or 'd'. Rounding to seconds first keeps the printed
     // time readable - an unrounded time_point prints with its full
     // sub-second precision, right down to nanoseconds.

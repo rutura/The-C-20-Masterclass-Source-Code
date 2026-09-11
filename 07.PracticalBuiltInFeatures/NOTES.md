@@ -15,9 +15,11 @@ loading it, cleaning it, and pulling answers out of it.
 ```
 
 This chapter is a tour of the **standard library's everyday tools** for
-that job: fixed and growable containers, sorting and searching, the
-functional-style ranges/views pipeline, strings beyond what we have seen so far.
-Things like the `std::format` spec grammar, non-owning views into text,
+that job: fixed and growable containers, how to pass a collection to a
+function without either copying it needlessly or letting it be
+mutated by accident, sorting and searching, the functional-style
+ranges/views pipeline, strings beyond what we have seen so far. Things
+like the `std::format` spec grammar, non-owning views into text,
 `std::chrono` for durations/clocks/calendar dates, files revisited with
 formatted input, reading structured data, and pattern matching with regular
 expressions. It closes with a small project that puts all of it to work
@@ -191,7 +193,7 @@ The rule of thumb: **default to reading by value for small types like
 write back, or when the element is large enough that copying it costs
 something** (a `std::string`, a `std::vector`, a struct with several
 members). `const T&` is the habit that pays off once `T` stops being tiny
-- it shows up again from chapter 7.6 onward, once the elements are
+- it shows up again from chapter 7.7 onward, once the elements are
 `std::string`s instead of `int`s.
 
 ### The C++20 `for (init; cond; range)` form
@@ -217,7 +219,121 @@ instead of on a separate line above the loop:
 
 ---
 
-## 7.3 `std::vector`
+## 7.3 Collection parameters and const
+
+In this lecture, we explore what happens when a function takes a
+**collection** as a parameter, and how `const` changes the story. 
+As usual, a parameter can be passed: 
+- by value (the function gets its own copy),
+- by reference (the function gets an alias to the caller's own data)
+- by const reference (the function gets an alias, but cannot write through it).
+
+We how all this applies to the case when the parameter is a **collection** instead of a single `int` or `double`.
+
+### By value: the whole array gets copied
+
+```cpp
+void report_by_value(std::array<int, 5> readings) {
+    readings[0] = -1;   // only touches this function's own copy
+    // ...
+}
+```
+
+We have already seen that `const` on a by-value `int` parameter only protects a
+copy the function already owns - the caller was never at risk either
+way. The same is true here, but the **cost** is no longer negligible:
+copying an `int` is one machine word; copying a `std::array<int, 5>` is
+five.
+
+```
+   caller                                report_by_value(sensor_readings)
+   ──────                                ─────────────────────────────────
+   sensor_readings: ┌────┬────┬────┬────┬────┐   copy    readings: ┌────┬────┬────┬────┬────┐
+                    │ 68 │ 71 │ 69 │ 72 │ 70 │  ───────►           │ 68 │ 71 │ 69 │ 72 │ 70 │
+                    └────┴────┴────┴────┴────┘                     └────┴────┴────┴────┴────┘
+                                                                      │
+                                              readings[0] = -1  ◄─────┘   only this SEPARATE
+                                                                            block changes
+
+   sensor_readings afterward: ┌────┬────┬────┬────┬────┐    UNCHANGED - the edit landed
+                              │ 68 │ 71 │ 69 │ 72 │ 70 │    on a copy that is thrown
+                              └────┴────┴────┴────┴────┘    away when the function returns
+```
+
+### By reference: an alias, and writes land on the caller's array
+
+```cpp
+void reset_readings(std::array<int, 5>& readings) {
+    for (int& reading : readings) {
+        reading = 0;
+    }
+}
+```
+
+No copy - `readings` is another name for the caller's own array. This is
+the right tool when a function's entire job is to mutate the caller's
+data in place:
+
+```
+   caller                                reset_readings(sensor_readings)
+   ──────                                ────────────────────────────────
+   sensor_readings: ┌────┬────┬────┬────┬────┐  alias   readings
+                    │ 68 │ 71 │ 69 │ 72 │ 70 │ ◄───────► (same object,
+                    └────┴────┴────┴────┴────┘            no copy)
+                       ▲
+                       │ for (int& reading : readings) { reading = 0; }
+                       │ writes THROUGH the alias, straight back onto
+                       │ the caller's own array
+                       ▼
+   sensor_readings afterward: ┌────┬────┬────┬────┬────┐   CHANGED - reset_readings'
+                              │  0 │  0 │  0 │  0 │  0 │   whole purpose was to do
+                              └────┴────┴────┴────┴────┘   exactly this
+```
+
+### By const reference: an alias, but a read-only one
+
+```cpp
+void report_by_const_ref(const std::array<int, 5>& readings) {
+    // readings[0] = 99;   // would not compile
+    std::print("readings: ");
+    for (int reading : readings) {
+        std::print("{} ", reading);
+    }
+}
+```
+
+No copy, and the compiler enforces that this function **cannot** write
+through `readings`. 
+
+```
+   readings[0] = 99;   inside report_by_const_ref
+        │
+        ▼
+   COMPILE ERROR: cannot assign to return value because function
+                  'operator[]' returns a const value
+```
+
+### Side by side
+
+```
+                  by value                by reference             by const reference
+                  ─────────                ────────────             ───────────────────
+   copy made?     YES - all N elements     NO - an alias            NO - an alias
+   caller sees    NEVER - edits land       ALWAYS - edits land      cannot write at all -
+   mutations?     on a throwaway copy      on the caller's array    compiler-enforced
+   choose when    the function needs       the function's job is   the function only
+                  its own independent      to mutate the caller's  needs to READ - the
+                  copy to experiment on    data in place            common case
+```
+
+Rule of thumb: default to **`const&`** for a collection a function only
+reads; reach for a plain **`&`** when the function's purpose is to
+mutate the caller's own data; reach for **by value** only when the
+function needs an independent copy to work with (Very rare). 
+
+---
+
+## 7.4 `std::vector`
 
 **`std::vector<T>`** is the growable counterpart to `std::array`: its
 elements live on the **heap**, and it can grow or shrink at run time.
@@ -376,7 +492,7 @@ propagates into the loop, not just onto the parameter name itself.
 
 ---
 
-## 7.4 Sorting, searching, and `accumulate`
+## 7.5 Sorting, searching, and `accumulate`
 
 ### Two ways to tell the computer what to do
 
@@ -421,8 +537,8 @@ lambda) saying what to do with one element, and it owns the looping.
    WHAT you state                       WHO supplies the loop
    ───────────────                      ─────────────────────
    accumulate(..., combine)             accumulate's internal iteration
-   filter(keep_if)                      the view's internal iteration (7.5)
-   transform(map_to)                    the view's internal iteration (7.5)
+   filter(keep_if)                      the view's internal iteration (7.6)
+   transform(map_to)                    the view's internal iteration (7.6)
 ```
 
 This is C++'s **functional-style** programming: not a different
@@ -540,9 +656,9 @@ by mistake.
 
 ---
 
-## 7.5 Ranges and views
+## 7.6 Ranges and views
 
-Section 7.4 hid one loop inside `accumulate`. C++20's **ranges library**
+Section 7.5 hid one loop inside `accumulate`. C++20's **ranges library**
 (`<ranges>`) goes further and gives you two more declarative building
 blocks - **filter** (keep only what matches) and **transform** (map each
 value to a new one) - that chain together instead of nesting loops inside
@@ -635,13 +751,13 @@ numbers | std::views::filter(...) | std::views::transform(...)
 ```
 
 `filter` and `transform` are exactly the "declarative, higher-order,
-internal iteration" pattern this lecture opened with in 7.4 - `accumulate`
+internal iteration" pattern this lecture opened with in 7.5 - `accumulate`
 folds a range down to one value, `filter`/`transform` reshape a range
 into a new one, and all three let you state *what* instead of *how*.
 
 ---
 
-## 7.6 Strings deep dive
+## 7.7 Strings deep dive
 
 Chapter 5 covered `length()`/`size()`, `empty()`, `==`/`!=`, `+`, and
 `starts_with`/`ends_with`. This lecture goes further.
@@ -816,7 +932,7 @@ record >> item >> quantity >> price;
 
 ---
 
-## 7.7 String formatting with `std::format`
+## 7.8 String formatting with `std::format`
 
 `std::print`/`std::println` already cover the everyday case - build a
 formatted result and send it straight to the console. **`std::format`**
@@ -940,7 +1056,7 @@ std::format_to(std::back_inserter(buffer), "{}={}", "height", 300);
 
 ---
 
-## 7.8 `std::string_view`
+## 7.9 `std::string_view`
 
 A **`std::string_view`** does not own characters - it is a
 `(pointer, length)` pair pointing at characters owned by someone else: a
@@ -1037,7 +1153,7 @@ need to keep it around - it avoids a copy the caller never asked for:
 
 ---
 
-## 7.9 `std::chrono`
+## 7.10 `std::chrono`
 
 Time shows up everywhere in real programs - how long an operation took,
 what the timestamp on a log line should read, what today's date is.
@@ -1131,7 +1247,7 @@ const auto now{std::chrono::system_clock::now()};   // a time_point
 ```
 
 `std::format` understands a `time_point` directly, using the same
-`{:...}` spec grammar from 7.7 - `%` codes take the place of a type
+`{:...}` spec grammar from 7.8 - `%` codes take the place of a type
 letter like `f` or `d`:
 
 ```cpp
@@ -1215,7 +1331,7 @@ const std::chrono::year_month_day nextWeek{
 
 ---
 
-## 7.10 Files revisited
+## 7.11 Files revisited
 
 Chapter 5 wrote and read plain lines of text with `std::getline` - one
 whole line, one `std::string`. A file can hold several **fields per
@@ -1273,7 +1389,7 @@ chapter 5's `while (std::getline(in, name))`:
 
 ---
 
-## 7.11 Reading CSV data
+## 7.12 Reading CSV data
 
 A CSV file's quoting and embedded-comma rules are easy to get subtly
 wrong with hand-rolled `stringstream` splitting:
@@ -1293,7 +1409,7 @@ it is **vendored** into this project (the same pattern as
 alongside our own code, nothing downloaded.
 
 ```
-   7.11ReadingCSV/
+   7.12ReadingCSV/
    ├── vendor/
    │   └── rapidcsv.h          ← third-party, committed, nothing downloaded
    ├── accounts.csv
@@ -1338,7 +1454,7 @@ target_include_directories(rooster SYSTEM PRIVATE
 
 ---
 
-## 7.12 Regex
+## 7.13 Regex
 
 A **regular expression** describes the *shape* of text, not literal
 characters - "a capital letter, then one or more lowercase letters", not
@@ -1428,11 +1544,11 @@ Common building blocks:
 
 ---
 
-## 7.13 Project: Titanic dataset analysis
+## 7.14 Project: Titanic dataset analysis
 
 Everything in this chapter comes together on one real dataset: the
 Titanic passenger manifest, loaded with the same vendored `rapidcsv`
-from 7.9.
+from 7.12.
 
 ```
    titanic.csv ──rapidcsv──► GetColumn<T> per field ──► std::vector<T>
@@ -1447,7 +1563,7 @@ from 7.9.
 Some `age` values are unparseable (`"?"` in the raw file).
 `rapidcsv::ConverterParams{true}` turns those into `NaN` instead of
 throwing, and a `std::views::filter` drops them before any statistic is
-computed - the same lazy-view idea from 7.5, now filtering out bad data
+computed - the same lazy-view idea from 7.6, now filtering out bad data
 instead of picking out even numbers.
 
 ```cpp
@@ -1524,7 +1640,7 @@ this chapter.
 
 ---
 
-## 7.14 Assignment
+## 7.15 Assignment
 
 Eight exercises building toward the same kind of work as the Titanic
 project, on a smaller dataset. `main.cpp` has the eight stubbed exercises,

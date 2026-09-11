@@ -5,7 +5,7 @@
 #include "rapidcsv.h"
 
 // PROJECT: reading a CSV file with a vendored library instead of hand-
-// rolled stringstream splitting (7.6's istringstream works for one line,
+// rolled stringstream splitting (7.7's istringstream works for one line,
 // but real CSVs have quoting, headers, and missing-value rules that are
 // easy to get subtly wrong by hand).
 
