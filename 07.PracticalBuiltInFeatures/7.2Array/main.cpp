@@ -12,11 +12,6 @@ int main() {
     std::println("tallying six dice rolls:");
     std::array<int, 6> roll_tally{};   // {} zero-initializes every element
 
-    // If you had to set each position by hand
-    for (std::size_t face{0}; face < roll_tally.size(); ++face) {
-        roll_tally[face] = 0;
-    }
-
     // A fixed sequence of ten rolls, as if a die had already been rolled
     // and someone wrote down the results: 3, 3, 1, 6, 3, 2, 3, 5, 4, 3.
     // Each roll's face value (1..6) becomes the index (face - 1) whose

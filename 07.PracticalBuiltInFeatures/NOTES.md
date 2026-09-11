@@ -29,62 +29,101 @@ on a real dataset - the Titanic passenger manifest.
 
 **`std::array<T, N>`** is a **fixed-size** sequence of `N` values of type
 `T`, stored **inline** - the elements sit directly inside the `array`
-object (not heap allocated), back to back, no separate heap allocation 
-(we'll understand what this means later on). `N` is part of the
-type: `std::array<int, 5>` and `std::array<int, 10>` are different types,
-the same way `int` and `double` are different types.
+object, back to back, no separate heap allocation (we will come back to
+what that means once heap allocation itself is on the table). `N` is
+part of the type: `std::array<int, 5>` and `std::array<int, 10>` are
+different types, the same way `int` and `double` are different types.
+
+The running example: tallying six-sided **dice rolls**. `roll_tally`
+counts how many times each face came up - index `i` holds the count for
+face `i + 1`:
 
 ```cpp
-std::array<int, 5> scores{};   // {} zero-initializes every element
+std::array<int, 6> roll_tally{};   // {} zero-initializes every element
 ```
 
 ```
-   std::array<int, 5> scores{};
+   std::array<int, 6> roll_tally{};
 
-   index:    0     1     2     3     4
-           ┌─────┬─────┬─────┬─────┬─────┐
-   scores: │  0  │  0  │  0  │  0  │  0  │      one block, 5 ints,
-           └─────┴─────┴─────┴─────┴─────┘      sitting right here
-            ▲                             ▲
-        scores[0]                    scores[4]
-                      size() == 5, fixed forever
+   index:      0     1     2     3     4     5
+             ┌─────┬─────┬─────┬─────┬─────┬─────┐
+   roll_tally│  0  │  0  │  0  │  0  │  0  │  0  │   one block, 6 ints,
+             └─────┴─────┴─────┴─────┴─────┴─────┘   sitting right here
+                ▲                                 ▲
+         roll_tally[0]                     roll_tally[5]
+          (count of 1s)                     (count of 6s)
+                      size() == 6, fixed forever
+```
+
+### Filling it in from real data
+
+A fixed sequence of ten rolls stands in for "a die that was already
+rolled and someone wrote the results down":
+
+```cpp
+constexpr std::array<int, 10> rolls{3, 3, 1, 6, 3, 2, 3, 5, 4, 3};
+
+for (std::size_t i{0}; i < rolls.size(); ++i) {
+    ++roll_tally[rolls[i] - 1];
+}
+```
+
+Each roll's face value (`1`..`6`) becomes the index (`face - 1`) whose
+count gets incremented - `rolls[i] - 1`, because indices start at `0` but
+die faces start at `1`:
+
+```
+   rolls:  3   3   1   6   3   2   3   5   4   3
+           │   │   │   │   │   │   │   │   │   │
+           ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼
+   index:  2   2   0   5   2   1   2   4   3   2      (roll - 1)
+
+   roll_tally after all ten increments:
+
+   index:      0     1     2     3     4     5
+             ┌─────┬─────┬─────┬─────┬─────┬─────┐
+   roll_tally│  1  │  1  │  5  │  1  │  1  │  1  │
+             └─────┴─────┴─────┴─────┴─────┴─────┘
+             face1  face2  face3  face4  face5  face6
+                            ▲
+                     three showed up FIVE times
+                     (indices 2, 2, 2, 2, 2 - five of the 3s in rolls)
 ```
 
 ### Access: `[]` vs `.at()`
 
-`scores[i]` is **unchecked** - fast, but an out-of-range `i` is undefined
-behavior: the program might crash, or might silently read whatever
-garbage happens to sit past the array in memory. `scores.at(i)` is the
-same idea, **bounds-checked**: an out-of-range index throws
-`std::out_of_range` instead of reading garbage.
+`roll_tally[face]` is **unchecked** - fast, but an out-of-range `face` is
+undefined behavior: the program might crash, or might silently read
+whatever garbage happens to sit past the array in memory.
+`roll_tally.at(face)` is the same idea, **bounds-checked**: an
+out-of-range index throws `std::out_of_range` instead of reading garbage.
 
 ```
-   scores[i]              i in range        →  reads scores[i], no check
-                           i out of range    →  UNDEFINED BEHAVIOR (danger)
+   roll_tally[face]        face in range        →  reads roll_tally[face], no check
+                            face out of range    →  UNDEFINED BEHAVIOR (danger)
 
-   scores.at(i)            i in range        →  reads scores[i]
-                           i out of range    →  throws std::out_of_range
+   roll_tally.at(face)     face in range        →  reads roll_tally[face]
+                            face out of range    →  throws std::out_of_range
 ```
 
 ```cpp
-scores.at(10);   // 5-element array - out of range
+roll_tally.at(6);   // 6-element array, valid indices 0..5 - out of range
 ```
 
 ```
-   scores.at(10)   on a 5-element array (valid indices 0..4)
+   roll_tally.at(6)   on a 6-element array (valid indices 0..5)
         │
         ▼
-   throws std::out_of_range   ("array::at: __n (which is 10) >= _Nm (which is 5)")
+   throws std::out_of_range   ("array::at: __n (which is 6) >= _Nm (which is 6)")
 ```
 
 ### CTAD: skip the `<T, N>`
 
 In plain terms: normally you have to tell `std::array` two things up
 front - what type it holds and how many elements it has
-(`std::array<int, 5>`). CTAD (Class Template Argument Deduction) 
-means the compiler can often **figure both of those out by itself**, 
-just by looking at what you put in the braces
-- so you get to skip typing them.
+(`std::array<int, 6>`). CTAD (Class Template Argument Deduction) means
+the compiler can often **figure both of those out by itself**, just by
+looking at what you put in the braces - so you get to skip typing them.
 
 `std::array` is a **class template** - a blueprint that needs some
 **arguments** filled in (`T` and `N`) before it becomes a real type. CTAD
@@ -92,54 +131,57 @@ is the compiler's ability to **deduce** those arguments on its own,
 instead of requiring you to write them by hand every time.
 
 ```cpp
-std::array highScores{32, 27, 64, 18, 95};   // inferred: array<int, 5>
+std::array lucky_numbers{7, 13, 21, 3, 42, 9};   // inferred: array<int, 6>
 ```
 
-**Class template argument deduction (CTAD)** reads the braced initializer
-and infers both the element type and the count for you:
-
 ```
-   std::array highScores{32, 27, 64, 18, 95};
-                          └──────────┬──────────┘
-                          5 ints in the braces
-                                     │
-                                     ▼
-                     compiler infers: std::array<int, 5>
+   std::array lucky_numbers{7, 13, 21, 3, 42, 9};
+                             └──────────┬──────────┘
+                             6 ints in the braces
+                                        │
+                                        ▼
+                        compiler infers: std::array<int, 6>
 ```
 
 ### Range-based for: reference vs. const reference
 
 ```cpp
-for (const int& score : highScores) { /* read-only */ }
-for (int& score : highScores)       { score *= 2; }   // modifies in place
+for (const int& number : lucky_numbers) { /* read-only */ }
+for (int& number : lucky_numbers)       { number += 100; }   // modifies in place
 ```
 
 ```
-   const int& score : highScores        int& score : highScores
-   ──────────────────────────           ──────────────────────
-   score is a READ-ONLY alias           score is a WRITABLE alias
-   for each element in turn             for each element in turn
+   const int& number : lucky_numbers      int& number : lucky_numbers
+   ────────────────────────────────       ──────────────────────────
+   number is a READ-ONLY alias            number is a WRITABLE alias
+   for each element in turn                for each element in turn
 
-   highScores: 32  27  64  18  95       highScores: 32  27  64  18  95
-                │                                     │
-                └─ score "looks at"                   └─ score *= 2 writes
-                   each one, cannot                      straight back into
-                   change it                             the array
-                                                    →   64  54 128  36 190
+   lucky_numbers: 7 13 21 3 42 9          lucky_numbers: 7 13 21 3 42 9
+                   │                                       │
+                   └─ number "looks at"                    └─ number += 100 writes
+                      each one, cannot                         straight back into
+                      change it                                the array
+                                                    →   107 113 121 103 142 109
 ```
 
-The C++20 `for (init; cond; range)` form lets a loop declare its own
-accumulator right where it is used, instead of one line above the loop:
+### The C++20 `for (init; cond; range)` form
+
+A plain range-based for only hands you each **value** - no index. That
+is fine here, since summing does not need one:
 
 ```cpp
-for (int total{0}; const int& score : highScores) {
-    total += score;
+for (int total{0}; const int& number : lucky_numbers) {
+    total += number;
+    std::println("number: {}, running total: {}", number, total);
 }
 ```
 
+The loop declares its own accumulator (`total`) right where it is used,
+instead of on a separate line above the loop:
+
 ```
-   score:    32    27    64    18    95
-   total:     0 → 32 → 59 → 123 → 141 → 236     (running total, traced step by step)
+   number:    107    113    121    103    142    109
+   total:       0 → 107 → 220 → 341 → 444 → 586 → 695     (running total, traced step by step)
 ```
 
 ---
