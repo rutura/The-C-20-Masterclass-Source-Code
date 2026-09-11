@@ -9,16 +9,6 @@
 /*
     Chapter 6 assignment - Functions
 
-    One small program built in eight steps. Each exercise pulls in a
-    different part of the chapter: prototypes and definitions, the
-    library tour (<cmath>, <numeric>, <algorithm>, <string>, <bit>),
-    default arguments, reference parameters, overloading, templates,
-    random numbers, static locals, recursion, [[nodiscard]], lambdas,
-    and the fixed-width integer types from the image project.
-
-    The theme is a tiny terminal stats / bar-chart tool: given a list of
-    numbers, describe them and draw them.
-
     Rules:
       - Use std::print / std::println. Never std::cout, never std::endl.
       - Brace-initialize every variable: int n{0};  double x{1.5};
@@ -28,7 +18,7 @@
 
 int main() {
 
-    // A fixed dataset the whole program works on. Treat it as given.
+    // A fixed dataset we will be working on
     const std::vector<int> samples{42, 17, 88, 5, 63, 29, 71, 50};
 
 
@@ -40,9 +30,10 @@ int main() {
             void stats(const std::vector<int>& data,
                        int& low, int& high, double& mean);
 
-        It scans `data` once and writes three results back through the
+        It scans (loops through) `data` once and writes three results back through the
         reference parameters: the smallest value, the largest value, and
-        the arithmetic mean (sum / count, as a double). Use std::min and
+        the arithmetic mean (sum / count, as a double). You have the freedom to name
+        the variables that are passed to the function as input. Use std::min and
         std::max from <algorithm> for the running low/high.
 
         Call it on `samples`, then print the three values.

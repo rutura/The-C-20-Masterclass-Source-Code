@@ -11,10 +11,6 @@
 /*
     Chapter 6 assignment - solutions
 
-    Each exercise keeps its problem statement and sample output in a
-    comment above the solution, so this file reads on its own. The
-    running theme is a tiny terminal stats / bar-chart tool over a fixed
-    list of numbers.
 */
 
 // ---------------------------------------------------------------------
@@ -195,12 +191,15 @@ int main() {
     // --- Exercise 1 ---
     std::println("--- Exercise 1: stats ---");
     {
+        /*
         int low{};
         int high{};
         double mean{};
         stats(samples, low, high, mean);
         std::println("low = {}, high = {}, mean = {}", low, high, mean);
+        */
     }
+    
 
     // --- Exercise 2 ---
     std::println("\n--- Exercise 2: bar ---");
@@ -213,6 +212,7 @@ int main() {
     }
 
     // --- Exercise 3 ---
+    /*
     std::println("\n--- Exercise 3: clamp_to<T> ---");
     {
         std::println("clamp_to(120, 0, 100)     = {}", clamp_to(120, 0, 100));
@@ -272,6 +272,7 @@ int main() {
         std::println("popcount    = {}", std::popcount(packed));
         std::println("power of 2? = {}", std::has_single_bit(packed));
     }
+    */
 
     return 0;
 }
