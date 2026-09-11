@@ -151,14 +151,49 @@ std::ranges::binary_search(fruits, "guava"s);  // false
 
 ### Folding a range into one value with `std::accumulate`
 
-`std::accumulate(first, last, init)` sums a range by default:
+Every loop we have written so far has been **procedural**: it spells out
+*how* to get the answer, one step at a time.
 
 ```cpp
-std::accumulate(quantities.begin(), quantities.end(), 0);   // sum
+int total{0};
+for (const int& item : quantities) {   // HOW: loop, add, repeat
+    total += item;
+}
 ```
 
-A fourth argument - a named function or a lambda - replaces `+` with
-whatever "combine" should mean:
+That works, but every line is a place a mistake can hide - the wrong
+starting value for `total`, the wrong operator, a loop bound off by one.
+`std::accumulate(first, last, init)` says the same thing **declaratively**
+- *what* you want ("reduce this range to one value, starting from
+`init`") - and lets the library supply the *how*:
+
+```cpp
+std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting from 0
+```
+
+```
+   PROCEDURAL (you write the HOW)         DECLARATIVE (you state the WHAT)
+   ───────────────────────────            ─────────────────────────────
+   int total{0};                          std::accumulate(
+   for (const int& item : quantities) {       quantities.begin(),
+       total += item;                          quantities.end(),
+   }                                            0)
+   │                                       │
+   loop, running variable,                 "reduce quantities to one
+   +=, off-by-one risk on                  value, starting from 0" -
+   every hand-written loop like it         accumulate owns the loop
+```
+
+`accumulate` hides ("internalizes") the loop and the running total from
+you. That hidden loop is called **internal iteration** - you never see
+the index or the intermediate value, only the final result.
+
+#### Customizing *how* to combine: higher-order functions
+
+By default `accumulate`'s "combine" step is `+`. A fourth argument - a
+**function you pass to another function** - overrides it. A function that
+takes another function as an argument (or returns one) is called a
+**higher-order function**; `accumulate` is one.
 
 ```cpp
 int multiply(int x, int y) { return x * y; }
@@ -166,12 +201,58 @@ int multiply(int x, int y) { return x * y; }
 std::accumulate(factors.begin(), factors.end(), 1, multiply);   // product
 
 std::accumulate(factors.begin(), factors.end(), 1,
-                 [](int x, int y) { return x * y; });           // same, inline
+                 [](int x, int y) { return x * y; });           // same, inline lambda
 ```
+
+```
+   accumulate(begin, end, 1, multiply)   on factors = {1, 2, 3, 4, 5}
+
+   step        combine(acc, element)      acc afterward
+   ────        ─────────────────────      ─────────────
+   1           multiply(1, 1)     = 1     1
+   2           multiply(1, 2)     = 2     2
+   3           multiply(2, 3)     = 6     6
+   4           multiply(6, 4)     = 24    24
+   5           multiply(24, 5)    = 120   120   ◄── final result
+```
+
+A **lambda** - the unnamed, inline function from earlier in the course -
+is what you reach for when the combining step is only used once, right
+here, and does not deserve a separate top-level name like `multiply`
+does. Nothing about `accumulate` changes; only *how it combines* does.
+
+Passing behavior around like this is also why these tools favor
+**immutability**: `quantities` and `factors` are never modified by any of
+this - `accumulate` reads them and hands back a brand new value, so there
+is no shared running variable for two different pieces of code to step on
+by mistake.
 
 ---
 
 ## 7.5 Ranges and views
+
+Section 7.4 hid one loop inside `accumulate`. C++20's **ranges library**
+(`<ranges>`) goes further and gives you two more declarative building
+blocks - **filter** (keep only what matches) and **transform** (map each
+value to a new one) - that chain together instead of nesting loops inside
+loops.
+
+```
+   the procedural way: nested loops, one running vector per step
+
+   std::vector<int> evens{};
+   for (int x : numbers) {
+       if (x % 2 == 0) evens.push_back(x);          // filter, by hand
+   }
+   std::vector<int> squares{};
+   for (int x : evens) {
+       squares.push_back(x * x);                     // transform, by hand
+   }
+
+   the declarative way: state what, chain it, let the library iterate
+
+   numbers | std::views::filter(even) | std::views::transform(square)
+```
 
 A **view** is a lazy wrapper around a range: it does not build a new
 container up front, it produces values on demand as something iterates it.
@@ -181,7 +262,11 @@ auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
 ```
 
 `std::views::filter` and `std::views::transform` wrap a range the same
-way, and chain together with `|`, read left to right like a pipeline:
+way, and chain together with `|`, read left to right like a pipeline.
+Like `accumulate`'s fourth argument, each one is a **higher-order
+function**: `filter` takes a lambda that decides *keep or drop*,
+`transform` takes a lambda that decides *old value or new value* - you
+supply the small decision, the view supplies the iteration.
 
 ```cpp
 auto evenSquares{
@@ -203,6 +288,25 @@ generated sequence like `iota`:
 ```cpp
 numbers | std::views::filter(...) | std::views::transform(...)
 ```
+
+### Putting 7.4 and 7.5 together
+
+`accumulate`, `filter`, and `transform` are three tools built on the same
+idea: name *what* should happen to each element, hand that decision to
+the library as a function, and let the library own the loop.
+
+```
+   WHAT you state                       WHO supplies the loop
+   ───────────────                      ─────────────────────
+   accumulate(..., combine)             accumulate's internal iteration
+   filter(keep_if)                      the view's internal iteration
+   transform(map_to)                    the view's internal iteration
+```
+
+This is C++'s **functional-style** programming: not a different
+language, just a different default - reach for a declarative pipeline
+first, and drop back down to a hand-written loop only when a pipeline
+cannot say what you mean.
 
 ---
 
