@@ -53,5 +53,14 @@ int main() {
                   std::accumulate(factors.begin(), factors.end(), 1,
                                    [](int x, int y) { return x * y; }));
 
+    // simulate the default: a lambda that adds 
+    std::println("Total of quantities (lambda, reproducing the default): {}",
+                  std::accumulate(quantities.begin(), quantities.end(), 0,
+                                   [](int x, int y) { return x + y; }));
+
+    // Can even use a built in binary function for addiion 
+    std::println("Total of quantities (std::plus): {}",
+                  std::accumulate(quantities.begin(), quantities.end(), 0, std::plus<int>()));
+
     return 0;
 }

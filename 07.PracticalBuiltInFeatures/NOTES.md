@@ -565,6 +565,12 @@ library own the loop.
 std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting from 0
 ```
 
+Unlike `std::ranges::sort` and `std::ranges::binary_search` above,
+`accumulate` has **no `std::ranges::` counterpart** to call directly on
+`quantities` - `<numeric>` was never given the same range-based
+overloads `<algorithm>` was, so `begin()`/`end()` still have to be passed
+explicitly, the pre-ranges way.
+
 Traced on `quantities = {10, 20, 30, 40}`:
 
 ```
@@ -613,6 +619,51 @@ A **lambda** - the unnamed, inline function from earlier in the course -
 is what you reach for when the combining step is only used once, right
 here, and does not deserve a separate top-level name like `multiply`
 does. Nothing about `accumulate` changes; only *how it combines* does.
+
+#### "No fourth argument" is shorthand, not magic
+
+A lambda spelling out `x + y` and calling `accumulate` with no fourth
+argument at all produce the identical result:
+
+```cpp
+std::accumulate(quantities.begin(), quantities.end(), 0);                       // 100
+std::accumulate(quantities.begin(), quantities.end(), 0,
+                 [](int x, int y) { return x + y; });                            // 100, same
+```
+
+```
+   accumulate(begin, end, 0)                accumulate(begin, end, 0, [](x, y){ return x + y; })
+        │                                              │
+        └──────────────────────┬──────────────────────┘
+                                ▼
+                   IDENTICAL - "no fourth argument" is shorthand for
+                   "combine with +". Seeing the default written out as
+                   a lambda makes plain there was never anything hidden -
+                   just a default value for a parameter, like default
+                   arguments (6.5) on an ordinary function.
+```
+
+#### A built-in function object instead of a lambda: `std::plus`
+
+`<functional>`'s `std::plus<T>` is a small callable object whose whole
+job is `x + y` - the standard library's own version of the lambda above,
+ready-made:
+
+```cpp
+std::accumulate(quantities.begin(), quantities.end(), 0, std::plus<int>());   // 100, same again
+```
+
+```
+   named function      multiply(x, y) { return x * y; }        - write it yourself, reusable
+   lambda               [](int x, int y) { return x + y; }      - write it yourself, inline, once
+   function object       std::plus<int>()                       - already written FOR you
+```
+
+All three are just different ways to hand `accumulate` something
+callable with two arguments - the choice is about where the logic
+already lives (a name you already wrote, an inline one-off, or a
+standard type nobody has to write at all), not about which one
+`accumulate` prefers.
 
 Passing behavior around like this is also why these tools favor
 **immutability**: `quantities` and `factors` are never modified by any of
