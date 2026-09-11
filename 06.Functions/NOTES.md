@@ -1059,9 +1059,8 @@ what it promises (and does not promise) on a function parameter, and how
 `constexpr` is a stronger, different guarantee than `const`.
 
 This section stays on **free functions and plain variables**. `const`
-also shows up on class member functions (`void draw() const`) - that is
-its own topic, covered later once classes are on the table
-(`21.ConstAndStaticMembers`).
+also shows up on class member functions (`void draw() const`) and we 
+will talk more on that later in the course. 
 
 ### Const standalone variables
 
@@ -1071,9 +1070,8 @@ int current_players{1};   // NOT const - this one is meant to change
 ```
 
 `const` is a compiler-enforced promise: **this variable's value will not
-change after initialization.** Try to assign to it later and the
-compiler rejects the program outright - this is caught at compile time,
-not left as a bug waiting to happen at run time.
+change after initialization.** If you try to assign to it later, the
+compiler will  rejects the change and trow a compiler error. 
 
 ```
    const int max_players{4};
@@ -1119,10 +1117,7 @@ function, `const` or not.
 ```
 
 What `const` *does* protect is the function's own local copy from an
-**accidental** reassignment inside its own body - a typo like `x = x + 1;`
-when `return x * x;` was intended gets caught immediately, instead of
-silently computing the wrong thing. It is a self-imposed discipline on
-the function's own logic, not a promise the caller can rely on.
+**accidental** reassignment inside its own body.
 
 ### Const function parameters - by reference
 
@@ -1160,10 +1155,7 @@ housekeeping; it is the actual promise the caller depends on:
 ```
 
 Combining `const` with `&` gets both things at once: the no-copy speed
-of a reference, and the safety of pass-by-value. This is exactly the
-`const std::vector<int>&`, `const std::string&` pattern already seen on
-function parameters throughout this course - now with the reasoning
-behind it made explicit.
+of a reference, and the safety of pass-by-value. 
 
 ### Constexpr variables: compile-time, not just unchanging
 
@@ -1242,27 +1234,18 @@ without a dedicated example here:
   function *must* run at compile time, every time, with no runtime
   fallback. Calling it with a value only known at runtime is a compile
   error, not a graceful drop to ordinary execution.
-- **`constinit`** - guarantees a variable with static storage duration
-  is initialized at compile time (avoiding the "static initialization
-  order fiasco" across files), but - unlike `const`/`constexpr` -
-  **does not make the variable immutable**. A `constinit` variable can
-  still be reassigned later; only its *initialization* is pinned to
-  compile time.
+- **`constinit`** - just know it exists. Will explore later. 
 
 ```
-   const        constexpr        consteval           constinit
-   ─────        ─────────        ─────────           ─────────
-   value fixed  value fixed,     FUNCTION must        variable's
-   after init,  computed at      run at compile        INITIAL value
-   value itself compile time     time - no             fixed at compile
-   may be a     (implies const)  runtime fallback      time - variable
-   runtime                       allowed                itself is NOT
-   value                                                immutable
+   const        constexpr        consteval           
+   ─────        ─────────        ─────────           
+   value fixed  value fixed,     FUNCTION must       
+   after init,  computed at      run at compile     
+   value itself compile time     time - no         
+   may be a     (implies const)  runtime fallback 
+   runtime                       allowed         
+   value                                        
 ```
-
-Neither gets a full treatment in this lecture - `constexpr` covers the
-everyday need; these two are worth being able to recognize when they
-show up in other people's code.
 
 ---
 
