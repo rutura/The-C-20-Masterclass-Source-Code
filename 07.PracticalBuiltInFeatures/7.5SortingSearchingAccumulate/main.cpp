@@ -37,6 +37,7 @@ int main() {
 
     // std::accumulate folds a range down to a single value. With no extra
     // argument the fold operation is +, so this sums the elements.
+    // std::accumulate has no range counterpart, so we pass begin() and end() explicitly.
     constexpr std::array quantities{10, 20, 30, 40};
     std::println("\nTotal of quantities: {}",
                   std::accumulate(quantities.begin(), quantities.end(), 0));
