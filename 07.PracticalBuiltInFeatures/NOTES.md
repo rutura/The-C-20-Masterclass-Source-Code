@@ -567,8 +567,10 @@ differently: `true` means "the first argument belongs before the
 second." A lambda can reproduce the built-in comparators exactly:
 
 ```cpp
-std::ranges::sort(fruits, [](const std::string& a, const std::string& b) { return a < b; });   // == std::ranges::less{}
-std::ranges::sort(fruits, [](const std::string& a, const std::string& b) { return a > b; });   // == std::ranges::greater{}
+std::ranges::sort(fruits, [](const std::string& a, 
+         const std::string& b) { return a < b; });   // == std::ranges::less{}
+std::ranges::sort(fruits, [](const std::string& a, 
+         const std::string& b) { return a > b; });   // == std::ranges::greater{}
 ```
 
 Both produce byte-for-byte the same order as the `less{}`/`greater{}`
@@ -718,7 +720,7 @@ is what you reach for when the combining step is only used once, right
 here, and does not deserve a separate top-level name like `multiply`
 does. Nothing about `accumulate` changes; only *how it combines* does.
 
-#### "No fourth argument" is shorthand, not magic
+#### "No fourth argument" is shorthand
 
 A lambda spelling out `x + y` and calling `accumulate` with no fourth
 argument at all produce the identical result:
