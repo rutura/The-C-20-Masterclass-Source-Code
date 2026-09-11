@@ -152,7 +152,7 @@ int main() {
         A name is "flagged" if it matches this regex, checked with
         std::regex_match:
 
-            std::regex shortName{"[A-Z][a-z]{0,3}"};
+            std::regex short_name{"[A-Z][a-z]{0,3}"};
 
         (a capital letter followed by at most three lowercase letters -
         i.e. a name 4 characters or shorter). For every row where the

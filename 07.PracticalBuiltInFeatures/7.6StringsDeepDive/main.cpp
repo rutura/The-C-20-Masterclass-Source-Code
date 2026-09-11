@@ -34,9 +34,9 @@ int main() {
 
     // find_first_not_of: skip a set of characters, report where something
     // else starts. Handy for "where does the interesting part begin".
-    std::size_t digitsStart{log.find_first_not_of("noon is ")};
+    std::size_t digits_start{log.find_first_not_of("noon is ")};
     std::println("first character not in \"noon is \": '{}' at {}",
-                  log.at(digitsStart), digitsStart);
+                  log.at(digits_start), digits_start);
 
     // npos marks "not found" - always check for it before using the result.
     std::size_t missing{log.find("xyz")};
@@ -49,10 +49,10 @@ int main() {
     sentence.erase(19);   // drop everything from index 19 onward
     std::println("after erase(19): {}", sentence);
 
-    std::size_t spacePos{sentence.find(' ')};
-    while (spacePos != std::string::npos) {
-        sentence.replace(spacePos, 1, "_");
-        spacePos = sentence.find(' ', spacePos + 1);
+    std::size_t space_pos{sentence.find(' ')};
+    while (space_pos != std::string::npos) {
+        sentence.replace(space_pos, 1, "_");
+        space_pos = sentence.find(' ', space_pos + 1);
     }
     std::println("after replacing spaces: {}", sentence);
 

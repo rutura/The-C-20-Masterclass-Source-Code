@@ -49,15 +49,15 @@ int main() {
 
     // --- Exercise 3 ------------------------------------------------------------
     std::println("\n--- Exercise 3: average_of_hot_days ---");
-    auto hotDays{
+    auto hot_days{
         temperatures | std::views::filter([](int t) { return t > 70; })};
 
-    const auto hotDayCount{std::ranges::distance(hotDays)};
-    const double hotDayAverage{
-        std::accumulate(hotDays.begin(), hotDays.end(), 0.0) / hotDayCount};
+    const auto hot_day_count{std::ranges::distance(hot_days)};
+    const double hot_day_average{
+        std::accumulate(hot_days.begin(), hot_days.end(), 0.0) / hot_day_count};
 
-    std::println("hot days: {}", hotDayCount);
-    std::println("average: {:.2f}", hotDayAverage);
+    std::println("hot days: {}", hot_day_count);
+    std::println("average: {:.2f}", hot_day_average);
 
     // --- Exercise 4 ---------------------------------------------------------
     std::println("\n--- Exercise 4: clean_label ---");
@@ -81,10 +81,10 @@ int main() {
     std::vector<std::string> names{accounts.GetColumn<std::string>("name")};
     std::vector<double> balances{accounts.GetColumn<double>("balance")};
 
-    std::regex shortName{"[A-Z][a-z]{0,3}"};
+    std::regex short_name{"[A-Z][a-z]{0,3}"};
 
     for (std::size_t i{0}; i < names.size(); ++i) {
-        if (std::regex_match(names.at(i), shortName)) {
+        if (std::regex_match(names.at(i), short_name)) {
             std::println("{}: {}", names.at(i), balances.at(i));
         }
     }
@@ -126,15 +126,15 @@ void warmest_and_coolest(const std::vector<int>& data, int& coolest, int& warmes
 
 // Drops a trailing "#..." comment, then swaps spaces for underscores.
 std::string clean_label(std::string label) {
-    std::size_t hashPos{label.find('#')};
-    if (hashPos != std::string::npos) {
-        label.erase(hashPos);
+    std::size_t hash_pos{label.find('#')};
+    if (hash_pos != std::string::npos) {
+        label.erase(hash_pos);
     }
 
-    std::size_t spacePos{label.find(' ')};
-    while (spacePos != std::string::npos) {
-        label.replace(spacePos, 1, "_");
-        spacePos = label.find(' ', spacePos + 1);
+    std::size_t space_pos{label.find(' ')};
+    while (space_pos != std::string::npos) {
+        label.replace(space_pos, 1, "_");
+        space_pos = label.find(' ', space_pos + 1);
     }
 
     return label;
@@ -151,7 +151,7 @@ std::string format_receipt(const std::string& item, int quantity, double price) 
 long days_until(std::chrono::year_month_day target) {
     const auto today{std::chrono::floor<std::chrono::days>(
         std::chrono::system_clock::now())};
-    const auto targetDays{static_cast<std::chrono::sys_days>(target)};
+    const auto target_days{static_cast<std::chrono::sys_days>(target)};
 
-    return (targetDays - today).count();
+    return (target_days - today).count();
 }

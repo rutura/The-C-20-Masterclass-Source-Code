@@ -8,30 +8,30 @@ int main() {
     // pair pointing at characters owned by someone else: a std::string, a
     // string literal, part of either. No allocation, no copy.
     std::string color{"red"};
-    std::string colorCopy{color};        // a real copy - owns its own data
-    std::string_view colorView{color};   // a view - "sees" color's own data
+    std::string color_copy{color};        // a real copy - owns its own data
+    std::string_view color_view{color};   // a view - "sees" color's own data
 
-    std::println("color: {}\ncolorCopy: {}\ncolorView: {}",
-                  color, colorCopy, colorView);
+    std::println("color: {}\ncolor_copy: {}\ncolor_view: {}",
+                  color, color_copy, color_view);
 
-    // Because colorView points at color's characters, a change to color
-    // shows up through colorView. colorCopy, a separate string, does not
+    // Because color_view points at color's characters, a change to color
+    // shows up through color_view. color_copy, a separate string, does not
     // see it.
     color.at(0) = 'R';
     std::println("\nafter modifying color:");
-    std::println("color: {}\ncolorCopy: {}\ncolorView: {}",
-                  color, colorCopy, colorView);
+    std::println("color: {}\ncolor_copy: {}\ncolor_view: {}",
+                  color, color_copy, color_view);
 
     // A string_view compares directly with a string or another view.
-    std::println("\ncolor == colorView: {}", color == colorView);
-    std::println("colorCopy == colorView: {}", colorCopy == colorView);
+    std::println("\ncolor == color_view: {}", color == color_view);
+    std::println("color_copy == color_view: {}", color_copy == color_view);
 
     // remove_prefix/remove_suffix shrink the view's window without
     // touching the underlying characters - O(1), nothing is copied or
     // erased.
-    colorView.remove_prefix(1);   // drop the leading 'R'
-    colorView.remove_suffix(1);   // drop the trailing 'd'
-    std::println("\ncolor: {}\ncolorView (after trimming): {}", color, colorView);
+    color_view.remove_prefix(1);   // drop the leading 'R'
+    color_view.remove_suffix(1);   // drop the trailing 'd'
+    std::println("\ncolor: {}\ncolor_view (after trimming): {}", color, color_view);
 
     // A string_view can also wrap a plain string literal - no std::string
     // is created at all here.
