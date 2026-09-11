@@ -291,81 +291,97 @@ int main() {
 
     // --- Exercise 1 ---
     std::println("--- Exercise 1: stats ---");
-    int low{};
-    int high{};
-    double mean{};
-    stats(samples, low, high, mean);
-    std::println("low = {}, high = {}, mean = {}", low, high, mean);
+    {
+        int low{};
+        int high{};
+        double mean{};
+        stats(samples, low, high, mean);
+        std::println("low = {}, high = {}, mean = {}", low, high, mean);
+    }
 
     // --- Exercise 2 ---
     std::println("\n--- Exercise 2: bar ---");
-    for (int value : samples) {
-        bar(value / 2);           // all defaults: width 40, fill '*'
+    {
+        for (int value : samples) {
+            bar(value / 2);           // all defaults: width 40, fill '*'
+        }
+        bar(1000);                    // clamped down to width (40)
+        bar(20, 20, '=');             // all three arguments given
     }
-    bar(1000);                    // clamped down to width (40)
-    bar(20, 20, '=');             // all three arguments given
 
     // --- Exercise 3 ---
     std::println("\n--- Exercise 3: clamp_to<T> ---");
-    std::println("clamp_to(120, 0, 100)     = {}", clamp_to(120, 0, 100));
-    std::println("clamp_to(-2.5, 0.0, 1.0)  = {}", clamp_to(-2.5, 0.0, 1.0));
-    std::println("std::clamp(120, 0, 100)   = {}", std::clamp(120, 0, 100));
+    {
+        std::println("clamp_to(120, 0, 100)     = {}", clamp_to(120, 0, 100));
+        std::println("clamp_to(-2.5, 0.0, 1.0)  = {}", clamp_to(-2.5, 0.0, 1.0));
+        std::println("std::clamp(120, 0, 100)   = {}", std::clamp(120, 0, 100));
+    }
 
     // --- Exercise 4 ---
     std::println("\n--- Exercise 4: describe (overloading) ---");
-    describe(88);
-    describe(3.5);
-    describe(4.0);       // the .0 matters: describe(4) would call describe(int)
-    describe("apple");
-    describe("banana");
+    {
+        describe(88);
+        describe(3.5);
+        describe(4.0);       // the .0 matters: describe(4) would call describe(int)
+        describe("apple");
+        describe("banana");
+    }
 
     // --- Exercise 5 ---
     std::println("\n--- Exercise 5: next_roll (static local RNG) ---");
-    std::print("rolls:");
-    for (int i{0}; i < 8; ++i) {
-        std::print(" {}", next_roll());
+    {
+        std::print("rolls:");
+        for (int i{0}; i < 8; ++i) {
+            std::print(" {}", next_roll());
+        }
+        std::println("");
     }
-    std::println("");
 
     // --- Exercise 6 ---
     std::println("\n--- Exercise 6: digit_sum ---");
-    long samples_total{0};
-    for (int value : samples) {
-        samples_total += value;
-    }
+    {
+        long samples_total{0};
+        for (int value : samples) {
+            samples_total += value;
+        }
 
-    for (long n : {42L, 12345L, samples_total}) {
-        std::println("digit_sum({}) = {}   (iterative: {})",
-                     n, digit_sum(n), digit_sum_iterative(n));
+        for (long n : {42L, 12345L, samples_total}) {
+            std::println("digit_sum({}) = {}   (iterative: {})",
+                         n, digit_sum(n), digit_sum_iterative(n));
+        }
     }
 
     // --- Exercise 7 ---
     std::println("\n--- Exercise 7: checksum ---");
-    std::println("checksum(samples) = {}", checksum(samples));
-    // checksum(samples);   // would warn: [[nodiscard]] result ignored
+    {
+        std::println("checksum(samples) = {}", checksum(samples));
+        // checksum(samples);   // would warn: [[nodiscard]] result ignored
+    }
 
     // --- Exercise 8 ---
     std::println("\n--- Exercise 8: image project (background + rectangle) ---");
-    const int width{400};
-    const int height{300};
+    {
+        const int width{400};
+        const int height{300};
 
-    auto pixels = make_canvas(width, height);
+        auto pixels = make_canvas(width, height);
 
-    draw_background(pixels, width, height, 200, 200, 200);   // mid gray
-    draw_border(pixels, width, height, 8, 255, 255, 255);
-    draw_rectangle(pixels, width, height,
-                   100, 100,      // top-left corner
-                   120, 80,       // rect_width, rect_height
-                   4,             // outline thickness
-                   200, 40, 40);  // red outline
+        draw_background(pixels, width, height, 200, 200, 200);   // mid gray
+        draw_border(pixels, width, height, 8, 255, 255, 255);
+        draw_rectangle(pixels, width, height,
+                       100, 100,      // top-left corner
+                       120, 80,       // rect_width, rect_height
+                       4,             // outline thickness
+                       200, 40, 40);  // red outline
 
-    if (write_png("image.png", width, height, pixels)) {
-        std::println("wrote image.png ({} x {}) - gray background with a bordered rectangle",
-                     width, height);
-    }
-    else {
-        std::println("could not write image.png");
-        return 1;
+        if (write_png("image.png", width, height, pixels)) {
+            std::println("wrote image.png ({} x {}) - gray background with a bordered rectangle",
+                         width, height);
+        }
+        else {
+            std::println("could not write image.png");
+            return 1;
+        }
     }
 
     return 0;
