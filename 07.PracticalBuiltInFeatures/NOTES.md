@@ -29,7 +29,8 @@ on a real dataset - the Titanic passenger manifest.
 
 **`std::array<T, N>`** is a **fixed-size** sequence of `N` values of type
 `T`, stored **inline** - the elements sit directly inside the `array`
-object, back to back, no separate heap allocation. `N` is part of the
+object (not heap allocated), back to back, no separate heap allocation 
+(we'll understand what this means later on). `N` is part of the
 type: `std::array<int, 5>` and `std::array<int, 10>` are different types,
 the same way `int` and `double` are different types.
 
