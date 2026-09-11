@@ -251,39 +251,26 @@ long digit_sum_iterative(long n) {
 }
 
 // ---------------------------------------------------------------------
-// Exercise 8 - pack three bytes into one std::uint32_t
+// Exercise 8 - the 6.18 image project, pulled in as a dependency and
+// extended with two new drawing functions
 //
-// Mirrors the image project: three channel bytes packed into a wider
-// integer. Layout: red is the top byte of the low 24 bits, then green,
-// then blue.
+// image.h / image.cpp / stb_impl.cpp are copied verbatim from
+// 06.Functions/6.18ProjectFetchContent, and CMakeLists.txt gained the
+// same FetchContent(stb) block plus the new sources on the
+// add_executable(...) calls - see that file for the "wire up the
+// dependency" half of this exercise. draw_background and draw_rectangle
+// are the two functions added to image.h/image.cpp for this exercise;
+// draw_background, draw_border, and draw_rectangle are all called from
+// main() below.
 //
-//     bits: 23..16   15..8    7..0
-//              R        G       B
+// draw_rectangle mirrors draw_border's edge-band test (color a pixel
+// only when it is within `thickness` of an edge), just measured from
+// the rectangle's own four edges and offset by (x, y) instead of always
+// covering the whole canvas.
 //
 // Sample output:
-//     packed      = 0xf08c28
-//     red         = 240
-//     green       = 140
-//     blue        = 40
-//     popcount    = 11
-//     power of 2? = false
+//     wrote image.png (400 x 300) - gray background with a bordered rectangle
 // ---------------------------------------------------------------------
-std::uint32_t pack_rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-    // Cast each byte to the wide type BEFORE shifting: `r << 16` done in
-    // 8-bit arithmetic would lose every bit. (In practice r is promoted
-    // to int here, but being explicit matches the intent and the image
-    // chapter's advice about doing width-sensitive math in the wide type.)
-    return (static_cast<std::uint32_t>(r) << 16) |
-           (static_cast<std::uint32_t>(g) << 8) |
-           static_cast<std::uint32_t>(b);
-}
-
-std::uint8_t channel(std::uint32_t packed, int which) {
-    // which: 0 = red (top byte), 1 = green, 2 = blue (bottom byte).
-    // Red sits highest, so it needs the biggest right-shift.
-    const int shift{(2 - which) * 8};
-    return static_cast<std::uint8_t>((packed >> shift) & 0xFFu);
-}
 
 int main() {
 
