@@ -559,6 +559,59 @@ std::ranges::sort(fruits, std::ranges::greater{});
     is the implicit default)                      same sort, different comparator)
 ```
 
+#### A lambda comparator can reproduce `less`/`greater` by hand
+
+`sort`'s comparator is any two-argument, `bool`-returning callable - the
+same shape `accumulate`'s combine function had, just interpreted
+differently: `true` means "the first argument belongs before the
+second." A lambda can reproduce the built-in comparators exactly:
+
+```cpp
+std::ranges::sort(fruits, [](const std::string& a, const std::string& b) { return a < b; });   // == std::ranges::less{}
+std::ranges::sort(fruits, [](const std::string& a, const std::string& b) { return a > b; });   // == std::ranges::greater{}
+```
+
+Both produce byte-for-byte the same order as the `less{}`/`greater{}`
+calls above - proof that `less`/`greater` are not a separate mechanism
+from a lambda comparator, just a ready-made one for the everyday case.
+
+#### A lambda can express a rule `less`/`greater` cannot
+
+`std::ranges::less`/`greater` only ever compare two elements *as
+themselves*. A lambda comparator can compare anything derived from
+them - here, each string's `.size()` instead of the strings
+alphabetically:
+
+```cpp
+std::ranges::sort(fruits,
+                   [](const std::string& a, const std::string& b) {
+                       return a.size() < b.size();   // shorter name first
+                   });
+
+std::ranges::sort(fruits,
+                   [](const std::string& a, const std::string& b) {
+                       return a.size() > b.size();   // longer name first
+                   });
+```
+
+```
+   fruits = {mango, kiwi, fig, date, apple}   (lengths: 5, 4, 3, 4, 5)
+
+   sort by .size(), ascending:    fig  kiwi  date  mango  apple
+                                    3    4     4      5      5
+                                              (kiwi/date and mango/apple
+                                               keep their original relative
+                                               order - ties are not reordered)
+
+   sort by .size(), descending:   mango  apple  kiwi  date  fig
+                                     5      5     4     4     3
+```
+
+This is the real payoff of a lambda comparator: alphabetical order is
+only one possible rule, and `sort` does not care which rule you give it
+- it just needs something that can say, for any two elements, which one
+belongs first.
+
 ### Searching sorted data with `std::ranges::binary_search`
 
 `binary_search` repeatedly **halves** the search range - which only gives
@@ -575,9 +628,10 @@ search assumes** - ascending, by default.
 ```
 
 ```cpp
-std::ranges::sort(fruits);   // back to ascending - fruits was left DESCENDING
-                              // by std::ranges::greater{} above, and
-                              // binary_search assumes ascending order
+std::ranges::sort(fruits);   // back to alphabetical ascending - fruits was
+                              // left sorted by LENGTH, descending, from the
+                              // last lambda comparator above; binary_search
+                              // assumes alphabetical ascending order
 
 std::ranges::binary_search(fruits, "kiwi"s);   // true
 std::ranges::binary_search(fruits, "guava"s);  // false
@@ -585,13 +639,18 @@ std::ranges::binary_search(fruits, "guava"s);  // false
 
 That halving is the trade a sort buys you: `O(log n)` lookups instead of
 scanning every element - but only correct when the data's actual order
-matches what `binary_search` assumes. Search the still-descending
-`fruits` from the `greater{}` example above and `binary_search` reports
-"kiwi" as **not found**, even though it is sitting right there - the
-same wrong-answer failure mode as searching unsorted data, just caused
-by a mismatched *direction* instead of no order at all. Sorting back to
-ascending immediately before the search, as the code above does, is what
-avoids it.
+matches what `binary_search` assumes. The dangerous part is that this
+failure is **not reliable**: search `fruits` while it is still sorted by
+length instead of alphabetically, and the result depends entirely on
+where the halving happens to land - it might report "not found" for a
+value that is there, might find the wrong thing, or might even
+accidentally succeed, all without any warning that the assumption was
+violated. That is worse than an obvious crash - a bug that only shows up
+for *some* searches on *some* data is much harder to catch in testing.
+Sorting back to alphabetical ascending immediately before the search, as
+the code above does, is what avoids it - a reminder that
+`binary_search`'s "sorted" always means "sorted by the same rule
+`binary_search` itself is using," not sorted any old way.
 
 ### Folding a range into one value with `std::accumulate`
 
