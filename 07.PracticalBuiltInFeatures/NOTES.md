@@ -475,7 +475,8 @@ for (const int& item : quantities) {   // HOW: loop, add, repeat
 ```
 
 That works, but  there is another paradicm we can use to do the same things. 
-It is called **Functional Programming**. Sometimes also refered to as **Declarative Programming**. This lecture and the next introduce tools that subscribe to that 
+It is called **Functional Programming**. Sometimes also refered to 
+as **Declarative Programming**. This lecture and the next introduce tools that subscribe to that 
 paradigm - `accumulate`,`filter`, `transform` - where you instead state *what* you 
 want and let the library supply the *how*:
 
@@ -530,10 +531,39 @@ std::ranges::sort(fruits);   // ascending, in place
    after sort:   apple  date  fig  kiwi  mango
 ```
 
+#### "Ascending" is a default comparator, not magic
+
+`sort` with no second argument is shorthand, the same way `accumulate`
+with no fourth argument was (earlier in this lecture). The comparator it
+defaults to is `std::ranges::less` - pass it explicitly and nothing
+changes:
+
+```cpp
+std::ranges::sort(fruits, std::ranges::less{});   // identical order to sort(fruits)
+```
+
+Swap in `std::ranges::greater` instead, and the exact same algorithm
+sorts **descending** - `sort`'s job never changes, only the rule it uses
+to compare two elements does:
+
+```cpp
+std::ranges::sort(fruits, std::ranges::greater{});
+```
+
+```
+   std::ranges::sort(fruits)                    std::ranges::sort(fruits, std::ranges::greater{})
+        │                                              │
+        ▼                                              ▼
+   apple date fig kiwi mango                    mango kiwi fig date apple
+   (ascending - std::ranges::less                (descending - largest first,
+    is the implicit default)                      same sort, different comparator)
+```
+
 ### Searching sorted data with `std::ranges::binary_search`
 
 `binary_search` repeatedly **halves** the search range - which only gives
-a correct answer when the data is already sorted.
+a correct answer when the data is already sorted **in the order the
+search assumes** - ascending, by default.
 
 ```
    searching sorted {apple, date, fig, kiwi, mango} for "kiwi"
@@ -545,14 +575,23 @@ a correct answer when the data is already sorted.
 ```
 
 ```cpp
+std::ranges::sort(fruits);   // back to ascending - fruits was left DESCENDING
+                              // by std::ranges::greater{} above, and
+                              // binary_search assumes ascending order
+
 std::ranges::binary_search(fruits, "kiwi"s);   // true
 std::ranges::binary_search(fruits, "guava"s);  // false
 ```
 
 That halving is the trade a sort buys you: `O(log n)` lookups instead of
-scanning every element - but only correct on **already-sorted** data.
-Run `binary_search` on unsorted data and it can wrongly report "not
-found" even when the value is there.
+scanning every element - but only correct when the data's actual order
+matches what `binary_search` assumes. Search the still-descending
+`fruits` from the `greater{}` example above and `binary_search` reports
+"kiwi" as **not found**, even though it is sitting right there - the
+same wrong-answer failure mode as searching unsorted data, just caused
+by a mismatched *direction* instead of no order at all. Sorting back to
+ascending immediately before the search, as the code above does, is what
+avoids it.
 
 ### Folding a range into one value with `std::accumulate`
 

@@ -27,8 +27,34 @@ int main() {
         std::print("{} ", fruit);
     }
 
+    // sort's "ascending order" is not magic either - it is a default
+    // comparator, std::ranges::less, doing the comparing. Passing it
+    // explicitly reproduces the exact same order as the call above.
+    std::ranges::sort(fruits, std::ranges::less{});
+
+    std::print("\nSorted (explicit std::ranges::less): ");
+    for (const std::string& fruit : fruits) {
+        std::print("{} ", fruit);
+    }
+
+    // Swap in std::ranges::greater instead and the same algorithm sorts
+    // descending - sort's job never changes, only the rule it compares
+    // consecutive elements with does.
+    std::ranges::sort(fruits, std::ranges::greater{});
+
+    std::print("\nSorted descending (std::ranges::greater): ");
+    for (const std::string& fruit : fruits) {
+        std::print("{} ", fruit);
+    }
+
     // binary_search only works correctly on already-sorted data - that is
-    // the trade a sort buys you: O(log n) lookups instead of O(n).
+    // the trade a sort buys you: O(log n) lookups instead of O(n). fruits
+    // is currently sorted DESCENDING from the std::ranges::greater call
+    // above; binary_search assumes ascending order by default, so sort it
+    // back first - searching with the wrong ordering assumption is exactly
+    // how binary_search gives wrong answers on "sorted" data.
+    std::ranges::sort(fruits);
+
     bool found{std::ranges::binary_search(fruits, "kiwi"s)};
     std::println("\n\n\"kiwi\" {} found in fruits", found ? "was" : "was not");
 
