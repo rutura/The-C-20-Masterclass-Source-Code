@@ -76,14 +76,16 @@ int main() {
 
     // --- constexpr functions: compile time when possible, runtime otherwise --
     constexpr int compile_time_cube{cube(3)};   // 3 is a literal - the compiler
+                                                // can (and typically will) compute 
+                                                // this itself; nothing runs at runtime
     std::println("\ncube(3), evaluated at compile time: {}", compile_time_cube);
-    // can (and typically will) compute this itself; nothing runs at runtime
 
     int side{current_players + 2};
-    int runtime_cube{cube(side)};                // side is only known while
+    int runtime_cube{cube(side)};    // side is only known while
+                                     // the program runs - cube falls back to an 
+                                     //  ordinary function call here,same function, 
+                                     // same result, different point in time it runs
     std::println("cube(side), evaluated at run time: {}", runtime_cube);
-    // the program runs - cube falls back to an ordinary function call here,
-    // same function, same result, different point in time it runs
 
     return 0;
 }
