@@ -474,11 +474,10 @@ for (const int& item : quantities) {   // HOW: loop, add, repeat
 }
 ```
 
-That works, but every line is a place a mistake can hide - the wrong
-starting value, the wrong operator, a loop bound off by one. This
-lecture and the next introduce **declarative** tools - `accumulate`,
-`filter`, `transform` - where you instead state *what* you want and let
-the library supply the *how*:
+That works, but  there is another paradicm we can use to do the same things. 
+It is called **Functional Programming**. Sometimes also refered to as **Declarative Programming**. This lecture and the next introduce tools that subscribe to that 
+paradigm - `accumulate`,`filter`, `transform` - where you instead state *what* you 
+want and let the library supply the *how*:
 
 ```
    PROCEDURAL: you write the HOW              DECLARATIVE: you state the WHAT
