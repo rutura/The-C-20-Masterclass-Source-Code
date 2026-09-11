@@ -234,21 +234,58 @@ add to it later.
    cannot grow                           push_back() grows it
 ```
 
-### `(7)` vs. `{7}` - a common first mistake
+### Growing from nothing: `push_back`
+
+The running example: a **warehouse** that starts with no stock and
+receives deliveries one at a time.
 
 ```cpp
-std::vector<int> readings(7);    // 7 elements, each value-initialized to 0
-std::vector<int> other{7};       // ONE element, valued 7
+std::vector<int> warehouse_stock;   // starts empty, size() == 0
+
+warehouse_stock.push_back(40);
+warehouse_stock.push_back(15);
+warehouse_stock.push_back(60);
 ```
 
 ```
-   readings(7)   →  ┌───┬───┬───┬───┬───┬───┬───┐
-                    │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │     SEVEN elements
-                    └───┴───┴───┴───┴───┴───┴───┘     (7) sizes the vector
+   warehouse_stock{};                                   size() == 0
+   (nothing allocated yet)
 
-   other{7}      →  ┌───┐
-                    │ 7 │                              ONE element
-                    └───┘                              {7} is the element list
+   push_back(40)  →  ┌────┐                              size() == 1
+                     │ 40 │
+                     └────┘
+
+   push_back(15)  →  ┌────┬────┐                         size() == 2
+                     │ 40 │ 15 │
+                     └────┴────┘
+
+   push_back(60)  →  ┌────┬────┬────┐                    size() == 3
+                     │ 40 │ 15 │ 60 │
+                     └────┴────┴────┘
+```
+
+This is the one thing `std::array` fundamentally cannot do - its size is
+fixed at compile time, while `push_back` grows a `vector` on demand.
+
+### `(N)` vs. `{N}` - a common first mistake
+
+A vector can also be built at a fixed starting size instead of growing
+one element at a time - `storefront_stock(5)` and `backroom_stock(8)`
+each start pre-filled with zeros:
+
+```cpp
+std::vector<int> storefront_stock(5);   // 5 elements, each value-initialized to 0
+std::vector<int> other{5};              // ONE element, valued 5
+```
+
+```
+   storefront_stock(5)  →  ┌───┬───┬───┬───┬───┐
+                           │ 0 │ 0 │ 0 │ 0 │ 0 │     FIVE elements
+                           └───┴───┴───┴───┴───┘     (5) sizes the vector
+
+   other{5}              →  ┌───┐
+                            │ 5 │                     ONE element
+                            └───┘                     {5} is the element list
 ```
 
 Parentheses `()` size the vector; braces `{}` list its elements. The two
@@ -258,48 +295,38 @@ look every time.
 ### Comparing, copying, assigning
 
 ```cpp
-std::vector<int> a(5), b(5);
-a == b;                 // element-by-element comparison, like std::array
-std::vector c{a};       // copy constructor - c owns its own copy of a's data
-a = b;                  // assignment - a's old contents are replaced
+storefront_stock != backroom_stock;              // element-by-element comparison
+std::vector overflow_stock{backroom_stock};      // copy constructor - overflow_stock
+                                                  // owns its own copy of the data
+storefront_stock = backroom_stock;               // assignment - storefront_stock's
+                                                  // old contents are replaced
 ```
 
 ```
-   std::vector c{a};
+   std::vector overflow_stock{backroom_stock};
 
-   a: ┌───┬───┬───┬───┬───┐         c: ┌───┬───┬───┬───┬───┐
-      │ 0 │ 0 │ 0 │ 0 │ 0 │            │ 0 │ 0 │ 0 │ 0 │ 0 │
-      └───┴───┴───┴───┴───┘            └───┴───┴───┴───┴───┘
-        own block of memory              a SEPARATE block - c's own copy
-        changing a later does NOT touch c, and vice versa
+   backroom_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐   overflow_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐
+                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │
+                   └───┴───┴───┴───┴───┴───┴───┴───┘                   └───┴───┴───┴───┴───┴───┴───┴───┘
+                     own block of memory                                 a SEPARATE block - overflow_stock's own copy
+                     changing backroom_stock later does NOT touch overflow_stock, and vice versa
 ```
 
-### Growing: `push_back`
+### `.at()` as an lvalue: bounds-checked writes, and reading it out of bounds
+
+`.at(i)` is not just for reading - assigning through it writes to that
+element, still with the bounds check:
 
 ```cpp
-readings.push_back(1000);   // appends one element, resizing as needed
+storefront_stock.at(3) = 250;   // bounds-checked write
 ```
 
-```
-   before:  ┌───┬───┬───┬───┬───┬───┬───┐             size() == 7
-            │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │
-            └───┴───┴───┴───┴───┴───┴───┘
-
-   readings.push_back(1000);
-
-   after:   ┌───┬───┬───┬───┬───┬───┬───┬──────┐      size() == 8
-            │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 1000 │
-            └───┴───┴───┴───┴───┴───┴───┴──────┘
-```
-
-This is the one thing `std::array` fundamentally cannot do - its size is
-fixed at compile time, while `push_back` grows a `vector` on demand.
-
-### `.at()` still bounds-checks
+Read past the end, though, and it throws instead of silently returning
+garbage:
 
 ```cpp
 try {
-    readings.at(15);   // out of range - readings only has 8 elements
+    storefront_stock.at(20);   // out of range - storefront_stock only has 8 elements
 }
 catch (const std::out_of_range& ex) {
     std::println("An exception occurred: {}", ex.what());
@@ -307,12 +334,45 @@ catch (const std::out_of_range& ex) {
 ```
 
 ```
-   readings.at(15)  on an 8-element vector
+   storefront_stock.at(20)  on an 8-element vector
         │
         ▼
    throws std::out_of_range  ──►  caught by catch  ──►  ex.what() printed
                                    (program keeps running, does not crash)
 ```
+
+### A `const&` parameter forces `const` on everything it hands out
+
+`print_stock` takes its vector `const std::vector<int>& stock` - a
+promise not to modify `stock`. That promise is not just enforced on
+`stock` itself; it reaches into the range-based for that reads it too:
+
+```cpp
+void print_stock(const std::vector<int>& stock) {
+    for (const int& quantity : stock) {   // must be const int& (or plain int)
+        std::print("{} ", quantity);
+    }
+}
+```
+
+7.2 dropped the reference for a read-only `int` loop variable, since a
+plain `int` copy costs nothing extra to make. Try that same drop here
+with a *writable* reference instead, and it will not compile:
+
+```
+   for (int& quantity : stock) { ... }        stock is const std::vector<int>&
+        │                                          │
+        └─ asks for a WRITABLE alias               └─ begin()/end() on a const
+           into stock's elements                       vector hand out const_iterator -
+                                                         every element comes back const
+
+   ERROR: binding reference of type 'int' to value of type 'const int'
+          drops 'const' qualifier
+```
+
+`const int& quantity` (or a plain `int` copy, for the same read-only
+reason as 7.2) is what is actually allowed - `const` on the parameter
+propagates into the loop, not just onto the parameter name itself.
 
 ---
 

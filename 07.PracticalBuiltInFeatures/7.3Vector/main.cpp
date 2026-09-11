@@ -2,9 +2,18 @@
 #include <stdexcept>
 #include <vector>
 
-void print_readings(const std::vector<int>& readings) {
-    for (const int& reading : readings) {
-        std::print("{} ", reading);
+void print_stock(const std::vector<int>& stock) {
+    // 7.2 dropped the reference here because number was only ever READ,
+    // never written - a plain `int number` copy was enough. This loop
+    // looks the same, but stock's PARAMETER is `const std::vector<int>&`:
+    // stock itself cannot be modified inside this function. Because of
+    // that, the compiler will not let quantity be a writable `int&`
+    // either - a reference into data you promised not to touch would
+    // let you break that promise. `const int&` is what is actually
+    // allowed here; the plain `int` copy below works too, for the same
+    // reason it did in 7.2 - quantity is still only being read.
+    for (const int& quantity : stock) {
+        std::print("{} ", quantity);
     }
     std::println("");
 }
@@ -12,55 +21,59 @@ void print_readings(const std::vector<int>& readings) {
 int main() {
 
     // std::vector<T> - like std::array, but its size can change at run
-    // time and its elements live on the heap. vector(7) makes 7 elements,
-    // each value-initialized to 0.
-    std::vector<int> morning_readings(7);
-    std::vector<int> evening_readings(10);
+    // time and its elements live on the heap. This is what std::array
+    // cannot do: push_back appends one element, resizing as needed.
+    std::vector<int> warehouse_stock;   // starts empty, size() == 0
+    std::println("New warehouse: size is {}", warehouse_stock.size());
 
-    std::println("Size of morning_readings is {}", morning_readings.size());
-    print_readings(morning_readings);
+    warehouse_stock.push_back(40);
+    warehouse_stock.push_back(15);
+    warehouse_stock.push_back(60);
+    std::println("After three deliveries: size is {}", warehouse_stock.size());
+    std::print("warehouse_stock: ");
+    print_stock(warehouse_stock);
 
-    std::println("Size of evening_readings is {}", evening_readings.size());
-    print_readings(evening_readings);
+    // vector(N) makes N elements, each value-initialized to 0 - a
+    // different way to build one than growing it with push_back.
+    std::vector<int> storefront_stock(5);
+    std::vector<int> backroom_stock(8);
+
+    std::println("\nSize of storefront_stock is {}", storefront_stock.size());
+    print_stock(storefront_stock);
+
+    std::println("Size of backroom_stock is {}", backroom_stock.size());
+    print_stock(backroom_stock);
 
     // Two vectors compare element by element, like std::array.
-    if (morning_readings != evening_readings) {
-        std::println("morning_readings and evening_readings are not equal "
+    if (storefront_stock != backroom_stock) {
+        std::println("storefront_stock and backroom_stock are not equal "
                       "(different sizes)");
     }
 
-    // Copy constructor: afternoon_readings starts as an independent copy.
-    std::vector afternoon_readings{morning_readings};
-    std::println("\nSize of afternoon_readings is {}", afternoon_readings.size());
+    // Copy constructor: overflow_stock starts as an independent copy.
+    std::vector overflow_stock{backroom_stock};
+    std::println("\nSize of overflow_stock is {}", overflow_stock.size());
 
-    // Assignment replaces morning_readings' contents with evening_readings'.
-    morning_readings = evening_readings;
-    std::println("\nAfter assigning evening_readings to morning_readings:");
-    std::println("morning_readings and evening_readings are equal: {}",
-                  morning_readings == evening_readings);
+    // Assignment replaces storefront_stock's contents with backroom_stock's.
+    storefront_stock = backroom_stock;
+    std::println("\nAfter assigning backroom_stock to storefront_stock:");
+    std::println("storefront_stock and backroom_stock are equal: {}",
+                  storefront_stock == backroom_stock);
 
     // .at(i) as an lvalue: bounds-checked write.
-    morning_readings.at(5) = 1000;
-    std::print("morning_readings: ");
-    print_readings(morning_readings);
+    storefront_stock.at(3) = 250;
+    std::print("storefront_stock: ");
+    print_stock(storefront_stock);
 
     // Out-of-range access throws std::out_of_range - catch it instead of
     // crashing.
     try {
-        std::println("\nAttempting morning_readings.at(15)");
-        std::println("{}", morning_readings.at(15));
+        std::println("\nAttempting storefront_stock.at(20)");
+        std::println("{}", storefront_stock.at(20));
     }
     catch (const std::out_of_range& ex) {
         std::println("An exception occurred: {}", ex.what());
     }
-
-    // A vector can grow. push_back appends one element, resizing as
-    // needed - this is what std::array cannot do.
-    std::println("\nCurrent afternoon_readings size is {}", afternoon_readings.size());
-    afternoon_readings.push_back(1000);
-    std::println("New afternoon_readings size is {}", afternoon_readings.size());
-    std::print("afternoon_readings now contains: ");
-    print_readings(afternoon_readings);
 
     return 0;
 }
