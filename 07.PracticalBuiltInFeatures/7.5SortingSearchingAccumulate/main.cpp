@@ -47,11 +47,39 @@ int main() {
         std::print("{} ", fruit);
     }
 
+    // A lambda comparator can express a rule std::ranges::less/greater
+    // cannot - here, "shorter name first" instead of alphabetical order.
+    // Same two-argument, bool-returning shape as accumulate's combine
+    // function; sort just uses the return value differently (true means
+    // "the first argument belongs before the second").
+    std::ranges::sort(fruits,
+                       [](const std::string& a, const std::string& b) {
+                           return a.size() < b.size();
+                       });
+
+    std::print("\nSorted by length, ascending (lambda): ");
+    for (const std::string& fruit : fruits) {
+        std::print("{} ", fruit);
+    }
+
+    // Flip the comparison and the same lambda shape sorts the opposite
+    // way - longest name first.
+    std::ranges::sort(fruits,
+                       [](const std::string& a, const std::string& b) {
+                           return a.size() > b.size();
+                       });
+
+    std::print("\nSorted by length, descending (lambda): ");
+    for (const std::string& fruit : fruits) {
+        std::print("{} ", fruit);
+    }
+
     // binary_search only works correctly on already-sorted data - that is
     // the trade a sort buys you: O(log n) lookups instead of O(n). fruits
-    // is currently sorted DESCENDING from the std::ranges::greater call
-    // above; binary_search assumes ascending order by default, so sort it
-    // back first - searching with the wrong ordering assumption is exactly
+    // is currently sorted by LENGTH, descending, from the lambda call
+    // above - neither alphabetical NOR ascending; binary_search assumes
+    // alphabetical ascending order by default, so sort it back first -
+    // searching with the wrong ordering assumption is exactly
     // how binary_search gives wrong answers on "sorted" data.
     std::ranges::sort(fruits);
 
