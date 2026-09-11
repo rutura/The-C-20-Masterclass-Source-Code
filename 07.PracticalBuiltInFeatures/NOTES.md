@@ -143,34 +143,60 @@ std::array lucky_numbers{7, 13, 21, 3, 42, 9};   // inferred: array<int, 6>
                         compiler infers: std::array<int, 6>
 ```
 
-### Range-based for: reference vs. const reference
+### Range-based for: value vs. reference
 
 ```cpp
-for (const int& number : lucky_numbers) { /* read-only */ }
-for (int& number : lucky_numbers)       { number += 100; }   // modifies in place
+for (int number : lucky_numbers)  { /* read-only */ }
+for (int& number : lucky_numbers) { number += 100; }   // modifies in place
+```
+
+A reference is not free - it exists to do one of two jobs. Neither job
+applies to a loop that only *reads* an `int`, so the first loop takes
+`number` **by value**, not by reference:
+
+```
+   WHY A REFERENCE, NORMALLY                 WHY NOT HERE
+   ──────────────────────────                ────────────
+   1. avoid copying a LARGE element          int is tiny - a few bytes.
+      (a std::string, a struct, ...)         Copying it costs nothing a
+                                              reference would save.
+
+   2. WRITE back into the array              This loop only reads number -
+      through the loop variable              never assigns to it.
 ```
 
 ```
-   const int& number : lucky_numbers      int& number : lucky_numbers
-   ────────────────────────────────       ──────────────────────────
-   number is a READ-ONLY alias            number is a WRITABLE alias
-   for each element in turn                for each element in turn
+   int number : lucky_numbers              int& number : lucky_numbers
+   ────────────────────────                ───────────────────────────
+   number is a COPY of                     number is a WRITABLE alias
+   each element in turn                    for each element in turn
 
-   lucky_numbers: 7 13 21 3 42 9          lucky_numbers: 7 13 21 3 42 9
-                   │                                       │
-                   └─ number "looks at"                    └─ number += 100 writes
-                      each one, cannot                         straight back into
-                      change it                                the array
-                                                    →   107 113 121 103 142 109
+   lucky_numbers: 7 13 21 3 42 9           lucky_numbers: 7 13 21 3 42 9
+                   │                                        │
+                   └─ number holds a                        └─ number += 100 writes
+                      copy - changing it                        straight back into
+                      does not touch the                        the array
+                      array
+
+                                                     →   107 113 121 103 142 109
 ```
+
+The rule of thumb: **default to reading by value for small types like
+`int`, `char`, `double`; reach for a reference only when you need to
+write back, or when the element is large enough that copying it costs
+something** (a `std::string`, a `std::vector`, a struct with several
+members). `const T&` is the habit that pays off once `T` stops being tiny
+- it shows up again from chapter 7.6 onward, once the elements are
+`std::string`s instead of `int`s.
 
 ### The C++20 `for (init; cond; range)` form
 
 A plain range-based for only hands you each **value** - no index. That
-is fine here, since summing does not need one:
+is fine here, since summing does not need one, and `number` is still
+read-only, so it stays a by-value `int`:
 
 ```cpp
-for (int total{0}; const int& number : lucky_numbers) {
+for (int total{0}; int number : lucky_numbers) {
     total += number;
     std::println("number: {}, running total: {}", number, total);
 }

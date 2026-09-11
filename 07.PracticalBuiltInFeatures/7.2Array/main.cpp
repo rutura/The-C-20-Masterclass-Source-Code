@@ -45,10 +45,13 @@ int main() {
     std::array lucky_numbers{7, 13, 21, 3, 42, 9};
 
     // Range-based for reads more naturally once you don't need the index.
-    // A `const int&` element avoids copying (irrelevant for int, habitual
-    // for larger element types).
+    // Reading an int by value is fine - int is small and cheap to copy, so
+    // there is nothing for a reference to save here. A reference earns its
+    // place when the loop body needs to WRITE back into the array (next),
+    // or when the element type is large enough that copying it costs
+    // something.
     std::print("\nlucky numbers: ");
-    for (const int& number : lucky_numbers) {
+    for (int number : lucky_numbers) {
         std::print("{} ", number);
     }
     std::println("");
@@ -59,7 +62,7 @@ int main() {
     }
 
     std::print("shifted by 100: ");
-    for (const int& number : lucky_numbers) {
+    for (int number : lucky_numbers) {
         std::print("{} ", number);
     }
     std::println("");
@@ -67,7 +70,7 @@ int main() {
     // A running total, computed with a range-based for that also declares
     // its own accumulator - the "for (init; cond; range)" form from C++20.
     std::println("\nrunning total:");
-    for (int total{0}; const int& number : lucky_numbers) {
+    for (int total{0}; int number : lucky_numbers) {
         total += number;
         std::println("number: {}, running total: {}", number, total);
     }
