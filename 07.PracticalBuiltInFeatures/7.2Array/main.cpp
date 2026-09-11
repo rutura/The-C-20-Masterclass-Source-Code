@@ -5,6 +5,10 @@ int main() {
 
     // std::array<T, N> - a fixed-size sequence of N values of type T,
     // stored inline (no separate heap allocation). N is part of the type.
+    //
+    // roll_tally counts how many times each face of a six-sided die came
+    // up: roll_tally[0] is how many 1s were rolled, roll_tally[1] is how
+    // many 2s, and so on - index i holds the count for face (i + 1).
     std::println("tallying six dice rolls:");
     std::array<int, 6> roll_tally{};   // {} zero-initializes every element
 
@@ -12,8 +16,14 @@ int main() {
         roll_tally[face] = 0;
     }
 
-    // A roll of the die at index 2 (face value 3) comes up four times.
-    roll_tally[2] = 4;
+    // A fixed sequence of ten rolls, as if a die had already been rolled
+    // and someone wrote down the results: 3, 3, 1, 6, 3, 2, 3, 5, 4, 3.
+    // Each roll's face value (1..6) becomes the index (face - 1) whose
+    // count gets incremented.
+    constexpr std::array<int, 10> rolls{3, 3, 1, 6, 3, 2, 3, 5, 4, 3};
+    for (const int& roll : rolls) {
+        ++roll_tally[roll - 1];
+    }
 
     for (std::size_t face{0}; face < roll_tally.size(); ++face) {
         std::println("face {}: {} times", face + 1, roll_tally[face]);
