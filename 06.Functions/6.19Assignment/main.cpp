@@ -197,19 +197,46 @@ int main() {
     /*
         Exercise 7 - checksum() with [[nodiscard]] and a lambda
 
+        A checksum is a single number squeezed out of a whole collection
+        of data, used to catch corruption or mistakes: if you compute the
+        checksum before sending a file and again after receiving it, and
+        the two numbers don't match, something changed along the way -
+        even if you never look at the data itself. You don't need to
+        know exactly how the number was produced to use it this way; you
+        only need it to reliably change whenever the input does, and to
+        reproduce the exact same number for the exact same input.
+
         Write:
 
             [[nodiscard]] int checksum(const std::vector<int>& data);
 
-        It returns a running value computed like this: start at 0, and
-        for each element run  acc = acc * 31 + element  (a classic
-        rolling hash). Do the accumulation with a lambda captured by
-        reference ([&acc]) that you call once per element in a range-for
-        loop.
+        It folds every element into one int, one at a time, using this
+        rule, starting from acc = 0:
+
+            acc = acc * 31 + element
+
+        Worked example for {1, 2, 3}:
+
+            acc = 0
+            acc = 0 * 31 + 1  = 1      (after folding in 1)
+            acc = 1 * 31 + 2  = 33     (after folding in 2)
+            acc = 33 * 31 + 3 = 1026   (after folding in 3)   <- final checksum
+
+        Change any one element - say {1, 2, 4} instead of {1, 2, 3} -
+        and the final number comes out completely different, which is
+        exactly the point: the result is sensitive to every value that
+        went in.
+
+        Do the folding with a lambda captured by reference ([&acc]) that
+        you call once per element in a range-for loop, instead of writing
+        the "acc = acc * 31 + element" line directly in the loop body.
 
         Because checksum is [[nodiscard]], calling it and ignoring the
-        result must produce a compiler warning. Show that you use it:
-        print checksum(samples). Then add a commented-out line
+        result may( depending on the warning level) produce a compiler 
+        warning - the compiler is telling you "why did you even call 
+        this function if you're not going to look at what it gives back?". 
+        Try to use it and see if your compiler throws a warning: print
+        checksum(samples). Then add a commented-out line
         `// checksum(samples);` with a note that it would warn.
 
         Sample output:
@@ -217,48 +244,6 @@ int main() {
     */
     std::println("\n--- Exercise 7: checksum ---");
     // TODO
-
-
-    /*
-        Exercise 8 - pack three bytes into one std::uint32_t
-
-        This mirrors the image project: three small channel values
-        squeezed into one wider integer.
-
-        (a) Write:
-
-                std::uint32_t pack_rgb(std::uint8_t r,
-                                       std::uint8_t g,
-                                       std::uint8_t b);
-
-            returning (r << 16) | (g << 8) | b. Cast r/g/b to
-            std::uint32_t before shifting so the shift has room.
-
-        (b) Write:
-
-                std::uint8_t channel(std::uint32_t packed, int which);
-
-            where which == 0 returns the red byte, 1 green, 2 blue.
-            From part (a)'s layout, red sits in bits 23..16, green in
-            15..8, blue in 7..0 - so red needs the biggest right-shift.
-            Shift right by (2 - which) * 8, then mask with 0xFF.
-
-        Pack (240, 140, 40) - the image project's orange. Print the
-        packed value in hex with {:#08x}, then print the three channels
-        read back out. Also print std::popcount(packed) and
-        std::has_single_bit(packed) from <bit>.
-
-        Sample output:
-            packed      = 0xf08c28
-            red         = 240
-            green       = 140
-            blue        = 40
-            popcount    = 11
-            power of 2? = false
-    */
-    std::println("\n--- Exercise 8: pack_rgb ---");
-    // TODO
-
 
     return 0;
 }

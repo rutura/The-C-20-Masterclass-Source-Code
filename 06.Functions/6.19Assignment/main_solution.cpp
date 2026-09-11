@@ -349,6 +349,7 @@ int main() {
     // --- Exercise 6 ---
     std::println("\n--- Exercise 6: digit_sum ---");
     {
+        /*
         long samples_total{0};
         for (int value : samples) {
             samples_total += value;
@@ -358,28 +359,17 @@ int main() {
             std::println("digit_sum({}) = {}   (iterative: {})",
                          n, digit_sum(n), digit_sum_iterative(n));
         }
+        */
     }
 
     // --- Exercise 7 ---
-    /*
     std::println("\n--- Exercise 7: checksum ---");
     {
+        /*
         std::println("checksum(samples) = {}", checksum(samples));
         // checksum(samples);   // would warn: [[nodiscard]] result ignored
+        */
     }
-
-    // --- Exercise 8 ---
-    std::println("\n--- Exercise 8: pack_rgb ---");
-    {
-        const std::uint32_t packed{pack_rgb(240, 140, 40)};   // image project's orange
-        std::println("packed      = {:#08x}", packed);
-        std::println("red         = {}", channel(packed, 0));
-        std::println("green       = {}", channel(packed, 1));
-        std::println("blue        = {}", channel(packed, 2));
-        std::println("popcount    = {}", std::popcount(packed));
-        std::println("power of 2? = {}", std::has_single_bit(packed));
-    }
-    */
 
     return 0;
 }
