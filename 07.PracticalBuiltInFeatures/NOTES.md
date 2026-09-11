@@ -245,6 +245,59 @@ catch (const std::out_of_range& ex) {
 
 ## 7.4 Sorting, searching, and `accumulate`
 
+### Two ways to tell the computer what to do
+
+Every loop written so far in this course has been **procedural**: line
+by line, it spells out *how* to get the answer - set up a running
+variable, loop, update it, repeat.
+
+```cpp
+int total{0};
+for (const int& item : quantities) {   // HOW: loop, add, repeat
+    total += item;
+}
+```
+
+That works, but every line is a place a mistake can hide - the wrong
+starting value, the wrong operator, a loop bound off by one. This
+lecture and the next introduce **declarative** tools - `accumulate`,
+`filter`, `transform` - where you instead state *what* you want and let
+the library supply the *how*:
+
+```
+   PROCEDURAL: you write the HOW              DECLARATIVE: you state the WHAT
+   ──────────────────────────────             ────────────────────────────────
+   int total{0};                              std::accumulate(quantities.begin(),
+   for (const int& item : quantities) {                       quantities.end(), 0)
+       total += item;
+   }                                          "reduce quantities to one value,
+                                               starting from 0" - the library
+   loop, running variable, += ...             owns the loop, you just say what
+```
+
+Under the hood, each declarative tool still hides a loop somewhere -
+this is called **internal iteration**, because the loop runs *inside*
+the library function instead of in code you wrote and can see. What
+changes is who supplies the small per-element decision: a **higher-order
+function** is a function that takes another function as an argument (or
+returns one), and `accumulate`, `filter`, and `transform` are all
+higher-order functions - you hand each one a small function (often a
+lambda) saying what to do with one element, and it owns the looping.
+
+```
+   WHAT you state                       WHO supplies the loop
+   ───────────────                      ─────────────────────
+   accumulate(..., combine)             accumulate's internal iteration
+   filter(keep_if)                      the view's internal iteration (7.5)
+   transform(map_to)                    the view's internal iteration (7.5)
+```
+
+This is C++'s **functional-style** programming: not a different
+language, just a different default - reach for a declarative pipeline
+first, and drop back down to a hand-written loop only when a pipeline
+cannot say what you mean. The rest of this lecture and the next show
+what that looks like in practice, starting with sorting and searching.
+
 ### Sorting with `std::ranges::sort`
 
 ```cpp
@@ -288,37 +341,13 @@ found" even when the value is there.
 
 ### Folding a range into one value with `std::accumulate`
 
-Every loop we have written so far has been **procedural**: it spells out
-*how* to get the answer, one step at a time.
-
-```cpp
-int total{0};
-for (const int& item : quantities) {   // HOW: loop, add, repeat
-    total += item;
-}
-```
-
-That works, but every line is a place a mistake can hide - the wrong
-starting value for `total`, the wrong operator, a loop bound off by one.
-`std::accumulate(first, last, init)` says the same thing **declaratively**
-- *what* you want ("reduce this range to one value, starting from
-`init`") - and lets the library supply the *how*:
+`std::accumulate(first, last, init)` is the declarative tool from the
+opening of this lecture, applied to "reduce a range to one value": state
+*what* you want (start from `init`, combine every element) and let the
+library own the loop.
 
 ```cpp
 std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting from 0
-```
-
-```
-   PROCEDURAL (you write the HOW)         DECLARATIVE (you state the WHAT)
-   ───────────────────────────            ─────────────────────────────
-   int total{0};                          std::accumulate(
-   for (const int& item : quantities) {       quantities.begin(),
-       total += item;                          quantities.end(),
-   }                                            0)
-   │                                       │
-   loop, running variable,                 "reduce quantities to one
-   +=, off-by-one risk on                  value, starting from 0" -
-   every hand-written loop like it         accumulate owns the loop
 ```
 
 Traced on `quantities = {10, 20, 30, 40}`:
@@ -472,24 +501,10 @@ generated sequence like `iota`:
 numbers | std::views::filter(...) | std::views::transform(...)
 ```
 
-### Putting 7.4 and 7.5 together
-
-`accumulate`, `filter`, and `transform` are three tools built on the same
-idea: name *what* should happen to each element, hand that decision to
-the library as a function, and let the library own the loop.
-
-```
-   WHAT you state                       WHO supplies the loop
-   ───────────────                      ─────────────────────
-   accumulate(..., combine)             accumulate's internal iteration
-   filter(keep_if)                      the view's internal iteration
-   transform(map_to)                    the view's internal iteration
-```
-
-This is C++'s **functional-style** programming: not a different
-language, just a different default - reach for a declarative pipeline
-first, and drop back down to a hand-written loop only when a pipeline
-cannot say what you mean.
+`filter` and `transform` are exactly the "declarative, higher-order,
+internal iteration" pattern this lecture opened with in 7.4 - `accumulate`
+folds a range down to one value, `filter`/`transform` reshape a range
+into a new one, and all three let you state *what* instead of *how*.
 
 ---
 
