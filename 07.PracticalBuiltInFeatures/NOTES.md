@@ -1116,7 +1116,9 @@ std::println("[{:*^10}]", 42);   // "[****42****]"  '*' as fill, centered
                         (centered inside a 10-wide field)
 ```
 
-### Precision
+### Precision:
+
+Digits after decimal point for floating-point, or max characters for a string:
 
 ```cpp
 std::println("{:.2f}", 3.14159);   // "3.14" - digits after the decimal

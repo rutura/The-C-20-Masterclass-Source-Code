@@ -17,6 +17,8 @@ int main() {
     // --- the format-spec grammar: {:fill align width.precision type} ------
     // Every {} can carry a colon-introduced spec describing exactly how
     // to lay out that one argument.
+
+    //Width and alignment
     std::println("[{:10}]", 42);       // width 10, default-aligned
     std::println("[{:<10}]", 42);      // < left-align
     std::println("[{:>10}]", 42);      // > right-align (default for numbers)
