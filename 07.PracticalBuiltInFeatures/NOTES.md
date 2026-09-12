@@ -1321,11 +1321,11 @@ colorView.remove_suffix(1);
                           start      end
 
    remove_prefix(1)  →         e  d
-                                ▲     ▲
+                               ▲     ▲
                              start   end     (window shrinks from the front)
 
    remove_suffix(1)  →         e
-                                ▲  ▲
+                               ▲  ▲
                              start end       (window shrinks from the back)
 
    "Red" itself is never touched - only colorView's own (pointer, length)
