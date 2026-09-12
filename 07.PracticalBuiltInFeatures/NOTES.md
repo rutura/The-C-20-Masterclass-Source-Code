@@ -1125,6 +1125,50 @@ std::println("{:.2f}", 3.14159);   // "3.14" - digits after the decimal
 std::println("{:.3}", "abcdefg");  // "abc"  - max characters, for a string
 ```
 
+### When you chop off digits after the decimal point
+
+Squeezing a `double` down to fewer decimal digits **rounds** to the
+nearest representable value - it does not just chop the extra digits off.
+Most of the time that is unsurprising:
+
+```cpp
+std::println("{:.2f}", 3.14159);   // "3.14" - third decimal is 1, rounds down
+std::println("{:.2f}", 3.146);     // "3.15" - third decimal is 6, rounds up
+```
+
+The interesting case is an exact **tie** - a value sitting exactly
+halfway between two representable outputs. C++ breaks ties with
+**round-half-to-even** ("banker's rounding"): it rounds to whichever
+neighbor has an *even* last digit, instead of always rounding up. Always
+rounding halves up would skew a large dataset's average slightly high;
+rounding to even cancels that bias out over many ties.
+
+```cpp
+std::println("{:.0f}", 2.5);   // "2" - exact tie, rounds to even -> 2
+std::println("{:.0f}", 3.5);   // "4" - exact tie, rounds to even -> 4, not 3
+```
+
+This only kicks in when the value is an exact tie **in binary**, not in
+decimal - and most decimal fractions are not exact in binary. A decimal
+fraction is only exact in binary if, reduced to lowest terms, its
+denominator is a pure power of two (`1/2`, `1/4`, `1/8`, `1/16`, ...).
+`0.125 = 1/8` qualifies; `0.135 = 27/200` does not, since `200` has a
+factor of `25` left over that no power of two can produce:
+
+```cpp
+std::println("{:.2f}", 0.125);   // "0.12" - 0.125 IS exact in binary (1/8): a real
+                                  //          tie, rounds to even -> "0.12"
+std::println("{:.2f}", 0.135);   // "0.14" - 0.135 is NOT exact in binary: the stored
+                                  //          value is a hair above .135, so it is not
+                                  //          a tie at all, and just rounds up normally
+```
+
+```
+   0.125 = 1/8 = 1/2^3   → exact in binary → real tie → round-to-even
+   0.135 = 27/200        → 200 has a factor of 25      → NOT exact →
+                            stored value != .135 exactly → not a tie
+```
+
 ### Sign flags and the alternate form
 
 ```cpp
