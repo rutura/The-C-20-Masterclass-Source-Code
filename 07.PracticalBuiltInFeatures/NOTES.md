@@ -1145,6 +1145,13 @@ std::println("{:#b}", 5);     // "0b101" - binary, alternate form shows the 0b
 
 ### Positional arguments: reuse or reorder
 
+A plain `{}` always grabs the next argument in line. Putting a number
+inside the braces - `{0}`, `{1}`, `{2}` - picks an argument by its
+position instead, so you can print the same argument more than once, or
+print the arguments in a different order than you passed them. This is 
+also handy if you decide to translate your program into another language
+for example.
+
 ```cpp
 std::println("{0} bought {1} for {0}'s {2}.", "Ada", "flowers", "mother");
 // "Ada bought flowers for Ada's mother."
@@ -1162,6 +1169,22 @@ std::println("{0} bought {1} for {0}'s {2}.", "Ada", "flowers", "mother");
 Without positional indices, `{}` always consumes the next argument in
 order - positional indices let you reuse one argument twice, or print
 them in a different order than they were passed.
+
+### Put it all together
+
+You can put it all together. Once thing to note is that the positional
+argument or index comes before the `:` in the spec.
+
+```
+    std::println("{0:>8.2f} | {1:>8.2f}", 4.5, 128.375);
+```
+
+```
+   {0:>8.2f}  |  {1:>8.2f}
+    │          │
+    │          └── args[1] = 128.375 → " 128.38" (rounded, right-aligned in width 8)
+    └────────────── args[0] = 4.5 → "   4.50" (rounded, right-aligned in width 8)
+```
 
 ### `std::format_to`: write into a buffer instead of allocating fresh
 
