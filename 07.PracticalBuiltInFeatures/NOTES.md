@@ -927,7 +927,7 @@ filename.substr(0, 6);   // "report_final.pdf" -> "report"
 
 ```cpp
 log.find("is");                    // first occurrence, from the front
-log.rfind("is");                   // last occurrence, from the back
+log.rfind("is");                   // last occurrence
 log.find_first_not_of("noon is "); // first character NOT in this set
 ```
 
