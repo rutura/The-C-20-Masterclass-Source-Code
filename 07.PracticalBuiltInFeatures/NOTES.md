@@ -835,6 +835,10 @@ auto evenSquares{
             | std::views::transform([](int x) { return x * x; })};
 ```
 
+NOTE: The result of the pipeline above is a **view**, or a description of a range,
+that comes up with real values only when something iterates it. 
+Hence the name **lazy evaluation**.
+
 ```
    counted ──filter(even)──► evens ──transform(square)──► evenSquares
 
@@ -871,7 +875,7 @@ numbers | std::views::filter(...) | std::views::transform(...)
 ```
 
 `filter` and `transform` are exactly the "declarative, higher-order,
-internal iteration" pattern this lecture opened with in 7.5 - `accumulate`
+internal iteration" pattern we have seen before: `accumulate`
 folds a range down to one value, `filter`/`transform` reshape a range
 into a new one, and all three let you state *what* instead of *how*.
 
