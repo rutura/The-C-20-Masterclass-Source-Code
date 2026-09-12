@@ -1129,45 +1129,48 @@ std::println("{:.3}", "abcdefg");  // "abc"  - max characters, for a string
 
 Squeezing a `double` down to fewer decimal digits **rounds** to the
 nearest representable value - it does not just chop the extra digits off.
-Most of the time that is unsurprising:
+C++ uses **round half to even** (also called **banker's rounding**) .
+Here are the rules simplified:
 
-```cpp
-std::println("{:.2f}", 3.14159);   // "3.14" - third decimal is 1, rounds down
-std::println("{:.2f}", 3.146);     // "3.15" - third decimal is 6, rounds up
-```
+1. **Not a tie?** Round to the nearer value, same as school rounding.
+   ```cpp
+   std::println("{:.2f}", 3.14159);   // "3.14" - third decimal is 1, rounds down
+   std::println("{:.2f}", 3.146);     // "3.15" - third decimal is 6, rounds up
+   ```
+2. **Is it a tie** (the cut-off part is exactly half)? Check if that
+   half is exactly representable in binary (rule below).
+   - **Exact** -> it's a real tie -> round to whichever neighbor is
+     **even**.
+     ```cpp
+     std::println("{:.0f}", 2.5);     // "2"    - exact tie -> round to even -> 2
+     std::println("{:.0f}", 3.5);     // "4"    - exact tie -> round to even -> 4, not 3
+     std::println("{:.2f}", 0.125);   // "0.12" - exact tie -> round to even -> 0.12
+     ```
+   - **Not exact** -> it only looks like a tie in decimal; the value
+     stored in memory is actually a hair above or below `.5` -> round
+     to whichever side it actually leans.
+     ```cpp
+     std::println("{:.2f}", 0.135);   // "0.14" - NOT an exact tie -> leans up -> 0.14
+     ```
 
-The interesting case is an exact **tie** - a value sitting exactly
-halfway between two representable outputs. C++ breaks ties with
-**round-half-to-even** ("banker's rounding"): it rounds to whichever
-neighbor has an *even* last digit, instead of always rounding up. Always
-rounding halves up would skew a large dataset's average slightly high;
-rounding to even cancels that bias out over many ties.
-
-```cpp
-std::println("{:.0f}", 2.5);   // "2" - exact tie, rounds to even -> 2
-std::println("{:.0f}", 3.5);   // "4" - exact tie, rounds to even -> 4, not 3
-```
-
-This only kicks in when the value is an exact tie **in binary**, not in
-decimal - and most decimal fractions are not exact in binary. A decimal
-fraction is only exact in binary if, reduced to lowest terms, its
-denominator is a pure power of two (`1/2`, `1/4`, `1/8`, `1/16`, ...).
-`0.125 = 1/8` qualifies; `0.135 = 27/200` does not, since `200` has a
-factor of `25` left over that no power of two can produce:
-
-```cpp
-std::println("{:.2f}", 0.125);   // "0.12" - 0.125 IS exact in binary (1/8): a real
-                                  //          tie, rounds to even -> "0.12"
-std::println("{:.2f}", 0.135);   // "0.14" - 0.135 is NOT exact in binary: the stored
-                                  //          value is a hair above .135, so it is not
-                                  //          a tie at all, and just rounds up normally
-```
+**How to check "exactly representable in binary":** take the
+fractional part and keep multiplying by 2, dropping the whole-number
+part each time. If you hit exactly `0`, it is exact. If it repeats
+forever instead, it is not.
 
 ```
-   0.125 = 1/8 = 1/2^3   → exact in binary → real tie → round-to-even
-   0.135 = 27/200        → 200 has a factor of 25      → NOT exact →
-                            stored value != .135 exactly → not a tie
+   0.125 x 2 = 0.25   -> .25
+   0.25  x 2 = 0.5    -> .5
+   0.5   x 2 = 1.0    -> 0 left over          EXACT (took 3 steps)
+
+   0.135 x 2 = 0.27   -> .27
+   0.27  x 2 = 0.54   -> .54
+   0.54  x 2 = 1.08   -> .08
+   0.08  x 2 = 0.16   -> .16
+   ...never reaches exactly 0                  NOT EXACT (repeats forever)
 ```
+
+NOTE: If this is confusing, just set up some code and let your computer tell you!
 
 ### Sign flags and the alternate form
 
