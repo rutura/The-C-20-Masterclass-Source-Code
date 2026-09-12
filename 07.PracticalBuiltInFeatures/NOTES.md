@@ -775,11 +775,10 @@ by mistake.
 
 ## 7.6 Ranges and views
 
-Section 7.5 hid one loop inside `accumulate`. C++20's **ranges library**
-(`<ranges>`) goes further and gives you two more declarative building
-blocks - **filter** (keep only what matches) and **transform** (map each
-value to a new one) - that chain together instead of nesting loops inside
-loops.
+In this lecture, we are expxloring C++20's **ranges library**
+two more declarative building features: **filter** (keep only what matches)
+ and **transform** (map each value to a new one) - that chain together instead
+of nesting loops inside loops.
 
 ```
    the procedural way: nested loops, one running vector per step
@@ -798,6 +797,10 @@ loops.
    numbers | std::views::filter(even) | std::views::transform(square)
 ```
 
+In English: take `numbers`, keep only the even ones, then square each of
+those that survived the filter. Nothing is computed yet - the result just
+sits in the air as a view, waiting for something to iterate it.
+
 ### A view does not build a container - it wraps one, lazily
 
 ```cpp
@@ -808,7 +811,7 @@ auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
    std::views::iota(1, 11)
 
    NOT this (eager - builds the whole thing up front):
-      ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐
+      ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐State w
       │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │    a real std::vector<int>
       └───┴───┴───┴───┴───┴───┴───┴───┴───┴────┘
 
