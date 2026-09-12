@@ -1015,6 +1015,13 @@ greeting.insert(7, "World");   // "Hello, !" -> "Hello, World!"
 
 ### String streams: build and parse without hand-rolled loops
 
+Everything so far has streamed to the console (`std::cout`) or to a file
+(`std::ifstream`/`std::ofstream`). C++ offers a third destination: a
+string held **in memory**, via `std::istringstream` and
+`std::ostringstream`. They support the same `<<`/`>>` operators and
+formatting machinery as any other stream - just aimed at a string instead
+of a screen or a file.
+
 `std::ostringstream` accumulates pieces of different types into one
 string, using the same `<<` `std::cout` uses - just aimed at a string
 instead of the console:
