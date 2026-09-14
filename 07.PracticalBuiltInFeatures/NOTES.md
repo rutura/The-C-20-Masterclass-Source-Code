@@ -1385,26 +1385,28 @@ each can be built and stepped through on its own.
 `std::ratio` lets you represent any finite rational number exactly, and
 use it at compile time. It lives in `<ratio>`, namespace `std`. This is
 not a value you compute with at runtime - `ratio` is a **class template**,
-and a specific instantiation of it, like `ratio<1, 60>`, names one
-specific rational number as a **type**. The numerator and denominator are
-compile-time constants of type `std::intmax_t` (a signed integer with the
-widest range your compiler supports):
+and a specific instantiation of it, like `ratio<1, 4>` (one quarter),
+names one specific rational number as a **type**. The numerator and
+denominator are compile-time constants of type `std::intmax_t` (a signed
+integer with the widest range your compiler supports), reached through
+the type's own `::num` and `::den`:
 
 ```cpp
-using r1 = std::ratio<1, 60>;   // the fraction 1/60, as a TYPE
-
-intmax_t num{r1::num};   // 1  - read off the type, not computed at runtime
-intmax_t den{r1::den};   // 60
+// (1) A quarter, spelled out in full - no alias, just the type itself.
+intmax_t quarterHourNum{std::ratio<1, 4>::num};   // 1
+intmax_t quarterHourDen{std::ratio<1, 4>::den};   // 4
+std::println("1/4 = {}/{}", quarterHourNum, quarterHourDen);
 ```
 
 ```
-   std::ratio<1, 60>
-              │   │
-              │   └── denominator, a compile-time constant: ::den
-              └────── numerator,   a compile-time constant: ::num
+   std::ratio<1, 4>
+              │  │
+              │  └── denominator, a compile-time constant: ::den
+              └───── numerator,   a compile-time constant: ::num
 
-   You never write "ratio<1,60> r;" and call member functions on r -
-   there IS no object. You only ever read ::num / ::den off the TYPE.
+   You never write "ratio<1,4> r;" and call member functions on r -
+   there IS no object. You only ever read ::num / ::den off the TYPE
+   itself, the way you just read quarterHourNum/quarterHourDen above.
 ```
 
 Because the numerator and denominator must be known at compile time, a
@@ -1413,10 +1415,10 @@ Because the numerator and denominator must be known at compile time, a
 itself a compile-time constant:
 
 ```cpp
-intmax_t n{1}, d{60};
+intmax_t n{1}, d{4};
 using bad = std::ratio<n, d>;         // Error: n, d are not compile-time constants
 
-const intmax_t cn{1}, cd{60};
+const intmax_t cn{1}, cd{4};
 using ok = std::ratio<cn, cd>;        // Ok: const constants are usable
 ```
 
@@ -1427,54 +1429,129 @@ out the greatest common divisor `gcd` of `n` and `d`:
    num = sign(n) * sign(d) * abs(n) / gcd
    den = abs(d) / gcd
 
-   ratio<2, 4>   and   ratio<1, 2>   →  the exact same TYPE after normalization
+   ratio<2, 8>   and   ratio<1, 4>   →  the exact same TYPE after normalization
 ```
 
-The library ships `ratio_add`, `ratio_subtract`, `ratio_multiply`, and
-`ratio_divide` for arithmetic - but since ratios are types, not objects,
-you cannot write `r1 + r2`. Each template computes a new `ratio` type,
-exposed through an embedded `::type` alias:
+`main1_ratios.cpp` proves it with `ratio_equal`, one of the compile-time
+comparison templates covered below:
 
 ```cpp
-using r1 = std::ratio<1, 60>;
-using r2 = std::ratio<1, 30>;
-using result = std::ratio_add<r1, r2>::type;   // 1/20, after normalization
+// (2) Two different SPELLINGS, but the exact same type after normalization.
+std::println("ratio<2,8> == ratio<1,4>: {}",
+              std::ratio_equal<std::ratio<2, 8>, std::ratio<1, 4>>::value);
+// "ratio<2,8> == ratio<1,4>: true"
 ```
 
-```
-   ratio_add<ratio<1,60>, ratio<1,30>>::type
-                                         │
-                         computed by the COMPILER, at compile time,
-                         resolves to the type ratio<1, 20>
-
-   (compare: 1/60 + 1/30 = 1/20 - same math, done on TYPES)
-```
-
-`ratio_equal`, `ratio_less`, and their siblings compare ratios the same
-way, at compile time, producing a `std::bool_constant` - itself a
-`std::integral_constant<bool, ...>`, a struct template that pairs a type
-with a compile-time value. Read the result off its `::value` member:
+**The four arithmetic operations.** Because ratios are types, not
+objects, you cannot write `ratio<1,4> + ratio<1,3>` - the library gives
+you four class templates instead, one per operation, each computing a
+*new* `ratio` type through an embedded `::type` alias. `main1_ratios.cpp`
+runs all four, back-to-back, against the plain fraction math so you can
+check every result by hand:
 
 ```cpp
-using res = std::ratio_less<r2, r1>;
-std::println("{}", res::value);   // false
+// (3) Addition: a quarter of an hour + a third of an hour.
+using sumType = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
+std::println("1/4 + 1/3 = {}/{}", sumType::num, sumType::den);
 ```
 
-Because a ratio is a type, you cannot `println("{}", r1)` directly - you
-always extract `::num`/`::den` first, as `main1_ratios.cpp` does:
+```
+   1/4 + 1/3
+      │    │
+      │    └── common denominator 12: 1/3 = 4/12
+      └─────── common denominator 12: 1/4 = 3/12
+
+   3/12 + 4/12 = 7/12   ──►  ratio_add<ratio<1,4>, ratio<1,3>>::type
+                              is the type ratio<7, 12> - already normalized,
+                              since gcd(7, 12) == 1
+```
 
 ```cpp
-using r1 = std::ratio<1, 60>;
-std::println("r1 = {}/{}", r1::num, r1::den);   // "r1 = 1/60"
+// (4) Subtraction: a half of an hour - a quarter of an hour.
+using differenceType = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+std::println("1/2 - 1/4 = {}/{}", differenceType::num, differenceType::den);
 ```
 
-The library also ships SI ratio aliases for convenience - `milli`,
+```
+   1/2 - 1/4
+      │    │
+      │    └── 1/4 stays as-is
+      └─────── common denominator 4: 1/2 = 2/4
+
+   2/4 - 1/4 = 1/4   ──►  ratio_subtract<ratio<1,2>, ratio<1,4>>::type
+                           is the type ratio<1, 4>
+```
+
+```cpp
+// (5) Multiplication: a quarter of an hour, times two-thirds.
+using productType = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
+std::println("1/4 * 2/3 = {}/{}", productType::num, productType::den);
+```
+
+```
+   1/4 * 2/3  =  (1*2) / (4*3)  =  2/12
+
+   2/12, reduced by gcd(2,12)=2, is 1/6   ──►  ratio_multiply<...>::type
+                                                 is the NORMALIZED type ratio<1, 6>
+```
+
+```cpp
+// (6) Division: a half, divided by a quarter.
+using quotientType = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+std::println("(1/2) / (1/4) = {}/{}", quotientType::num, quotientType::den);
+```
+
+```
+   (1/2) / (1/4)  =  1/2 * 4/1  =  4/2
+
+   4/2, reduced by gcd(4,2)=2, is 2/1 (i.e. 2)   ──►  ratio_divide<...>::type
+                                                        is the type ratio<2, 1>
+```
+
+**Comparisons work the same way** - `ratio_equal`, `ratio_not_equal`,
+`ratio_less`, `ratio_less_equal`, `ratio_greater`, and
+`ratio_greater_equal` are all evaluated at compile time, on types, not
+values. Each produces a `std::bool_constant` - itself a
+`std::integral_constant<bool, ...>`, a struct template pairing a type
+with a compile-time constant value (`integral_constant<int, 15>` stores
+an `int` valued 15; `bool_constant<true>` is `integral_constant<bool,
+true>`). Read the answer off the result's `::value` member:
+
+```cpp
+// (7)-(9) Comparing 1/3 against 1/4 - and 1/4 against itself.
+std::println("1/3 <  1/4 : {}", (std::ratio_less<std::ratio<1, 3>, std::ratio<1, 4>>::value));
+std::println("1/3 >  1/4 : {}", (std::ratio_greater<std::ratio<1, 3>, std::ratio<1, 4>>::value));
+std::println("1/4 <= 1/4 : {}", (std::ratio_less_equal<std::ratio<1, 4>, std::ratio<1, 4>>::value));
+// false, true, true - exactly what plain fraction math would tell you:
+// 1/3 (≈0.333) is bigger than 1/4 (0.25), and 1/4 is certainly <= itself.
+```
+
+Because a ratio is a type, you cannot `println("{}", someRatio)` directly
+- you always extract `::num`/`::den` (or, for comparisons, `::value`)
+first, exactly as every example above does.
+
+**Naming a ratio with `using`, once the full spelling gets tedious.** A
+type alias changes nothing about how the ratio behaves - it is just a
+shorter name for the exact same type, and it is what you will actually
+reach for once a ratio gets used more than once:
+
+```cpp
+// (10) Same computation as (3), now with names instead of the full spelling.
+using quarterHour = std::ratio<1, 4>;
+using thirdHour = std::ratio<1, 3>;
+using sumViaAliases = std::ratio_add<quarterHour, thirdHour>::type;
+std::println("quarterHour + thirdHour = {}/{}", sumViaAliases::num, sumViaAliases::den);
+// "quarterHour + thirdHour = 7/12" - identical result to (3), just easier to read
+```
+
+**SI ratio aliases the library ships for convenience** - `milli`,
 `micro`, `nano`, `kilo`, `mega`, and more, all the way from `yocto`
 (`10^-24`) to `yotta` (`10^24`):
 
 ```cpp
-using milli = std::ratio<1, 1'000>;
-using kilo  = std::ratio<1'000, 1>;
+// (11)-(12)
+std::println("milli = {}/{}", std::milli::num, std::milli::den);   // "milli = 1/1000"
+std::println("kilo  = {}/{}", std::kilo::num, std::kilo::den);     // "kilo  = 1000/1"
 ```
 
 `chrono` uses exactly these to define its predefined duration types
