@@ -1358,50 +1358,267 @@ need to keep it around - it avoids a copy the caller never asked for:
 
 ---
 
-## 7.10 `std::chrono`
+## 7.10 Date and Time Utilities
 
 Time shows up everywhere in real programs - how long an operation took,
-what the timestamp on a log line should read, what today's date is.
-**`<chrono>`** is the standard library's time toolkit: **durations**
-(an amount of time), **clocks** (a source of "now"), and, since C++20,
-genuine **calendar dates**.
+what the timestamp on a log line should read, what today's date is,
+what "9am in Brussels" means to someone in New York. **`<chrono>`** is
+the standard library's time toolkit, and it is built from five pieces:
 
-### Durations: an amount of time, with the unit baked into the type
+```
+   DURATIONS    an amount of time            ("90 minutes and 32 seconds")
+   CLOCKS       a source of "now"            (steady_clock, system_clock, ...)
+   TIME POINTS  a specific instant           (a duration since a clock's epoch)
+   DATES        a genuine calendar day       (year_month_day, since C++20)
+   TIME ZONES   wall-clock time for a place  (zoned_time, since C++20)
+```
+
+Everything lives in `<chrono>`, namespace `std::chrono`. Underneath all
+five sits `<ratio>` - the compile-time fraction type chrono uses to
+describe exactly how long "one tick" is, for every duration type, with
+zero runtime cost. This lecture walks the five pieces in that order, one
+file per topic - `main1_ratios.cpp` through `main8_time_zones.cpp` - so
+each can be built and stepped through on its own.
+
+### `main1_ratios.cpp` - `std::ratio`: an exact fraction, known at compile time
+
+`std::ratio` lets you represent any finite rational number exactly, and
+use it at compile time. It lives in `<ratio>`, namespace `std`. This is
+not a value you compute with at runtime - `ratio` is a **class template**,
+and a specific instantiation of it, like `ratio<1, 60>`, names one
+specific rational number as a **type**. The numerator and denominator are
+compile-time constants of type `std::intmax_t` (a signed integer with the
+widest range your compiler supports):
 
 ```cpp
-std::chrono::seconds fiveSeconds{5};
-std::chrono::milliseconds fiveThousandMs{5000};
+using r1 = std::ratio<1, 60>;   // the fraction 1/60, as a TYPE
+
+intmax_t num{r1::num};   // 1  - read off the type, not computed at runtime
+intmax_t den{r1::den};   // 60
+```
+
+```
+   std::ratio<1, 60>
+              │   │
+              │   └── denominator, a compile-time constant: ::den
+              └────── numerator,   a compile-time constant: ::num
+
+   You never write "ratio<1,60> r;" and call member functions on r -
+   there IS no object. You only ever read ::num / ::den off the TYPE.
+```
+
+Because the numerator and denominator must be known at compile time, a
+`ratio` built from ordinary (non-const) variables is a compile error -
+`const` fixes it, since a `const intmax_t` initialized from a literal is
+itself a compile-time constant:
+
+```cpp
+intmax_t n{1}, d{60};
+using bad = std::ratio<n, d>;         // Error: n, d are not compile-time constants
+
+const intmax_t cn{1}, cd{60};
+using ok = std::ratio<cn, cd>;        // Ok: const constants are usable
+```
+
+**Ratios are always normalized.** For `ratio<n, d>`, the library divides
+out the greatest common divisor `gcd` of `n` and `d`:
+
+```
+   num = sign(n) * sign(d) * abs(n) / gcd
+   den = abs(d) / gcd
+
+   ratio<2, 4>   and   ratio<1, 2>   →  the exact same TYPE after normalization
+```
+
+The library ships `ratio_add`, `ratio_subtract`, `ratio_multiply`, and
+`ratio_divide` for arithmetic - but since ratios are types, not objects,
+you cannot write `r1 + r2`. Each template computes a new `ratio` type,
+exposed through an embedded `::type` alias:
+
+```cpp
+using r1 = std::ratio<1, 60>;
+using r2 = std::ratio<1, 30>;
+using result = std::ratio_add<r1, r2>::type;   // 1/20, after normalization
+```
+
+```
+   ratio_add<ratio<1,60>, ratio<1,30>>::type
+                                         │
+                         computed by the COMPILER, at compile time,
+                         resolves to the type ratio<1, 20>
+
+   (compare: 1/60 + 1/30 = 1/20 - same math, done on TYPES)
+```
+
+`ratio_equal`, `ratio_less`, and their siblings compare ratios the same
+way, at compile time, producing a `std::bool_constant` - itself a
+`std::integral_constant<bool, ...>`, a struct template that pairs a type
+with a compile-time value. Read the result off its `::value` member:
+
+```cpp
+using res = std::ratio_less<r2, r1>;
+std::println("{}", res::value);   // false
+```
+
+Because a ratio is a type, you cannot `println("{}", r1)` directly - you
+always extract `::num`/`::den` first, as `main1_ratios.cpp` does:
+
+```cpp
+using r1 = std::ratio<1, 60>;
+std::println("r1 = {}/{}", r1::num, r1::den);   // "r1 = 1/60"
+```
+
+The library also ships SI ratio aliases for convenience - `milli`,
+`micro`, `nano`, `kilo`, `mega`, and more, all the way from `yocto`
+(`10^-24`) to `yotta` (`10^24`):
+
+```cpp
+using milli = std::ratio<1, 1'000>;
+using kilo  = std::ratio<1'000, 1>;
+```
+
+`chrono` uses exactly these to define its predefined duration types
+(`milliseconds` is a duration ticking in `milli`-second units) - which is
+the whole reason `ratio` exists as a lecture prerequisite: every duration
+type is tagged with a ratio describing its tick length.
+
+### `main2_durations.cpp` - Durations: an amount of time, with the unit baked into the type
+
+A **duration** is an interval between two points in time - a number of
+**ticks**, plus a **tick period** (how long one tick lasts, as a
+compile-time `ratio` in seconds):
+
+```cpp
+template <class Rep, class Period = std::ratio<1>>
+class duration { /* ... */ };
 ```
 
 ```
    std::chrono::duration<Rep, Period>
-                  │        │
-                  │        └── the tick length: what ONE tick means
-                  │             (seconds, milliseconds, minutes, ...)
-                  └─────────── the number of ticks (a plain integer or double)
-
-   seconds{5}         ==  5 ticks, each tick = 1 second
-   milliseconds{5000} ==  5000 ticks, each tick = 1 millisecond
-                            │
-                            both represent the SAME amount of time,
-                            just counted in different-sized units
+                          │     │
+                          │     └── tick period, a compile-time ratio<N,D>
+                          │          in seconds - defaults to ratio<1>,
+                          │          i.e. one tick = one second
+                          └──────── the type holding the tick COUNT
+                                     (an arithmetic type: long, double, ...)
 ```
 
-Different duration *types* holding the same amount of time still compare
-equal - the library converts for you:
-
 ```cpp
-fiveSeconds == fiveThousandMs;   // true
+std::chrono::duration<long, std::ratio<60>> d1{123};   // 123 ticks of 60s each = 123 minutes
 ```
 
-`duration_cast<T>` converts explicitly between duration types, the same
-spirit as `static_cast` - going from a smaller unit to a bigger one can
-lose information (leftover milliseconds do not fit in whole seconds), so
-it is never implicit:
+Three constructors exist: default, "from a tick count", and "from another
+duration" - the last one is how conversions between duration types happen.
+Durations support the full set of arithmetic operators
+(`+ - * / % ++ -- += -= *= /= %=`) plus `==`/`<=>`, and these member
+functions:
+
+```
+   MEMBER FUNCTION           DESCRIPTION
+   ─────────────────────────────────────────────────────────────────────
+   Rep count() const         the raw tick count, as the Rep type
+   static duration zero()    a duration of zero
+   static duration min()     the smallest value Rep can represent
+   static duration max()     the largest value Rep can represent
+```
+
+`floor()`, `ceil()`, `round()`, and `abs()` work on durations exactly as
+they do on plain numbers.
+
+**Comparing durations with different tick periods just works** - the
+library converts internally:
 
 ```cpp
-auto raceDuration{90min + 32s};                    // chrono_literals: 90 minutes, 32 seconds
-std::chrono::duration_cast<std::chrono::seconds>(raceDuration).count();  // 5432
+duration<long, ratio<60>> d3{10};   // 10 minutes
+duration<long, ratio<1>>  d4{14};   // 14 seconds
+d3 > d4;                             // true - compared as the same underlying time
+```
+
+**Converting between duration types** is where the interesting rules
+live. Going from a smaller tick to a bigger tick with a **floating-point**
+Rep never loses information, so it stays implicit:
+
+```cpp
+duration<long> d7{30};                  // 30 seconds (integral)
+duration<double, ratio<60>> d8{d7};     // 0.5 minutes - implicit, no data lost
+```
+
+```
+   30 seconds  ──implicit──►  0.5 minutes
+                                  │
+                         double Rep can hold a fraction,
+                         so nothing is lost - the compiler allows it
+```
+
+But converting seconds to minutes with an **integral** Rep could produce
+a non-integral result - so the compiler refuses it outright, even when a
+particular value happens to divide evenly:
+
+```cpp
+duration<long> d7{30};
+duration<long, ratio<60>> bad{d7};   // Error: possible truncation - refused
+                                      // at compile time, not just at runtime
+```
+
+`duration_cast<T>()` is the explicit override, the same spirit as
+`static_cast` - it forces the conversion using integer truncation:
+
+```cpp
+auto forced{duration_cast<duration<long, ratio<60>>>(duration<long>{30})};
+// forced == 0 minutes - 30 seconds truncates down, same as int division
+```
+
+```
+   duration_cast<T>(source)
+        │
+        "I know this can lose information - do it anyway,
+         and truncate toward zero if it doesn't divide evenly"
+
+   30 seconds  ──duration_cast<minutes>──►  0 minutes   (30 / 60 = 0, truncated)
+```
+
+Converting the **other** direction - minutes to seconds - never loses
+information when both Reps are integral, so it stays implicit either way:
+
+```cpp
+duration<long, ratio<60>> d9{10};   // 10 minutes
+duration<long> d10{d9};              // 600 seconds - implicit, exact
+```
+
+**Predefined durations** save you from spelling out `duration<Rep,
+Period>` by hand - `nanoseconds`, `microseconds`, `milliseconds`,
+`seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, `years`, all in
+`std::chrono`, built from the SI ratios above:
+
+```cpp
+minutes d9{10};   // same type, same meaning, as duration<long, ratio<60>>{10}
+```
+
+The standard mandates that these predefined durations use **integral**
+Reps - so, just like the `long`-based example above, a conversion that
+*could* produce a fractional result is a compile-time error, even when
+the specific numbers involved divide evenly:
+
+```cpp
+seconds s{60};
+minutes m{s};   // Error - refused even though 60s IS exactly 1 minute;
+                // the compiler only looks at the TYPES, not the value
+```
+
+Converting minutes to seconds is always exact (multiplying by an integer
+never introduces a fraction), so it stays implicit:
+
+```cpp
+minutes m{2};
+seconds s{m};   // Ok, implicit - 120s
+```
+
+**Standard chrono literals** - `h`, `min`, `s`, `ms`, `us`, `ns` - build
+durations directly from numeric literals, and combine naturally:
+
+```cpp
+auto raceDuration{90min + 32s};   // 90 minutes and 32 seconds, added directly
+duration_cast<seconds>(raceDuration).count();   // 5432
 ```
 
 ```
@@ -1413,126 +1630,505 @@ std::chrono::duration_cast<std::chrono::seconds>(raceDuration).count();  // 5432
                               5400 + 32  =  5432 seconds total
 ```
 
-### Benchmarking a block of code with `steady_clock`
+These literals live in the inline namespace `std::chrono_literals` (also
+reachable via `std::literals::chrono_literals`), and are additionally
+re-exported directly into `std::chrono` - so `using namespace
+std::chrono;` alone is enough to use them.
+
+**`hh_mm_ss`** takes any duration and splits it back into display-ready
+fields - `hours()`, `minutes()`, `seconds()`, `subseconds()`, all
+non-negative, plus `is_negative()`:
 
 ```cpp
-const auto start{std::chrono::steady_clock::now()};
-// ... the work being timed ...
-const auto end{std::chrono::steady_clock::now()};
+const hh_mm_ss split{hours{1} + minutes{23} + seconds{45}};
+std::println("{}h {}m {}s", split.hours().count(),
+              split.minutes().count(), split.seconds().count());
+// "1h 23m 45s"
+```
 
-const auto elapsed{std::chrono::duration_cast<std::chrono::milliseconds>(end - start)};
+```
+   hh_mm_ss{ 1h + 23min + 45s }
+                    │
+          the SAME 5025 seconds, just re-sliced into fields
+
+   duration   ──►  one number + a unit            (5025s)
+   hh_mm_ss   ──►  several numbers, one per field  (1h 23m 45s)
+```
+
+### `main3_now.cpp` and `main4_timing.cpp` - Clocks: a source of "now"
+
+A **clock** pairs a `time_point` type with a `duration` type and an
+**epoch** - the moment that clock starts counting from. The standard
+defines several:
+
+```
+   CLOCK                   DESCRIPTION                               EPOCH
+   ──────────────────────────────────────────────────────────────────────────────
+   system_clock            UTC wall-clock time, system-wide           1970-01-01
+   steady_clock            time_point NEVER decreases - system_clock  unspecified
+                           can be adjusted at any time; this one
+                           need not relate to wall-clock time at all
+   high_resolution_clock   shortest possible tick period - may just   unspecified
+                           be an ALIAS for steady_clock or
+                           system_clock, depending on your compiler
+   utc_clock               UTC, and the ONLY one of these that        1970-01-01
+                           tracks leap seconds
+   tai_clock               International Atomic Time, weighted        1958-01-01
+                           average of several atomic clocks
+   gps_clock               GPS satellite time                         1980-01-06
+   file_clock              std::filesystem file timestamps            unspecified*
+
+   * typically 1970-01-01 on Unix, 1601-01-01 on Windows
+```
+
+A **leap second** is a second occasionally inserted into (or removed
+from) UTC to correct drift against true solar time. `utc_clock` is the
+only one of these that tracks them; the others don't, and `file_clock`'s
+behavior here is unspecified.
+
+> **high_resolution_clock is best avoided.** Its implementation is not
+> consistent between compilers - it might be `steady_clock` on one, and
+> `system_clock` on another - so whether it can go backward isn't
+> portable. Prefer `system_clock` for wall-clock time and `steady_clock`
+> for measuring durations, always.
+
+Every clock has a static `now()` returning the current `time_point`, and
+a static `is_steady` reporting whether it can go backward:
+
+```cpp
+std::println("steady_clock::is_steady = {}", steady_clock::is_steady);  // true
+std::println("system_clock::is_steady = {}", system_clock::is_steady);  // false
+```
+
+**`main3_now.cpp`: printing the current time.** `std::format`/`println`
+understand a `time_point` directly, using the same `{:...}` spec grammar
+from 7.8 - `%` codes replace a type letter like `f` or `d`. The `L`
+specifier formats according to the current global `locale`:
+
+```cpp
+std::locale::global(std::locale{""});    // the user's own OS locale
+std::println("UTC: {:L}", system_clock::now());
+std::println("UTC: {:L%c}", system_clock::now());   // %c = locale's own "preferred" format
+```
+
+```
+   {:L%c}
+     │ │
+     │ └── %c: the locale's own preferred date+time layout
+     └──── L:  use the currently configured GLOBAL locale to format it
+```
+
+**`main4_timing.cpp`: measuring elapsed time.** `steady_clock` is the
+right tool because it is immune to the system clock being adjusted mid-
+measurement (NTP sync, a user changing the time):
+
+```cpp
+auto start{steady_clock::now()};
+// ... the work being timed ...
+auto end{steady_clock::now()};
+auto diff{end - start};                                       // a duration
+println("Total: {}", duration_cast<milliseconds>(diff));
 ```
 
 ```
    timeline:   start ────────────── work happens ────────────── end
                  │                                                │
-                 └──────────────────  elapsed = end - start ──────┘
-                                       (a duration, not a time_point)
-
-   steady_clock NEVER goes backward - it is not tied to the wall clock,
-   so a system-clock adjustment (NTP sync, a user changing the time)
-   cannot make elapsed come out negative. Use it whenever you are
-   MEASURING elapsed time, never system_clock.
+                 └──────────────────  diff = end - start ─────────┘
+                                       (a DURATION, not a time_point -
+                                        time_point - time_point = duration)
 ```
 
-### Wall-clock time with `system_clock`
+`system_clock` additionally offers `to_time_t()`/`from_time_t()` to
+interoperate with the C-style `time_t` representation from `<ctime>`.
+
+A subtlety worth knowing: most OS timers only update every 10-15ms. Any
+event shorter than one timer tick appears to take **zero** time, and any
+event between one and two ticks appears to take exactly **one** tick -
+called **gating error**. A loop that actually takes 44ms on a system with
+a 15ms timer update can appear to take only 30ms. The fix is simple: make
+the measured work large enough to span many timer ticks (`main4_timing.cpp`
+runs 10 million iterations of real arithmetic for exactly this reason).
+
+### `main5_time_point.cpp` - Time Point: a specific instant
+
+A **`time_point`** represents a point in time, stored as a `duration`
+relative to its clock's **epoch**. Every `time_point` is tied to a
+specific clock - the epoch belongs to the clock, not to `time_point`
+itself. (The classic Unix epoch is 1970-01-01, ticking in seconds; the
+Windows epoch is 1601-01-01, ticking in 100-nanosecond units - different
+platforms, different epochs and units, all hidden behind the same
+interface.)
 
 ```cpp
-const auto now{std::chrono::system_clock::now()};   // a time_point
+time_point<steady_clock> tp1;             // == steady_clock::time_point tp1;
 ```
 
-```
-   steady_clock::now()     answers "how much time has passed?"
-                            - use for benchmarking / timeouts
+`time_since_epoch()` returns the duration between the clock's epoch and
+this `time_point`:
 
-   system_clock::now()     answers "what time is it right now?"
-                            - use for timestamps / logging
-                            - CAN jump (clock sync, user changes it) -
-                              never use it to measure elapsed time
+```
+   tp1                        epoch of steady_clock's own timeline
+    │                              │
+    │◄──────── time_since_epoch() ─┤
+    │                              │
+   "10 minutes after this clock started counting"
 ```
 
-`std::format` understands a `time_point` directly, using the same
-`{:...}` spec grammar from 7.8 - `%` codes take the place of a type
-letter like `f` or `d`:
+Only the arithmetic that makes sense is supported - you can add or
+subtract a duration from a `time_point`, and subtracting two `time_point`s
+gives you a duration, but **adding two `time_point`s is not supported**
+(there is no meaningful answer to "3pm plus 5pm"):
+
+```
+   tp + d = tp        tp - d = tp
+   d + tp = tp        tp - tp = d      (two time_points → a duration)
+   tp += d            tp -= d
+
+   tp + tp             ← NOT supported. Adding two points in time
+                          is not a meaningful operation.
+```
+
+`time_point` has three constructors mirroring `duration`'s: default
+(initializes to the epoch), from a duration (epoch + that duration), and
+from another `time_point` of the same clock (for converting between
+precisions). Comparison (`==`, `<=>`) and `min()`/`max()` work as you'd
+expect.
+
+### `main6_time_point_conversions.cpp` - converting between precisions
+
+Just like durations, `time_point` conversions are implicit when nothing
+can be lost, and explicit otherwise:
 
 ```cpp
-std::println("Right now: {:%Y-%m-%d %H:%M:%S}", now);
-// "Right now: 2026-09-11 06:49:25"
+time_point<steady_clock, seconds> tpSeconds{42s};
+time_point<steady_clock, milliseconds> tpMs{tpSeconds};   // implicit - 42000ms, exact
 ```
 
 ```
-   {:%Y-%m-%d %H:%M:%S}
-      │  │  │   │  │  │
-      │  │  │   │  │  └── seconds
-      │  │  │   │  └───── minutes
-      │  │  │   └──────── hours (24-hour)
-      │  │  └──────────── day of month
-      │  └─────────────── month
-      └────────────────── year
+   seconds  ──implicit──►  milliseconds
+      │                          │
+   coarser tick             finer tick - going from coarse to fine
+                             never loses anything, so it's allowed silently
 ```
 
-A raw `time_point` carries sub-second precision (down to nanoseconds on
-most systems) - `time_point_cast<seconds>(now)` rounds it down to whole
-seconds first, so the printed time stays readable instead of trailing
-nine digits of fractional noise.
-
-### C++20 calendar dates: `year_month_day`
-
-A `time_point` is a point on an abstract timeline; **`year_month_day`**
-is a genuine **calendar date** - built from chrono's own `year`, `month`,
-and `day` building blocks:
+Going the other way needs `time_point_cast<T>()` - the `time_point`
+counterpart to `duration_cast`:
 
 ```cpp
-const std::chrono::year_month_day releaseDate{
-    std::chrono::year{2020}, std::chrono::month{9}, std::chrono::day{15}};
-
-std::println("C++20 was published around: {:%B %d, %Y}", releaseDate);
-// "C++20 was published around: September 15, 2020"
+time_point<steady_clock, milliseconds> tpMs{42'424ms};
+auto tpSeconds{time_point_cast<seconds>(tpMs)};   // 42000ms worth - the 424ms are GONE
 ```
 
 ```
-   year_month_day{ year{2020}, month{9}, day{15} }
-                       │            │        │
-                       2020         September 15th
-
-   {:%B %d, %Y}  formats it as  "September 15, 2020"
-        │
-        %B = full month name (vs. %m for the numeric month, "09")
+   42424ms  ──time_point_cast<seconds>──►  42000ms (i.e. 42s)
+                     │
+           explicit - you're telling the compiler
+           "yes, I know the 424ms remainder gets truncated"
 ```
 
-Going from a `time_point` to a calendar date needs one more step -
-**`floor<days>`** truncates the `time_point` down to midnight, since a
-`time_point` alone carries no notion of "which calendar day" until it is
-rounded to that granularity:
+`floor()`, `ceil()`, and `round()` work on `time_points` exactly as they
+do on durations and on plain numeric values - each rounds to a target
+duration granularity instead of just truncating:
 
 ```cpp
-const std::chrono::year_month_day today{
-    std::chrono::floor<std::chrono::days>(now)};
+time_point<steady_clock, milliseconds> tp{2'500ms};
+floor<seconds>(tp);   // 2s   - rounds down
+ceil<seconds>(tp);    // 3s   - rounds up
+round<seconds>(tp);   // 2s   - rounds to nearest (ties to even, like std::round's cousins)
 ```
 
+### `main7_dates.cpp` - Date: genuine calendar support
+
+C++20 added real calendar dates on top of everything above. Only the
+Gregorian calendar ships with the standard, but the design lets other
+calendars (Coptic, Julian, ...) interoperate with the rest of `<chrono>`.
+
+**The building-block types**, all in `std::chrono`:
+
 ```
-   now (a time_point, includes hours/minutes/seconds/...)
-       │
-       floor<days>(now)   ──►  truncates to midnight of that day
-       │
-       year_month_day{...}  ──►  a genuine calendar date: today
+   CLASS                     DESCRIPTION
+   ──────────────────────────────────────────────────────────────────────────
+   year                      a year, range [-32767, 32767]; is_leap() tells you
+                             whether it's a leap year; min()/max() bound it
+   month                     a month, range [1, 12]; named constants January..December
+   day                       a day, range [1, 31]
+   weekday                   a day of the week, [0, 6], 0 = Sunday; named
+                             constants Sunday..Saturday
+   weekday_indexed           the 1st-5th occurrence of a weekday in a month -
+                             e.g. Monday[2] = "the second Monday"
+   weekday_last              the LAST occurrence of a weekday in a month
+   month_day                 a month + day, year unspecified
+   month_day_last            the last day of a month, year unspecified
+   month_weekday             the nth weekday of a month, year unspecified
+   month_weekday_last        the last weekday of a month, year unspecified
+   year_month                a year + month
+   year_month_day            a full year + month + day
+   year_month_day_last       the last day of a specific year and month
+   year_month_weekday        the nth weekday of a specific year and month
+   year_month_weekday_last   the last weekday of a specific year and month
 ```
 
-Calendar arithmetic in whole days works directly on the floored value -
-no hand-rolled "how many days in this month" logic required:
+Every one of these has an `ok()` member reporting whether it holds a
+valid value. Two literal suffixes help build them: `y` for years, `d` for
+days (both in `std::chrono_literals`), and named month/weekday constants
+cover the rest:
 
 ```cpp
-const std::chrono::year_month_day nextWeek{
-    std::chrono::floor<std::chrono::days>(now) + std::chrono::days{7}};
+year y1{2020};        auto y2{2020y};    // equivalent
+month m1{6};          auto m2{June};     // equivalent
+day d1{22};           auto d2{22d};      // equivalent
+```
+
+**`operator/` builds full dates**, in any of three natural orders - and
+combines with `weekday_indexed`/`last` to build the more exotic forms:
+
+```cpp
+year_month_day fulldate1{2020y, June, 22d};
+auto fulldate2{2020y / June / 22d};        // Y / M / D
+auto fulldate3{22d / June / 2020y};        // D / M / Y
+
+auto thirdMonday{Monday[3] / June / 2020}; // the 3rd Monday of June 2020
+
+auto june22{June / 22d};                   // month_day: "June 22, some year"
+auto june22_2020{2020y / june22};          // attach a year → year_month_day
+
+auto lastDayOfAJune{June / last};                    // month_day_last
+auto lastDayOfJune2020{2020y / lastDayOfAJune};       // year_month_day_last
+auto lastMondayOfJune2020{2020y / June / Monday[last]}; // year_month_weekday_last
 ```
 
 ```
-   floor<days>(now)  +  days{7}
-          │                │
-       today's           add 7        →  year_month_day{...}  = one week
-       midnight          whole days       from today, correct across a
-                                           month or year boundary
+   Monday[3] / June / 2020
+       │         │      │
+       │         │      └── year 2020
+       │         └───────── the month of June
+       └─────────────────── weekday_indexed: the 3rd Monday that falls in it
+
+   operator/ reads left-to-right, narrowing what's unspecified at each
+   step - "some weekday" → "that weekday in June" → "...of 2020"
 ```
+
+**Serial vs. field-based: two shapes for the same date.** `year_month_day`
+is **field-based** - it stores year, month, and day as three separate
+members. `sys_days` is the other shape: a `time_point` of `system_clock`
+that just counts whole days since the epoch - a **serial** type:
+
+```cpp
+template <typename Duration>
+using sys_time = std::chrono::time_point<std::chrono::system_clock, Duration>;
+using sys_seconds = sys_time<seconds>;
+using sys_days    = sys_time<days>;
+```
+
+```
+   year_month_day{ 2020y, June, 22d }        sys_days{ 2020y / June / 22d }
+        │                                         │
+   FIELD-BASED:                               SERIAL:
+   3 separate members                         1 number - "day #N since 1970-01-01"
+   (year, month, day)
+        │                                         │
+   easy to read, easy to print                fast to do arithmetic on
+   (this is what you WANT to print)           (this is what you WANT to compute with)
+
+   Both name the SAME calendar day - convert between them
+   whichever direction the next operation needs.
+```
+
+`floor<days>` truncates any `time_point` down to midnight, turning it
+into something convertible to `year_month_day` - a `time_point` alone
+carries no notion of "which calendar day" until you round it to that
+granularity:
+
+```cpp
+auto today{floor<days>(system_clock::now())};             // a sys_days
+system_clock::time_point t1{sys_days{2020y / June / 22d}}; // year_month_day → time_point
+year_month_day yearmonthday{floor<days>(t1)};              // time_point → year_month_day
+```
+
+A full date **with** a time-of-day builds up the same way, one duration
+at a time:
+
+```cpp
+auto t2{sys_days{2020y / June / 22d} + 9h + 35min + 10s};   // 2020-06-22 09:35:10 UTC
+```
+
+**Printing dates.** `operator<<` works on streams as usual; `println`/
+`format` understand chrono types directly, and the `L` specifier
+localizes the output:
+
+```cpp
+std::cout << yearmonthday << '\n';
+std::println("{:L}", yearmonthday);
+```
+
+Watch out: printing a `year_month_weekday_last` prints its **symbolic**
+form, not a resolved date - convert through `sys_days` first if you want
+the actual calendar date:
+
+```cpp
+println("{:L}", lastMondayOfJune2020);                        // "2020/Jun/Mon[last]"
+year_month_day resolved{sys_days{lastMondayOfJune2020}};
+println("{:L}", resolved);                                    // "2020-06-29"
+```
+
+```
+   year_month_weekday_last   ──sys_days{...}──►   year_month_day
+   "2020/Jun/Mon[last]"       (resolve it)          "2020-06-29"
+      (a RULE)                                      (an actual DATE)
+```
+
+With the `L` specifier, month and weekday names are localized; `%A`
+prints the full weekday name instead of an abbreviation:
+
+```cpp
+std::locale::global(std::locale{"nl-NL"});
+std::println("Monday in Dutch is {:L%A}", Monday);   // "Monday in Dutch is maandag"
+```
+
+**Arithmetic with dates - and a genuine trap.** Adding whole days to a
+serial type is always exact:
+
+```cpp
+auto t3{t2 + days{5}};   // add exactly 5 days - unambiguous, no surprises
+```
+
+But `sys_days` (and any `time_point`) is a **serial** type - underneath,
+just a count of days/seconds since an epoch. Adding `years{1}` to it does
+**not** mean "same month and day, next year." The standard defines a
+chrono year as the *average* Gregorian year - 86,400 × ((365×400)+97)/400
+= 31,556,952 seconds (365.2425 days) - so that repeated additions stay
+leap-year-correct on average. That average is not a whole number of
+days, so a time-of-day component can visibly **drift**:
+
+```cpp
+auto t5{sys_days{2020y/June/22d} + 9h + 35min + 10s};   // 2020-06-22 09:35:10
+auto t6{t5 + years{1}};                                  // 2021-06-22 15:24:22  <- drifted!
+```
+
+```
+   t5   2020-06-22 09:35:10
+    │
+    │  + years{1}  adds 31,556,952 seconds (the AVERAGE year),
+    │              not "the same date, next year"
+    ▼
+   t6   2021-06-22 15:24:22     ← date advanced correctly, but the
+                                   TIME OF DAY drifted by nearly 6 hours
+```
+
+To add **exactly** one calendar year, convert to the field-based
+`year_month_day` first - where "add a year" means exactly that, because
+the type has real year/month/day fields - then rebuild the serial
+`time_point` from the pieces:
+
+```cpp
+sys_days t5_days{time_point_cast<days>(t5)};   // split off the whole-days part
+seconds t5_seconds{t5 - t5_days};               // ...and the remaining time-of-day
+year_month_day t5_ymd{t5_days};                 // convert to field-based
+year_month_day t7_ymd{t5_ymd + years{1}};       // add a YEAR, exactly, field-based
+auto t7{sys_days{t7_ymd} + t5_seconds};         // rebuild, time-of-day intact
+// t7 = 2021-06-22 09:35:10  <- time of day preserved this time
+```
+
+```
+   t5  ──split──►  t5_days (whole days)  +  t5_seconds (09:35:10)
+                          │
+                  year_month_day{t5_days}
+                          │
+                    + years{1}     ← exact calendar arithmetic, because
+                          │            this type has real y/m/d fields
+                    sys_days{...}
+                          │
+                    + t5_seconds   ← re-attach the original time-of-day
+                          │
+                          ▼
+                 2021-06-22 09:35:10
+```
+
+**Rule of thumb:** day-granularity arithmetic (`+ days{n}`) on a serial
+type is always exact. For year or month arithmetic where the exact
+calendar date matters, go through `year_month_day` instead of adding
+straight to a serial `time_point`.
+
+### `main8_time_zones.cpp` - Time Zone: wall-clock time, anywhere
+
+The standard library ships a copy of the IANA time zone database
+(www.iana.org/time-zones). `get_tzdb()` returns a reference to the single
+existing `tzdb` instance; its public `zones` member is a `vector` of every
+known `time_zone`:
+
+```cpp
+const auto& database{get_tzdb()};
+for (const auto& zone : database.zones) {
+    println("{}", zone.name());
+}
+```
+
+Each `time_zone` has a `name()`, and two conversion functions:
+`to_local()` (a `sys_time` → the wall-clock `local_time` for that zone)
+and `to_sys()` (the reverse). Because of daylight saving time, a
+`local_time → sys_time` conversion can be **ambiguous** (the hour repeats
+during "fall back") or **nonexistent** (the hour is skipped during
+"spring forward") - such cases throw `ambiguous_local_time` or
+`nonexistent_local_time`, respectively.
+
+`locate_zone()` looks a zone up by IANA name and throws `runtime_error`
+if it isn't found; `current_zone()` returns whatever zone the machine
+itself is configured for:
+
+```cpp
+auto* brussels{locate_zone("Europe/Brussels")};
+auto* gmt{locate_zone("GMT")};
+auto* current{current_zone()};
+```
+
+**Converting a UTC instant to different zones' wall-clock time:**
+
+```cpp
+auto nowUTC{system_clock::now()};                    // always UTC
+auto nowInBrussels{brussels->to_local(nowUTC)};       // Brussels' wall-clock time
+auto nowInCurrentZone{current->to_local(nowUTC)};     // this machine's wall-clock time
+```
+
+```
+   system_clock::now()   is ALWAYS UTC - a single, unambiguous instant
+              │
+              ├──► brussels->to_local(...)   ──►  "11:35" (UTC+2 in June, DST)
+              │
+              └──► current->to_local(...)    ──►  whatever this machine reads
+
+   One instant in time. Many correct wall-clock spellings of it.
+```
+
+**`zoned_time`** goes one step further: it *pairs* a `time_point` with a
+`time_zone`, so formatting it prints the correct wall-clock time for that
+zone directly, with no manual `to_local()` call needed. Converting
+between zones is then just constructing a new `zoned_time` from an
+existing one - the underlying UTC instant never changes, only how it's
+displayed:
+
+```cpp
+zoned_time<seconds> brusselsTime{brussels, local_days{2020y/June/22d} + 9h};
+zoned_time<seconds> newYorkTime{"America/New_York", brusselsTime};
+
+println("Brussels: {:L}", brusselsTime.get_local_time());   // 2020-06-22 09:00:00
+println("New York: {:L}", newYorkTime.get_local_time());    // 2020-06-22 03:00:00
+```
+
+```
+   brusselsTime  ──same UTC instant──►  newYorkTime
+   09:00 Brussels (UTC+2)               03:00 New York (UTC-4)
+        │                                    │
+        └──────── both name the SAME MOMENT, just displayed
+                  in each zone's own local wall-clock convention
+```
+
+> **A note on the Docker student environments.** As of Clang 21, libc++
+> does not yet implement the time zone database - `get_tzdb`,
+> `locate_zone`, `current_zone`, and `zoned_time` will fail to compile
+> there. `main8_time_zones.cpp` builds and runs correctly on MSVC and on
+> GCC's libstdc++ (the compiler this course targets); if you are on the
+> Clang container, read through this file rather than building it.
+> `main1_ratios.cpp` through `main7_dates.cpp` build cleanly everywhere.
 
 ---
 
