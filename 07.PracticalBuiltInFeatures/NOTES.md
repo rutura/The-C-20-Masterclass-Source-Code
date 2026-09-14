@@ -1442,15 +1442,44 @@ std::println("ratio<2,8> == ratio<1,4>: {}",
 // "ratio<2,8> == ratio<1,4>: true"
 ```
 
-**The four arithmetic operations.** Because ratios are types, not
-objects, you cannot write `ratio<1,4> + ratio<1,3>` - the library gives
-you four class templates instead, one per operation, each computing a
-*new* `ratio` type through an embedded `::type` alias. `main1_ratios.cpp`
-runs all four, back-to-back, against the plain fraction math so you can
-check every result by hand:
+**Naming a ratio with `using`, as soon as you plan to reuse it.** A type
+alias changes nothing about how the ratio behaves - it is just a shorter
+name for the exact same type. `main1_ratios.cpp` introduces two aliases
+right here, before the arithmetic, so the rest of the file can lean on
+short names instead of the full `std::ratio<1, 4>` spelling wherever it's
+convenient:
 
 ```cpp
-// (3) Addition: a quarter of an hour + a third of an hour.
+// (3) Two named ratios, and their sum computed through the aliases.
+using quarter_hour = std::ratio<1, 4>;
+using third_hour = std::ratio<1, 3>;
+using sum_via_aliases = std::ratio_add<quarter_hour, third_hour>::type;
+std::println("quarter_hour + third_hour = {}/{}", sum_via_aliases::num, sum_via_aliases::den);
+// "quarter_hour + third_hour = 7/12"
+```
+
+```
+   using quarter_hour = std::ratio<1, 4>;
+                │                  │
+                │                  └── the actual TYPE - unchanged
+                └───────────────────── just a shorter NAME for it
+
+   quarter_hour and std::ratio<1, 4> are the exact same type from here on -
+   the alias buys you readability, nothing else.
+```
+
+**The four arithmetic operations, spelled out in full.** Because ratios
+are types, not objects, you cannot write `ratio<1,4> + ratio<1,3>` - the
+library gives you four class templates instead, one per operation, each
+computing a *new* `ratio` type through an embedded `::type` alias.
+`main1_ratios.cpp` deliberately goes back to the full spelling here
+(rather than reusing `quarter_hour`/`third_hour`) so you see both styles
+side by side - use whichever reads better at the call site. It runs all
+four, back-to-back, against the plain fraction math so you can check
+every result by hand:
+
+```cpp
+// (4) Addition: a quarter of an hour + a third of an hour.
 using sum_type = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
 std::println("1/4 + 1/3 = {}/{}", sum_type::num, sum_type::den);
 ```
@@ -1467,7 +1496,7 @@ std::println("1/4 + 1/3 = {}/{}", sum_type::num, sum_type::den);
 ```
 
 ```cpp
-// (4) Subtraction: a half of an hour - a quarter of an hour.
+// (5) Subtraction: a half of an hour - a quarter of an hour.
 using diff_type = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
 std::println("1/2 - 1/4 = {}/{}", diff_type::num, diff_type::den);
 ```
@@ -1483,7 +1512,7 @@ std::println("1/2 - 1/4 = {}/{}", diff_type::num, diff_type::den);
 ```
 
 ```cpp
-// (5) Multiplication: a quarter of an hour, times two-thirds.
+// (6) Multiplication: a quarter of an hour, times two-thirds.
 using product_type = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
 std::println("1/4 * 2/3 = {}/{}", product_type::num, product_type::den);
 ```
@@ -1496,7 +1525,7 @@ std::println("1/4 * 2/3 = {}/{}", product_type::num, product_type::den);
 ```
 
 ```cpp
-// (6) Division: a half, divided by a quarter.
+// (7) Division: a half, divided by a quarter.
 using quotient_type = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
 std::println("(1/2) / (1/4) = {}/{}", quotient_type::num, quotient_type::den);
 ```
@@ -1518,7 +1547,7 @@ an `int` valued 15; `bool_constant<true>` is `integral_constant<bool,
 true>`). Read the answer off the result's `::value` member:
 
 ```cpp
-// (7)-(9) Comparing 1/3 against 1/4 - and 1/4 against itself.
+// (8)-(10) Comparing 1/3 against 1/4 - and 1/4 against itself.
 std::println("1/3 <  1/4 : {}", (std::ratio_less<std::ratio<1, 3>, std::ratio<1, 4>>::value));
 std::println("1/3 >  1/4 : {}", (std::ratio_greater<std::ratio<1, 3>, std::ratio<1, 4>>::value));
 std::println("1/4 <= 1/4 : {}", (std::ratio_less_equal<std::ratio<1, 4>, std::ratio<1, 4>>::value));
@@ -1529,20 +1558,6 @@ std::println("1/4 <= 1/4 : {}", (std::ratio_less_equal<std::ratio<1, 4>, std::ra
 Because a ratio is a type, you cannot `println("{}", some_ratio)` directly
 - you always extract `::num`/`::den` (or, for comparisons, `::value`)
 first, exactly as every example above does.
-
-**Naming a ratio with `using`, once the full spelling gets tedious.** A
-type alias changes nothing about how the ratio behaves - it is just a
-shorter name for the exact same type, and it is what you will actually
-reach for once a ratio gets used more than once:
-
-```cpp
-// (10) Same computation as (3), now with names instead of the full spelling.
-using quarter_hour = std::ratio<1, 4>;
-using third_hour = std::ratio<1, 3>;
-using sum_via_aliases = std::ratio_add<quarter_hour, third_hour>::type;
-std::println("quarter_hour + third_hour = {}/{}", sum_via_aliases::num, sum_via_aliases::den);
-// "quarter_hour + third_hour = 7/12" - identical result to (3), just easier to read
-```
 
 **SI ratio aliases the library ships for convenience** - `milli`,
 `micro`, `nano`, `kilo`, `mega`, and more, all the way from `yocto`
