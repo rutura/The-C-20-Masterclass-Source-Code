@@ -31,12 +31,12 @@ int main() {
 
     // Every time_point from system_clock is UTC. to_local() converts it to
     // the WALL-CLOCK time for a given zone.
-    auto nowUTC{std::chrono::system_clock::now()};
-    auto nowInBrussels{brussels->to_local(nowUTC)};
-    auto nowInCurrentZone{current->to_local(nowUTC)};
-    std::println("Now UTC:        {:L%c}", nowUTC);
-    std::println("Now Brussels:   {:L%c}", nowInBrussels);
-    std::println("Now in current: {:L%c}", nowInCurrentZone);
+    auto now_utc{std::chrono::system_clock::now()};
+    auto now_in_brussels{brussels->to_local(now_utc)};
+    auto now_in_current_zone{current->to_local(now_utc)};
+    std::println("Now UTC:        {:L%c}", now_utc);
+    std::println("Now Brussels:   {:L%c}", now_in_brussels);
+    std::println("Now in current: {:L%c}", now_in_current_zone);
 
     // Construct a specific UTC time and convert it to Brussels' local time.
     auto t{std::chrono::sys_days{2020y / std::chrono::June / 22d} + 9h + 35min + 10s};   // UTC
@@ -46,12 +46,12 @@ int main() {
     // zoned_time pairs a time_point with a time_zone - formatting it prints
     // the correct wall-clock time for THAT zone directly, no manual
     // to_local() call needed.
-    std::chrono::zoned_time<std::chrono::seconds> brusselsTime{
+    std::chrono::zoned_time<std::chrono::seconds> brussels_time{
         brussels, std::chrono::local_days{2020y / std::chrono::June / 22d} + 9h};
     // Converting between zones is just constructing a new zoned_time from
     // an existing one - the underlying UTC instant stays the same.
-    std::chrono::zoned_time<std::chrono::seconds> newYorkTime{
-        "America/New_York", brusselsTime};
-    std::println("Brussels: {:L}", brusselsTime.get_local_time());
-    std::println("New York: {:L}", newYorkTime.get_local_time());
+    std::chrono::zoned_time<std::chrono::seconds> new_york_time{
+        "America/New_York", brussels_time};
+    std::println("Brussels: {:L}", brussels_time.get_local_time());
+    std::println("New York: {:L}", new_york_time.get_local_time());
 }

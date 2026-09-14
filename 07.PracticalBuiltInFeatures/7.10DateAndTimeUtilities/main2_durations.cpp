@@ -85,8 +85,8 @@ int main() {
     // The literals themselves live in std::chrono_literals - this using
     // directive brings in ONLY the literal suffixes, not all of std::chrono.
     using namespace std::chrono_literals;
-    auto myDuration{42min};
-    std::println("{}", myDuration);
+    auto my_duration{42min};
+    std::println("{}", my_duration);
 
     // --- hh_mm_ss: splitting a duration into display-friendly fields ------
     // hh_mm_ss accepts any duration and exposes hours()/minutes()/seconds()/

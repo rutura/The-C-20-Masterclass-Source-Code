@@ -10,9 +10,9 @@
 int main() {
     // A quarter of an hour, spelled out in full - no alias yet.
     // Get the numerator and denominator off the TYPE itself.
-    std::intmax_t quarterHourNum{std::ratio<1, 4>::num};
-    std::intmax_t quarterHourDen{std::ratio<1, 4>::den};
-    std::println("1) 1/4 = {}/{}", quarterHourNum, quarterHourDen);
+    std::intmax_t quarter_hour_num{std::ratio<1, 4>::num};
+    std::intmax_t quarter_hour_den{std::ratio<1, 4>::den};
+    std::println("1) 1/4 = {}/{}", quarter_hour_num, quarter_hour_den);
 
     // A ratio is always normalized: the greatest common divisor of the
     // numerator and denominator is divided out. ratio<2, 8> and ratio<1, 4>
@@ -27,20 +27,20 @@ int main() {
     // back as a new type via the embedded ::type alias.
 
     // Addition: a quarter of an hour + a third of an hour.
-    using sumType = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
-    std::println("3) 1/4 + 1/3 = {}/{}", sumType::num, sumType::den);   // 7/12
+    using sum_type = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
+    std::println("3) 1/4 + 1/3 = {}/{}", sum_type::num, sum_type::den);   // 7/12
 
     // Subtraction: a half of an hour - a quarter of an hour.
-    using differenceType = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
-    std::println("4) 1/2 - 1/4 = {}/{}", differenceType::num, differenceType::den);   // 1/4
+    using diff_type = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+    std::println("4) 1/2 - 1/4 = {}/{}", diff_type::num, diff_type::den);   // 1/4
 
     // Multiplication: a quarter of an hour, times two-thirds.
-    using productType = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
-    std::println("5) 1/4 * 2/3 = {}/{}", productType::num, productType::den);   // 1/6
+    using product_type = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
+    std::println("5) 1/4 * 2/3 = {}/{}", product_type::num, product_type::den);   // 1/6
 
     // Division: a half, divided by a quarter.
-    using quotientType = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
-    std::println("6) (1/2) / (1/4) = {}/{}", quotientType::num, quotientType::den);   // 2/1
+    using quotient_type = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+    std::println("6) (1/2) / (1/4) = {}/{}", quotient_type::num, quotient_type::den);   // 2/1
 
     // --- Comparisons, also at compile time ---------------------------------
     // ratio_equal, ratio_not_equal, ratio_less, ratio_less_equal,
@@ -54,11 +54,11 @@ int main() {
     // --- Naming a ratio with `using`, once you're tired of spelling it out -
     // A type alias is just a shorter name for the exact same type - it
     // changes nothing about how the ratio behaves.
-    using quarterHour = std::ratio<1, 4>;
-    using thirdHour = std::ratio<1, 3>;
-    using sumViaAliases = std::ratio_add<quarterHour, thirdHour>::type;
-    std::println("10) quarterHour + thirdHour = {}/{}",
-             sumViaAliases::num, sumViaAliases::den);   // same 7/12 as line 3
+    using quarter_hour = std::ratio<1, 4>;
+    using third_hour = std::ratio<1, 3>;
+    using sum_via_aliases = std::ratio_add<quarter_hour, third_hour>::type;
+    std::println("10) quarter_hour + third_hour = {}/{}",
+             sum_via_aliases::num, sum_via_aliases::den);   // same 7/12 as line 3
 
     // --- SI ratio aliases the library ships for convenience -----------------
     // milli, micro, nano, kilo, mega, and more - chrono uses exactly these

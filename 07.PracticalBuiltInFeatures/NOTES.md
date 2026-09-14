@@ -1393,9 +1393,9 @@ the type's own `::num` and `::den`:
 
 ```cpp
 // (1) A quarter, spelled out in full - no alias, just the type itself.
-intmax_t quarterHourNum{std::ratio<1, 4>::num};   // 1
-intmax_t quarterHourDen{std::ratio<1, 4>::den};   // 4
-std::println("1/4 = {}/{}", quarterHourNum, quarterHourDen);
+intmax_t quarter_hour_num{std::ratio<1, 4>::num};   // 1
+intmax_t quarter_hour_den{std::ratio<1, 4>::den};   // 4
+std::println("1/4 = {}/{}", quarter_hour_num, quarter_hour_den);
 ```
 
 ```
@@ -1406,7 +1406,7 @@ std::println("1/4 = {}/{}", quarterHourNum, quarterHourDen);
 
    You never write "ratio<1,4> r;" and call member functions on r -
    there IS no object. You only ever read ::num / ::den off the TYPE
-   itself, the way you just read quarterHourNum/quarterHourDen above.
+   itself, the way you just read quarter_hour_num/quarter_hour_den above.
 ```
 
 Because the numerator and denominator must be known at compile time, a
@@ -1451,8 +1451,8 @@ check every result by hand:
 
 ```cpp
 // (3) Addition: a quarter of an hour + a third of an hour.
-using sumType = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
-std::println("1/4 + 1/3 = {}/{}", sumType::num, sumType::den);
+using sum_type = std::ratio_add<std::ratio<1, 4>, std::ratio<1, 3>>::type;
+std::println("1/4 + 1/3 = {}/{}", sum_type::num, sum_type::den);
 ```
 
 ```
@@ -1468,8 +1468,8 @@ std::println("1/4 + 1/3 = {}/{}", sumType::num, sumType::den);
 
 ```cpp
 // (4) Subtraction: a half of an hour - a quarter of an hour.
-using differenceType = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
-std::println("1/2 - 1/4 = {}/{}", differenceType::num, differenceType::den);
+using diff_type = std::ratio_subtract<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+std::println("1/2 - 1/4 = {}/{}", diff_type::num, diff_type::den);
 ```
 
 ```
@@ -1484,8 +1484,8 @@ std::println("1/2 - 1/4 = {}/{}", differenceType::num, differenceType::den);
 
 ```cpp
 // (5) Multiplication: a quarter of an hour, times two-thirds.
-using productType = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
-std::println("1/4 * 2/3 = {}/{}", productType::num, productType::den);
+using product_type = std::ratio_multiply<std::ratio<1, 4>, std::ratio<2, 3>>::type;
+std::println("1/4 * 2/3 = {}/{}", product_type::num, product_type::den);
 ```
 
 ```
@@ -1497,8 +1497,8 @@ std::println("1/4 * 2/3 = {}/{}", productType::num, productType::den);
 
 ```cpp
 // (6) Division: a half, divided by a quarter.
-using quotientType = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
-std::println("(1/2) / (1/4) = {}/{}", quotientType::num, quotientType::den);
+using quotient_type = std::ratio_divide<std::ratio<1, 2>, std::ratio<1, 4>>::type;
+std::println("(1/2) / (1/4) = {}/{}", quotient_type::num, quotient_type::den);
 ```
 
 ```
@@ -1526,7 +1526,7 @@ std::println("1/4 <= 1/4 : {}", (std::ratio_less_equal<std::ratio<1, 4>, std::ra
 // 1/3 (≈0.333) is bigger than 1/4 (0.25), and 1/4 is certainly <= itself.
 ```
 
-Because a ratio is a type, you cannot `println("{}", someRatio)` directly
+Because a ratio is a type, you cannot `println("{}", some_ratio)` directly
 - you always extract `::num`/`::den` (or, for comparisons, `::value`)
 first, exactly as every example above does.
 
@@ -1537,11 +1537,11 @@ reach for once a ratio gets used more than once:
 
 ```cpp
 // (10) Same computation as (3), now with names instead of the full spelling.
-using quarterHour = std::ratio<1, 4>;
-using thirdHour = std::ratio<1, 3>;
-using sumViaAliases = std::ratio_add<quarterHour, thirdHour>::type;
-std::println("quarterHour + thirdHour = {}/{}", sumViaAliases::num, sumViaAliases::den);
-// "quarterHour + thirdHour = 7/12" - identical result to (3), just easier to read
+using quarter_hour = std::ratio<1, 4>;
+using third_hour = std::ratio<1, 3>;
+using sum_via_aliases = std::ratio_add<quarter_hour, third_hour>::type;
+std::println("quarter_hour + third_hour = {}/{}", sum_via_aliases::num, sum_via_aliases::den);
+// "quarter_hour + third_hour = 7/12" - identical result to (3), just easier to read
 ```
 
 **SI ratio aliases the library ships for convenience** - `milli`,
@@ -1694,8 +1694,8 @@ seconds s{m};   // Ok, implicit - 120s
 durations directly from numeric literals, and combine naturally:
 
 ```cpp
-auto raceDuration{90min + 32s};   // 90 minutes and 32 seconds, added directly
-duration_cast<seconds>(raceDuration).count();   // 5432
+auto race_duration{90min + 32s};   // 90 minutes and 32 seconds, added directly
+duration_cast<seconds>(race_duration).count();   // 5432
 ```
 
 ```
@@ -1877,8 +1877,8 @@ Just like durations, `time_point` conversions are implicit when nothing
 can be lost, and explicit otherwise:
 
 ```cpp
-time_point<steady_clock, seconds> tpSeconds{42s};
-time_point<steady_clock, milliseconds> tpMs{tpSeconds};   // implicit - 42000ms, exact
+time_point<steady_clock, seconds> tp_seconds{42s};
+time_point<steady_clock, milliseconds> tp_ms{tp_seconds};   // implicit - 42000ms, exact
 ```
 
 ```
@@ -1892,8 +1892,8 @@ Going the other way needs `time_point_cast<T>()` - the `time_point`
 counterpart to `duration_cast`:
 
 ```cpp
-time_point<steady_clock, milliseconds> tpMs{42'424ms};
-auto tpSeconds{time_point_cast<seconds>(tpMs)};   // 42000ms worth - the 424ms are GONE
+time_point<steady_clock, milliseconds> tp_ms{42'424ms};
+auto tp_seconds{time_point_cast<seconds>(tp_ms)};   // 42000ms worth - the 424ms are GONE
 ```
 
 ```
@@ -1964,14 +1964,14 @@ year_month_day fulldate1{2020y, June, 22d};
 auto fulldate2{2020y / June / 22d};        // Y / M / D
 auto fulldate3{22d / June / 2020y};        // D / M / Y
 
-auto thirdMonday{Monday[3] / June / 2020}; // the 3rd Monday of June 2020
+auto third_monday{Monday[3] / June / 2020}; // the 3rd Monday of June 2020
 
 auto june22{June / 22d};                   // month_day: "June 22, some year"
 auto june22_2020{2020y / june22};          // attach a year → year_month_day
 
-auto lastDayOfAJune{June / last};                    // month_day_last
-auto lastDayOfJune2020{2020y / lastDayOfAJune};       // year_month_day_last
-auto lastMondayOfJune2020{2020y / June / Monday[last]}; // year_month_weekday_last
+auto last_day_of_a_june{June / last};                    // month_day_last
+auto last_day_of_june_2020{2020y / last_day_of_a_june};       // year_month_day_last
+auto last_monday_of_june_2020{2020y / June / Monday[last]}; // year_month_weekday_last
 ```
 
 ```
@@ -2043,8 +2043,8 @@ form, not a resolved date - convert through `sys_days` first if you want
 the actual calendar date:
 
 ```cpp
-println("{:L}", lastMondayOfJune2020);                        // "2020/Jun/Mon[last]"
-year_month_day resolved{sys_days{lastMondayOfJune2020}};
+println("{:L}", last_monday_of_june_2020);                        // "2020/Jun/Mon[last]"
+year_month_day resolved{sys_days{last_monday_of_june_2020}};
 println("{:L}", resolved);                                    // "2020-06-29"
 ```
 
@@ -2161,9 +2161,9 @@ auto* current{current_zone()};
 **Converting a UTC instant to different zones' wall-clock time:**
 
 ```cpp
-auto nowUTC{system_clock::now()};                    // always UTC
-auto nowInBrussels{brussels->to_local(nowUTC)};       // Brussels' wall-clock time
-auto nowInCurrentZone{current->to_local(nowUTC)};     // this machine's wall-clock time
+auto now_utc{system_clock::now()};                    // always UTC
+auto now_in_brussels{brussels->to_local(now_utc)};       // Brussels' wall-clock time
+auto now_in_current_zone{current->to_local(now_utc)};     // this machine's wall-clock time
 ```
 
 ```
@@ -2184,15 +2184,15 @@ existing one - the underlying UTC instant never changes, only how it's
 displayed:
 
 ```cpp
-zoned_time<seconds> brusselsTime{brussels, local_days{2020y/June/22d} + 9h};
-zoned_time<seconds> newYorkTime{"America/New_York", brusselsTime};
+zoned_time<seconds> brussels_time{brussels, local_days{2020y/June/22d} + 9h};
+zoned_time<seconds> new_york_time{"America/New_York", brussels_time};
 
-println("Brussels: {:L}", brusselsTime.get_local_time());   // 2020-06-22 09:00:00
-println("New York: {:L}", newYorkTime.get_local_time());    // 2020-06-22 03:00:00
+println("Brussels: {:L}", brussels_time.get_local_time());   // 2020-06-22 09:00:00
+println("New York: {:L}", new_york_time.get_local_time());    // 2020-06-22 03:00:00
 ```
 
 ```
-   brusselsTime  ──same UTC instant──►  newYorkTime
+   brussels_time  ──same UTC instant──►  new_york_time
    09:00 Brussels (UTC+2)               03:00 New York (UTC-4)
         │                                    │
         └──────── both name the SAME MOMENT, just displayed

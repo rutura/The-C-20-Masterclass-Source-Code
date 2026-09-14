@@ -12,9 +12,9 @@ int main() {
 
     // Some work to time - arithmetic heavy enough that the loop doesn't
     // finish instantly.
-    const int numberOfIterations{10'000'000};
+    const int number_of_iterations{10'000'000};
     double d{0};
-    for (int i{0}; i < numberOfIterations; ++i) {
+    for (int i{0}; i < number_of_iterations; ++i) {
         d += std::sqrt(std::abs(std::sin(i) * std::cos(i)));
     }
 
@@ -34,12 +34,12 @@ int main() {
     std::println("Total: {}", std::chrono::duration_cast<std::chrono::milliseconds>(diff));
     // Time per iteration, in nanoseconds.
     std::println("{} per iteration",
-                  std::chrono::duration<double, std::nano>{diff / numberOfIterations});
+                  std::chrono::duration<double, std::nano>{diff / number_of_iterations});
 
     // A note on accuracy: most OS timers only update every 10-15ms. Any
     // event shorter than one timer tick appears to take "zero" time, and
     // any event between one and two ticks appears to take exactly one tick -
     // a phenomenon called GATING ERROR. If your timings look suspiciously
-    // small or suspiciously round, increase numberOfIterations so the
+    // small or suspiciously round, increase number_of_iterations so the
     // total time spans many timer ticks.
 }

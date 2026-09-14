@@ -49,8 +49,8 @@ int main() {
 
     // system_clock additionally offers to_time_t()/from_time_t() to
     // interoperate with the C-style <ctime> time_t representation.
-    std::time_t asTimeT{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-    auto backToTimePoint{std::chrono::system_clock::from_time_t(asTimeT)};
+    std::time_t as_time_t{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+    auto back_to_time_point{std::chrono::system_clock::from_time_t(as_time_t)};
     std::println("round-tripped through time_t: {:%Y-%m-%d %H:%M:%S}",
-             std::chrono::time_point_cast<std::chrono::seconds>(backToTimePoint));
+             std::chrono::time_point_cast<std::chrono::seconds>(back_to_time_point));
 }
