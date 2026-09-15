@@ -2321,10 +2321,26 @@ for (const auto& name : names) {
 
 What the range-based `for` loop is hiding is an **iterator** - an object
 that knows how to move to the next element and how to read the current
-one. `names.begin()` gives you an iterator pointing at the first
+one. 
+
+```
+   index:      0           1            2
+             ┌───────────┬────────────┬─────────────┬╌╌╌╌╌╌╌╌╌╌╌╌┐
+   names     │   "Ada"   │  "Grace"   │ "Katherine" ┊    (none)  ┊
+             └───────────┴────────────┴─────────────┴╌╌╌╌╌╌╌╌╌╌╌╌┘
+                    ▲                                       ▲
+              names.begin()                            names.end()
+              (points AT the                      (one past the last real
+               first element)                       element - a sentinel,
+                                                    never read, only compared
+                                                              against)
+```
+
+`names.begin()` gives you an iterator pointing at the first
 element; `names.end()` gives you a special "one past the last element"
-iterator that never gets dereferenced, only compared against. Writing
-the loop out with iterators directly, by hand, looks like this:
+iterator that never gets dereferenced (doesn't point to a valid element), 
+only compared against. Writing the loop out with iterators directly, 
+by hand, looks like this:
 
 ```cpp
 for (auto it = names.begin(); it != names.end(); ++it) {
@@ -2332,17 +2348,11 @@ for (auto it = names.begin(); it != names.end(); ++it) {
 }
 ```
 
-```
-   names:      "Ada"      "Grace"    "Katherine"
-                ▲                                ▲
-           names.begin()                    names.end()
-           (points AT the                   (one past the last
-            first element)                   element - never read,
-                                              only compared against)
 
+```
    it = names.begin()  ──►  *it = "Ada"  ──►  ++it  ──►  *it = "Grace"  ──► ...
                                                                               │
-                                        ++it eventually reaches names.end() ◄┘
+                                        ++it eventually reaches names.end()  ◄┘
                                         (it != names.end() becomes false, loop ends)
 ```
 
