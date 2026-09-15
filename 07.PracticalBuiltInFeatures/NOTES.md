@@ -2163,6 +2163,7 @@ std::regex_match("E", proper_name);       // false - no lowercase letters follow
 ```
 
 ```
+   std::regex zip_code{R"(\d{5})"};   // exactly 5 digits
    std::regex_match("02215",   zip_code)     → true   (exactly 5 digits, nothing more)
    std::regex_match("02215-1", zip_code)     → false  (the "-1" is unaccounted for -
                                                          regex_match needs the WHOLE string)
@@ -2173,15 +2174,6 @@ matched text behind each group can be pulled back out of a
 `std::smatch` afterward, `[1]` for the first group, `[2]` for the
 second, and so on. `[0]` is always the entire match:
 
-```cpp
-std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
-if (std::smatch m; std::regex_match(input, m, date)) {
-    int year{std::stoi(m[1])};
-    int month{std::stoi(m[2])};
-    int day{std::stoi(m[3])};
-}
-```
-
 ```
    (\d{4})   /   (\d{1,2})   /   (\d{1,2})
    group 1       group 2         group 3
@@ -2190,6 +2182,15 @@ if (std::smatch m; std::regex_match(input, m, date)) {
      │         │        │
     m[1]      m[2]     m[3]      m[0] = "2024/6/22" (the whole match)
    "2024"     "6"      "22"
+```
+
+```cpp
+std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
+if (std::smatch m; std::regex_match(input, m, date)) {
+    int year{std::stoi(m[1])};
+    int month{std::stoi(m[2])};
+    int day{std::stoi(m[3])};
+}
 ```
 
 ### `main2_searching.cpp` - `regex_search`: find a match anywhere, and find them all
