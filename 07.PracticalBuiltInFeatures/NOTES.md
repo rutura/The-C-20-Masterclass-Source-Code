@@ -2095,8 +2095,14 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `{n,}`         | `n` or more occurrences        |
 | `{n,m}`        | between `n` and `m`, inclusive |
 
-A quick instinct-building pass on each piece, in isolation, before they
-start combining in the files below:
+Let's put these to test with a few examples, all using `std::regex_match`.
+This function checks whether the *entire* string fits the pattern, returning `true` or `false`.
+
+```cpp
+std::println("7 matches \\d: {}", std::regex_match("7", std::regex{R"(\d)"}));          // true
+std::println("77 matches \\d: {}", std::regex_match("77", std::regex{R"(\d)"}));         // false
+```
+Now more examples,
 
 ```cpp
 std::regex_match("7", std::regex{R"(\d)"});          // true  - \d is a single digit
