@@ -2216,7 +2216,11 @@ every match in a string, search, record what was found, then keep
 searching what's left - `match.suffix()` is everything **after** the
 match just found:
 
+We are looking for phone numbers. Not just one.
+
 ```cpp
+std::string contact{"Ada Lovelace, Home: 555-555-1234, Work: 555-555-4321"};
+std::regex phone_number{R"(\d{3}-\d{3}-\d{4})"};
 std::smatch match;
 while (std::regex_search(contact, match, phone_number)) {
     std::println("{}", match.str());
