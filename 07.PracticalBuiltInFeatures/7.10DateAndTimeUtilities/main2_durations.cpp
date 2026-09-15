@@ -60,6 +60,13 @@ int main() {
     std::chrono::duration<long, std::ratio<60>> d1{123};
     std::println("{} ({})", d1, d1.count());
 
+    // A duration can just as easily tick FASTER than a second. ratio<1, 1000>
+    // means "one tick is 1/1000 of a second" - 250 of those ticks is a
+    // quarter of a second. This is exactly how std::chrono::milliseconds is
+    // built, just spelled out by hand instead of using the predefined alias.
+    std::chrono::duration<long, std::ratio<1, 1000>> d1_ms{250};
+    std::println("{} ({})", d1_ms, d1_ms.count());
+
     // A duration represented by a double, tick = 1 second, set to the
     // largest value that type can hold.
     auto d2{std::chrono::duration<double>::max()};

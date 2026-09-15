@@ -1692,7 +1692,21 @@ std::chrono::duration<long, std::ratio<60>> d1{123};   // 123 ticks of 60s each 
 
 This is a **count** (`123`, the number of ticks - stored as a `long` here)
 paired with a **tick period** (`ratio<60>`, how long one tick is - 60
-seconds). Three constructors exist: default, "from a tick count", and
+seconds).
+
+We can also represent durations in ticks **faster** than a second, using a
+fractional ratio:
+
+```cpp
+std::chrono::duration<long, std::ratio<1, 1000>> d1_ms{250};   // 250 ticks of 1/1000s each = 250 milliseconds
+```
+
+This is exactly how `std::chrono::milliseconds` is built under the hood -
+`ratio<1, 1000>` is the same fraction as the `std::milli` alias from the
+`ratio` lecture - you're just spelling it out yourself instead of reaching
+for the predefined name.
+
+Three constructors exist: default, "from a tick count", and
 "from another duration" - the last one is how conversions between duration
 types happen. Durations support the full set of arithmetic operators
 (`+ - * / % ++ -- += -= *= /= %=`) plus `==`/`<=>`, and these member
