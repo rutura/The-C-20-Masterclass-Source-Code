@@ -2592,12 +2592,13 @@ the original untouched - question one, answered:
 
 ```cpp
 std::string data{"1\t2\t3\t4"};
-std::regex_replace(data, std::regex{"\t"}, ",");   // tabs -> commas
+std::string csv_line{std::regex_replace(data, std::regex{"\t"}, ",")};   // tabs -> commas
 ```
 
 ```
    data:                "1\t2\t3\t4"        (unchanged after the call)
-   regex_replace result: "1,2,3,4"          (a brand new string)
+   regex_replace RETURNS a brand new string - it has to be caught, or it's lost:
+   csv_line:            "1,2,3,4"           (caught in its own variable, above)
 ```
 
 Question two: can the replacement reuse pieces of what it just matched?

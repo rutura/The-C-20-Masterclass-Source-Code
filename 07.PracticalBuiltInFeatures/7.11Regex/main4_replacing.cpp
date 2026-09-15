@@ -7,8 +7,11 @@ int main() {
     // regex_replace rewrites every match in a copy of the string - the
     // original is untouched.
     std::string data{"1\t2\t3\t4"};
+    std::println("Before replacing tabs with commas: {}", data);
     std::string csv_line{std::regex_replace(data, std::regex{"\t"}, ",")};
     std::println("after replacing tabs with commas: {}", csv_line);
+    std::println("Data is unchanged after replacement: {}", data);
+    
 
     // The replacement string can reference capture groups with $1, $2, ...
     // Here group 1 is the header text, group 2 is the paragraph text.
