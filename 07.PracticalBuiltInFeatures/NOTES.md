@@ -1576,9 +1576,14 @@ type is tagged with a ratio describing its tick length.
 
 ### `main2_durations.cpp` - Durations: an amount of time, with the unit baked into the type
 
-A **duration** is an interval between two points in time - a number of
-**ticks**, plus a **tick period** (how long one tick lasts, as a
-compile-time `ratio` in seconds):
+A **duration** is an amount of time between two points of time. It's like saying "5 minutes"
+or "5000 milliseconds". It's a span of time. C++'s `std::chrono::duration` type represents a
+duration as two things:
+- a **count**, the number of ticks ( e.g 5)
+- a **tick period**, how long each tick is (e.g 1 second or 1/1000 of a second)
+
+So `std::chrono::seconds(5)` is "5 ticks, where each tick is 1 second long", and `std::chrono::milliseconds(5000)` is "5000 ticks, where each tick is 1/1000 of a second long". Both represent the same amount of time: 5 seconds.
+
 
 ```cpp
 template <class Rep, class Period = std::ratio<1>>
