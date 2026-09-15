@@ -32,6 +32,13 @@ int main() {
     auto race_duration{90min + 32s};
     std::println("{}", race_duration);
 
+    // Recall from main1_ratios.cpp that ratio<Num, Den> defaults Den to 1 -
+    // ratio<60> and ratio<60, 1> are the exact same type, just spelled
+    // differently. Declaring one without a denominator and reading its
+    // num/den back off the type proves the 1 is really there.
+    std::println("{}/{}", std::ratio<60>::num, std::ratio<60>::den);
+    std::println("{}", std::ratio_equal<std::ratio<60>, std::ratio<60, 1>>::value);
+
     // --- Under the hood: duration<Rep, Period> -----------------------------
     // Every duration type above - minutes included - is really the same
     // template: a plain number (Rep), paired with a compile-time ratio

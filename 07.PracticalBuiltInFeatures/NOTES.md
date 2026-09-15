@@ -1642,14 +1642,26 @@ std::chrono;` alone is enough to use them.
 So far, every duration you've reached for already existed in the library.
 That covers the vast majority of real code - but what if you needed a unit
 `chrono` doesn't predefine, like "ticks of 60 seconds" or "an amount of
-time counted in fractional seconds"? Recall the `std::ratio` type from
-earlier in this lecture - a compile-time fraction. It turns out every
+time counted in fractional seconds"? Recall the `std::ratio<Num, Den>` type
+from earlier in this lecture - a compile-time fraction. It turns out every
 duration type above, `minutes` included, is quietly built the same way
 under the hood: a plain number, paired with a `ratio` that says how many
-seconds long **one tick** of that number is. `minutes` ticks in units of
-`ratio<60>` (60 seconds per tick); `milliseconds` ticks in units of
-`std::milli` (1/1000 of a second per tick). Once you know that, you can
-build your own:
+seconds long **one tick** of that number is.
+
+One thing worth noting is that if you declare ratio and leave out the denominator,
+the denominator defaults to 1. For example, `ratio<60>` is equivalent to `ratio<60, 1>`. 
+This is something we are about to use.
+
+```cpp
+std::println("{}/{}", std::ratio<60>::num, std::ratio<60>::den);   
+// "60/1" - the 1 is really there
+std::println("{}", std::ratio_equal<std::ratio<60>, std::ratio<60, 1>>::value);   
+// true - identical types
+```
+
+With that settled: `minutes` ticks in units of `ratio<60>` (60 seconds per
+tick); `milliseconds` ticks in units of `std::milli` (1/1000 of a second
+per tick). Once you know that, you can build your own:
 
 ```cpp
 template <class Rep, class Period = std::ratio<1>>
