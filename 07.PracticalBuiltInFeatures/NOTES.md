@@ -2360,14 +2360,36 @@ This begin/`!=`/`++`/`*` pattern is exactly what a range-based `for`
 loop has been doing for you invisibly the whole time - and it's exactly
 what `std::sregex_iterator` reuses, except instead of walking the
 elements of a `vector`, it walks the **matches** of a regex against a
-range of text. Give it a begin iterator, an end iterator, and a regex,
-and it hands you one match at a time, the same `!=`/`++`/`*` way. A
-default-constructed `sregex_iterator{}` (no arguments) plays the same
+range of text.
+
+`std::sregex_iterator` only really has two constructors worth knowing:
+
+```
+   sregex_iterator{}                              the "end" sentinel -
+                                                    same role as names.end() above,
+                                                    never dereferenced, only compared against
+
+   sregex_iterator{begin, end, regex}              the "start walking here" iterator -
+                                                    begin/end mark the range of text to
+                                                    search, regex is the pattern to walk matches of
+```
+
+A default-constructed `sregex_iterator{}` (no arguments) plays the same
 role `names.end()` played above: "one past the last match."
+
+> **A gotcha worth knowing about.** The `begin, end, regex` constructor
+> only accepts the regex by **reference** - passing a temporary
+> `std::regex{...}` directly (instead of a named variable) is a compile
+> error, on purpose. The iterator stores a pointer to the regex you gave
+> it rather than copying it, and a temporary would be destroyed before
+> the iterator finished using it - a dangling pointer waiting to happen.
+> This is why `word` above is a named variable declared *before* the
+> loop, not `std::sregex_iterator{sentence.cbegin(), sentence.cend(),
+> std::regex{R"([\w]+)"}}` inline.
 
 ```cpp
 std::string sentence{"This is  a test string."};
-std::regex word{R"([\w]+)"};
+std::regex word{R"([\w]+)"}; // A collection of 1 or more \w, once we meet a non \w the current word is done.
 const std::sregex_iterator end;
 for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
     it != end; ++it) {
@@ -2387,11 +2409,22 @@ for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
 
 `std::sregex_token_iterator` does the same walk, but hands back the
 matched text directly through `->str()` instead of a full `match_results`
-object - simpler when the whole match is all you need. It can also be
-pointed at **specific capture groups by index**, instead of the whole
+object - simpler when the whole match is all you need. 
+
+```cpp
+const std::sregex_token_iterator token_end;
+   for (auto it = std::sregex_token_iterator{sentence.cbegin(), sentence.cend(), word};
+      it != token_end; ++it) {
+      std::println("  \"{}\"", it->str());
+}
+```
+
+It can also be pointed at **specific capture groups by index**, instead of the whole
 match:
 
 ```cpp
+std::regex date{R"(^(\d{4})/(\d{1,2})/(\d{1,2})$)"};
+std::string when{"2024/6/22"};
 std::vector month_and_day{2, 3};
 for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
     it != token_end; ++it) {
