@@ -6,14 +6,11 @@ int main() {
 
     // regex_search looks for a match ANYWHERE in the string, unlike
     // regex_match which demands the whole string fit.
-    std::string line{"int total{0};   // running total of all sales"};
-    std::regex comment{R"(//\s*(.+)$)"};
-
-    if (std::smatch m; std::regex_search(line, m, comment)) {
-        std::println("found comment: '{}'", m[1].str());
-    } else {
-        std::println("no comment found");
-    }
+    std::regex fun{"fun"};
+    std::println("regex_match(\"Programming is fun\", fun): {}",
+        std::regex_match("Programming is fun", fun));
+    std::println("regex_search(\"Programming is fun\", fun): {}",
+        std::regex_search("Programming is fun", fun));
 
     // A single regex_search only ever finds the FIRST match. To find every
     // match in a string, search, record what you found, then keep

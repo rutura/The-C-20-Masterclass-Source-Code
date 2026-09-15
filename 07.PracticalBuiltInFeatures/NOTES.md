@@ -2242,12 +2242,6 @@ while (std::regex_search(contact, match, phone_number)) {
    search 3:  nothing left to find → loop ends
 ```
 
-> **Never call `regex_search` in a loop over the ORIGINAL string with
-> shifting begin/end iterators** to try to find every match - it's easy
-> to get wrong around anchors and empty matches. Reassigning the string
-> to `match.suffix()`, as above, is the safe, simple version of "find
-> them all." The next file introduces a purpose-built tool for this.
-
 ### `main3_walking_matches.cpp` - walking every match directly
 
 The `suffix()`-shrinking loop works, but it rebuilds the string on every
