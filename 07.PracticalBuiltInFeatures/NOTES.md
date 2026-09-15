@@ -2462,13 +2462,21 @@ for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, mont
 
 Passing `-1` instead of a capture-group index flips the meaning to
 "everything that does **NOT** match" - splitting the string on the
-pattern, like a delimiter-based tokenizer. This is also how you can build
-a `std::vector<std::string>` of tokens directly from the iterator pair:
+pattern, like a delimiter-based tokenizer.
+
+Every Standard Library container - `std::vector` included - has a
+constructor that takes a **begin iterator and an end iterator** and
+copies everything in that range into the new container. This isn't
+regex-specific; it's the same constructor you'd use to build one
+`vector` from a slice of another. Since `sregex_token_iterator` is
+itself a begin/end pair (a "start walking here" iterator and the
+`sregex_token_iterator{}` sentinel), it plugs directly into that
+constructor - no explicit loop needed to collect the tokens:
 
 ```cpp
 std::vector<std::string> tokens{
-    std::sregex_token_iterator{csv.cbegin(), csv.cend(), delimiter, -1},
-    std::sregex_token_iterator{}};
+    std::sregex_token_iterator{csv.cbegin(), csv.cend(), delimiter, -1},   // begin: walk csv, yield the GAPS
+    std::sregex_token_iterator{}};                                        // end: the usual sentinel
 ```
 
 ```
