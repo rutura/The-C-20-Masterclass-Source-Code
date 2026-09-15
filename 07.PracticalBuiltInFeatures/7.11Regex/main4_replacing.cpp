@@ -15,6 +15,8 @@ int main() {
 
     // The replacement string can reference capture groups with $1, $2, ...
     // Here group 1 is the header text, group 2 is the paragraph text.
+    // Harvest for data in htlml using the regex rules and put the results
+    // in replacement, using the found results.
     std::string html{"<body><h1>Header</h1><p>Some text</p></body>"};
     std::regex tags{"<h1>(.*)</h1><p>(.*)</p>"};
     std::string replacement{"H1=$1 and P=$2"};

@@ -2128,6 +2128,7 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `[A-Z]`        | one uppercase letter (a range) |
 | `[a-z]`        | one lowercase letter (a range) |
 | `[...]`        | a **character set** - one character from whatever's inside the brackets |
+| `.`            | the **wildcard** - any single character except a newline |
 | `^` / `$`      | anchors - "start of string" / "end of string" |
 | `()`           | a **capture group** - remembers what matched inside it |
 | `+`            | one or more of the preceding piece |
@@ -2240,6 +2241,11 @@ std::regex_match("b", std::regex{"a*"});             // false - "b" still isn't 
 
 std::regex_match("\t", std::regex{"\t"});            // true  - a C++ escape, matched as ONE literal tab
 std::regex_match(" ", std::regex{"\t"});             // false - a space isn't a tab, no matter how alike they look
+
+std::regex_match("a", std::regex{"."});              // true  - "." matches ANY one character
+std::regex_match("\n", std::regex{"."});             // false - except a newline, which "." refuses
+std::regex_match("", std::regex{"."});               // false - "." still needs exactly ONE character
+std::regex_match("hello world!", std::regex{".*"});  // true  - "." + "*" together: "any text at all"
 
 std::regex_match("aaa", std::regex{"a{3}"});         // true  - {3} means EXACTLY three a's
 std::regex_match("aa", std::regex{"a{3}"});          // false - only two a's, not exactly three
@@ -2612,9 +2618,9 @@ std::regex_replace(html, tags, "H1=$1 and P=$2");
 ```
 
 ```
-   html:  "<body><h1>Header</h1><p>Some text</p></body>"
-                    └──────┬──────┘└───────┬────────┘
-                        $1=Header       $2=Some text
+   html: "<body><h1>Header</h1><p>Some text</p></body>"
+                └─────┬─────┘  └─────┬──────┘
+                      $1=Header      $2=Some text
 
    default replace: "<body>H1=Header and P=Some text</body>"
                       └─┬─┘                            └──┬──┘
