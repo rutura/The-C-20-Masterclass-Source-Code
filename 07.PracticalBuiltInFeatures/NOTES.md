@@ -2377,7 +2377,7 @@ range of text.
 A default-constructed `sregex_iterator{}` (no arguments) plays the same
 role `names.end()` played above: "one past the last match."
 
-> **A gotcha worth knowing about.** The `begin, end, regex` constructor
+> **Watch out!** The `begin, end, regex` constructor
 > only accepts the regex by **reference** - passing a temporary
 > `std::regex{...}` directly (instead of a named variable) is a compile
 > error, on purpose. The iterator stores a pointer to the regex you gave
