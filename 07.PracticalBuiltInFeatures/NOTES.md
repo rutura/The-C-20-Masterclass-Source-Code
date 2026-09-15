@@ -2506,8 +2506,28 @@ std::vector<std::string> tokens{
 
 ### `main4_replacing.cpp` - `regex_replace`: rewrite every match in a copy
 
+Every tool so far has answered a yes/no or "where/what" question: does
+this fit the pattern (`regex_match`), is the pattern in there somewhere
+(`regex_search`), what are all the places it shows up (the iterators).
+`regex_replace` is the first tool that actually **edits text** - "find
+this shape, and swap it out for something else," the same everyday task
+as a find-and-replace in a text editor, except the "find" part is a
+whole pattern instead of one exact word.
+
+```
+   find-and-replace in a text editor:      find EXACT text  →  swap in new text
+
+   regex_replace:                          find a SHAPE     →  swap in new text
+                                            (any tab, any date, any word, ...)
+```
+
+Three things end up mattering once you actually use it: does it touch
+the original string, can the replacement text reuse pieces of what it
+just matched, and what happens to the parts that *didn't* match. The
+rest of this section walks those three questions in order.
+
 `regex_replace` rewrites every match in a **copy** of the string, leaving
-the original untouched:
+the original untouched - question one, answered:
 
 ```cpp
 std::regex_replace(data, std::regex{"\t"}, ",");   // tabs -> commas
@@ -2518,9 +2538,10 @@ std::regex_replace(data, std::regex{"\t"}, ",");   // tabs -> commas
    regex_replace result: "1,2,3,4"          (a brand new string)
 ```
 
-The replacement text can reference capture groups with `$1`, `$2`, and so
-on - the *default* mode still copies through everything that did **not**
-match, alongside the replaced text:
+Question two: can the replacement reuse pieces of what it just matched?
+Yes - the replacement text can reference capture groups with `$1`, `$2`,
+and so on. Question three, for now: the *default* mode still copies
+through everything that did **not** match, alongside the replaced text:
 
 ```cpp
 std::regex tags{"<h1>(.*)</h1><p>(.*)</p>"};
@@ -2537,8 +2558,9 @@ std::regex_replace(html, tags, "H1=$1 and P=$2");
                    copied through untouched      copied through untouched
 ```
 
-`regex_constants::format_no_copy` drops everything that did **not**
-match instead of copying it through - only the replaced text survives:
+Revisiting question three: `regex_constants::format_no_copy` flips that
+default - it drops everything that did **not** match instead of copying
+it through, so only the replaced text survives:
 
 ```cpp
 std::regex_replace(html, tags, replacement, std::regex_constants::format_no_copy);
