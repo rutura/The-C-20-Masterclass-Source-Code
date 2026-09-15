@@ -2186,6 +2186,14 @@ second, and so on. `[0]` is always the entire match:
 
 `std::stoi` is a built-in function that converts a string into a signed integer. 
 
+The `R"( ... )"` around the pattern is a **raw string literal** - inside
+it, backslashes are just backslashes, not escape sequences. Without it,
+matching a literal digit would mean writing `"\\d"` (escaping the
+backslash itself so C++ passes a single `\` through to the regex
+engine); with a raw string, `\d` can be written exactly as it reads.
+Regex patterns lean on backslashes constantly, so raw string literals
+are used for every pattern in this lecture from here on.
+
 ```cpp
 std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
 if (std::smatch m; std::regex_match(input, m, date)) {
