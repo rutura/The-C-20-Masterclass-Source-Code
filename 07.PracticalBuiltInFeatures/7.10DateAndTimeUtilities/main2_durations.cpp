@@ -67,6 +67,32 @@ int main() {
     std::chrono::duration<long, std::ratio<1, 1000>> d1_ms{250};
     std::println("{} ({})", d1_ms, d1_ms.count());
 
+    // Three constructors exist: default, "from a tick count" (as d1 and
+    // d1_ms above), and "from another duration". The default constructor
+    // does NOT zero-initialize when Rep is a fundamental type like long -
+    // the tick count is left indeterminate, exactly like a bare `long x;`.
+    // This is exactly why this course always brace-initializes: `{}` forces
+    // the tick count to 0, a bare declaration does not.
+    std::chrono::duration<long, std::ratio<60>> d1_default{};  // brace-init -> 0
+    std::chrono::duration<long, std::ratio<60>> d1_copy{d1};   // from another duration
+    std::println("{} {}", d1_default, d1_copy);
+
+    // zero(), min(), and max() are static member functions - they don't
+    // need an existing duration to call them, just the type.
+    std::println("{} {} {}",
+        std::chrono::duration<long, std::ratio<60>>::zero(),
+        std::chrono::duration<long, std::ratio<60>>::min(),
+        std::chrono::duration<long, std::ratio<60>>::max());
+
+    // floor(), ceil(), round(), and abs() work on durations exactly as they
+    // do on plain numbers - here, rounding 250ms down/up/nearest to a whole
+    // number of seconds.
+    std::println("{} {} {}",
+        std::chrono::floor<std::chrono::seconds>(d1_ms),
+        std::chrono::ceil<std::chrono::seconds>(d1_ms),
+        std::chrono::round<std::chrono::seconds>(d1_ms));
+    std::println("{}", std::chrono::abs(std::chrono::seconds{-5}));
+
     // A duration represented by a double, tick = 1 second, set to the
     // largest value that type can hold.
     auto d2{std::chrono::duration<double>::max()};

@@ -1706,23 +1706,48 @@ This is exactly how `std::chrono::milliseconds` is built under the hood -
 `ratio` lecture - you're just spelling it out yourself instead of reaching
 for the predefined name.
 
-Three constructors exist: default, "from a tick count", and
-"from another duration" - the last one is how conversions between duration
-types happen. Durations support the full set of arithmetic operators
-(`+ - * / % ++ -- += -= *= /= %=`) plus `==`/`<=>`, and these member
-functions:
+**Three constructors exist**: default, "from a tick count" (as `d1` and
+`d1_ms` above), and "from another duration" - the last one is how
+conversions between duration types happen. The default constructor does
+**not** zero-initialize when `Rep` is a fundamental type like `long` - the
+tick count is left indeterminate, exactly like a bare `long x;`. This is
+exactly why this course always brace-initializes: `{}` forces the tick
+count to `0`, a bare declaration does not.
 
-```
-   MEMBER FUNCTION           DESCRIPTION
-   ─────────────────────────────────────────────────────────────────────
-   Rep count() const         the raw tick count, as the Rep type
-   static duration zero()    a duration of zero
-   static duration min()     the smallest value Rep can represent
-   static duration max()     the largest value Rep can represent
+```cpp
+std::chrono::duration<long, std::ratio<60>> d1_default{};  // brace-init -> 0
+std::chrono::duration<long, std::ratio<60>> d1_from_tick_count{123};   // from a tick count
+std::chrono::duration<long, std::ratio<60>> d1_copy{d1};   // from another duration
+std::println("{} {} {}", d1_default, d1_from_tick_count, d1_copy);   // "0min 123min"
 ```
 
-`floor()`, `ceil()`, `round()`, and `abs()` work on durations exactly as
-they do on plain numbers.
+**`zero()`, `min()`, and `max()` are static member functions** - they
+don't need an existing duration to call them, just the type:
+
+```cpp
+std::println("{} {} {}",
+    std::chrono::duration<long, std::ratio<60>>::zero(),   // a duration of zero
+    std::chrono::duration<long, std::ratio<60>>::min(),    // the smallest value long can represent
+    std::chrono::duration<long, std::ratio<60>>::max());   // the largest value long can represent
+// "0min -9223372036854775808min 9223372036854775807min"
+```
+
+**`floor()`, `ceil()`, and `round()` work on durations exactly as they do
+on plain numbers** - rounding `250ms` down/up/nearest to a whole number of
+seconds:
+
+```cpp
+std::println("{} {} {}",
+    std::chrono::floor<std::chrono::seconds>(d1_ms),   // 0s
+    std::chrono::ceil<std::chrono::seconds>(d1_ms),    // 1s
+    std::chrono::round<std::chrono::seconds>(d1_ms));  // 0s - 250ms is closer to 0s than 1s
+```
+
+**So does `abs()`:**
+
+```cpp
+std::println("{}", std::chrono::abs(std::chrono::seconds{-5}));   // "5s"
+```
 
 **Comparing durations with different tick periods just works** - the
 library converts internally:
