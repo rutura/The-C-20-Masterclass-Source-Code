@@ -2484,12 +2484,24 @@ std::vector<std::string> tokens{
    delimiter pattern: \s*[,;]\s*   (a comma or semicolon, with optional
                                      whitespace hugging either side)
 
-   -1 means "give me the gaps BETWEEN matches of the delimiter", not the
-   delimiter matches themselves:
+   what the delimiter actually matches (the part -1 THROWS AWAY):
 
-   "This is" | ,  | "a" | ; | "test string."
-        ▲       (skipped, this IS the match)  ▲
-     token 1                                token 2, token 3
+   ┌─────────┬╌╌╌╌╌╌╌┬─────┬╌╌╌╌╌┬───────────────┐
+   │ This is ┊,      ┊  a  ┊;    ┊ test string.  │
+   └─────────┴╌╌╌╌╌╌╌┴─────┴╌╌╌╌╌┴───────────────┘
+                ▲             ▲
+           delimiter      delimiter
+            match           match
+        (",  " - comma    (";" - no
+         + 2 spaces)     surrounding space)
+
+   -1 flips it: keep the SOLID boxes, drop the dashed ones -
+   "give me the gaps BETWEEN matches", not the matches themselves:
+
+   ┌─────────┐        ┌─────┐       ┌───────────────┐
+   │ This is │        │  a  │       │ test string.  │
+   └─────────┘        └─────┘       └───────────────┘
+     token 1          token 2           token 3
 ```
 
 ### `main4_replacing.cpp` - `regex_replace`: rewrite every match in a copy
