@@ -2057,22 +2057,21 @@ std::println("{:%Y-%m-%d %H:%M}", meeting_time);   // "2020-06-22 09:35"
 
 ## 7.11 Regex
 
-*Regular expressions* are a way to describe patterns in text. You 
-can use them for example to check and see if a password entered by a
-user lives by the security rules like: 
+*Regular expressions* are a way to describe patterns in text. You
+can use them, for example, to check whether a password entered by a
+user lives up to a set of security rules like:
 - at least 8 characters long
 - contains at least one uppercase letter
 - contains at least one lowercase letter
 - contains at least one number
 - contains at least 23 special characters like `!@#$%^&*()_+-=[]{}|;':",./<>?`
 
-The last one is brutal on purpose!
+The last one is brutal on purpose! But notice the shape of every rule
+above: none of them name a specific password - they all describe a
+*pattern* the text must fit. That's exactly what a **regular expression**
+describes - the *shape* of text, not literal characters. 
 
-
-
-A **regular expression** describes the *shape* of text, not literal
-characters - "a capital letter, then one or more lowercase letters", not
-one specific word. `<regex>` gives you four things to do with a pattern:
+`<regex>` gives you four things to do with a pattern:
 
 ```
    MATCH     does this WHOLE string fit the pattern?      regex_match
@@ -2082,13 +2081,7 @@ one specific word. `<regex>` gives you four things to do with a pattern:
    REPLACE   rewrite every match in a copy of the string   regex_replace
 ```
 
-This lecture walks those four in order, one file per topic -
-`main1_matching.cpp`, `main2_searching.cpp`, `main3_walking_matches.cpp`,
-and `main4_replacing.cpp` - so each can be built and stepped through on
-its own.
-
-Common building blocks, useful as a reference while reading any of the
-four files below:
+We will explore all these bit by bit. But before we start, let's look at the basic building blocks of a regex pattern. The table below shows some of the most common pieces:
 
 | Pattern piece | Means                          |
 |----------------|--------------------------------|
