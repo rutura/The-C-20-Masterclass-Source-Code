@@ -1840,9 +1840,12 @@ example from earlier:
 duration_cast<seconds>(90min + 32s).count();   // 5432
 ```
 
-**`hh_mm_ss`** takes any duration and splits it back into display-ready
-fields - `hours()`, `minutes()`, `seconds()`, `subseconds()`, all
-non-negative, plus `is_negative()`:
+**`hh_mm_ss`** is a small helper type whose only job is to take a single
+duration - one number and a unit - and re-slice it into the separate
+hours/minutes/seconds fields you'd actually show on a clock or a countdown
+timer. It takes any duration and splits it back into display-ready fields -
+`hours()`, `minutes()`, `seconds()`, `subseconds()`, all non-negative, plus
+`is_negative()`:
 
 ```cpp
 const hh_mm_ss split{hours{1} + minutes{23} + seconds{45}};
