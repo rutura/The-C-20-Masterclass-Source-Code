@@ -2095,6 +2095,39 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `{n,}`         | `n` or more occurrences        |
 | `{n,m}`        | between `n` and `m`, inclusive |
 
+A quick instinct-building pass on each piece, in isolation, before they
+start combining in the files below:
+
+```cpp
+std::regex_match("7", std::regex{R"(\d)"});          // true  - \d is a single digit
+std::regex_match("77", std::regex{R"(\d)"});         // false - \d matches only ONE digit
+
+std::regex_match("_", std::regex{R"(\w)"});          // true  - \w matches letters, digits, AND _
+std::regex_match("!", std::regex{R"(\w)"});          // false - punctuation is not a "word" character
+
+std::regex_match("Q", std::regex{"[A-Z]"});          // true  - one letter in the range A-Z
+std::regex_match("q", std::regex{"[A-Z]"});          // false - lowercase is outside the range
+
+std::regex_match("q", std::regex{"[a-z]"});          // true  - one letter in the range a-z
+std::regex_match("Q", std::regex{"[a-z]"});          // false - uppercase is outside the range
+
+std::smatch m;
+std::regex_search("id-42", m, std::regex{R"(id-(\d+))"});
+m[1].str();                                          // "42" - () captured just the digits
+
+std::regex_match("aaa", std::regex{"a+"});           // true  - "+" allows one OR more a's
+std::regex_match("", std::regex{"a+"});              // false - "+" needs AT LEAST one
+
+std::regex_match("aaa", std::regex{"a{3}"});         // true  - {3} means EXACTLY three a's
+std::regex_match("aa", std::regex{"a{3}"});          // false - only two a's, not exactly three
+
+std::regex_match("aaaaa", std::regex{"a{3,}"});      // true  - {3,} means three OR MORE
+std::regex_match("aa", std::regex{"a{3,}"});         // false - fewer than three
+
+std::regex_match("aaaa", std::regex{"a{2,4}"});      // true  - {2,4} means between two and four
+std::regex_match("aaaaa", std::regex{"a{2,4}"});     // false - five is one too many
+```
+
 ### `main1_matching.cpp` - `regex_match`: does the whole string fit?
 
 `regex_match` requires the **entire** string to satisfy the pattern -
