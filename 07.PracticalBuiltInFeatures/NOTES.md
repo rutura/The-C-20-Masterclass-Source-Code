@@ -2263,9 +2263,9 @@ std::regex_match("aaaaa", std::regex{"a{2,4}"});     // false - five is one too 
 one leftover character the pattern doesn't account for is enough to fail:
 
 ```cpp
-std::regex proper_name{"[A-Z][a-z]+"};
-std::regex_match("Wally", proper_name);   // true  - the WHOLE string fits
-std::regex_match("E", proper_name);       // false - no lowercase letters follow
+std::regex city_name{"[A-Z][a-z]+"};
+std::regex_match("Nairobi", city_name);   // true  - the WHOLE string fits
+std::regex_match("K", city_name);         // false - no lowercase letters follow
 ```
 
 ```
@@ -2274,22 +2274,22 @@ std::regex_match("E", proper_name);       // false - no lowercase letters follow
              CAPITAL   lowercase letters
              letter
 
-   "Wally"   W  a  l  l  y
-             ▲  └──┬──┘
-          [A-Z]  [a-z]+ (4 lowercase letters, "one or more" satisfied)
+   "Nairobi" N  a  i  r  o  b  i
+             ▲  └────┬────┘
+          [A-Z]  [a-z]+ (6 lowercase letters, "one or more" satisfied)
                                                     → MATCH, true
 
-   "E"       E
+   "K"       K
              ▲
           [A-Z] matches, but nothing is left for [a-z]+ to match
           (it needs AT LEAST one)                 → NO MATCH, false
 ```
 
 ```
-   std::regex zip_code{R"(\d{5})"};   // exactly 5 digits
-   std::regex_match("02215",   zip_code)     → true   (exactly 5 digits, nothing more)
-   std::regex_match("02215-1", zip_code)     → false  (the "-1" is unaccounted for -
-                                                         regex_match needs the WHOLE string)
+   std::regex invoice_code{R"(\d{5})"};   // exactly 5 digits
+   std::regex_match("48213",   invoice_code)   → true   (exactly 5 digits, nothing more)
+   std::regex_match("48213-1", invoice_code)   → false  (the "-1" is unaccounted for -
+                                                           regex_match needs the WHOLE string)
 ```
 
 Wrapping part of a pattern in `()` marks a **capture group** - the
@@ -2301,18 +2301,18 @@ second, and so on. `[0]` is always the entire match:
    (\d{4})   /   (\d{1,2})   /   (\d{1,2})
    group 1       group 2         group 3
 
-   "2024   /   6   /   22"
-     │         │        │
-    m[1]      m[2]     m[3]      m[0] = "2024/6/22" (the whole match)
-   "2024"     "6"      "22"
+   "2025   /   3   /   9"
+     │         │       │
+    m[1]      m[2]     m[3]      m[0] = "2025/3/9" (the whole match)
+   "2025"     "3"      "9"
 ```
 
 `std::stoi` is a built-in function that converts a string into a signed integer. 
 
 
 ```cpp
-std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
-if (std::smatch m; std::regex_match(input, m, date)) {
+std::regex ship_date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
+if (std::smatch m; std::regex_match(input, m, ship_date)) {
     int year{std::stoi(m[1])};
     int month{std::stoi(m[2])};
     int day{std::stoi(m[3])};
@@ -2326,11 +2326,11 @@ match **anywhere** inside it, and captures what it found in a
 `std::smatch` the same way `regex_match` does:
 
 ```
-   regex_match("Programming is fun", regex{"fun"})    → false
+   regex_match("Debugging is fun", regex{"fun"})    → false
                                                           (the WHOLE string
                                                            is not just "fun")
 
-   regex_search("Programming is fun", regex{"fun"})   → true
+   regex_search("Debugging is fun", regex{"fun"})   → true
                                                           (found "fun"
                                                            SOMEWHERE inside)
 ```
@@ -2340,27 +2340,27 @@ every match in a string, search, record what was found, then keep
 searching what's left - `match.suffix()` is everything **after** the
 match just found:
 
-We are looking for phone numbers. Not just one.
+We are looking for ticket IDs. Not just one.
 
 ```cpp
-std::string contact{"Ada Lovelace, Home: 555-555-1234, Work: 555-555-4321"};
-std::regex phone_number{R"(\d{3}-\d{3}-\d{4})"};
+std::string ticket{"Grace Hopper, Order: TCK-9001, Follow-up: TCK-9042"};
+std::regex ticket_id{R"(TCK-\d{4})"};
 std::smatch match;
-while (std::regex_search(contact, match, phone_number)) {
+while (std::regex_search(ticket, match, ticket_id)) {
     std::println("{}", match.str());
-    contact = match.suffix();   // keep searching after this match
+    ticket = match.suffix();   // keep searching after this match
 }
 ```
 
 ```
-   contact: "Ada Lovelace, Home: 555-555-1234, Work: 555-555-4321"
+   ticket: "Grace Hopper, Order: TCK-9001, Follow-up: TCK-9042"
 
-   search 1:  finds "555-555-1234"
-              match.suffix() = ", Work: 555-555-4321"   ← everything AFTER the match
+   search 1:  finds "TCK-9001"
+              match.suffix() = ", Follow-up: TCK-9042"   ← everything AFTER the match
 
-   contact = match.suffix();
+   ticket = match.suffix();
 
-   search 2 (on the new, shorter contact):  finds "555-555-4321"
+   search 2 (on the new, shorter ticket):  finds "TCK-9042"
               match.suffix() = ""
 
    search 3:  nothing left to find → loop ends
@@ -2453,26 +2453,26 @@ role `names.end()` played above: "one past the last match."
 > error, on purpose. The iterator stores a pointer to the regex you gave
 > it rather than copying it, and a temporary would be destroyed before
 > the iterator finished using it - a dangling pointer waiting to happen.
-> This is why `word` above is a named variable declared *before* the
-> loop, not `std::sregex_iterator{sentence.cbegin(), sentence.cend(),
+> This is why `item` above is a named variable declared *before* the
+> loop, not `std::sregex_iterator{shopping_list.cbegin(), shopping_list.cend(),
 > std::regex{R"([\w]+)"}}` inline.
 
 ```cpp
-std::string sentence{"This is  a test string."};
-std::regex word{R"([\w]+)"}; // A collection of 1 or more \w, once we meet a non \w the current word is done.
+std::string shopping_list{"eggs milk  bread rice"};
+std::regex item{R"([\w]+)"}; // A collection of 1 or more \w, once we meet a non \w the current word is done.
 const std::sregex_iterator end;
-for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
+for (auto it = std::sregex_iterator{shopping_list.cbegin(), shopping_list.cend(), item};
     it != end; ++it) {
     std::println("\"{}\"", (*it)[0].str());
 }
 ```
 
 ```
-   sentence: "This is  a test string."
+   shopping_list: "eggs milk  bread rice"
 
-   it starts here ──► finds "This" ──► ++it ──► finds "is" ──► ++it ──► ...
-                                                                          │
-                                        ++it eventually reaches end ◄────┘
+   it starts here ──► finds "eggs" ──► ++it ──► finds "milk" ──► ++it ──► ...
+                                                                            │
+                                        ++it eventually reaches end ◄──────┘
                         (the same "keep going until you hit end()" shape
                          a range-based for loop already hides from you)
 ```
@@ -2483,7 +2483,7 @@ object - simpler when the whole match is all you need.
 
 ```cpp
 const std::sregex_token_iterator token_end;
-   for (auto it = std::sregex_token_iterator{sentence.cbegin(), sentence.cend(), word};
+   for (auto it = std::sregex_token_iterator{shopping_list.cbegin(), shopping_list.cend(), item};
       it != token_end; ++it) {
       std::println("  \"{}\"", it->str());
 }
@@ -2491,15 +2491,15 @@ const std::sregex_token_iterator token_end;
 
 Without telling it otherwise, a token iterator only ever yields submatch
 `0` - the **whole match** - even against a pattern that has capture
-groups. The date pattern below has three, but nothing here pulls them
+groups. The timestamp pattern below has three, but nothing here pulls them
 out individually yet:
 
 ```cpp
-std::regex date{R"(^(\d{4})/(\d{1,2})/(\d{1,2})$)"};
-std::string when{"2024/6/22"};
-for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date};
+std::regex timestamp{R"(^(\d{1,2}):(\d{1,2}):(\d{1,2})$)"};
+std::string logged_at{"14:6:9"};
+for (auto it = std::sregex_token_iterator{logged_at.cbegin(), logged_at.cend(), timestamp};
     it != token_end; ++it) {
-    std::println("\"{}\"", it->str());   // "2024/6/22" - the whole match, groups ignored
+    std::println("\"{}\"", it->str());   // "14:6:9" - the whole match, groups ignored
 }
 ```
 
@@ -2507,22 +2507,22 @@ It can also be pointed at **specific capture groups by index**, instead
 of the whole match - passing a `vector<int>` of the indices to walk:
 
 ```cpp
-std::vector month_and_day{2, 3}; // Only walk index 2 and 3. 
-for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
+std::vector hour_and_minute{1, 2}; // Only walk index 1 and 2. 
+for (auto it = std::sregex_token_iterator{logged_at.cbegin(), logged_at.cend(), timestamp, hour_and_minute};
     it != token_end; ++it) {
     std::println("\"{}\"", it->str());
 }
 ```
 
 ```
-   date pattern:  ^(\d{4})/(\d{1,2})/(\d{1,2})$
-                    group1   group2    group3
+   timestamp pattern:  ^(\d{1,2}):(\d{1,2}):(\d{1,2})$
+                          group1     group2     group3
 
-   no index given   →  submatch 0 (the WHOLE match)  →  "2024/6/22"
+   no index given   →  submatch 0 (the WHOLE match)  →  "14:6:9"
 
-   {2, 3}  →  "only walk groups 2 and 3, skip group 1 and the whole match"
+   {1, 2}  →  "only walk groups 1 and 2, skip group 3 and the whole match"
 
-   "2024/6/22"  →  yields "6", then "22"   (year is never visited)
+   "14:6:9"  →  yields "14", then "6"   (second is never visited)
 ```
 
 Passing `-1` instead of a capture-group index flips the meaning to
@@ -2540,33 +2540,33 @@ constructor - no explicit loop needed to collect the tokens:
 
 ```cpp
 std::vector<std::string> tokens{
-    std::sregex_token_iterator{csv.cbegin(), csv.cend(), delimiter, -1},   // begin: walk csv, yield the GAPS
-    std::sregex_token_iterator{}};                                        // end: the usual sentinel
+    std::sregex_token_iterator{tags.cbegin(), tags.cend(), delimiter, -1},   // begin: walk tags, yield the GAPS
+    std::sregex_token_iterator{}};                                          // end: the usual sentinel
 ```
 
 ```
-   csv: "This is,  a;test string."
+   tags: "backend,  urgent;needs-review"
    delimiter pattern: \s*[,;]\s*   (a comma or semicolon, with optional
                                      whitespace hugging either side)
 
    what the delimiter actually matches (the part -1 THROWS AWAY):
 
-   ┌─────────┬╌╌╌╌╌╌╌┬─────┬╌╌╌╌╌┬───────────────┐
-   │ This is ┊,      ┊  a  ┊;    ┊ test string.  │
-   └─────────┴╌╌╌╌╌╌╌┴─────┴╌╌╌╌╌┴───────────────┘
-                ▲             ▲
-           delimiter      delimiter
-            match           match
-        (",  " - comma    (";" - no
-         + 2 spaces)     surrounding space)
+   ┌─────────┬╌╌╌╌╌╌╌┬────────┬╌╌╌┬───────────────┐
+   │ backend ┊,      ┊ urgent ┊;  ┊ needs-review  │
+   └─────────┴╌╌╌╌╌╌╌┴────────┴╌╌╌┴───────────────┘
+                ▲                ▲
+           delimiter         delimiter
+            match              match
+        (",  " - comma      (";" - no
+         + 2 spaces)       surrounding space)
 
    -1 flips it: keep the SOLID boxes, drop the dashed ones -
    "give me the gaps BETWEEN matches", not the matches themselves:
 
-   ┌─────────┐        ┌─────┐       ┌───────────────┐
-   │ This is │        │  a  │       │ test string.  │
-   └─────────┘        └─────┘       └───────────────┘
-     token 1          token 2           token 3
+   ┌─────────┐        ┌────────┐      ┌───────────────┐
+   │ backend │        │ urgent │      │ needs-review  │
+   └─────────┘        └────────┘      └───────────────┘
+     token 1            token 2           token 3
 ```
 
 ### `main4_replacing.cpp` - `regex_replace`: rewrite every match in a copy
@@ -2597,14 +2597,19 @@ this section walks them in order:
 the original untouched - question one, answered:
 
 ```cpp
-std::string data{"1\t2\t3\t4"};
-std::string csv_line{std::regex_replace(data, std::regex{"\t"}, ",")};   // tabs -> commas
+std::string data{"apple|3|0.99"};
+std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};   // pipes -> commas
 ```
 
+Note the pattern escapes the pipe as `\|` - unlike the tab above, `|`
+is a regex metacharacter (alternation), so matching a *literal* pipe
+character requires escaping it.
+
 ```
-   data:                "1\t2\t3\t4"        (unchanged after the call)
+   data (before the call):  "apple|3|0.99"
    regex_replace RETURNS a brand new string - it has to be caught, or it's lost:
-   csv_line:            "1,2,3,4"           (caught in its own variable, above)
+   csv_line:                "apple,3,0.99"     (caught in its own variable, above)
+   data (after the call):   "apple|3|0.99"     (printed again - still unchanged)
 ```
 
 Question two: can the replacement reuse pieces of what it just matched?
@@ -2613,18 +2618,18 @@ and so on. Question three, for now: the *default* mode still copies
 through everything that did **not** match, alongside the replaced text:
 
 ```cpp
-std::regex tags{"<h1>(.*)</h1><p>(.*)</p>"};
-std::regex_replace(html, tags, "H1=$1 and P=$2");
+std::regex markup{"<title>(.*)</title><summary>(.*)</summary>"};
+std::regex_replace(article, markup, "TITLE=$1 and SUMMARY=$2");
 ```
 
 ```
-   html: "<body><h1>Header</h1><p>Some text</p></body>"
-                └─────┬─────┘  └─────┬──────┘
-                      $1=Header      $2=Some text
+   article: "<article><title>Launch Day</title><summary>It shipped</summary></article>"
+                       └──────┬──────┘        └───────┬───────┘
+                          $1=Launch Day           $2=It shipped
 
-   default replace: "<body>H1=Header and P=Some text</body>"
-                      └─┬─┘                            └──┬──┘
-                   copied through untouched      copied through untouched
+   default replace: "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
+                      └───┬───┘                                      └───┬────┘
+                   copied through untouched                  copied through untouched
 ```
 
 Revisiting question three: `regex_constants::format_no_copy` flips that
@@ -2632,14 +2637,14 @@ default - it drops everything that did **not** match instead of copying
 it through, so only the replaced text survives:
 
 ```cpp
-std::regex_replace(html, tags, replacement, std::regex_constants::format_no_copy);
+std::regex_replace(article, markup, replacement, std::regex_constants::format_no_copy);
 ```
 
 ```
-   default:         "<body>H1=Header and P=Some text</body>"
-   format_no_copy:          "H1=Header and P=Some text"
-                      ▲                                  ▲
-                 "<body>" and "</body>" are GONE - format_no_copy
+   default:         "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
+   format_no_copy:            "TITLE=Launch Day and SUMMARY=It shipped"
+                      ▲                                                ▲
+                 "<article>" and "</article>" are GONE - format_no_copy
                  only keeps what the replacement text produced
 ```
 
@@ -2650,22 +2655,22 @@ copied through:
 
 ```cpp
 std::regex one_word{R"(([\w]+))"};
-std::regex_replace(paragraph, one_word, "$1\n", std::regex_constants::format_no_copy);
+std::regex_replace(headline, one_word, "$1\n", std::regex_constants::format_no_copy);
 ```
 
 ```
-   paragraph: "This is a test string."
+   headline: "Regex makes text processing easy"
 
    default    would keep the original spacing between replaced words
    format_no_copy keeps ONLY "$1\n" for each word - the spaces that
                   matched nothing are thrown away, so the words land
                   one per line:
 
-                  This
-                  is
-                  a
-                  test
-                  string
+                  Regex
+                  makes
+                  text
+                  processing
+                  easy
 ```
 
 ---

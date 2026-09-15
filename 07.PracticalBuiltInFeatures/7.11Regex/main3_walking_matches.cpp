@@ -11,12 +11,12 @@ int main() {
     // has been driving for you since std::array: sregex_iterator{} (no
     // arguments) marks "one past the last match", the same role end()
     // plays for a container.
-    std::string sentence{"This is  a test string."};
-    std::regex word{R"([\w]+)"};
+    std::string shopping_list{"eggs milk  bread rice"};
+    std::regex item{R"([\w]+)"};
 
-    std::println("walking every word in \"{}\":", sentence);
+    std::println("walking every item in \"{}\":", shopping_list);
     const std::sregex_iterator end;
-    for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
+    for (auto it = std::sregex_iterator{shopping_list.cbegin(), shopping_list.cend(), item};
         it != end; ++it) {
         std::println("  \"{}\"", (*it)[0].str());
     }
@@ -26,30 +26,30 @@ int main() {
     // object - simpler when you don't need the whole match_results.
     std::println("\nsame walk with a token iterator:");
     const std::sregex_token_iterator token_end;
-    for (auto it = std::sregex_token_iterator{sentence.cbegin(), sentence.cend(), word};
+    for (auto it = std::sregex_token_iterator{shopping_list.cbegin(), shopping_list.cend(), item};
         it != token_end; ++it) {
         std::println("  \"{}\"", it->str());
     }
 
     // Without telling it otherwise, a token iterator only ever yields
     // submatch 0 - the WHOLE match - even though this pattern has three
-    // capture groups. The year, month, and day are matched, but nothing
-    // pulls them out individually here.
-    std::regex date{R"(^(\d{4})/(\d{1,2})/(\d{1,2})$)"};
-    std::string when{"2024/6/22"};
+    // capture groups. The hour, minute, and second are matched, but
+    // nothing pulls them out individually here.
+    std::regex timestamp{R"(^(\d{1,2}):(\d{1,2}):(\d{1,2})$)"};
+    std::string logged_at{"14:6:9"};
 
     std::println("\ndefault token iterator on a pattern WITH capture groups:");
-    for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date};
+    for (auto it = std::sregex_token_iterator{logged_at.cbegin(), logged_at.cend(), timestamp};
         it != token_end; ++it) {
         std::println("  \"{}\"", it->str());
     }
 
     // A token iterator can also target specific capture groups by index -
-    // here, only groups 2 and 3 (month, day) of the same date pattern.
-    std::vector month_and_day{2, 3};
+    // here, only groups 1 and 2 (hour, minute) of the same timestamp pattern.
+    std::vector hour_and_minute{1, 2};
 
-    std::println("\nmonth and day only, from \"{}\":", when);
-    for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
+    std::println("\nhour and minute only, from \"{}\":", logged_at);
+    for (auto it = std::sregex_token_iterator{logged_at.cbegin(), logged_at.cend(), timestamp, hour_and_minute};
         it != token_end; ++it) {
         std::println("  \"{}\"", it->str());
     }
@@ -58,13 +58,13 @@ int main() {
     // "everything that does NOT match" - splitting the string on the
     // pattern, like a delimiter-based tokenizer.
     std::regex delimiter{R"(\s*[,;]\s*)"};
-    std::string csv{"This is,  a;test string."};
+    std::string tags{"backend,  urgent;needs-review"};
 
     std::vector<std::string> tokens{
-        std::sregex_token_iterator{csv.cbegin(), csv.cend(), delimiter, -1},
+        std::sregex_token_iterator{tags.cbegin(), tags.cend(), delimiter, -1},
         std::sregex_token_iterator{}};
 
-    std::println("\nsplitting \"{}\" on ',' and ';':", csv);
+    std::println("\nsplitting \"{}\" on ',' and ';':", tags);
     for (const auto& token : tokens) {
         std::println("  \"{}\"", token);
     }
