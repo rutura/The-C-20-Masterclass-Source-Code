@@ -2298,12 +2298,62 @@ while (std::regex_search(contact, match, phone_number)) {
 
 ### `main3_walking_matches.cpp` - walking every match directly
 
-The `suffix()`-shrinking loop works, but it rebuilds the string on every
-pass. `std::sregex_iterator` walks every match directly, using the same
-begin/end/`++` shape a range-based `for` loop has been driving for you
-invisibly since `std::array` back in 7.2 - a default-constructed
-`sregex_iterator{}` (no arguments) plays the same role `end()` plays for
-a container: "one past the last match."
+Before getting to regex, let's explore the iteration tools we've already
+covered using the `for` loop. Take a plain `std::vector<std::string>`
+of names. The most basic way to visit every element is an index-based
+`for` loop:
+
+```cpp
+std::vector<std::string> names{"Ada", "Grace", "Katherine"};
+for (std::size_t i{0}; i < names.size(); ++i) {
+    std::println("{}", names[i]);
+}
+```
+
+A range-based `for` loop used constantly since `std::array` in a few past
+lectures hides the index entirely - you just say "for each name in names":
+
+```cpp
+for (const auto& name : names) {
+    std::println("{}", name);
+}
+```
+
+What the range-based `for` loop is hiding is an **iterator** - an object
+that knows how to move to the next element and how to read the current
+one. `names.begin()` gives you an iterator pointing at the first
+element; `names.end()` gives you a special "one past the last element"
+iterator that never gets dereferenced, only compared against. Writing
+the loop out with iterators directly, by hand, looks like this:
+
+```cpp
+for (auto it = names.begin(); it != names.end(); ++it) {
+    std::println("{}", *it);   // *it reads the element the iterator points at
+}
+```
+
+```
+   names:      "Ada"      "Grace"    "Katherine"
+                ▲                                ▲
+           names.begin()                    names.end()
+           (points AT the                   (one past the last
+            first element)                   element - never read,
+                                              only compared against)
+
+   it = names.begin()  ──►  *it = "Ada"  ──►  ++it  ──►  *it = "Grace"  ──► ...
+                                                                              │
+                                        ++it eventually reaches names.end() ◄┘
+                                        (it != names.end() becomes false, loop ends)
+```
+
+This begin/`!=`/`++`/`*` pattern is exactly what a range-based `for`
+loop has been doing for you invisibly the whole time - and it's exactly
+what `std::sregex_iterator` reuses, except instead of walking the
+elements of a `vector`, it walks the **matches** of a regex against a
+range of text. Give it a begin iterator, an end iterator, and a regex,
+and it hands you one match at a time, the same `!=`/`++`/`*` way. A
+default-constructed `sregex_iterator{}` (no arguments) plays the same
+role `names.end()` played above: "one past the last match."
 
 ```cpp
 std::string sentence{"This is  a test string."};
