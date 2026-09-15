@@ -2184,6 +2184,8 @@ second, and so on. `[0]` is always the entire match:
    "2024"     "6"      "22"
 ```
 
+`std::stoi` is a built-in function that converts a string into a signed integer. 
+
 ```cpp
 std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
 if (std::smatch m; std::regex_match(input, m, date)) {
