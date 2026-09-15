@@ -16,7 +16,7 @@ int main() {
 
     std::println("walking every word in \"{}\":", sentence);
     const std::sregex_iterator end;
-    for (std::sregex_iterator it{sentence.cbegin(), sentence.cend(), word};
+    for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
         it != end; ++it) {
         std::println("  \"{}\"", (*it)[0].str());
     }
@@ -26,7 +26,7 @@ int main() {
     // object - simpler when you don't need the whole match_results.
     std::println("\nsame walk with a token iterator:");
     const std::sregex_token_iterator token_end;
-    for (std::sregex_token_iterator it{sentence.cbegin(), sentence.cend(), word};
+    for (auto it = std::sregex_token_iterator{sentence.cbegin(), sentence.cend(), word};
         it != token_end; ++it) {
         std::println("  \"{}\"", it->str());
     }
@@ -38,7 +38,7 @@ int main() {
     std::vector month_and_day{2, 3};
 
     std::println("\nmonth and day only, from \"{}\":", when);
-    for (std::sregex_token_iterator it{when.cbegin(), when.cend(), date, month_and_day};
+    for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
         it != token_end; ++it) {
         std::println("  \"{}\"", it->str());
     }

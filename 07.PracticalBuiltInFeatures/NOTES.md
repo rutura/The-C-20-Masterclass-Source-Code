@@ -2309,7 +2309,7 @@ a container: "one past the last match."
 std::string sentence{"This is  a test string."};
 std::regex word{R"([\w]+)"};
 const std::sregex_iterator end;
-for (std::sregex_iterator it{sentence.cbegin(), sentence.cend(), word};
+for (auto it = std::sregex_iterator{sentence.cbegin(), sentence.cend(), word};
     it != end; ++it) {
     std::println("\"{}\"", (*it)[0].str());
 }
@@ -2333,7 +2333,7 @@ match:
 
 ```cpp
 std::vector month_and_day{2, 3};
-for (std::sregex_token_iterator it{when.cbegin(), when.cend(), date, month_and_day};
+for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
     it != token_end; ++it) {
     std::println("\"{}\"", it->str());
 }
