@@ -1576,14 +1576,80 @@ type is tagged with a ratio describing its tick length.
 
 ### `main2_durations.cpp` - Durations: an amount of time, with the unit baked into the type
 
-A **duration** is an amount of time between two points of time. It's like saying "5 minutes"
-or "5000 milliseconds". It's a span of time. C++'s `std::chrono::duration` type represents a
-duration as two things:
-- a **count**, the number of ticks ( e.g 5)
-- a **tick period**, how long each tick is (e.g 1 second or 1/1000 of a second)
+A **duration** is an amount of time between two points of time. It's like
+saying "5 minutes" or "5000 milliseconds". It's a span of time. C++'s
+`std::chrono::duration` type represents a duration as two things:
+- a **count**, the number of ticks (e.g. 5)
+- a **tick period**, how long each tick is (e.g. 1 second or 1/1000 of a
+  second)
 
-So `std::chrono::seconds(5)` is "5 ticks, where each tick is 1 second long", and `std::chrono::milliseconds(5000)` is "5000 ticks, where each tick is 1/1000 of a second long". Both represent the same amount of time: 5 seconds.
+So `std::chrono::seconds(5)` is "5 ticks, where each tick is 1 second
+long", and `std::chrono::milliseconds(5000)` is "5000 ticks, where each
+tick is 1/1000 of a second long". Both represent the same amount of time:
+5 seconds.
 
+The library ships one of these types ready-made for every unit you'd
+normally reach for:
+
+```cpp
+std::chrono::minutes five_minutes{5};
+std::chrono::milliseconds five_thousand_ms{5000};
+std::chrono::hours two_hours{2};
+```
+
+`std::chrono::minutes`, `std::chrono::milliseconds`, and `std::chrono::hours`
+are all **duration types** - `nanoseconds`, `microseconds`, `milliseconds`,
+`seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years` all
+exist, ready to use, no setup required. You can print one directly, add and
+subtract them, and compare them:
+
+```cpp
+std::chrono::minutes five_minutes{5};
+std::println("{}", five_minutes);          // "5min"
+std::println("{}", five_minutes.count());  // 5 - the raw number, with the unit stripped off
+```
+
+`.count()` is how you get the plain number back out when you need it (for
+example, to do your own arithmetic or pass it to an API that just wants an
+`int`).
+
+**Durations with different units mix freely.** You don't need to convert
+minutes to seconds by hand before adding them - the library does it for
+you:
+
+```cpp
+using namespace std::chrono_literals;
+auto race_duration{90min + 32s};   // 90 minutes and 32 seconds, added directly
+std::println("{}", race_duration); // "5432s" - chrono picked a common unit itself
+```
+
+```
+   90min + 32s
+      │      │
+      │      └── 32 seconds
+      └───────── 90 minutes  =  5400 seconds
+                                   │
+                              5400 + 32  =  5432 seconds total
+```
+
+The `min`, `s`, `h`, `ms`, `us`, `ns` suffixes above are **standard chrono
+literals** - they build a duration directly from a numeric literal, no type
+name needed. They live in the inline namespace `std::chrono_literals` (also
+reachable via `std::literals::chrono_literals`), and are additionally
+re-exported directly into `std::chrono` - so `using namespace
+std::chrono;` alone is enough to use them.
+
+So far, every duration you've reached for already existed in the library.
+That covers the vast majority of real code - but what if you needed a unit
+`chrono` doesn't predefine, like "ticks of 60 seconds" or "an amount of
+time counted in fractional seconds"? Recall the `std::ratio` type from
+earlier in this lecture - a compile-time fraction. It turns out every
+duration type above, `minutes` included, is quietly built the same way
+under the hood: a plain number, paired with a `ratio` that says how many
+seconds long **one tick** of that number is. `minutes` ticks in units of
+`ratio<60>` (60 seconds per tick); `milliseconds` ticks in units of
+`std::milli` (1/1000 of a second per tick). Once you know that, you can
+build your own:
 
 ```cpp
 template <class Rep, class Period = std::ratio<1>>
@@ -1600,13 +1666,19 @@ class duration { /* ... */ };
                                      (an arithmetic type: long, double, ...)
 ```
 
+`std::chrono::minutes` is really nothing more than `duration<some integer
+type, ratio<60>>` under a shorter name. Spelling it out yourself lets you
+describe a unit the library doesn't name for you:
+
 ```cpp
 std::chrono::duration<long, std::ratio<60>> d1{123};   // 123 ticks of 60s each = 123 minutes
 ```
 
-Three constructors exist: default, "from a tick count", and "from another
-duration" - the last one is how conversions between duration types happen.
-Durations support the full set of arithmetic operators
+This is a **count** (`123`, the number of ticks - stored as a `long` here)
+paired with a **tick period** (`ratio<60>`, how long one tick is - 60
+seconds). Three constructors exist: default, "from a tick count", and
+"from another duration" - the last one is how conversions between duration
+types happen. Durations support the full set of arithmetic operators
 (`+ - * / % ++ -- += -= *= /= %=`) plus `==`/`<=>`, and these member
 functions:
 
@@ -1682,19 +1754,11 @@ duration<long, ratio<60>> d9{10};   // 10 minutes
 duration<long> d10{d9};              // 600 seconds - implicit, exact
 ```
 
-**Predefined durations** save you from spelling out `duration<Rep,
-Period>` by hand - `nanoseconds`, `microseconds`, `milliseconds`,
-`seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, `years`, all in
-`std::chrono`, built from the SI ratios above:
-
-```cpp
-minutes d9{10};   // same type, same meaning, as duration<long, ratio<60>>{10}
-```
-
-The standard mandates that these predefined durations use **integral**
-Reps - so, just like the `long`-based example above, a conversion that
-*could* produce a fractional result is a compile-time error, even when
-the specific numbers involved divide evenly:
+**One extra rule applies specifically to the predefined durations** you
+started this section with. The standard mandates that types like `minutes`
+and `seconds` use **integral** Reps - so, just like the `long`-based
+example above, a conversion that *could* produce a fractional result is a
+compile-time error, even when the specific numbers involved divide evenly:
 
 ```cpp
 seconds s{60};
@@ -1710,27 +1774,12 @@ minutes m{2};
 seconds s{m};   // Ok, implicit - 120s
 ```
 
-**Standard chrono literals** - `h`, `min`, `s`, `ms`, `us`, `ns` - build
-durations directly from numeric literals, and combine naturally:
+And the `duration_cast` you just saw works just as well on the race-time
+example from earlier:
 
 ```cpp
-auto race_duration{90min + 32s};   // 90 minutes and 32 seconds, added directly
-duration_cast<seconds>(race_duration).count();   // 5432
+duration_cast<seconds>(90min + 32s).count();   // 5432
 ```
-
-```
-   90min + 32s
-      │      │
-      │      └── 32 seconds
-      └───────── 90 minutes  =  5400 seconds
-                                   │
-                              5400 + 32  =  5432 seconds total
-```
-
-These literals live in the inline namespace `std::chrono_literals` (also
-reachable via `std::literals::chrono_literals`), and are additionally
-re-exported directly into `std::chrono` - so `using namespace
-std::chrono;` alone is enough to use them.
 
 **`hh_mm_ss`** takes any duration and splits it back into display-ready
 fields - `hours()`, `minutes()`, `seconds()`, `subseconds()`, all

@@ -5,8 +5,8 @@
 int main() {
     // The library ships a ready-made duration type for every unit you'd
     // normally reach for - no setup required.
-    std::chrono::minutes five_minutes{5};
-    std::println("{} ({})", five_minutes, five_minutes.count());
+    std::chrono::minutes fiveMinutes{5};
+    std::println("{} ({})", fiveMinutes, fiveMinutes.count());
 
     // --- Standard chrono literals -----------------------------------------
     // h, min, s, ms, us, ns build durations directly from numeric literals.
@@ -29,8 +29,8 @@ int main() {
     d4 *= 2;   // 15 -> 30 seconds
 
     // Adding minutes and seconds directly - chrono picks a common unit.
-    auto race_duration{90min + 32s};
-    std::println("{}", race_duration);
+    auto raceDuration{90min + 32s};
+    std::println("{}", raceDuration);
 
     // --- Under the hood: duration<Rep, Period> -----------------------------
     // Every duration type above - minutes included - is really the same
