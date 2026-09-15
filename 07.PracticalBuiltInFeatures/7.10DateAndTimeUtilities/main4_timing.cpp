@@ -7,6 +7,11 @@
 // the time). That makes steady_clock the right choice whenever you are
 // MEASURING elapsed time rather than asking "what time is it."
 int main() {
+    // is_steady reports whether a clock's time_point can ever go backward.
+    // steady_clock's is true - it's guaranteed to only ever move forward,
+    // which is exactly why it's the right tool for measuring elapsed time.
+    std::println("steady_clock::is_steady = {}", std::chrono::steady_clock::is_steady);
+
     // Get the start time.
     auto start{std::chrono::steady_clock::now()};
 

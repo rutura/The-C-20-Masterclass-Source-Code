@@ -1869,9 +1869,78 @@ std::println("{}h {}m {}s", split.hours().count(),
 
 ### `main3_now.cpp` and `main4_timing.cpp` - Clocks: a source of "now"
 
-A **clock** pairs a `time_point` type with a `duration` type and an
-**epoch** - the moment that clock starts counting from. The standard
-defines several:
+There are two different questions you ask about time in everyday
+life: "what time is it right now?" and "how long did that just take?".
+Those are two different jobs - one wants a wall-clock reading you'd
+show a person, the other wants an elapsed amount of time you'd measure with
+a stopwatch. C++ gives you a different **clock** for each job.
+
+**Asking "what time is it right now?"** - `std::chrono::system_clock` is
+that clock. Its `now()` returns the current `time_point`, and
+`std::println`/`std::format` understand a `time_point` directly, using the
+same `{:...}` spec grammar from 7.8 - `%` codes replace a type letter like
+`f` or `d`:
+
+```cpp
+std::println("UTC: {:L}", std::chrono::system_clock::now());
+```
+
+The `L` specifier formats according to the current global `locale` -
+setting one makes the output follow the user's own conventions (date
+order, month names, ...; see chapter 21 for a full discussion of locales):
+
+```cpp
+std::locale::global(std::locale{""});    // the user's own OS locale
+std::println("UTC: {:L}", std::chrono::system_clock::now());
+std::println("UTC: {:L%c}", std::chrono::system_clock::now());   // %c = locale's own "preferred" format
+```
+
+```
+   {:L%c}
+     │ │
+     │ └── %c: the locale's own preferred date+time layout
+     └──── L:  use the currently configured GLOBAL locale to format it
+```
+
+**Asking "how long did that just take?"** - this is a different clock,
+`std::chrono::steady_clock`. You take a reading before the work, another
+after, and subtract:
+
+```cpp
+auto start{std::chrono::steady_clock::now()};
+// ... the work being timed ...
+auto end{std::chrono::steady_clock::now()};
+auto diff{end - start};   // a DURATION, not a time_point - subtracting two
+                           // points in time gives you a span between them
+std::println("Total: {}", std::chrono::duration_cast<std::chrono::milliseconds>(diff));
+```
+
+```
+   timeline:   start ────────────── work happens ────────────── end
+                 │                                                │
+                 └──────────────────  diff = end - start ─────────┘
+                                       (a DURATION, not a time_point -
+                                        time_point - time_point = duration)
+```
+
+Why a *different* clock instead of just reusing `system_clock` for timing
+too? Because `system_clock` can be adjusted at any moment - an NTP sync or
+a user changing the time could make your "end" reading jump backward or
+forward mid-measurement, corrupting the result. `steady_clock` is
+guaranteed to never go backward, which is exactly what you want from a
+stopwatch.
+
+Now the formal version of what you just used: a **clock** pairs a
+`time_point` type with a `duration` type and an **epoch** - the moment
+that clock starts counting from. `now()` and a static `is_steady` (does
+this clock's `time_point` ever go backward?) exist on every clock:
+
+```cpp
+std::println("system_clock::is_steady = {}", std::chrono::system_clock::is_steady);   // false
+std::println("steady_clock::is_steady = {}", std::chrono::steady_clock::is_steady);   // true
+```
+
+The standard defines several clocks beyond these two:
 
 ```
    CLOCK                   DESCRIPTION                               EPOCH
@@ -1904,62 +1973,24 @@ behavior here is unspecified.
 > portable. Prefer `system_clock` for wall-clock time and `steady_clock`
 > for measuring durations, always.
 
-Every clock has a static `now()` returning the current `time_point`, and
-a static `is_steady` reporting whether it can go backward:
-
-```cpp
-std::println("steady_clock::is_steady = {}", steady_clock::is_steady);  // true
-std::println("system_clock::is_steady = {}", system_clock::is_steady);  // false
-```
-
-**`main3_now.cpp`: printing the current time.** `std::format`/`println`
-understand a `time_point` directly, using the same `{:...}` spec grammar
-from 7.8 - `%` codes replace a type letter like `f` or `d`. The `L`
-specifier formats according to the current global `locale`:
-
-```cpp
-std::locale::global(std::locale{""});    // the user's own OS locale
-std::println("UTC: {:L}", system_clock::now());
-std::println("UTC: {:L%c}", system_clock::now());   // %c = locale's own "preferred" format
-```
-
-```
-   {:L%c}
-     │ │
-     │ └── %c: the locale's own preferred date+time layout
-     └──── L:  use the currently configured GLOBAL locale to format it
-```
-
-**`main4_timing.cpp`: measuring elapsed time.** `steady_clock` is the
-right tool because it is immune to the system clock being adjusted mid-
-measurement (NTP sync, a user changing the time):
-
-```cpp
-auto start{steady_clock::now()};
-// ... the work being timed ...
-auto end{steady_clock::now()};
-auto diff{end - start};                                       // a duration
-println("Total: {}", duration_cast<milliseconds>(diff));
-```
-
-```
-   timeline:   start ────────────── work happens ────────────── end
-                 │                                                │
-                 └──────────────────  diff = end - start ─────────┘
-                                       (a DURATION, not a time_point -
-                                        time_point - time_point = duration)
-```
-
 `system_clock` additionally offers `to_time_t()`/`from_time_t()` to
-interoperate with the C-style `time_t` representation from `<ctime>`.
+interoperate with the C-style `time_t` representation from `<ctime>`:
 
-A subtlety worth knowing: most OS timers only update every 10-15ms. Any
-event shorter than one timer tick appears to take **zero** time, and any
-event between one and two ticks appears to take exactly **one** tick -
-called **gating error**. A loop that actually takes 44ms on a system with
-a 15ms timer update can appear to take only 30ms. The fix is simple: make
-the measured work large enough to span many timer ticks (`main4_timing.cpp`
-runs 10 million iterations of real arithmetic for exactly this reason).
+```cpp
+std::time_t as_time_t{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
+auto back_to_time_point{std::chrono::system_clock::from_time_t(as_time_t)};
+std::println("round-tripped through time_t: {:%Y-%m-%d %H:%M:%S}",
+         std::chrono::time_point_cast<std::chrono::seconds>(back_to_time_point));
+```
+
+A subtlety worth knowing about `main4_timing.cpp`'s elapsed-time
+measurement: most OS timers only update every 10-15ms. Any event shorter
+than one timer tick appears to take **zero** time, and any event between
+one and two ticks appears to take exactly **one** tick - called **gating
+error**. A loop that actually takes 44ms on a system with a 15ms timer
+update can appear to take only 30ms. The fix is simple: make the measured
+work large enough to span many timer ticks (`main4_timing.cpp` runs 10
+million iterations of real arithmetic for exactly this reason).
 
 ### `main5_time_point.cpp` - Time Point: a specific instant
 
