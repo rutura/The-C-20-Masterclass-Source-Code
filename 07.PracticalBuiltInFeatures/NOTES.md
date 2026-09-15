@@ -2124,8 +2124,11 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 |----------------|--------------------------------|
 | `\d`           | a single digit                 |
 | `\w`           | a single "word" character (letter, digit, `_`) |
+| `\s`           | a single whitespace character (space, tab, newline, ...) |
 | `[A-Z]`        | one uppercase letter (a range) |
 | `[a-z]`        | one lowercase letter (a range) |
+| `[...]`        | a **character set** - one character from whatever's inside the brackets |
+| `^` / `$`      | anchors - "start of string" / "end of string" |
 | `()`           | a **capture group** - remembers what matched inside it |
 | `+`            | one or more of the preceding piece |
 | `{n}`          | exactly `n` occurrences        |
@@ -2135,16 +2138,11 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 Let's put these to test with a few examples, all using `std::regex_match`.
 This function checks whether the *entire* string fits the pattern, returning `true` or `false`.
 
-```cpp
-std::println("7 matches \\d: {}", std::regex_match("7", std::regex{R"(\d)"}));          // true
-std::println("77 matches \\d: {}", std::regex_match("77", std::regex{R"(\d)"}));         // false
-```
-
 Recall from a previous lecture that `R"( ... )"` around the pattern is 
 a **raw string literal** - backslashes inside it are just backslashes, 
 not escape sequences, so `\d` can be written exactly as it reads instead of
 `"\\d"`. Regex patterns lean on backslashes constantly, so raw string
-literals are used for most patterns in this lecture from here on. Now more examples,
+literals are used for most patterns in this lecture from here on.
 
 ```cpp
 std::regex_match("7", std::regex{R"(\d)"});          // true  - \d is a single digit
@@ -2158,6 +2156,19 @@ std::regex_match("q", std::regex{"[A-Z]"});          // false - lowercase is out
 
 std::regex_match("q", std::regex{"[a-z]"});          // true  - one letter in the range a-z
 std::regex_match("Q", std::regex{"[a-z]"});          // false - uppercase is outside the range
+
+std::regex_match(" ", std::regex{R"(\s)"});          // true  - \s is a single whitespace character
+std::regex_match("x", std::regex{R"(\s)"});          // false - "x" is not whitespace
+
+std::regex_match("c", std::regex{"[abc]"});          // true  - [...] matches ONE of the characters inside it
+std::regex_match("z", std::regex{"[abc]"});          // false - "z" isn't in the set {a, b, c}
+std::regex_match("5", std::regex{R"([\w])"});        // true  - a set can wrap a shorthand too - one \w character
+std::regex_match("55", std::regex{R"([\w])"});       // false - still just ONE character, same as \w alone
+
+std::regex_search("cat sat", std::regex{"^cat"});   // true  - "cat" is anchored to the START
+std::regex_search("the cat", std::regex{"^cat"});   // false - "cat" isn't at the start here
+std::regex_search("the cat", std::regex{"cat$"});   // true  - "cat" is anchored to the END
+std::regex_search("cat sat", std::regex{"cat$"});   // false - "cat" isn't at the end here
 
 std::smatch m;
 std::regex_search("id-42", m, std::regex{R"(id-(\d+))"});
@@ -2295,6 +2306,7 @@ invisibly since `std::array` back in 7.2 - a default-constructed
 a container: "one past the last match."
 
 ```cpp
+std::string sentence{"This is  a test string."};
 std::regex word{R"([\w]+)"};
 const std::sregex_iterator end;
 for (std::sregex_iterator it{sentence.cbegin(), sentence.cend(), word};
