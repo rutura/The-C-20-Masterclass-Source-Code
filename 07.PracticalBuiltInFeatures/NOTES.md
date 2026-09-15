@@ -2136,6 +2136,62 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `{n,}`         | `n` or more occurrences        |
 | `{n,m}`        | between `n` and `m`, inclusive |
 
+### Metacharacters vs. escape sequences: two different `\`'s
+
+Every backslash piece in the table above (`\d`, `\w`, `\s`) is a
+**metacharacter** - the *regex engine's own* shorthand for a whole
+category of characters. `\d` doesn't mean "a digit" the way a letter
+means itself; it's special syntax the regex engine interprets.
+
+A `\t`, `\n`, or `\r` appearing in a pattern is a completely different
+thing: an ordinary **C++ string escape**, resolved by the compiler
+*before* the regex engine ever sees the string. By the time
+`std::regex{"\t"}` runs, C++ has already turned `"\t"` into a string
+holding one real tab byte - the regex engine just sees a literal
+character to match, the exact same way it would see a literal `a`. It
+never even knows a backslash was involved.
+
+| Kind | Examples | Interpreted by | Means |
+|------|----------|-----------------|-------|
+| **Metacharacter** | `\d`, `\w`, `\s` | the regex engine | a whole *category* of characters |
+| **C++ string escape** | `\t`, `\n`, `\r` | the C++ compiler | one specific *literal* character |
+
+```cpp
+std::regex{R"(\d)"}   // metacharacter - the regex engine sees "\d" and
+                       // treats it as "any digit"
+
+std::regex{"\t"}      // C++ escape - the regex engine never sees a
+                       // backslash at all, just one literal tab byte
+                       // (same \t you've used in std::println strings)
+```
+
+```
+   std::regex{R"(\d)"}
+                 │
+                 ▼
+        regex engine receives:  \  d     (two characters, backslash intact -
+                                            raw string literal passed it through)
+                 │
+                 ▼
+        regex engine's OWN rule: "\d" means "match any digit"
+
+   std::regex{"\t"}
+             │
+             ▼
+   C++ COMPILER resolves the escape FIRST, before regex ever runs:
+             │
+             ▼
+        regex engine receives:  [tab]   (one real tab character, no backslash)
+             │
+             ▼
+        regex engine's rule: "match this exact character" - nothing special
+```
+
+This is exactly why raw string literals matter for the metacharacter
+row and not the escape-sequence row: `R"(\d)"` protects the backslash so
+the *regex engine* gets to interpret it, while `"\t"` deliberately lets
+*C++* consume the backslash first.
+
 Let's put these to test with a few examples, all using `std::regex_match`.
 This function checks whether the *entire* string fits the pattern, returning `true` or `false`.
 
@@ -2181,6 +2237,9 @@ std::regex_match("", std::regex{"a+"});              // false - "+" needs AT LEA
 std::regex_match("aaa", std::regex{"a*"});           // true  - "*" allows one OR more a's too
 std::regex_match("", std::regex{"a*"});              // true  - but "*" is also happy with ZERO
 std::regex_match("b", std::regex{"a*"});             // false - "b" still isn't an "a"
+
+std::regex_match("\t", std::regex{"\t"});            // true  - a C++ escape, matched as ONE literal tab
+std::regex_match(" ", std::regex{"\t"});             // false - a space isn't a tab, no matter how alike they look
 
 std::regex_match("aaa", std::regex{"a{3}"});         // true  - {3} means EXACTLY three a's
 std::regex_match("aa", std::regex{"a{3}"});          // false - only two a's, not exactly three
@@ -2532,6 +2591,7 @@ this section walks them in order:
 the original untouched - question one, answered:
 
 ```cpp
+std::string data{"1\t2\t3\t4"};
 std::regex_replace(data, std::regex{"\t"}, ",");   // tabs -> commas
 ```
 
