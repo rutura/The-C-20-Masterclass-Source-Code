@@ -2521,10 +2521,12 @@ whole pattern instead of one exact word.
                                             (any tab, any date, any word, ...)
 ```
 
-Three things end up mattering once you actually use it: does it touch
-the original string, can the replacement text reuse pieces of what it
-just matched, and what happens to the parts that *didn't* match. The
-rest of this section walks those three questions in order.
+Three things end up mattering once you actually use it, and the rest of
+this section walks them in order:
+
+- Does it touch the **original** string?
+- Can the replacement text **reuse** pieces of what it just matched?
+- What happens to the parts that **didn't** match?
 
 `regex_replace` rewrites every match in a **copy** of the string, leaving
 the original untouched - question one, answered:
