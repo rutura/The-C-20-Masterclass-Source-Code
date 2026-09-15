@@ -11,21 +11,37 @@ int main() {
 
     // --- system_clock: "what time is it right now?" -----------------------
     // system_clock represents UTC wall-clock time from the system-wide
-    // real-time clock. std::println understands a time_point directly,
-    // using the same {:...} spec grammar from 7.8 - % codes replace a type
-    // letter like f or d.
-    std::println("UTC: {:%Y-%m-%d %H:%M:%S}", std::chrono::system_clock::now());
+    // real-time clock - every time_point it returns is UTC, not your local
+    // time. std::println understands a time_point directly, using the same
+    // {:...} spec grammar from 7.8 - % codes replace a type letter like f
+    // or d.
+    auto now_utc{std::chrono::system_clock::now()};
+    std::println("UTC:   {:%Y-%m-%d %H:%M:%S}", now_utc);
+
+    // To show the time a student would actually recognize, convert that UTC
+    // instant to their machine's own time zone. current_zone() asks the OS
+    // which zone it's configured for; to_local() converts a UTC time_point
+    // to that zone's wall-clock time.
+    //
+    // NOTE FOR STUDENTS ON THE CLANG DOCKER IMAGE: as of Clang 21, libc++
+    // does not yet implement the IANA time zone database, so current_zone()
+    // will fail to compile there. This works on MSVC and on GCC's
+    // libstdc++, which is what we build with.
+    auto now_local{std::chrono::current_zone()->to_local(now_utc)};
+    std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
 
     // Setting the global locale makes formatted output follow the user's
-    // own conventions (date order, month names, ...). The L specifier then
-    // formats according to that locale. See chapter 21 for a full
-    // discussion of locales.
+    // own conventions (date order, month names, ...) - a SEPARATE axis from
+    // the time zone conversion above. Locale changes how a time is WRITTEN;
+    // it does not change WHICH instant or WHICH zone is being shown. The L
+    // specifier formats according to the currently configured locale. See
+    // chapter 21 for a full discussion of locales.
     try {
         std::locale::global(std::locale{""});
     } catch (const std::runtime_error&) {
         std::println("(no OS locale available here - falling back to \"C\")");
     }
-    std::println("UTC: {:L%c}", std::chrono::system_clock::now());
+    std::println("Local, locale-formatted: {:L%c}", now_local);
 
     // system_clock can be adjusted at any moment (NTP sync, a user changing
     // the time) - which is exactly why it's the WRONG tool for measuring
@@ -68,13 +84,6 @@ int main() {
     // duration_cast() gives whole milliseconds instead, if you don't need
     // the fractional part.
     std::println("Total: {}", std::chrono::duration_cast<std::chrono::milliseconds>(diff));
-
-    // A note on accuracy: most OS timers only update every 10-15ms. Any
-    // event shorter than one timer tick appears to take "zero" time, and
-    // any event between one and two ticks appears to take exactly one tick -
-    // a phenomenon called GATING ERROR. If your timings look suspiciously
-    // small or suspiciously round, increase number_of_iterations so the
-    // total time spans many timer ticks.
 
     // --- Dates: year_month_day ----------------------------------------------
     // C++20 added genuine calendar support to <chrono>. year, month, and day

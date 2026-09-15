@@ -1884,17 +1884,44 @@ same `{:...}` spec grammar from 7.8 - `%` codes replace a type letter like
 `f` or `d`:
 
 ```cpp
-std::println("UTC: {:L}", std::chrono::system_clock::now());
+auto now_utc{std::chrono::system_clock::now()};
+std::println("UTC: {:%Y-%m-%d %H:%M:%S}", now_utc);
 ```
 
-The `L` specifier formats according to the current global `locale` -
-setting one makes the output follow the user's own conventions (date
-order, month names, ...; see chapter 21 for a full discussion of locales):
+**A gotcha worth knowing up front: `system_clock::now()` is always UTC,
+never your local time.** Printing it directly, no matter how you format
+it, still shows the UTC hour - a student in Nairobi (UTC+3) or New York
+(UTC-5) will not see their own wall-clock time from this alone. To get
+that, convert the UTC `time_point` to a specific **time zone**:
+`current_zone()` asks the OS which zone it's configured for, and
+`to_local()` converts a UTC `time_point` to that zone's wall-clock time:
+
+```cpp
+auto now_local{std::chrono::current_zone()->to_local(now_utc)};
+std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
+```
+
+```
+   system_clock::now()  is ALWAYS UTC, regardless of formatting
+              │
+              └──► current_zone()->to_local(...)  ──►  the machine's own
+                                                        wall-clock time
+```
+
+> **A note on the Docker student environments.** As of Clang 21, libc++
+> does not yet implement the IANA time zone database, so `current_zone()`
+> will fail to compile there. This works on MSVC and on GCC's libstdc++,
+> which is what we build with.
+
+**Locale is a separate axis from time zone - it changes how a time is
+written, not which instant or zone is being shown.** Setting a locale
+makes formatted output follow the user's own conventions (date order,
+month names, ...), and the `L` specifier formats according to whatever 
+locale is currently set:
 
 ```cpp
 std::locale::global(std::locale{""});    // the user's own OS locale
-std::println("UTC: {:L}", std::chrono::system_clock::now());
-std::println("UTC: {:L%c}", std::chrono::system_clock::now());   // %c = locale's own "preferred" format
+std::println("{:L%c}", now_local);       // %c = locale's own "preferred" format
 ```
 
 ```
@@ -1902,6 +1929,9 @@ std::println("UTC: {:L%c}", std::chrono::system_clock::now());   // %c = locale'
      │ │
      │ └── %c: the locale's own preferred date+time layout
      └──── L:  use the currently configured GLOBAL locale to format it
+
+   TIME ZONE  answers "which instant, shown in whose wall clock?"
+   LOCALE     answers "written in what style?" - independent questions
 ```
 
 **Asking "how long did that just take?"** - this is a different clock,
@@ -1932,67 +1962,9 @@ forward mid-measurement, corrupting the result. `steady_clock` is
 guaranteed to never go backward, which is exactly what you want from a
 stopwatch.
 
-Now the formal version of what you just used: a **clock** pairs a
-`time_point` type with a `duration` type and an **epoch** - the moment
-that clock starts counting from. `now()` and a static `is_steady` (does
-this clock's `time_point` ever go backward?) exist on every clock:
-
-```cpp
-std::println("system_clock::is_steady = {}", std::chrono::system_clock::is_steady);   // false
-std::println("steady_clock::is_steady = {}", std::chrono::steady_clock::is_steady);   // true
-```
-
-The standard defines several clocks beyond these two:
-
-```
-   CLOCK                   DESCRIPTION                               EPOCH
-   ──────────────────────────────────────────────────────────────────────────────
-   system_clock            UTC wall-clock time, system-wide           1970-01-01
-   steady_clock            time_point NEVER decreases - system_clock  unspecified
-                           can be adjusted at any time; this one
-                           need not relate to wall-clock time at all
-   high_resolution_clock   shortest possible tick period - may just   unspecified
-                           be an ALIAS for steady_clock or
-                           system_clock, depending on your compiler
-   utc_clock               UTC, and the ONLY one of these that        1970-01-01
-                           tracks leap seconds
-   tai_clock               International Atomic Time, weighted        1958-01-01
-                           average of several atomic clocks
-   gps_clock               GPS satellite time                         1980-01-06
-   file_clock              std::filesystem file timestamps            unspecified*
-
-   * typically 1970-01-01 on Unix, 1601-01-01 on Windows
-```
-
-A **leap second** is a second occasionally inserted into (or removed
-from) UTC to correct drift against true solar time. `utc_clock` is the
-only one of these that tracks them; the others don't, and `file_clock`'s
-behavior here is unspecified.
-
-> **high_resolution_clock is best avoided.** Its implementation is not
-> consistent between compilers - it might be `steady_clock` on one, and
-> `system_clock` on another - so whether it can go backward isn't
-> portable. Prefer `system_clock` for wall-clock time and `steady_clock`
-> for measuring durations, always.
-
-`system_clock` additionally offers `to_time_t()`/`from_time_t()` to
-interoperate with the C-style `time_t` representation from `<ctime>`:
-
-```cpp
-std::time_t as_time_t{std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())};
-auto back_to_time_point{std::chrono::system_clock::from_time_t(as_time_t)};
-std::println("round-tripped through time_t: {:%Y-%m-%d %H:%M:%S}",
-         std::chrono::time_point_cast<std::chrono::seconds>(back_to_time_point));
-```
-
-A subtlety worth knowing about this elapsed-time measurement: most OS
-timers only update every 10-15ms. Any event shorter than one timer tick
-appears to take **zero** time, and any event between one and two ticks
-appears to take exactly **one** tick - called **gating error**. A loop
-that actually takes 44ms on a system with a 15ms timer update can appear
-to take only 30ms. The fix is simple: make the measured work large enough
-to span many timer ticks (the example above runs 10 million iterations of
-real arithmetic for exactly this reason).
+There is much more to clocks than this, but the rest is rarely needed, 
+and it can quickly get complicated. We will cover more as we keep diving 
+deep into more C++ advanced topics.
 
 ### Dates: putting the calendar to work
 
@@ -2027,6 +1999,11 @@ want for reading and printing. `sys_days` is the other shape: a
 epoch - a **serial** type, which is what you want for arithmetic and
 comparisons:
 
+```cpp
+std::chrono::sys_days as_time_point{some_date};             // date -> time_point
+std::chrono::year_month_day back_to_date{as_time_point};    // time_point -> date
+```
+
 ```
    year_month_day{ 2020y, June, 22d }        sys_days{ 2020y / June / 22d }
         │                                         │
@@ -2041,10 +2018,6 @@ comparisons:
    whichever direction the next operation needs.
 ```
 
-```cpp
-std::chrono::sys_days as_time_point{some_date};             // date -> time_point
-std::chrono::year_month_day back_to_date{as_time_point};    // time_point -> date
-```
 
 **Getting "today"** is the same conversion, starting from `now()`.
 `floor<days>` truncates any finer `time_point` down to midnight, which is
@@ -2078,7 +2051,7 @@ std::println("{:%Y-%m-%d %H:%M}", meeting_time);   // "2020-06-22 09:35"
 > last day/weekday of a month, localized month/weekday names, and time
 > zone conversion (`zoned_time`, converting UTC to a specific region's
 > wall-clock time) are all there if a project needs them. They're left out
-> here because they come up rarely in day-to-day code; reach for the
+> here because they come up rarely in day-to-day code; please reach for the
 > Standard Library reference on `<chrono>` calendar types if you need one
 > of them.
 
