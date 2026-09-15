@@ -1648,6 +1648,10 @@ duration type above, `minutes` included, is quietly built the same way
 under the hood: a plain number, paired with a `ratio` that says how many
 seconds long **one tick** of that number is.
 
+Why use a `std::ratio` instead of just a number like `10` or `1000`? Because that
+gives us the ability to represent **fractions** of a second exactly. So we get the 
+ability to say "one tick is 1/1000 of a second" (milliseconds) or "one tick is 1/60 of a second" (sixtieths of a second) without losing precision.
+
 One thing worth noting is that if you declare ratio and leave out the denominator,
 the denominator defaults to 1. For example, `ratio<60>` is equivalent to `ratio<60, 1>`. 
 This is something we are about to use.
