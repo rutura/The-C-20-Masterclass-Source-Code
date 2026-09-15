@@ -2131,6 +2131,7 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `^` / `$`      | anchors - "start of string" / "end of string" |
 | `()`           | a **capture group** - remembers what matched inside it |
 | `+`            | one or more of the preceding piece |
+| `*`            | zero or more of the preceding piece |
 | `{n}`          | exactly `n` occurrences        |
 | `{n,}`         | `n` or more occurrences        |
 | `{n,m}`        | between `n` and `m`, inclusive |
@@ -2176,6 +2177,10 @@ m[1].str();                                          // "42" - () captured just 
 
 std::regex_match("aaa", std::regex{"a+"});           // true  - "+" allows one OR more a's
 std::regex_match("", std::regex{"a+"});              // false - "+" needs AT LEAST one
+
+std::regex_match("aaa", std::regex{"a*"});           // true  - "*" allows one OR more a's too
+std::regex_match("", std::regex{"a*"});              // true  - but "*" is also happy with ZERO
+std::regex_match("b", std::regex{"a*"});             // false - "b" still isn't an "a"
 
 std::regex_match("aaa", std::regex{"a{3}"});         // true  - {3} means EXACTLY three a's
 std::regex_match("aa", std::regex{"a{3}"});          // false - only two a's, not exactly three
