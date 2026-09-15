@@ -20,10 +20,8 @@ function without either copying it needlessly or letting it be
 mutated by accident, sorting and searching, the functional-style
 ranges/views pipeline, strings beyond what we have seen so far. Things
 like the `std::format` spec grammar, non-owning views into text,
-`std::chrono` for durations/clocks/calendar dates, files revisited with
-formatted input, reading structured data, and pattern matching with regular
-expressions. It closes with a small project that puts all of it to work
-on a real dataset - the Titanic passenger manifest.
+`std::chrono` for durations/clocks/calendar dates, and pattern matching
+with regular expressions.
 
 ---
 
@@ -2057,130 +2055,7 @@ std::println("{:%Y-%m-%d %H:%M}", meeting_time);   // "2020-06-22 09:35"
 
 ---
 
-## 7.11 Files revisited
-
-Chapter 5 wrote and read plain lines of text with `std::getline` - one
-whole line, one `std::string`. A file can hold several **fields per
-line** instead - the same `<<`/`>>` you already know from
-`std::cout`/`std::cin`, aimed at a file stream.
-
-```
-   chapter 5:  ONE field per line               this lecture: SEVERAL fields per line
-
-   names.txt:                                   accounts.txt:
-     Ada                                          100 Jones 24.98
-     Alan                                         200 Doe 345.67
-     Grace                                        300 White 0.0
-
-   read with:  std::getline(in, name)            read with:  in >> account >> name >> balance
-              (one std::string per read)                     (three typed reads per record)
-```
-
-```cpp
-// write.cpp
-std::ofstream out{"accounts.txt"};
-out << account.number << ' ' << account.name << ' ' << account.balance << '\n';
-```
-
-```cpp
-// read.cpp
-while (in >> number >> name >> balance) {   // one whitespace-delimited,
-    // ...                                  // typed field per read
-}
-```
-
-```
-   accounts.txt:   100 Jones 24.98
-                    │    │     │
-   in >> number ◄───┘    │     │      number  (int)         = 100
-   in >> name   ◄─────────┘     │      name    (std::string) = "Jones"
-   in >> balance ◄──────────────┘      balance (double)      = 24.98
-```
-
-`>>` splits on whitespace and converts to each variable's type as it
-reads - three reads per record, instead of `getline`'s one string per
-line. The stream itself turns false once there is nothing left to read,
-so the `while` loop runs once per complete record - the same shape as
-chapter 5's `while (std::getline(in, name))`:
-
-```
-   while (in >> number >> name >> balance) {
-       ...
-   }
-        │
-        └── the whole expression (in >> number >> name >> balance)
-            evaluates to the stream itself, which tests true while
-            reads keep succeeding, false once the file runs out
-```
-
----
-
-## 7.12 Reading CSV data
-
-A CSV file's quoting and embedded-comma rules are easy to get subtly
-wrong with hand-rolled `stringstream` splitting:
-
-```
-   what a naive split-on-comma gets WRONG:
-
-   100,"Smith, Jr.",24.98
-        └────┬────┘
-        one field, but it CONTAINS a comma inside quotes -
-        a naive split(',') would wrongly cut it into two fields
-```
-
-**`rapidcsv`** is a small, header-only library that already solved that -
-it is **vendored** into this project (the same pattern as
-`6.17ProjectVendoredHeader`): the header sits in `vendor/`, committed
-alongside our own code, nothing downloaded.
-
-```
-   7.12ReadingCSV/
-   ├── vendor/
-   │   └── rapidcsv.h          ← third-party, committed, nothing downloaded
-   ├── accounts.csv
-   ├── main.cpp                ← #include "rapidcsv.h"
-   └── CMakeLists.txt
-```
-
-```cpp
-#include "rapidcsv.h"
-
-rapidcsv::Document document{"accounts.csv"};   // loads and parses on construction
-
-std::vector<int> accounts{document.GetColumn<int>("account")};
-std::vector<std::string> names{document.GetColumn<std::string>("name")};
-std::vector<double> balances{document.GetColumn<double>("balance")};
-```
-
-```
-   accounts.csv:
-   account,name,balance
-   100,Jones,24.98
-   200,Doe,345.67
-   300,White,0.0
-
-   GetColumn<int>("account")     →  std::vector<int>{100, 200, 300}
-   GetColumn<std::string>("name")→  std::vector<std::string>{"Jones", "Doe", "White"}
-   GetColumn<double>("balance")  →  std::vector<double>{24.98, 345.67, 0.0}
-
-   the header row NAMES each column - GetColumn<T>("name") looks it up
-   by that name and converts every cell in it to T
-```
-
-Being header-only, `rapidcsv.h` needs no separate implementation file to
-compile, unlike `stb_image_write.h` in chapter 6 - just the include path
-pointed at `vendor/`:
-
-```cmake
-target_include_directories(rooster SYSTEM PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor
-)
-```
-
----
-
-## 7.13 Regex
+## 7.11 Regex
 
 A **regular expression** describes the *shape* of text, not literal
 characters - "a capital letter, then one or more lowercase letters", not
@@ -2270,109 +2145,13 @@ Common building blocks:
 
 ---
 
-## 7.14 Project: Titanic dataset analysis
+## 7.12 Assignment
 
-Everything in this chapter comes together on one real dataset: the
-Titanic passenger manifest, loaded with the same vendored `rapidcsv`
-from 7.12.
-
-```
-   titanic.csv ──rapidcsv──► GetColumn<T> per field ──► std::vector<T>
-                                                              │
-                             sort · filter · accumulate · count_if
-                                                              │
-                                                    survival statistics
-```
-
-### Missing data: filtering out `NaN` before it corrupts a statistic
-
-Some `age` values are unparseable (`"?"` in the raw file).
-`rapidcsv::ConverterParams{true}` turns those into `NaN` instead of
-throwing, and a `std::views::filter` drops them before any statistic is
-computed - the same lazy-view idea from 7.6, now filtering out bad data
-instead of picking out even numbers.
-
-```cpp
-auto knownAges{age | std::views::filter([](double a) { return !std::isnan(a); })};
-std::vector<double> cleanAges{knownAges.begin(), knownAges.end()};
-```
-
-```
-   age column (raw):    29   0.9   NaN    2    30   NaN   25   ...
-                          │    │    ✗     │     │    ✗     │
-   views::filter(!isnan)  ▼    ▼          ▼     ▼          ▼
-   knownAges (lazy view): 29  0.9         2    30          25   ...
-
-   one NaN slipping through would poison std::accumulate's sum with NaN,
-   and would throw off std::ranges::sort's ordering - filtering FIRST
-   avoids both
-```
-
-### Descriptive statistics: sort, then read off the shape
-
-```
-   cleanAges, sorted ascending:
-
-   [ 0.17  0.42  1.00  ...  28.00  ...  79.00  80.00 ]
-     ▲                        ▲                  ▲
-   .front()                middle               .back()
-   = minimum                                   = maximum
-                    (median = the middle element,
-                     or the average of the two middle
-                     elements if the count is even)
-
-   average = std::accumulate(cleanAges, 0.0) / cleanAges.size()
-```
-
-### Counting with a condition: `std::ranges::count_if`
-
-```cpp
-std::ranges::count_if(passengerClass, [](int c) { return c == 1; });
-```
-
-```
-   passengerClass:  1   3   1   2   3   3   1   2  ...
-                    │       │       │       │
-                    ▼       ▼       ▼       ▼
-                count_if(== 1) counts only these matches
-
-   result: however many elements satisfied the predicate -
-           no hand-written loop, no manually incremented counter
-```
-
-### Cross-referencing parallel columns by index
-
-`survived`, `sex`, and `passengerClass` are separate `std::vector`s, but
-row `i` in each one describes the **same passenger** - so answering "what
-fraction of survivors were women" means walking `i` across all three
-together.
-
-```
-   index i:          0        1        2        3       ...
-                      │        │        │        │
-   survived[i]:       1        1        0        1
-   sex[i]:          female    male    female    male
-   passengerClass[i]:  1        1        1        2
-
-   passenger 0: survived=1, sex="female", class=1   ─┐
-   passenger 1: survived=1, sex="male",   class=1    ├─ same i, same person,
-   passenger 3: survived=1, sex="male",   class=2   ─┘   three parallel vectors
-```
-
-The result is a small report: passenger counts by class, an overall
-survival rate, and a breakdown of who survived by sex and by class - real
-answers pulled out of a real dataset using nothing but the tools from
-this chapter.
-
----
-
-## 7.15 Assignment
-
-Eight exercises building toward the same kind of work as the Titanic
-project, on a smaller dataset. `main.cpp` has the eight stubbed exercises,
-each with its problem statement and a sample run in a comment;
-`main_solution.cpp` solves all eight with the statements repeated above
-each solution. Built as two executables (`rooster`, `rooster_solution`).
+Seven exercises drawing on the whole chapter, on a small dataset.
+`main.cpp` has the seven stubbed exercises, each with its problem
+statement and a sample run in a comment; `main_solution.cpp` solves all
+seven with the statements repeated above each solution. Built as two
+executables (`rooster`, `rooster_solution`).
 
 | # | Exercise | Tools |
 |---|----------|-------|
@@ -2381,14 +2160,12 @@ each solution. Built as two executables (`rooster`, `rooster_solution`).
 | 3 | `average_of_hot_days()` | a `views::filter` \| `views::transform` pipeline, `std::accumulate` over a view |
 | 4 | `clean_label()` | `find`/`erase`, `find`/`replace` in a loop |
 | 5 | `extract_reading()` | parsing one line of text with `std::istringstream` |
-| 6 | `flagged_accounts()` | `rapidcsv::Document` + `std::regex_match`, on `accounts.csv` |
-| 7 | `format_receipt()` | `std::format`'s fill/align/width/precision spec grammar |
-| 8 | `days_until()` | `std::chrono::year_month_day`, `sys_days` conversion, calendar-day arithmetic |
+| 6 | `format_receipt()` | `std::format`'s fill/align/width/precision spec grammar |
+| 7 | `days_until()` | `std::chrono::year_month_day`, `sys_days` conversion, calendar-day arithmetic |
 
-The quiz (`QUIZ.md`) is 23 multiple-choice questions across the whole
-chapter, including the format-spec grammar, chrono durations/clocks/
-calendar dates, the CSV/vendoring pattern, and the Titanic project's
-ranges/statistics.
+The quiz (`QUIZ.md`) is 18 multiple-choice questions across the whole
+chapter, including the format-spec grammar and chrono durations/clocks/
+calendar dates.
 
 After this chapter the student can hold, sort, search, and summarize real
 collections of data - the last stop before the course turns to pointers

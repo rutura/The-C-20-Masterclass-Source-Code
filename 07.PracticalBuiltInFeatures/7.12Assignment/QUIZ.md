@@ -1,13 +1,12 @@
 # Chapter 7 Quiz - Practical Built-In Features
 
-23 multiple-choice questions covering **Chapter 7 (Practical Built-In
+18 multiple-choice questions covering **Chapter 7 (Practical Built-In
 Features)**: `std::array` vs `std::vector`, sorting/searching/`accumulate`,
 ranges and views, strings beyond the basics (`find`/`erase`/`replace`/
 `insert`, string streams), the `std::format` spec grammar, `std::string_view`,
-`std::chrono` (durations, clocks, C++20 calendar dates), files with
-formatted `>>`/`<<`, reading CSV data with a vendored library, `<regex>`,
-and the Titanic dataset project. Each question is followed immediately by
-its correct answer and a short explanation.
+`std::chrono` (durations, clocks, C++20 calendar dates), and `<regex>`. Each
+question is followed immediately by its correct answer and a short
+explanation.
 
 ---
 
@@ -110,34 +109,7 @@ D. `view` becomes empty
 
 **Answer: B** - a `string_view` has no data of its own; it is watching `original`'s characters directly, so any change to `original` is visible through the view.
 
-### 12. Reading a file with `input >> account >> name >> balance` (formatted extraction) instead of `std::getline(input, line)` differs how?
-
-A. There is no difference between the two
-B. `>>` reads one whitespace-delimited, typed field at a time (so three reads pull three separate fields off the stream); `getline` reads one whole line as a single string
-C. `getline` can only be used with `std::cin`, never a file
-D. `>>` cannot read numbers, only strings
-
-**Answer: B** - `>>` splits on whitespace and converts to the target variable's type as it reads, which is exactly what lets one line yield an `int`, a `std::string`, and a `double` in one statement.
-
-### 13. Why is `rapidcsv.h` *vendored* into the project folder instead of hand-writing a CSV parser with `std::stringstream`?
-
-A. The standard library cannot open files at all
-B. A real CSV parser needs to handle quoting, embedded commas, and header rows correctly - a small hand-rolled splitter gets those wrong on real-world data; vendoring reuses a library that already solved it
-C. Vendoring is required by the C++ standard for any third-party header
-D. `stringstream` cannot read numbers, only text
-
-**Answer: B** - 7.6's `istringstream` splitting is fine for one clean line; a CSV file's quoting/escaping rules are enough extra complexity that reaching for a small, focused library (the same vendoring pattern from 6.17) is the practical choice.
-
-### 14. `rapidcsv::Document doc{"accounts.csv"}; auto balances{doc.GetColumn<double>("balance")};` gives you...
-
-A. A single `double` - the sum of the column
-B. A `std::vector<double>`, one entry per row, converted from the CSV's text to `double`
-C. A `std::string` containing the raw column text
-D. Nothing - `GetColumn` requires a numeric header, not a name
-
-**Answer: B** - `GetColumn<T>("name")` reads an entire named column and converts each cell to `T`, returning them as a `std::vector<T>` in row order.
-
-### 15. `std::regex_match("Wally", std::regex{"[A-Z][a-z]+"})` returns `true` because...
+### 12. `std::regex_match("Wally", std::regex{"[A-Z][a-z]+"})` returns `true` because...
 
 A. `regex_match` only checks the first character
 B. The whole string fits the pattern: one capital letter, followed by one or more lowercase letters, with nothing left over
@@ -146,7 +118,7 @@ D. The pattern matches any word of any length
 
 **Answer: B** - `regex_match` requires the *entire* string to satisfy the pattern, start to end. `"Wally99"` would fail the same pattern because of the trailing digits.
 
-### 16. How does `std::regex_search` differ from `std::regex_match`?
+### 13. How does `std::regex_search` differ from `std::regex_match`?
 
 A. They are exactly the same function under two names
 B. `regex_search` looks for a match *anywhere* inside the string; `regex_match` requires the *whole* string to match
@@ -155,25 +127,7 @@ D. `regex_match` is deprecated in C++20
 
 **Answer: B** - `regex_search("Programming is fun", std::regex{"fun"})` finds `"fun"` even though it is only part of the string; `regex_match` with the same pattern would fail because `"Programming is fun"` as a whole does not equal `"fun"`.
 
-### 17. In the Titanic project, why filter the `age` column with `std::views::filter([](double a){ return !std::isnan(a); })` before computing statistics?
-
-A. To remove passengers who did not survive
-B. Some age values are missing in the dataset (parsed as NaN); including them would corrupt an average or a sorted median
-C. `isnan` sorts the ages in the process
-D. Views cannot hold `double` values otherwise
-
-**Answer: B** - the dataset uses `"?"` for unknown ages, which `ConverterParams{true}` turns into `NaN` instead of throwing. Filtering those out before averaging or sorting keeps the statistics meaningful.
-
-### 18. `std::ranges::count_if(survived, [](int s){ return s != 0; })` in the Titanic project computes...
-
-A. The total number of passengers, survivors or not
-B. How many entries in `survived` are non-zero - i.e. how many passengers survived
-C. The sum of the `survived` column
-D. Whether at least one passenger survived (a `bool`)
-
-**Answer: B** - `count_if` counts how many elements satisfy the predicate. Here that predicate is "is this passenger's `survived` value non-zero", so the result is the survivor count.
-
-### 19. How does `std::format` differ from `std::print`/`std::println`?
+### 14. How does `std::format` differ from `std::print`/`std::println`?
 
 A. They are identical - `format` is just an older, deprecated name for `print`
 B. `std::format` returns a `std::string` built from the spec; `std::print`/`std::println` write formatted output straight to the console
@@ -182,7 +136,7 @@ D. `std::print` returns a `std::string`; `std::format` writes to the console
 
 **Answer: B** - `format` hands back a `std::string` for you to store, log, or build further; `print`/`println` skip that step and write the result straight to stdout.
 
-### 20. In the format spec `{:*^10}`, what does each part mean?
+### 15. In the format spec `{:*^10}`, what does each part mean?
 
 A. `*` is the value being formatted, `^10` is ignored
 B. `*` is the fill character, `^` centers the value, `10` is the minimum field width
@@ -191,7 +145,7 @@ D. This spec is invalid - fill characters are not allowed with `^`
 
 **Answer: B** - the format-spec grammar is `{:fill align width.precision type}`. Here the fill character is `*`, `^` requests centered alignment, and `10` is the field's minimum width - so a short value gets padded with `*` on both sides until the field is 10 characters wide.
 
-### 21. Why does `steady_clock`, not `system_clock`, get used to measure how long a block of code takes?
+### 16. Why does `steady_clock`, not `system_clock`, get used to measure how long a block of code takes?
 
 A. `steady_clock` has nanosecond precision and `system_clock` does not
 B. `steady_clock` never goes backward - it is unaffected by the system clock being adjusted (NTP sync, a user changing the time), so an elapsed-time measurement can never come out negative
@@ -200,7 +154,7 @@ D. There is no difference - either clock works identically for benchmarking
 
 **Answer: B** - `system_clock` tracks wall-clock time and can jump forward or backward if the system clock is corrected. `steady_clock` is guaranteed monotonic, which is exactly what a correct elapsed-time measurement needs.
 
-### 22. What does `std::chrono::duration_cast<std::chrono::seconds>(race_duration)` do if `race_duration` is `90min + 32s`?
+### 17. What does `std::chrono::duration_cast<std::chrono::seconds>(race_duration)` do if `race_duration` is `90min + 32s`?
 
 A. Nothing - `duration_cast` only works on `system_clock` values
 B. Converts the duration to a count of whole seconds - `5432` in this case
@@ -209,7 +163,7 @@ D. Throws an exception, since minutes cannot convert to seconds
 
 **Answer: B** - `duration_cast<T>` explicitly converts between duration types, the same spirit as `static_cast`. `90min + 32s` is `5400 + 32 = 5432` seconds total, so `.count()` on the cast result gives `5432`.
 
-### 23. Why does converting a `system_clock::time_point` to a `std::chrono::year_month_day` require `floor<days>(...)` first?
+### 18. Why does converting a `system_clock::time_point` to a `std::chrono::year_month_day` require `floor<days>(...)` first?
 
 A. `floor` is required to silence a compiler warning, nothing more
 B. A `time_point` carries sub-day precision (hours, minutes, seconds, ...); `year_month_day` represents a calendar DAY, so the time_point must be truncated down to midnight of that day before it can convert

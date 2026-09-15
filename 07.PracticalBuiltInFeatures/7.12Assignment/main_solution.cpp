@@ -4,12 +4,9 @@
 #include <numeric>
 #include <print>
 #include <ranges>
-#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "rapidcsv.h"
 
 /*
     Chapter 7 assignment - Practical built-in features (SOLUTION)
@@ -75,28 +72,14 @@ int main() {
     std::println("reading: {}", reading);
     std::println("status: {}", status);
 
-    // --- Exercise 6 -------------------------------------------------------------
-    std::println("\n--- Exercise 6: flagged_accounts ---");
-    rapidcsv::Document accounts{"accounts.csv"};
-    std::vector<std::string> names{accounts.GetColumn<std::string>("name")};
-    std::vector<double> balances{accounts.GetColumn<double>("balance")};
-
-    std::regex short_name{"[A-Z][a-z]{0,3}"};
-
-    for (std::size_t i{0}; i < names.size(); ++i) {
-        if (std::regex_match(names.at(i), short_name)) {
-            std::println("{}: {}", names.at(i), balances.at(i));
-        }
-    }
-
-    // --- Exercise 7 ---------------------------------------------------------
-    std::println("\n--- Exercise 7: format_receipt ---");
+    // --- Exercise 6 ---------------------------------------------------------
+    std::println("\n--- Exercise 6: format_receipt ---");
     std::println("{}", format_receipt("coffee", 2, 4.5));
     std::println("{}", format_receipt("bagel", 1, 3.25));
     std::println("{}", format_receipt("tea", 10, 2.0));
 
-    // --- Exercise 8 -----------------------------------------------------------
-    std::println("\n--- Exercise 8: days_until ---");
+    // --- Exercise 7 -----------------------------------------------------------
+    std::println("\n--- Exercise 7: days_until ---");
     const std::chrono::year_month_day target{std::chrono::year{2026} / 12 / 25};
     std::println("{} days until {}", days_until(target), target);
 

@@ -4,11 +4,8 @@
 #include <numeric>
 #include <print>
 #include <ranges>
-#include <regex>
 #include <string>
 #include <vector>
-
-#include "rapidcsv.h"
 
 /*
     Chapter 7 assignment - Practical built-in features
@@ -143,31 +140,7 @@ int main() {
 
 
     /*
-        Exercise 6 - flagged_accounts(): CSV + regex together
-
-        accounts.csv (already in this folder) has columns account, name,
-        balance. Load it with rapidcsv::Document, same as 7.12ReadingCSV,
-        and get the "name" and "balance" columns as vectors.
-
-        A name is "flagged" if it matches this regex, checked with
-        std::regex_match:
-
-            std::regex short_name{"[A-Z][a-z]{0,3}"};
-
-        (a capital letter followed by at most three lowercase letters -
-        i.e. a name 4 characters or shorter). For every row where the
-        name matches, print the name and its balance.
-
-        Sample output (depends on accounts.csv's contents):
-            Doe: 345.67
-            Rich: 224.62
-    */
-    std::println("\n--- Exercise 6: flagged_accounts ---");
-    // TODO
-
-
-    /*
-        Exercise 7 - format_receipt(): std::format spec grammar
+        Exercise 6 - format_receipt(): std::format spec grammar
 
         Write:
 
@@ -190,12 +163,12 @@ int main() {
             bagel          1    3.25
             tea           10    2.00
     */
-    std::println("\n--- Exercise 7: format_receipt ---");
+    std::println("\n--- Exercise 6: format_receipt ---");
     // TODO
 
 
     /*
-        Exercise 8 - days_until(): std::chrono calendar arithmetic
+        Exercise 7 - days_until(): std::chrono calendar arithmetic
 
         Write:
 
@@ -219,7 +192,7 @@ int main() {
         Sample output (the number will differ depending on today's date):
             42 days until 2026-12-25
     */
-    std::println("\n--- Exercise 8: days_until ---");
+    std::println("\n--- Exercise 7: days_until ---");
     // TODO
 
     return 0;
