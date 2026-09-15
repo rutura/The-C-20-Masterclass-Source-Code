@@ -2471,7 +2471,7 @@ for (auto it = std::sregex_iterator{shopping_list.cbegin(), shopping_list.cend()
    shopping_list: "eggs milk  bread rice"
 
    it starts here ──► finds "eggs" ──► ++it ──► finds "milk" ──► ++it ──► ...
-                                                                            │
+                                                                           │
                                         ++it eventually reaches end ◄──────┘
                         (the same "keep going until you hit end()" shape
                          a range-based for loop already hides from you)
