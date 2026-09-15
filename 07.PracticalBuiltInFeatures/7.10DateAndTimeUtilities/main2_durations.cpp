@@ -73,9 +73,10 @@ int main() {
     // the tick count is left indeterminate, exactly like a bare `long x;`.
     // This is exactly why this course always brace-initializes: `{}` forces
     // the tick count to 0, a bare declaration does not.
-    std::chrono::duration<long, std::ratio<60>> d1_default{};  // brace-init -> 0
-    std::chrono::duration<long, std::ratio<60>> d1_copy{d1};   // from another duration
-    std::println("{} {}", d1_default, d1_copy);
+    std::chrono::duration<long, std::ratio<60>> d1_default{};             // brace-init -> 0
+    std::chrono::duration<long, std::ratio<60>> d1_from_tick_count{123};  // from a tick count
+    std::chrono::duration<long, std::ratio<60>> d1_copy{d1};              // from another duration
+    std::println("{} {} {}", d1_default, d1_from_tick_count, d1_copy);
 
     // zero(), min(), and max() are static member functions - they don't
     // need an existing duration to call them, just the type.
@@ -134,6 +135,10 @@ int main() {
     std::chrono::minutes m{2};
     std::chrono::seconds s{m};
     std::println("{} minutes = {}", m.count(), s);
+
+    // duration_cast works just as well on the race_duration example from
+    // earlier - forcing it down to a plain seconds count.
+    std::println("{}", std::chrono::duration_cast<std::chrono::seconds>(90min + 32s).count());
 
     // --- hh_mm_ss: splitting a duration into display-friendly fields ------
     // hh_mm_ss accepts any duration and exposes hours()/minutes()/seconds()/

@@ -1718,7 +1718,7 @@ count to `0`, a bare declaration does not.
 std::chrono::duration<long, std::ratio<60>> d1_default{};  // brace-init -> 0
 std::chrono::duration<long, std::ratio<60>> d1_from_tick_count{123};   // from a tick count
 std::chrono::duration<long, std::ratio<60>> d1_copy{d1};   // from another duration
-std::println("{} {} {}", d1_default, d1_from_tick_count, d1_copy);   // "0min 123min"
+std::println("{} {} {}", d1_default, d1_from_tick_count, d1_copy);   // "0min 123min 123min"
 ```
 
 **`zero()`, `min()`, and `max()` are static member functions** - they
@@ -1753,9 +1753,9 @@ std::println("{}", std::chrono::abs(std::chrono::seconds{-5}));   // "5s"
 library converts internally:
 
 ```cpp
-duration<long, ratio<60>> d3{10};   // 10 minutes
-duration<long, ratio<1>>  d4{14};   // 14 seconds
-d3 > d4;                             // true - compared as the same underlying time
+std::chrono::minutes d3{10};   // 10 minutes
+std::chrono::seconds d4{14};   // 14 seconds
+d3 > d4;                        // true - compared as the same underlying time
 ```
 
 **Converting between duration types** is where the interesting rules
@@ -1763,8 +1763,8 @@ live. Going from a smaller tick to a bigger tick with a **floating-point**
 Rep never loses information, so it stays implicit:
 
 ```cpp
-duration<long> d7{30};                  // 30 seconds (integral)
-duration<double, ratio<60>> d8{d7};     // 0.5 minutes - implicit, no data lost
+std::chrono::duration<long> d7{30};                       // 30 seconds (integral)
+std::chrono::duration<double, std::ratio<60>> d8{d7};     // 0.5 minutes - implicit, no data lost
 ```
 
 ```
@@ -1779,16 +1779,17 @@ a non-integral result - so the compiler refuses it outright, even when a
 particular value happens to divide evenly:
 
 ```cpp
-duration<long> d7{30};
-duration<long, ratio<60>> bad{d7};   // Error: possible truncation - refused
-                                      // at compile time, not just at runtime
+std::chrono::duration<long> d7{30};
+std::chrono::duration<long, std::ratio<60>> bad{d7};   // Error: possible truncation - refused
+                                                         // at compile time, not just at runtime
 ```
 
 `duration_cast<T>()` is the explicit override, the same spirit as
 `static_cast` - it forces the conversion using integer truncation:
 
 ```cpp
-auto forced{duration_cast<duration<long, ratio<60>>>(duration<long>{30})};
+auto forced{std::chrono::duration_cast<
+    std::chrono::duration<long, std::ratio<60>>>(std::chrono::duration<long>{30})};
 // forced == 0 minutes - 30 seconds truncates down, same as int division
 ```
 
@@ -1805,13 +1806,15 @@ Converting the **other** direction - minutes to seconds - never loses
 information when both Reps are integral, so it stays implicit either way:
 
 ```cpp
-duration<long, ratio<60>> d9{10};   // 10 minutes
-duration<long> d10{d9};              // 600 seconds - implicit, exact
+std::chrono::duration<long, std::ratio<60>> d9{10};   // 10 minutes
+std::chrono::duration<long> d10{d9};                   // 600 seconds - implicit, exact
 ```
 
-`duration<long>` here leans on `Period`'s default of `ratio<1>` - it's
-shorthand for `duration<long, ratio<1>>`, i.e. "ticks in seconds" - the
-same default-argument mechanic as `ratio<Num, Den = 1>` from earlier.
+`std::chrono::duration<long>` here leans on `Period`'s default of
+`std::ratio<1>` - it's shorthand for `std::chrono::duration<long,
+std::ratio<1>>`, i.e. "ticks in seconds" - the same default-argument
+mechanic as
+`std::ratio<Num, Den = 1>` from earlier.
 
 **One extra rule applies specifically to the predefined durations** you
 started this section with. The standard mandates that types like `minutes`
@@ -1820,24 +1823,25 @@ example above, a conversion that *could* produce a fractional result is a
 compile-time error, even when the specific numbers involved divide evenly:
 
 ```cpp
-seconds s{60};
-minutes m{s};   // Error - refused even though 60s IS exactly 1 minute;
-                // the compiler only looks at the TYPES, not the value
+std::chrono::seconds s{60};
+std::chrono::minutes m{s};   // Error - refused even though 60s IS exactly 1 minute;
+                              // the compiler only looks at the TYPES, not the value
 ```
 
 Converting minutes to seconds is always exact (multiplying by an integer
 never introduces a fraction), so it stays implicit:
 
 ```cpp
-minutes m{2};
-seconds s{m};   // Ok, implicit - 120s
+std::chrono::minutes m{2};
+std::chrono::seconds s{m};   // Ok, implicit - 120s
 ```
 
 And the `duration_cast` you just saw works just as well on the race-time
 example from earlier:
 
 ```cpp
-duration_cast<seconds>(90min + 32s).count();   // 5432
+using namespace std::chrono_literals;
+std::println("{}", std::chrono::duration_cast<std::chrono::seconds>(90min + 32s).count());   // 5432
 ```
 
 **`hh_mm_ss`** is a small helper type whose only job is to take a single
