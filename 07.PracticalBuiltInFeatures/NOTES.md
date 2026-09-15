@@ -1809,6 +1809,10 @@ duration<long, ratio<60>> d9{10};   // 10 minutes
 duration<long> d10{d9};              // 600 seconds - implicit, exact
 ```
 
+`duration<long>` here leans on `Period`'s default of `ratio<1>` - it's
+shorthand for `duration<long, ratio<1>>`, i.e. "ticks in seconds" - the
+same default-argument mechanic as `ratio<Num, Den = 1>` from earlier.
+
 **One extra rule applies specifically to the predefined durations** you
 started this section with. The standard mandates that types like `minutes`
 and `seconds` use **integral** Reps - so, just like the `long`-based
