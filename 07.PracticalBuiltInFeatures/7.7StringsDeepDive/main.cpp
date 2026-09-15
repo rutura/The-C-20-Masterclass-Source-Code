@@ -79,5 +79,16 @@ int main() {
     std::println("parsed -> item: {}, quantity: {}, price: {}",
                   item, quantity, price);
 
+    // --- raw string literals: turn off escaping entirely ---------------------
+    // An ordinary literal treats \ as the start of an escape sequence, so a
+    // literal backslash has to be doubled.
+    std::string path{"C:\\Users\\Ada\\Documents\\notes.txt"};
+
+    // R"( ... )" takes everything inside literally - no doubling needed.
+    // Both strings below hold the exact same characters.
+    std::string raw_path{R"(C:\Users\Ada\Documents\notes.txt)"};
+    std::println("\npath:     {}\nraw_path: {}\nequal:    {}",
+                  path, raw_path, path == raw_path);
+
     return 0;
 }

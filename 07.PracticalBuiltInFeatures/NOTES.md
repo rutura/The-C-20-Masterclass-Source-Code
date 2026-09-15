@@ -1061,6 +1061,43 @@ record >> item >> quantity >> price;
    same as std::cin >> - just reading from a string instead of the keyboard
 ```
 
+### Raw string literals: when backslashes are getting out of hand
+
+An ordinary string literal treats `\` as the start of an **escape
+sequence** - `\n` for a newline, `\t` for a tab, and so on. That means
+a literal backslash has to be escaped too, by doubling it, `\\`. A
+Windows-style file path is a good example of this getting out of hand
+fast:
+
+```cpp
+std::string path{"C:\\Users\\Ada\\Documents\\notes.txt"};   // every \ doubled
+```
+
+A **raw string literal**, written `R"( ... )"`, turns escaping off
+entirely - everything between the parentheses is taken literally,
+backslash included:
+
+```cpp
+std::string raw_path{R"(C:\Users\Ada\Documents\notes.txt)"};   // no doubling needed
+```
+
+```
+   ordinary:  "C:\\Users\\Ada\\Documents\\notes.txt"
+                   │↑    │↑    │↑
+                   each \\ is ONE literal backslash, spelled with two
+
+   raw:       R"(C:\Users\Ada\Documents\notes.txt)"
+                 │                                │
+                 R"(  starts it, no escaping inside   )"  ends it
+```
+
+Both lines above produce the **exact same string** - `R"(...)"` doesn't
+change what's stored, only how much escaping you have to type to get
+there. It earns its keep anywhere backslashes pile up: file paths,
+Windows registry keys, and - as the next lecture will lean on heavily -
+regular expression patterns, which use backslashes constantly (`\d`,
+`\w`, `\s`, ...).
+
 ---
 
 ## 7.8 String formatting with `std::format`
@@ -2102,7 +2139,12 @@ This function checks whether the *entire* string fits the pattern, returning `tr
 std::println("7 matches \\d: {}", std::regex_match("7", std::regex{R"(\d)"}));          // true
 std::println("77 matches \\d: {}", std::regex_match("77", std::regex{R"(\d)"}));         // false
 ```
-Now more examples,
+
+Recall from a previous lecture that `R"( ... )"` around the pattern is 
+a **raw string literal** - backslashes inside it are just backslashes, 
+not escape sequences, so `\d` can be written exactly as it reads instead of
+`"\\d"`. Regex patterns lean on backslashes constantly, so raw string
+literals are used for most patterns in this lecture from here on. Now more examples,
 
 ```cpp
 std::regex_match("7", std::regex{R"(\d)"});          // true  - \d is a single digit
@@ -2186,13 +2228,6 @@ second, and so on. `[0]` is always the entire match:
 
 `std::stoi` is a built-in function that converts a string into a signed integer. 
 
-The `R"( ... )"` around the pattern is a **raw string literal** - inside
-it, backslashes are just backslashes, not escape sequences. Without it,
-matching a literal digit would mean writing `"\\d"` (escaping the
-backslash itself so C++ passes a single `\` through to the regex
-engine); with a raw string, `\d` can be written exactly as it reads.
-Regex patterns lean on backslashes constantly, so raw string literals
-are used for every pattern in this lecture from here on.
 
 ```cpp
 std::regex date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
