@@ -2419,13 +2419,25 @@ const std::sregex_token_iterator token_end;
 }
 ```
 
-It can also be pointed at **specific capture groups by index**, instead of the whole
-match:
+Without telling it otherwise, a token iterator only ever yields submatch
+`0` - the **whole match** - even against a pattern that has capture
+groups. The date pattern below has three, but nothing here pulls them
+out individually yet:
 
 ```cpp
 std::regex date{R"(^(\d{4})/(\d{1,2})/(\d{1,2})$)"};
 std::string when{"2024/6/22"};
-std::vector month_and_day{2, 3};
+for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date};
+    it != token_end; ++it) {
+    std::println("\"{}\"", it->str());   // "2024/6/22" - the whole match, groups ignored
+}
+```
+
+It can also be pointed at **specific capture groups by index**, instead
+of the whole match - passing a `vector<int>` of the indices to walk:
+
+```cpp
+std::vector month_and_day{2, 3}; // Only walk index 2 and 3. 
 for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, month_and_day};
     it != token_end; ++it) {
     std::println("\"{}\"", it->str());
@@ -2435,6 +2447,8 @@ for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date, mont
 ```
    date pattern:  ^(\d{4})/(\d{1,2})/(\d{1,2})$
                     group1   group2    group3
+
+   no index given   →  submatch 0 (the WHOLE match)  →  "2024/6/22"
 
    {2, 3}  →  "only walk groups 2 and 3, skip group 1 and the whole match"
 

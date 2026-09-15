@@ -31,10 +31,21 @@ int main() {
         std::println("  \"{}\"", it->str());
     }
 
-    // A token iterator can also target specific capture groups by index -
-    // here, only groups 2 and 3 (month, day) of an anchored date pattern.
+    // Without telling it otherwise, a token iterator only ever yields
+    // submatch 0 - the WHOLE match - even though this pattern has three
+    // capture groups. The year, month, and day are matched, but nothing
+    // pulls them out individually here.
     std::regex date{R"(^(\d{4})/(\d{1,2})/(\d{1,2})$)"};
     std::string when{"2024/6/22"};
+
+    std::println("\ndefault token iterator on a pattern WITH capture groups:");
+    for (auto it = std::sregex_token_iterator{when.cbegin(), when.cend(), date};
+        it != token_end; ++it) {
+        std::println("  \"{}\"", it->str());
+    }
+
+    // A token iterator can also target specific capture groups by index -
+    // here, only groups 2 and 3 (month, day) of the same date pattern.
     std::vector month_and_day{2, 3};
 
     std::println("\nmonth and day only, from \"{}\":", when);
