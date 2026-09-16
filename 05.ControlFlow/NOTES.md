@@ -1,6 +1,6 @@
 # Control Flow
 
-Chapter 4 gave us variables and datatypes. Every program so far has run
+In the last chapters, we covered variables and datatypes. Every program so far has run
 **straight down the page**: statement, statement, statement, done.
 
 ```
