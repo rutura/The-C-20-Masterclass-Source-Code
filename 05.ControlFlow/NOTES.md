@@ -399,6 +399,14 @@ if (age >= 18) {
      ^ years_since_adult born       ^ it's gone
 ```
 
+### `=` vs `==`
+
+```
+   if (salary1 = salary2)  { ... }   ← assigns salary2 to salary1, result is that value
+   if (salary1 == salary2) { ... }   ← compares them   ✓ what you meant
+```
+Be careful: `=` is assignment, `==` is equality. 
+
 ---
 
 ## 5.6 Logical operators
