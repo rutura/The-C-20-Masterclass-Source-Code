@@ -1,8 +1,12 @@
 # First Steps
 
-In this lecture, we are officially starting our C++ journey. You will write
-your first program, see 
+In this chapter, we are officially starting our C++ journey. You will write
+your first program, see the difference between the classic `std::cout` way
+of printing and the modern C++23 `std::println` way, package work into a
+function, and read input back from the user.
 
+I know some of what I just said may not make sense yet, but don't worry. I break
+it all down in the videos.
 
 ---
 
