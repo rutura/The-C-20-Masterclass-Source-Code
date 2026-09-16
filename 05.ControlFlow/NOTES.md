@@ -411,12 +411,11 @@ Be careful: `=` is assignment, `==` is equality.
 
 ## 5.6 Logical operators
 
-Three operators that combine `bool` values.
+Three operators that combine `bool` values: AND, OR and NOT.
 
 ### Truth tables
 
 ```
-        &&  (AND)                ||  (OR)               !  (NOT)
    ┌───────┬───────┬─────┐  ┌───────┬───────┬─────┐  ┌───────┬─────┐
    │  a    │  b    │ a&&b│  │  a    │  b    │ a||b│  │  a    │  !a │
    ├───────┼───────┼─────┤  ├───────┼───────┼─────┤  ├───────┼─────┤
@@ -427,9 +426,6 @@ Three operators that combine `bool` values.
    └───────┴───────┴─────┘  └───────┴───────┴─────┘
      T only when BOTH        T when EITHER
 ```
-
-Build these on screen by printing every combination - it is the clearest
-way to show them.
 
 ### Combining conditions
 
@@ -459,38 +455,19 @@ Now walk it with `sessions = 0`:
    step 3   total_requests / sessions ─►  NEVER RUNS
 ```
 
-That last point is why this matters. `total_requests / sessions` with
-`sessions == 0` is a division by zero, which crashes the program. Because
-the `sessions != 0` test sits on the **left** of the `&&`, the division
-on the right is only ever reached when `sessions` is non-zero. The cheap
-test is **guarding** the risky one.
-
 ```cpp
 bool heavy_user{sessions != 0 && total_requests / sessions > 100};
 ```
 
-Order matters. Flip the two sides:
-
-```
-   total_requests / sessions > 100   &&   sessions != 0
-   └──────────────┬──────────────┘
-   runs FIRST, sessions is 0  ─►  divide by zero  ─►  crash
-```
-
-The guard only works when it is the left operand. This left-guard pattern
-is a real idiom - you will see it again in 5.8 for sentinel loops.
-
 ### Where the logical operators sit
 
-Here is the same precedence table from 5.2 again, so you do not have to
-scroll back. Highest precedence at the top; operators on one line share a
-level.
+Here is the precedence table with the logical operators.
 
 | Level | Operators (same line = same precedence)      | Associativity  | Kind             |
-|:-----:|---------------------------------------------|----------------|------------------|
-| 1     | `::`                                        | left to right  | scope            |
-| 2     | `()`  `[]`  `.`  `->`  `x++`  `x--`         | left to right  | postfix          |
-| 3     | `++x`  `--x`  `+x`  `-x`  `!`  `static_cast`| right to left  | unary (prefix)   |
+|:-----:|----------------------------------------------|----------------|------------------|
+| 1     | `::`                                         | left to right  | scope            |
+| 2     | `()`  `[]`  `.`  `->`  `x++`  `x--`          | left to right  | postfix          |
+| 3     | `++x`  `--x`  `+x`  `-x`  `!`  `static_cast` | right to left  | unary (prefix)   |
 | 4     | `*`  `/`  `%`                                | left to right  | multiplicative   |
 | 5     | `+`  `-`                                     | left to right  | additive         |
 | 6     | `<<`  `>>`                                   | left to right  | stream I/O       |
