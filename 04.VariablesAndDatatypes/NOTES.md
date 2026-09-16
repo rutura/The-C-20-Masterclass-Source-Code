@@ -1,21 +1,12 @@
 # Variables and Data Types
 
-Chapter 3 got a value on screen and a value back in. This chapter is
-about what a value actually *is* to the compiler: how the same number
-can be spelled four different ways, which built-in type to reach for and
-why, how `auto` saves you from writing the type out by hand, and one
-particularly sneaky bug that ties both of those together.
+In this chapter, we look at what a value actually *is* to the compiler:
+how the same number can be spelled four different ways, which built-in
+type to reach for and why, and how `auto` saves you from writing the type
+out by hand.
 
-The running example throughout is a small **retail / loyalty-points**
-scenario - purchases, discounts, customer records - carried forward
-lecture by lecture.
-
-```
-   4.2  number systems       the same value, four spellings
-   4.3  data types            which built-in type, and why
-   4.4  auto                  let the compiler write the type down
-   4.5  assignment            exercises pulling 3-4 together
-```
+If anything I just said sound confusing, don't worry, that's what we are here
+to clarify with the videos of this chapter.
 
 ---
 
@@ -290,36 +281,3 @@ reflexive default, and doubly not through an `auto` deduction you did
 not consciously notice (that stray `u` suffix). When in doubt, check
 what `auto` actually deduced with `sizeof` or a debugger before trusting
 it silently.
-
----
-
-## 4.5 Assignment
-
-Five exercises, each isolating one idea from 4.2-4.4. `main.cpp` in
-`4.5Assignment/` has the prompts as comments with `TODO` markers;
-`main_solution.cpp` has a worked solution.
-
-1. **Personal profile card** - declare a name, age, height (`double`,
-   meters), and student status (`bool`); print all four in one sentence.
-   Straight brace-initialization practice, nothing new.
-2. **Receipt printer** - six literals (three prices, three quantities),
-   compute per-item and grand totals, print with `{:.2f}` and aligned
-   labels. Exercises the `std::format` precision spec.
-3. **Base converter tool** - read a decimal `int` from `std::cin`, print
-   it back in octal/hex/binary with the same `{:#o}`/`{:#x}`/`{:#b}`
-   specs from 4.2, but on a value read at runtime instead of a hardcoded
-   literal.
-4. **Unit price calculator** - write a free function,
-   `double unit_price(double total_cost, int quantity)`, defined above
-   `main` (3.3's function-basics pattern), called with at least two
-   different inputs.
-5. **`auto` detective** - predict the deduced type for a handful of
-   `auto` declarations (a plain `int` literal, suffixed literals, a bare
-   string literal vs. an `s`-suffixed one, a mixed `int`/`double`
-   expression) *before* compiling, then check each prediction with
-   `sizeof` - direct practice of the 4.4 gotcha above.
-
-Chapter 4 closes with `4.6Quiz`, 15 multiple-choice questions spanning
-Chapter 3 and this chapter, each followed immediately by its answer and
-a short explanation - a self-check rather than a lecture, so it has no
-`main.cpp`/`CMakeLists.txt` of its own.
