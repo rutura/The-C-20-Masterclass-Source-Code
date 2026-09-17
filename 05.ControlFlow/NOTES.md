@@ -1007,8 +1007,10 @@ switch (grade) {
 }
 ```
 
-An `enum`/`enum class` is the same idea and is where `switch` really earns
-its keep - the compiler can warn you if a case is missing:
+An `enum`/`enum class` is a way to take a set of limited integer values we
+use in our program and give them easy to remember names that make sense. 
+Because they are integers under the hood, then can also be used as `switch`
+cases.
 
 ```cpp
 enum class Direction { North, South, East, West };
