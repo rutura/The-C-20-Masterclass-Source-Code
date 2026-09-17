@@ -1023,33 +1023,8 @@ switch (direction) {
 
 ### The same logic as `if`/`else if`
 
-Every `switch` here could be written as an `else if` ladder instead. Here's
-the star-rating example both ways, side by side:
-
-```cpp
-// switch - one expression, compared against several constants
-switch (score / 20) {
-    case 0:
-        ++oneStar;
-        break;
-    case 1:
-        ++twoStar;
-        break;
-    case 2:
-        ++threeStar;
-        break;
-    case 3:
-        ++fourStar;
-        break;
-    case 4:
-    case 5:
-        ++fiveStar;
-        break;
-    default:
-        std::println("  ignoring out-of-range score {}", score);
-        break;
-}
-```
+Every `switch` here could be written as an `else if` ladder instead. 
+But it won't be as readable.
 
 ---
 
