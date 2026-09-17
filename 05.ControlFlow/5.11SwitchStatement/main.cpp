@@ -8,19 +8,16 @@ int main() {
     // fit when you're branching on many discrete values of a single
     // expression - clearer than a long else-if ladder doing the same.
 
-    std::print("Enter the end-of-file indicator to stop "
-               "(Ctrl+Z then Enter on Windows, Ctrl+D on macOS/Linux).\n");
-
     int oneStar{0};
     int twoStar{0};
     int threeStar{0};
     int fourStar{0};
     int fiveStar{0};
 
-    std::print("Enter a review score (0-100): ");
+    std::print("Enter a review score (0-100), -1 to stop: ");
     int score{};
 
-    while (std::cin >> score) {
+    while (std::cin >> score && score != -1) {
         switch (score / 20) {       // 0-19 -> 0, 40-59 -> 2, 100 -> 5, ...
             case 0:
                 ++oneStar;
@@ -43,7 +40,7 @@ int main() {
                 break;              // optional on the last label, kept for symmetry
         }
 
-        std::print("Enter a review score (0-100): ");
+        std::print("Enter a review score (0-100), -1 to stop: ");
     }
 
     std::println("\n1 star : {}\n2 star : {}\n3 star : {}\n4 star : {}\n5 star : {}",

@@ -897,6 +897,29 @@ by 20 turns a whole range of scores into a single small number:
 ```
 
 ```cpp
+// using if/else if
+int bucket{score / 20};
+if (bucket == 0) {
+    ++oneStar;
+}
+else if (bucket == 1) {
+    ++twoStar;
+}
+else if (bucket == 2) {
+    ++threeStar;
+}
+else if (bucket == 3) {
+    ++fourStar;
+}
+else if (bucket == 4 || bucket == 5) {   
+    ++fiveStar;                          
+}
+else {
+    std::println("  ignoring out-of-range score {}", score);
+}
+```
+
+```cpp
 switch (score / 20) {
     case 0:
         ++oneStar;
@@ -948,13 +971,84 @@ mechanism happening **by accident**, and it is a classic bug.
 - The controlling expression must be an integer type (or `char`, or an
   `enum`).
 
-The example reads scores until end-of-file:
+The example reads scores until the user types the sentinel `-1`, the same
+convention 5.8's while-loop example already used:
 
 ```
-   while (std::cin >> score)   ── true while a number was read
-                              ── false at end-of-file:
-                                    Windows      : Ctrl+Z then Enter
-                                    macOS / Linux: Ctrl+D
+   while (std::cin >> score && score != -1)
+          └──────┬──────┘      └────┬────┘
+          a number was read     and it isn't the -1 sentinel
+```
+
+If the user types `-1`, `score != -1` is `false` and the loop stops before
+the switch ever runs - `-1 / 20` never gets a chance to hit `default`.
+
+### Other things you can switch on
+
+The controlling expression just has to boil down to an integer, so the
+`case` labels aren't limited to bucketed scores. A few other compile-time
+constants that show up often:
+
+```cpp
+// a menu choice typed as a plain number
+switch (menuChoice) {
+    case 1: /* add item */    break;
+    case 2: /* remove item */ break;
+    case 3: /* checkout */    break;
+    default: /* invalid */    break;
+}
+
+// a char works too - it's just a small integer under the hood
+switch (grade) {
+    case 'A': std::println("Excellent"); break;
+    case 'B': std::println("Good");      break;
+    case 'C': std::println("Passing");   break;
+    default:  std::println("Unknown grade"); break;
+}
+```
+
+An `enum`/`enum class` is the same idea and is where `switch` really earns
+its keep - the compiler can warn you if a case is missing:
+
+```cpp
+enum class Direction { North, South, East, West };
+
+switch (direction) {
+    case Direction::North: std::println("Heading up");    break;
+    case Direction::South: std::println("Heading down");  break;
+    case Direction::East:  std::println("Heading right"); break;
+    case Direction::West:  std::println("Heading left");  break;
+}
+```
+
+### The same logic as `if`/`else if`
+
+Every `switch` here could be written as an `else if` ladder instead. Here's
+the star-rating example both ways, side by side:
+
+```cpp
+// switch - one expression, compared against several constants
+switch (score / 20) {
+    case 0:
+        ++oneStar;
+        break;
+    case 1:
+        ++twoStar;
+        break;
+    case 2:
+        ++threeStar;
+        break;
+    case 3:
+        ++fourStar;
+        break;
+    case 4:
+    case 5:
+        ++fiveStar;
+        break;
+    default:
+        std::println("  ignoring out-of-range score {}", score);
+        break;
+}
 ```
 
 ---
