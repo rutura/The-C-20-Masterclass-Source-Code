@@ -660,7 +660,7 @@ else {
 ## 5.9 The `for` loop
 
 We have seen that a `while` loop has three parts: the setup above it, 
-the condition in the header, the update buriedin the body. `for` collects 
+the condition in the header, the update buried in the body. `for` collects 
 all three into **one line** so you can see them together.
 
 ```
@@ -799,17 +799,30 @@ cannot read them afterward.
    │        exit                │
    └────────────────────────────┘
 ```
+This loop is practical when the job has to be done at least once.
 
-Body **first**, condition **after** - so the body always runs **at least
-once**, even when the condition is false from the start.
+Body **first**, condition **after**
 
 ```
    while     :  CHECK, then maybe do        (body may run 0 times)
    do...while:  DO, then check whether again (body runs >= 1 time)
 ```
 
-Pick it when "do it, then decide whether to repeat" fits - the classic
-case is a prompt that must appear at least once:
+The counting example shows the other shape - a straight `for`-style loop
+written with `do...while`, which runs the body for `roll` = 1..10:
+
+```cpp
+int roll{1};
+do {
+    std::print("{} ", roll);
+    ++roll;
+} while (roll <= 10);
+```
+
+### Useful when something needs to be done before the test.
+
+The example below needs the user to type in the guess, so we do something 
+before we check. It's very suitable for a do while loop.
 
 ```cpp
 int guess{};
@@ -823,28 +836,8 @@ A plain `while` here would need the prompt written twice - once before
 the loop to prime it, once inside. `do...while` asks first, then only
 loops back if the answer was out of range:
 
-```
-   ask ──► read guess ──► guess valid? ──yes──► carry on
-              ▲                 │
-              │ no              │
-              └─────────────────┘
-
-   guess = 4   ─►  body runs once, 1..6 check passes, loop exits
-   guess = 9   ─►  body runs, check fails, "try again", body runs again
-```
-
 The semicolon after `while (...)` is easy to forget.
 
-The counting example shows the other shape - a straight `for`-style loop
-written with `do...while`, which runs the body for `roll` = 1..10:
-
-```cpp
-int roll{1};
-do {
-    std::print("{} ", roll);
-    ++roll;
-} while (roll <= 10);
-```
 
 ---
 
