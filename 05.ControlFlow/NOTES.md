@@ -877,19 +877,19 @@ by 20 turns a whole range of scores into a single small number:
 // using if/else if
 int bucket{score / 20};
 if (bucket == 0) {
-    ++oneStar;
+    ++one_star;
 }
 else if (bucket == 1) {
-    ++twoStar;
+    ++two_star;
 }
 else if (bucket == 2) {
-    ++threeStar;
+    ++three_star;
 }
 else if (bucket == 3) {
-    ++fourStar;
+    ++four_star;
 }
 else if (bucket == 4 || bucket == 5) {   
-    ++fiveStar;                          
+    ++five_star;                          
 }
 else {
     std::println("  ignoring out-of-range score {}", score);
@@ -899,20 +899,20 @@ else {
 ```cpp
 switch (score / 20) {
     case 0:
-        ++oneStar;
+        ++one_star;
         break;
     case 1:
-        ++twoStar;
+        ++two_star;
         break;
     case 2:
-        ++threeStar;
+        ++three_star;
         break;
     case 3:
-        ++fourStar;
+        ++four_star;
         break;
     case 4:                // 80-99  ─┐  both reach the same body,
     case 5:                // 100    ─┘  so 4 "falls through" into 5
-        ++fiveStar;
+        ++five_star;
         break;
     default:               // score outside 0-100
         std::println("  ignoring out-of-range score {}", score);
@@ -924,14 +924,14 @@ switch (score / 20) {
 
 ```
    case 1:
-       ++twoStar;
+       ++two_star;
        break;   ◄── STOP here, jump past the whole switch
 
    case 1:
-       ++twoStar;
+       ++two_star;
        ▼         ◄── NO break: execution falls straight into
-   case 2:           case 2's body and runs ++threeStar too
-       ++threeStar;
+   case 2:           case 2's body and runs ++three_star too
+       ++three_star;
 ```
 
 Stacking `case 4:` directly on top of `case 5:` with nothing between them
@@ -968,7 +968,7 @@ constants that show up often:
 
 ```cpp
 // a menu choice typed as a plain number
-switch (menuChoice) {
+switch (menu_choice) {
     case 1: /* add item */    break;
     case 2: /* remove item */ break;
     case 3: /* checkout */    break;
