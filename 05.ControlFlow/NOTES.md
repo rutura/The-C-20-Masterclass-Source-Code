@@ -1007,137 +1007,71 @@ But it won't be as readable!
 
 ## 5.12 `break` and `continue`
 
-Both of these are jump statements you put **inside a loop body** to
-change the normal flow:
+Both are jump statements you put **inside a loop body** to change the
+normal flow:
 
-- **`break`** - abandon the loop completely. Execution jumps to the first
-  statement *after* the loop. No more iterations, no matter how far the
-  counter still has to go.
-- **`continue`** - abandon only the *current* pass through the body. The
-  loop itself keeps running: execution jumps to the loop's next step (the
-  `++i` update in a `for`, the condition re-check in a `while`).
-
-In the diagram below, "the body" is whatever statements sit between the
-loop's braces - the real work the loop does each pass. Reading them
-top to bottom, `break`/`continue` cut that top-to-bottom flow short:
-
-```
-   break                              continue
-   ─────                              ────────
-   for (...) {                        for (...) {
-       (first part of body)               (first part of body)
-       if (found it) break; ──┐           if (skip this one) continue; ─┐
-       (rest of body)         │           (rest of body)  ◄─ NOT run    │
-   }                          │       }        ▲                        │
-   (code after the loop) ◄────┘       (back to the for's ++ and re-test)┘
-```
-
-`break` leaves the loop entirely; `continue` only skips the *rest of this
-pass* and lets the loop carry on.
-
-### The page-reading example
-
-We walk page numbers 1..10. `break` stops at a torn-out page; `continue`
-skips a blank one.
+- **`break`** - leave the loop completely, right now. No more iterations.
+- **`continue`** - skip the *rest of this pass only*. The loop moves on
+  to its next iteration as normal.
 
 ```cpp
-int page{};
-for (page = 1; page <= 10; ++page) {
-    if (page == 5) { break; }        // page torn out - stop reading
-    std::print("{} ", page);         // only reached for pages 1..4
-}
-// page is still 5 here (see note below)
+const std::string name{"Daniel"};
 
-for (int p{1}; p <= 10; ++p) {
-    if (p == 5) { continue; }        // page 5 is blank - skip just this pass
-    std::print("{} ", p);            // reached for every page except 5
+for (int i{0}; i < 10; ++i) {
+    std::println("[{}]: Your name is {}", i, name);
 }
 ```
 
 ```
-   break at page 5:      1  2  3  4  ✗
-                                     └─ loop ends; pages 6..10 never seen
-
-   continue at page 5:   1  2  3  4  ↷  6  7  8  9  10
-                                    │
-                                    └─ page 5's std::print is skipped,
-                                       but the loop keeps going
+   i:   0    1    2    3    4    5    6    7    8    9
+        │    │    │    │    │    │    │    │    │    │
+        ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼
+   [0]  [1]  [2]  [3]  [4]  [5]  [6]  [7]  [8]  [9]     ◄── all 10 printed
 ```
 
-**Why `page` is still `5` after the first loop.** The control variable is
-declared *before* the loop (`int page{};`), not in the header. So it
-outlives the loop, and you can read it afterward to find out *which*
-page you stopped on. If it were declared in the header
-(`for (int page = 1; ...)`) it would be gone the moment the loop ends,
-exactly like the loop variables in 5.9. Declaring it outside is a
-deliberate choice here so the "we stopped at page 5" information
-survives.
-
-### The `continue` gotcha in a `while` loop
-
-`continue` means "go to the loop's next step". In a `for` loop that next
-step is the update in the header, so the counter still moves:
-
-```
-   for (int p{1}; p <= 10; ++p) {
-       if (p == 5) continue;   ──►  runs ++p  ──►  re-checks p <= 10  ──►  next pass
-   }
-```
-
-In a `while` loop there is no update in the header - *you* are
-responsible for advancing the counter inside the body. `continue` jumps
-straight back to the condition and skips whatever body code came after
-it, including your `++p`:
-
-```
-   while (p < 10) {
-       if (p == 5) continue;   ──►  jumps straight back to  p < 10
-       ++p;                     ▲         (this line is NEVER reached
-   }                            └──────────  once p becomes 5)
-```
-
-So this loop is an **infinite loop**:
+### `break` - stop at `i == 5`
 
 ```cpp
-int p{0};
-while (p < 10) {
-    if (p == 5) { continue; }   // when p == 5, we jump back to the top...
-    ++p;                        // ...and never get here to make p go past 5
+for (int i{0}; i < 10; ++i) {
+    if (i == 5) { break; }     // stop dead, don't print 5 or anything after
+    std::println("[{}]: Your name is {}", i, name);
 }
-// p is stuck at 5 forever; the program hangs
 ```
 
-The fix is to advance the counter *before* the `continue`, or to
-restructure so the `++p` always runs:
+```
+   i:   0    1    2    3    4    5    6    7    8    9
+        │    │    │    │    │    │
+        ▼    ▼    ▼    ▼    ▼    ✗  ◄── break fires here
+       [0]  [1]  [2]  [3]  [4]            loop ends immediately
+                                       6..9 are never even reached
+```
+
+### `continue` - skip just `i == 5`
 
 ```cpp
-int p{0};
-while (p < 10) {
-    int current{p};
-    ++p;                        // advance FIRST, unconditionally
-    if (current == 5) { continue; }   // now safe - p has already moved
-    std::print("{} ", current);
+for (int i{0}; i < 10; ++i) {
+    if (i == 5) { continue; }  // skip only this pass's println
+    std::println("[{}]: Your name is {}", i, name);
 }
 ```
 
-### `break` and `continue` only affect the innermost loop
-
-When loops are nested, a `break` or `continue` inside the inner loop acts
-on the **inner** loop only. The outer loop is untouched:
-
-```cpp
-for (int row{1}; row <= 3; ++row) {
-    for (int col{1}; col <= 3; ++col) {
-        if (col == 2) { break; }   // breaks the col loop, NOT the row loop
-        std::print("({},{}) ", row, col);
-    }
-}
-// prints (1,1) (2,1) (3,1) - the outer loop still runs all 3 rows
+```
+   i:   0    1    2    3    4    5    6    7    8    9
+        │    │    │    │    │    │    │    │    │    │
+        ▼    ▼    ▼    ▼    ▼    ↷    ▼    ▼    ▼    ▼
+   [0]  [1]  [2]  [3]  [4]      [6]  [7]  [8]  [9]     ◄── [5] skipped,
+                            └─ println skipped,             loop keeps going
+                               but ++i still runs
 ```
 
-There is no built-in "break out of both loops" statement. If you need
-that, the common options are a flag variable the outer loop checks, or
-moving the nested loops into their own function and using `return`.
+Side by side, the difference is: `break` cuts the whole loop short;
+`continue` only cuts the current pass short.
+
+```
+   break:     [0] [1] [2] [3] [4]                          ← stops for good
+   continue:  [0] [1] [2] [3] [4]      [6] [7] [8] [9]      ← keeps going
+                                  └ 5 missing, rest intact ┘
+```
 
 ---
 
