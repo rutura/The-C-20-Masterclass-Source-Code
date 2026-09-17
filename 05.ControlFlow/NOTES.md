@@ -838,8 +838,8 @@ loops back if the answer was out of range:
 
 The semicolon after `while (...)` is easy to forget.
 
-
 ---
+
 ## 5.11 The `switch` statement
 
 Compare **one integer expression** against a list of constant `case`
