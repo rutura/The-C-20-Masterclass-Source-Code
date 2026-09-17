@@ -1077,8 +1077,8 @@ Side by side, the difference is: `break` cuts the whole loop short;
 
 ## 5.13 First look at `std::string`
 
-We used `std::string` in passing in chapter 4. Here is its own moment
-before the chapter closes. Needs `<string>`.
+We have used strings on many occasions in the course so far. In this lecture,
+we are going to visit it more and see some more operations you can do on it.
 
 A `std::string` is an object that holds a piece of text - a sequence of
 characters - and manages its own memory. It grows and shrinks as needed;
