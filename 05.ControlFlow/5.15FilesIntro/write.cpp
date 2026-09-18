@@ -1,6 +1,5 @@
 #include <fstream>
 #include <print>
-#include <string>
 #include <filesystem>
 
 // Part 1 of the file lecture: write a list of names to a text file.
@@ -28,9 +27,11 @@ int main() {
 
     // One name per line. The '\n' is what makes each name its own line,
     // which is exactly what read.cpp relies on when it reads line by line.
-    for (const std::string& name : {"Ada", "Alan", "Grace", "Linus", "Bjarne"}) {
-        out << name << '\n';
-    }
+    out << "Ada" << '\n';
+    out << "Alan" << '\n';
+    out << "Grace" << '\n';
+    out << "Linus" << '\n';
+    out << "Bjarne" << '\n';
 
     // The stream also closes automatically when `out` goes out of scope,
     // but closing explicitly makes the "we're done writing" point clear.
