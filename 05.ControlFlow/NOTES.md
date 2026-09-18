@@ -1181,8 +1181,11 @@ Kept to just these members - the deeper string API is a later chapter.
 
 ## 5.15 A first taste of files
 
-In this lectures, we are going to introduce the subject of reading and writing
-files.
+Everything so far has read from the keyboard and written to the console.
+This lecture is a bonus - a bridge to the chapters ahead - that swaps
+those for a **file on disk**. It is the one piece of this chapter that is
+not in the core reference material; treat it as a preview, not something
+you will be tested on here.
 
 ### A file is just another stream
 
@@ -1285,9 +1288,11 @@ if (!out) {                       // did the file actually open?
     return 1;
 }
 
-for (const std::string& name : {"Ada", "Alan", "Grace", "Linus", "Bjarne"}) {
-    out << name << '\n';          // '\n' puts each name on its own line
-}
+out << "Ada" << '\n';              // '\n' puts each name on its own line
+out << "Alan" << '\n';
+out << "Grace" << '\n';
+out << "Linus" << '\n';
+out << "Bjarne" << '\n';
 out.close();
 ```
 
@@ -1331,8 +1336,7 @@ has **no folder in it**, so the program creates and looks for the file in
 its **working directory** (also called the "current directory") - and
 that is *not* necessarily the folder your `write.cpp` lives in.
 
-The working directory is: **the folder that was current in whatever
-launched the program.**
+The working directory is: **the folder that was current in whatever launched the program.**
 
 | How you run it                         | Working directory is usually...                     |
 |----------------------------------------|-----------------------------------------------------|
@@ -1375,8 +1379,8 @@ somewhere under your build folder.
    Now `names.txt` lands in `5.15FilesIntro`, because that is the working
    directory you launched from.
 
-**Whatever you do, run `rooster_write` before `rooster_read`, from the
-same working directory.** If `read.cpp` prints "Could not open
+Whatever you do, run `rooster_write` before `rooster_read`, from the
+**same working directory.** If `read.cpp` prints "Could not open
 names.txt", it is almost always one of: you skipped `rooster_write`, or
 you ran the two programs from different directories.
 
