@@ -175,15 +175,22 @@ int main() {
     /*
         Exercise 4 - Grade histogram with switch
 
-        Read grades until end-of-file (while (std::cin >> grade)). For
-        each one, use a switch on grade / 10 to increment the right
-        letter-grade counter (A: 90-100, B: 80s, C: 70s, D: 60s,
-        F: below 60). After input ends, print each letter followed by a
-        bar of that many '*' characters. Build each bar with an inner
-        loop.
+        Read grades one at a time until the user enters -1 (sentinel),
+        using a while loop primed with one read before the loop. For
+        each grade, use a switch on grade / 10 to append a '*' to the
+        right letter-grade bar (A: 90-100, B: 80s, C: 70s, D: 60s,
+        F: below 60) - each bar is its own std::string. After input
+        ends, print each letter followed by its bar.
 
-        Sample output (user enters 95 88 82 71 60 55 91, then Ctrl+Z):
-            Enter grades, end-of-file to finish: > 95 88 82 71 60 55 91
+        Sample output (user enters 95 88 82 71 60 55 91 -1):
+            Enter a grade (-1 to stop): > 95
+            Enter a grade (-1 to stop): > 88
+            Enter a grade (-1 to stop): > 82
+            Enter a grade (-1 to stop): > 71
+            Enter a grade (-1 to stop): > 60
+            Enter a grade (-1 to stop): > 55
+            Enter a grade (-1 to stop): > 91
+            Enter a grade (-1 to stop): > -1
             A: **
             B: **
             C: *
@@ -212,21 +219,92 @@ int main() {
 
 
     /*
-        Exercise 6 - String report line
+        Exercise 6 - Palindrome check
 
-        Given std::string first{"Ada"}; and std::string last{"Lovelace"};
-        build a full name by concatenation (with a space between), print
-        it and its length, then report whether the full name starts with
-        "Ada " and whether it ends with "ace" using starts_with /
-        ends_with.
+        std::string supports a way to grab an element at a given index:
 
-        Sample output (no input needed):
-            full name: "Ada Lovelace", length 12
-            starts with "Ada " : true
-            ends with "ace"    : true
+            - full[i]     - fast, no bounds checking. Passing an
+                            out-of-range i is undefined behavior - it
+                            will not stop you.
+            - full.at(i)  - same result, but checks the index first and
+                            throws an exception if it's out of range.
+                            Slightly slower, but safer.
+
+        A palindrome is a word that reads the same forwards and
+        backwards. Examples:
+            "racecar" -> palindrome (7 characters, odd length)
+            "abba"    -> palindrome (4 characters, even length)
+            "hello"   -> not a palindrome
+
+        The idea: walk one index in from the front (i) and one in from
+        the back (j) at the same time, comparing word[i] to word[j] as
+        you go. If they ever differ, it's not a palindrome. If the
+        indices meet or cross in the middle without a mismatch, it is.
+
+        Odd length - "racecar" (7 characters), the indices meet at the
+        middle character:
+
+            r  a  c  e  c  a  r
+            0  1  2  3  4  5  6
+            ^                 ^
+           i=0              j=6    word[0]=='r', word[6]=='r' -> match, move in
+
+               ^           ^
+              i=1         j=5      word[1]=='a', word[5]=='a' -> match, move in
+
+                  ^     ^
+                 i=2   j=4         word[2]=='c', word[4]=='c' -> match, move in
+
+                     ^^
+                    i=3==j=3       i meets j - middle reached, no mismatch found
+
+        Even length - "abba" (4 characters), the indices cross without
+        ever landing on the same character:
+
+            a  b  b  a
+            0  1  2  3
+            ^        ^
+           i=0      j=3     word[0]=='a', word[3]=='a' -> match, move in
+
+               ^  ^
+              i=1 j=2       word[1]=='b', word[2]=='b' -> match, move in
+
+               ^^
+              i=2 j=1       i has crossed j (i > j) - middle reached, no mismatch found
+
+        Either way, the loop should stop as soon as i is no longer less
+        than j - that condition works for both odd and even lengths.
+
+        Your task: write a loop that checks whether a std::string is a
+        palindrome, following the walk-through above. Track the result
+        in a bool (true until you find a mismatch). Only one `word`
+        variable should be active at a time - leave the other two
+        commented out - so you write and test the loop just once. Try
+        each of "racecar" (odd length), "abba" (even length), and
+        "hello" (not a palindrome) by uncommenting one at a time,
+        rebuilding, and rerunning.
+
+        Sample output (with "racecar" active):
+            "racecar" is a palindrome: true
     */
     std::println("\n--- Exercise 6: String report line ---");
     // TODO
+    {
+        // Try each word one at a time - comment out two, leave one
+        // active, rebuild and rerun to see the loop handle each case.
+        std::string word{"racecar"};    // odd length - has a middle character
+        // std::string word{"abba"};    // even length - no middle character
+        // std::string word{"hello"};   // not a palindrome
+
+        bool is_palindrome{true};
+
+        // TODO: YOUR LOOP GOES BELOW THIS LINE
+
+
+        // TODO: YOUR LOOP GOES ABOVE THIS LINE
+
+        std::println("\"{}\" is a palindrome: {}", word, is_palindrome);
+    }
 
     return 0;
 }
