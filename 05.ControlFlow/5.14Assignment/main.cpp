@@ -37,6 +37,34 @@ int main() {
     */
     std::println("--- Exercise 1: Letter grade classifier ---");
     // TODO
+    {
+        /*
+        std::print("Enter a grade (0-100): ");
+        int grade{};
+        std::cin >> grade;
+
+        if (grade >= 90) {
+            std::println("Letter: A");
+        }
+        else if (grade >= 80) {
+            std::println("Letter: B");
+        }
+        else if (grade >= 70) {
+            std::println("Letter: C");
+        }
+        else if (grade >= 60) {
+            std::println("Letter: D");
+        }
+        else {
+            std::println("Letter: F");
+        }
+
+        // Ternary: the whole `grade >= 60 ? "pass" : "fail"` is one value,
+        // passed straight to println - no if statement needed.
+        std::println("{}", grade >= 60 ? "pass" : "fail");
+        */
+
+    }
 
 
     /*
@@ -62,6 +90,32 @@ int main() {
     */
     std::println("\n--- Exercise 2: Average of n scores ---");
     // TODO
+    {
+        /*
+        std::print("How many scores? ");
+        int n{};
+        std::cin >> n;
+
+        int total{};
+        for (int i{ 0 }; i < n; ++i) {
+            std::print("Score {}: ", i + 1);
+            int score{};
+            std::cin >> score;
+            total += score;
+        }
+
+        if (n == 0) {
+            std::println("no scores");           // guard: never divide by 0
+        }
+        else {
+            // static_cast<double> on one operand forces real division,
+            // so 265 / 3 is 88.33..., not the integer 88.
+            double average{static_cast<double>( total) / n };
+            std::println("total {}, average {:.2f}", total, average);
+        }
+        */
+
+    }
 
 
     /*
@@ -86,6 +140,36 @@ int main() {
     */
     std::println("\n--- Exercise 3: Sentinel-controlled tally ---");
     // TODO
+    {
+        int passing{ 0 };
+        int failing{ 0 };
+
+        std::print("Score (-1 to stop): ");
+        int score{};
+        std::cin >> score;
+
+        while (score != -1) {
+
+            //Ignore any score outside the range
+            if (score < 0 || score > 100) {
+                std::print("Score (-1 to stop): ");
+                std::cin >> score;
+                continue;
+            }
+
+            if (score >= 60) {
+                ++passing;
+            }
+            else {
+                ++failing;
+            }
+            std::print("Score (-1 to stop): ");
+            std::cin >> score;
+        }
+
+        std::println("passing: {}, failing: {}", passing, failing);
+
+    }
 
 
     /*
