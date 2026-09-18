@@ -1,0 +1,41 @@
+#include <fstream>
+#include <print>
+#include <filesystem>
+
+// Part 1 of the file lecture: write a list of names to a text file.
+//
+// A file is just another stream. std::cout sends characters to the
+// console; std::ofstream ("output file stream") sends them to a file
+// with the same << operator.
+
+int main(){
+    std::println("working directory: {}",
+        std::filesystem::current_path().string());
+
+    // Opening the stream with a filename creates (or truncates) the file
+    // in the program's working directory - see the lecture notes for
+    // where that actually is when you run from an IDE.
+    std::ofstream out{ "myfile.txt" };
+
+    // Always check the file actually opened before writing to it.
+    if (!out) {
+        std::println("Could not open names.txt for writing.");
+        return 1;
+    }
+
+    // One name per line. The '\n' is what makes each name its own line,
+    // which is exactly what read.cpp relies on when it reads line by line.
+
+    out << "Ada" << '\n';
+    out << "Alan" << '\n';
+    out << "Grace" << '\n';
+    out << "Linus" << '\n';
+    out << "Bjarne" << '\n';
+    out << "Steve" << '\n';
+    out << "Mark" << '\n';
+
+    out.close();
+
+    std::println("Wrote 5 names to names.txt");
+
+}

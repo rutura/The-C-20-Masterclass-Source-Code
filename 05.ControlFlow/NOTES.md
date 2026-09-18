@@ -1181,11 +1181,7 @@ Kept to just these members - the deeper string API is a later chapter.
 
 ## 5.15 A first taste of files
 
-Everything so far has read from the keyboard and written to the console.
-This lecture is a bonus - a bridge to the chapters ahead - that swaps
-those for a **file on disk**. It is the one piece of this chapter that is
-not in the core reference material; treat it as a preview, not something
-you will be tested on here.
+In this lecture, we'll take a practical detour and look at how to read and write files.
 
 ### A file is just another stream
 
