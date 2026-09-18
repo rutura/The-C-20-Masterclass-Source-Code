@@ -326,13 +326,30 @@ int main() {
         // std::string word{"hello"};   // not a palindrome
 
         bool is_palindrome{true};
-        for (std::size_t i{0}, j{word.length() - 1}; i < j; ++i, --j) {
+        std::size_t i{0};
+        std::size_t j{word.length() - 1};
+        while (i < j) {
             if (word.at(i) != word.at(j)) {       // .at() - bounds-checked read
                 is_palindrome = false;
                 break;
             }
+            ++i;
+            --j;
         }
         std::println("\"{}\" is a palindrome: {}", word, is_palindrome);
+
+        // A for loop can pack the two indices into its header - two
+        // initializers and two updates, separated by commas:
+        /*
+        bool is_palindrome{true};
+        for (std::size_t i{0}, j{word.length() - 1}; i < j; ++i, --j) {
+             if (word.at(i) != word.at(j)) {
+                 is_palindrome = false;
+                 break;
+             }
+         }
+         std::println("\"{}\" is a palindrome: {}", word, is_palindrome);
+        */
     }
 
     return 0;
