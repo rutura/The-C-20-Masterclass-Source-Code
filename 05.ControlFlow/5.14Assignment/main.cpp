@@ -135,7 +135,15 @@ int main() {
 
 
     /*
-        Exercise 6 - String report line
+        Exercise 6 - String report line, palindrome check
+
+        std::string supports indexing, just like an array:
+            - full[i]     - fast, no bounds checking. Passing an
+                            out-of-range i is undefined behavior - it
+                            will not stop you.
+            - full.at(i)  - same result, but checks the index first and
+                            throws an exception if it's out of range.
+                            Slightly slower, but safer.
 
         Given std::string first{"Ada"}; and std::string last{"Lovelace"};
         build a full name by concatenation (with a space between), print
@@ -143,10 +151,40 @@ int main() {
         "Ada " and whether it ends with "ace" using starts_with /
         ends_with.
 
-        Sample output (no input needed):
+        Then, given a separate std::string word, determine whether it
+        reads the same forwards and backwards - a palindrome. Examples:
+            "racecar" -> palindrome
+            "level"   -> palindrome
+            "hello"   -> not a palindrome
+
+        The idea: walk one index in from the front (i) and one in from
+        the back (j) at the same time, comparing word[i] to word[j] as
+        you go. If they ever differ, it's not a palindrome. If the
+        indices meet or cross in the middle without a mismatch, it is.
+
+            r  a  c  e  c  a  r
+            0  1  2  3  4  5  6
+            ^                 ^
+           i=0              j=6    word[0]=='r', word[6]=='r' -> match, move in
+
+               ^           ^
+              i=1         j=5      word[1]=='a', word[5]=='a' -> match, move in
+
+                  ^     ^
+                 i=2   j=4         word[2]=='c', word[4]=='c' -> match, move in
+
+                     ^^
+                    i=3==j=3       i meets j - middle reached, no mismatch found
+
+        Try it with both a palindrome and a non-palindrome word to check
+        your logic catches both cases.
+
+        Sample output (word = "racecar", then word = "hello"):
             full name: "Ada Lovelace", length 12
             starts with "Ada " : true
             ends with "ace"    : true
+            "racecar" is a palindrome: true
+            "hello" is a palindrome: false
     */
     std::println("\n--- Exercise 6: String report line ---");
     // TODO
