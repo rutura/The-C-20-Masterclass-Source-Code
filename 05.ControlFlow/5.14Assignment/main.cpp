@@ -204,6 +204,7 @@ int main() {
     std::println("\n--- Exercise 4: Grade histogram ---");
     // TODO
     {
+        /*
         std::string a_bar{};
         std::string b_bar{};
         std::string c_bar{};
@@ -245,6 +246,7 @@ int main() {
         std::println("C: {}", c_bar);
         std::println("D: {}", d_bar);
         std::println("F: {}", f_bar);
+        */
 
     }
 
@@ -264,6 +266,20 @@ int main() {
     */
     std::println("\n--- Exercise 5: Retry prompt ---");
     // TODO
+    {
+        /*
+        int grade{};
+
+        do {
+            std::print("Enter a grade (0-100): ");
+            std::cin >> grade;
+
+        } while (grade < 0 || grade > 100);
+
+        std::println("Accepted: {}", grade);
+        */
+
+    }
 
 
     /*
@@ -340,14 +356,36 @@ int main() {
     {
         // Try each word one at a time - comment out two, leave one
         // active, rebuild and rerun to see the loop handle each case.
-        std::string word{"racecar"};    // odd length - has a middle character
+        // std::string word{"racecar"};    // odd length - has a middle character
         // std::string word{"abba"};    // even length - no middle character
         // std::string word{"hello"};   // not a palindrome
+        std::string word{ "kayak1" };
 
         bool is_palindrome{true};
 
         // TODO: YOUR LOOP GOES BELOW THIS LINE
 
+        for (std::size_t i{ 0 }, j{ word.length() - 1 };i < j; ++i, --j) {
+            if (word.at(i) != word.at(j)) {
+                is_palindrome = false;
+                break;
+            }
+
+        }
+
+        /*
+        std::size_t i{ 0 };
+        std::size_t j{ word.length() - 1 };
+
+        while (i < j) {
+            if (word.at(i) != word.at(j)) {
+                is_palindrome = false;
+                break;
+            }
+            ++i;
+            --j;
+        }
+        */
 
         // TODO: YOUR LOOP GOES ABOVE THIS LINE
 
