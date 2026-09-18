@@ -141,6 +141,7 @@ int main() {
     std::println("\n--- Exercise 3: Sentinel-controlled tally ---");
     // TODO
     {
+        /*
         int passing{ 0 };
         int failing{ 0 };
 
@@ -168,6 +169,7 @@ int main() {
         }
 
         std::println("passing: {}, failing: {}", passing, failing);
+        */
 
     }
 
@@ -181,6 +183,8 @@ int main() {
         right letter-grade bar (A: 90-100, B: 80s, C: 70s, D: 60s,
         F: below 60) - each bar is its own std::string. After input
         ends, print each letter followed by its bar.
+
+        HINT: Use std::string to collect * characters for each grade.
 
         Sample output (user enters 95 88 82 71 60 55 91 -1):
             Enter a grade (-1 to stop): > 95
@@ -199,6 +203,50 @@ int main() {
     */
     std::println("\n--- Exercise 4: Grade histogram ---");
     // TODO
+    {
+        std::string a_bar{};
+        std::string b_bar{};
+        std::string c_bar{};
+        std::string d_bar{};
+        std::string f_bar{};
+
+        std::print("Enter a grade (-1 to stop): ");
+        int grade{};
+        std::cin >> grade;
+
+        while (grade != -1) {
+
+            switch (grade / 10) {
+
+            case 10:
+            case 9:
+                a_bar += '*';
+                break;
+            case 8:
+                b_bar += '*';
+                break;
+            case 7:
+                c_bar += '*';
+                break;
+            case 6:
+                d_bar += '*';
+                break;
+            default :
+                f_bar += '*';
+                break;
+            }
+
+            std::print("Enter a grade (-1 to stop): ");
+            std::cin >> grade;
+
+        }
+        std::println("A: {}", a_bar);
+        std::println("B: {}", b_bar);
+        std::println("C: {}", c_bar);
+        std::println("D: {}", d_bar);
+        std::println("F: {}", f_bar);
+
+    }
 
 
     /*
