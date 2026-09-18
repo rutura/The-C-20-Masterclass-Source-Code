@@ -135,7 +135,7 @@ int main() {
 
 
     /*
-        Exercise 6 - String report line, palindrome check
+        Exercise 6 - Palindrome check
 
         std::string supports indexing, just like an array:
             - full[i]     - fast, no bounds checking. Passing an
@@ -145,22 +145,19 @@ int main() {
                             throws an exception if it's out of range.
                             Slightly slower, but safer.
 
-        Given std::string first{"Ada"}; and std::string last{"Lovelace"};
-        build a full name by concatenation (with a space between), print
-        it and its length, then report whether the full name starts with
-        "Ada " and whether it ends with "ace" using starts_with /
-        ends_with.
-
-        Then, given a separate std::string word, determine whether it
-        reads the same forwards and backwards - a palindrome. Examples:
-            "racecar" -> palindrome
-            "level"   -> palindrome
+        A palindrome is a word that reads the same forwards and
+        backwards. Examples:
+            "racecar" -> palindrome (7 characters, odd length)
+            "abba"    -> palindrome (4 characters, even length)
             "hello"   -> not a palindrome
 
         The idea: walk one index in from the front (i) and one in from
         the back (j) at the same time, comparing word[i] to word[j] as
         you go. If they ever differ, it's not a palindrome. If the
         indices meet or cross in the middle without a mismatch, it is.
+
+        Odd length - "racecar" (7 characters), the indices meet at the
+        middle character:
 
             r  a  c  e  c  a  r
             0  1  2  3  4  5  6
@@ -176,17 +173,36 @@ int main() {
                      ^^
                     i=3==j=3       i meets j - middle reached, no mismatch found
 
-        Try it with both a palindrome and a non-palindrome word to check
-        your logic catches both cases.
+        Even length - "abba" (4 characters), the indices cross without
+        ever landing on the same character:
 
-        Sample output (word = "racecar", then word = "hello"):
-            full name: "Ada Lovelace", length 12
-            starts with "Ada " : true
-            ends with "ace"    : true
+            a  b  b  a
+            0  1  2  3
+            ^        ^
+           i=0      j=3     word[0]=='a', word[3]=='a' -> match, move in
+
+               ^  ^
+              i=1 j=2       word[1]=='b', word[2]=='b' -> match, move in
+
+               ^^
+              i=2 j=1       i has crossed j (i > j) - middle reached, no mismatch found
+
+        Either way, the loop should stop as soon as i is no longer less
+        than j - that condition works for both odd and even lengths.
+
+        Your task: write a loop that checks whether a std::string is a
+        palindrome, following the walk-through above. Track the result
+        in a bool (true until you find a mismatch). Only one `word`
+        variable should be active at a time - leave the other two
+        commented out - so you write and test the loop just once. Try
+        each of "racecar" (odd length), "abba" (even length), and
+        "hello" (not a palindrome) by uncommenting one at a time,
+        rebuilding, and rerunning.
+
+        Sample output (with "racecar" active):
             "racecar" is a palindrome: true
-            "hello" is a palindrome: false
     */
-    std::println("\n--- Exercise 6: String report line ---");
+    std::println("\n--- Exercise 6: Palindrome check ---");
     // TODO
 
     return 0;
