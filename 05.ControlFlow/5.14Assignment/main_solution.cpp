@@ -157,15 +157,22 @@ int main() {
     /*
         Exercise 4 - Grade histogram with switch
 
-        Read grades until end-of-file (while (std::cin >> grade)). For
-        each one, use a switch on grade / 10 to increment the right
-        letter-grade counter (A: 90-100, B: 80s, C: 70s, D: 60s,
-        F: below 60). After input ends, print each letter followed by a
-        bar of that many '*' characters. Build each bar with an inner
-        loop.
+        Read grades one at a time until the user enters -1 (sentinel),
+        using a while loop primed with one read before the loop. For
+        each grade, use a switch on grade / 10 to append a '*' to the
+        right letter-grade bar (A: 90-100, B: 80s, C: 70s, D: 60s,
+        F: below 60) - each bar is its own std::string. After input
+        ends, print each letter followed by its bar.
 
-        Sample output (user enters 95 88 82 71 60 55 91, then Ctrl+Z):
-            Enter grades, end-of-file to finish: > 95 88 82 71 60 55 91
+        Sample output (user enters 95 88 82 71 60 55 91 -1):
+            Enter a grade (-1 to stop): > 95
+            Enter a grade (-1 to stop): > 88
+            Enter a grade (-1 to stop): > 82
+            Enter a grade (-1 to stop): > 71
+            Enter a grade (-1 to stop): > 60
+            Enter a grade (-1 to stop): > 55
+            Enter a grade (-1 to stop): > 91
+            Enter a grade (-1 to stop): > -1
             A: **
             B: **
             C: *
@@ -174,44 +181,45 @@ int main() {
     */
     std::println("\n--- Exercise 4: Grade histogram ---");
     {
-        int aCount{0};
-        int bCount{0};
-        int cCount{0};
-        int dCount{0};
-        int fCount{0};
+        std::string a_bar{};
+        std::string b_bar{};
+        std::string c_bar{};
+        std::string d_bar{};
+        std::string f_bar{};
 
-        std::print("Enter grades, end-of-file to finish: ");
+        std::print("Enter a grade (-1 to stop): ");
         int grade{};
-        while (std::cin >> grade) {
+        std::cin >> grade;                        // priming read
+
+        while (grade != -1) {
             switch (grade / 10) {
-                case 10:                         // 100 lands here
-                case 9:                          // 90-99 falls through to same body
-                    ++aCount;
+                case 10:                          // 100 lands here
+                case 9:                           // 90-99 falls through to same body
+                    a_bar = a_bar + '*';
                     break;
                 case 8:
-                    ++bCount;
+                    b_bar = b_bar + '*';
                     break;
                 case 7:
-                    ++cCount;
+                    c_bar = c_bar + '*';
                     break;
                 case 6:
-                    ++dCount;
+                    d_bar = d_bar + '*';
                     break;
-                default:                         // anything below 60
-                    ++fCount;
+                default:                          // anything below 60
+                    f_bar = f_bar + '*';
                     break;
             }
+
+            std::print("Enter a grade (-1 to stop): ");
+            std::cin >> grade;                    // read next before re-testing
         }
 
-        int counts[]{aCount, bCount, cCount, dCount, fCount};
-        char letters[]{'A', 'B', 'C', 'D', 'F'};
-        for (int i{0}; i < 5; ++i) {
-            std::print("{}: ", letters[i]);
-            for (int star{0}; star < counts[i]; ++star) {   // inner loop draws the bar
-                std::print("*");
-            }
-            std::println("");
-        }
+        std::println("A: {}", a_bar);
+        std::println("B: {}", b_bar);
+        std::println("C: {}", c_bar);
+        std::println("D: {}", d_bar);
+        std::println("F: {}", f_bar);
     }
 
 

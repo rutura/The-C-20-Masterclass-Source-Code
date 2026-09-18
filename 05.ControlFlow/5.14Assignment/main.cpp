@@ -91,15 +91,22 @@ int main() {
     /*
         Exercise 4 - Grade histogram with switch
 
-        Read grades until end-of-file (while (std::cin >> grade)). For
-        each one, use a switch on grade / 10 to increment the right
-        letter-grade counter (A: 90-100, B: 80s, C: 70s, D: 60s,
-        F: below 60). After input ends, print each letter followed by a
-        bar of that many '*' characters. Build each bar with an inner
-        loop.
+        Read grades one at a time until the user enters -1 (sentinel),
+        using a while loop primed with one read before the loop. For
+        each grade, use a switch on grade / 10 to append a '*' to the
+        right letter-grade bar (A: 90-100, B: 80s, C: 70s, D: 60s,
+        F: below 60) - each bar is its own std::string. After input
+        ends, print each letter followed by its bar.
 
-        Sample output (user enters 95 88 82 71 60 55 91, then Ctrl+Z):
-            Enter grades, end-of-file to finish: > 95 88 82 71 60 55 91
+        Sample output (user enters 95 88 82 71 60 55 91 -1):
+            Enter a grade (-1 to stop): > 95
+            Enter a grade (-1 to stop): > 88
+            Enter a grade (-1 to stop): > 82
+            Enter a grade (-1 to stop): > 71
+            Enter a grade (-1 to stop): > 60
+            Enter a grade (-1 to stop): > 55
+            Enter a grade (-1 to stop): > 91
+            Enter a grade (-1 to stop): > -1
             A: **
             B: **
             C: *
