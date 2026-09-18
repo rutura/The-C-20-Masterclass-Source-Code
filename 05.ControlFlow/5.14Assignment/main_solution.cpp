@@ -251,7 +251,8 @@ int main() {
     /*
         Exercise 6 - Palindrome check
 
-        std::string supports indexing, just like an array:
+        std::string supports a way to grab an element at a given index:
+
             - full[i]     - fast, no bounds checking. Passing an
                             out-of-range i is undefined behavior - it
                             will not stop you.

@@ -137,7 +137,7 @@ int main() {
     /*
         Exercise 6 - Palindrome check
 
-        std::string supports indexing, just like an array:
+        std::string supports a way to grab an element at a given index:
             - full[i]     - fast, no bounds checking. Passing an
                             out-of-range i is undefined behavior - it
                             will not stop you.
@@ -203,7 +203,22 @@ int main() {
             "racecar" is a palindrome: true
     */
     std::println("\n--- Exercise 6: Palindrome check ---");
-    // TODO
+        {
+        // Try each word one at a time - comment out two, leave one
+        // active, rebuild and rerun to see the loop handle each case.
+        std::string word{"racecar"};    // odd length - has a middle character
+        // std::string word{"abba"};    // even length - no middle character
+        // std::string word{"hello"};   // not a palindrome
+
+        bool is_palindrome{true};
+
+        // TODO: YOUR LOOP GOES BELOW THIS LINE
+
+
+        // TODO: YOUR LOOP GOES ABOVE THIS LINE
+
+        std::println("\"{}\" is a palindrome: {}", word, is_palindrome);
+    }
 
     return 0;
 }
