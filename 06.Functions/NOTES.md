@@ -250,13 +250,18 @@ overflow (for huge ints) and with correct rounding.
 ```
 
 **`std::numbers::pi`** *(C++20)* — the constant π as a `double`, to full
-precision.
+precision. Before this existed, people either typed `3.14159...` by
+hand (easy to mistype, never precise enough) or wrote their own
+`constexpr double PI = ...`. Now the library just hands you the exact
+value.
 
 ```cpp
-double area{std::numbers::pi * radius * radius};   // πr²
+double radius{5.0};
+double area{std::numbers::pi * radius * radius};   // πr² ≈ 78.5398
 ```
 
-`<numbers>` also has `e`, `sqrt2`, `phi` (the golden ratio), and more.
+`<numbers>` also has `e`, `sqrt2`, `phi` (the golden ratio), and more —
+worth a peek if you ever find yourself hand-typing a math constant.
 
 ---
 
@@ -264,7 +269,7 @@ double area{std::numbers::pi * radius * radius};   // πr²
 
 **`std::gcd(a, b)`** *(C++17)* — the **g**reatest **c**ommon
 **d**ivisor: the largest whole number that divides both `a` and `b`
-evenly.
+evenly, with no remainder.
 
 ```
    gcd(24, 36)  →  12
@@ -274,8 +279,25 @@ evenly.
                     └─ common: 1 2 3 4 6 12 ─┘   largest = 12
 ```
 
+```cpp
+std::gcd(24, 36);   // 12
+std::gcd(7, 13);     // 1   -> nothing in common but 1 ("coprime")
+```
+
+**Practical nugget:** the classic use is reducing a fraction to its
+simplest form — divide both numerator and denominator by their `gcd`:
+
+```cpp
+int numerator{24}, denominator{36};
+int divisor{std::gcd(numerator, denominator)};   // 12
+
+numerator   /= divisor;   // 2
+denominator /= divisor;   // 3
+// 24/36 simplified is 2/3
+```
+
 **`std::lcm(a, b)`** *(C++17)* — the **l**east **c**ommon **m**ultiple:
-the smallest number that both `a` and `b` divide into.
+the smallest number that both `a` and `b` divide into evenly.
 
 ```
    lcm(4, 6)  →  12
@@ -284,6 +306,16 @@ the smallest number that both `a` and `b` divide into.
    multiples of 6:  6  12  18  24 ...
                         └─ smallest shared = 12
 ```
+
+```cpp
+std::lcm(4, 6);   // 12
+std::lcm(3, 5);   // 15  -> no overlap until 3*5
+```
+
+**Practical nugget:** `lcm` is what you'd reach for to line up two
+repeating cycles — e.g. "event A happens every 4 seconds, event B every
+6 seconds, when do they next coincide?" → every `lcm(4, 6) = 12`
+seconds.
 
 ---
 
@@ -296,9 +328,14 @@ values.
    min(7, 3) → 3          max(7, 3) → 7
 ```
 
+```cpp
+std::min(7, 3);   // 3
+std::max(7, 3);   // 7
+```
+
 **`std::clamp(v, lo, hi)`** *(C++17)* — force `v` into the range
 `[lo, hi]`. Below `lo` it becomes `lo`; above `hi` it becomes `hi`;
-in between it is unchanged.
+in between it is left unchanged.
 
 ```
    clamp(v, 0, 100):
@@ -309,6 +346,28 @@ in between it is unchanged.
       → 0      0                100     100      (● snapped to the edge)
 ```
 
+```cpp
+std::clamp(-30, 0, 100);   // 0    -> below lo, snapped up
+std::clamp( 55, 0, 100);   // 55   -> already in range, unchanged
+std::clamp(150, 0, 100);   // 100  -> above hi, snapped down
+```
+
+**Practical nugget:** this is exactly the same idea as clamping `t`
+before a `std::lerp` call (see above) — anywhere you have a value that
+must not escape a valid range (a volume percentage, a health bar, a
+pixel coordinate on screen) `clamp` is one call instead of a manual
+`if`/`else if`.
+
+```cpp
+// without clamp
+int volume{raw_volume};
+if (volume < 0)   volume = 0;
+if (volume > 100) volume = 100;
+
+// with clamp
+int volume{std::clamp(raw_volume, 0, 100)};
+```
+
 **`std::ranges::sort(v)`** *(C++20)* — sort a whole container in one
 call, ascending by default.
 
@@ -316,11 +375,21 @@ call, ascending by default.
    {5, 2, 8, 1, 9, 3}   ──ranges::sort──►   {1, 2, 3, 5, 8, 9}
 ```
 
+```cpp
+std::vector<int> v{5, 2, 8, 1, 9, 3};
+std::ranges::sort(v);
+// v is now {1, 2, 3, 5, 8, 9}
+```
+
+Note there's no return value to capture here — `v` is sorted **in
+place**, meaning the original container itself is rearranged.
+
 ---
 
 ### Text queries — `<string>`
 
-These are member functions you call on a `std::string`.
+These are member functions you call *on* a `std::string`, with dot
+syntax: `s.starts_with(...)` rather than `starts_with(s, ...)`.
 
 **`s.starts_with(p)` / `s.ends_with(p)`** *(C++20)* — does the string
 begin / end with `p`? Returns a `bool`.
@@ -332,23 +401,49 @@ begin / end with `p`? Returns a `bool`.
    ("hello")    ("world")   → both true
 ```
 
+```cpp
+std::string s{"hello world"};
+
+s.starts_with("hello");   // true
+s.starts_with("world");   // false
+s.ends_with("world");     // true
+```
+
+**Practical nugget:** a common real use is checking file extensions or
+URL prefixes:
+
+```cpp
+if (filename.ends_with(".cpp"))  { /* it's a C++ source file */ }
+if (url.starts_with("https://")) { /* it's a secure link */ }
+```
+
 **`s.contains(sub)`** *(C++23)* — is `sub` found *anywhere* inside `s`?
+Returns a `bool`.
 
 ```
    "hello world".contains("lo wo")
 
-    h e l l o   w o r l d
-        └─ l o _ w o ─┘        found → true
+     h e l l o  w o r l d
+        └─ l o_ w o ─┘        found → true
 ```
 
-Before C++23 you wrote `s.find(sub) != std::string::npos` for this;
-`contains` says what you mean.
+```cpp
+s.contains("lo wo");   // true
+s.contains("bye");     // false
+```
+
+Before C++23 you had to write
+`s.find(sub) != std::string::npos` for this — checking that `find`
+didn't return the special "not found" marker. `contains` says exactly
+what you mean, directly.
 
 ---
 
 ### Bit inspection — `<bit>` *(C++20)*
 
-These look at the binary representation of an unsigned integer.
+These look at the binary (0s and 1s) representation of an unsigned
+integer — the kind of low-level check you'd reach for in graphics,
+networking, or performance-sensitive code.
 
 **`std::popcount(x)`** — the **pop**ulation **count**: how many bits are
 set to `1`.
@@ -358,6 +453,12 @@ set to `1`.
 
    1 0 1 1 0 1 0 0
    ▲   ▲ ▲   ▲            four 1s  →  4
+```
+
+```cpp
+std::popcount(0b1011'0100u);   // 4
+std::popcount(0b0000'0000u);   // 0
+std::popcount(0b1111'1111u);   // 8
 ```
 
 **`std::bit_width(x)`** — how many bits it takes to represent `x`: the
@@ -371,6 +472,12 @@ position of the highest set bit, plus one.
    highest 1 is in bit 7 (counting from 0)  →  width 8
 ```
 
+```cpp
+std::bit_width(0b1011'0100u);   // 8
+std::bit_width(0b0000'0001u);   // 1
+std::bit_width(0b0000'0000u);   // 0  -> no bits set at all
+```
+
 **`std::has_single_bit(x)`** — is exactly one bit set? Equivalently, is
 `x` a power of two (1, 2, 4, 8, 16, ...)?
 
@@ -378,6 +485,16 @@ position of the highest set bit, plus one.
    64  = 0b0100'0000   → one bit set   → true
    65  = 0b0100'0001   → two bits set  → false
 ```
+
+```cpp
+std::has_single_bit(64u);   // true   -> 64 is a power of two
+std::has_single_bit(65u);   // false
+```
+
+**Practical nugget:** `has_single_bit` is the modern, readable way to
+check "is this a power of two?" — useful for things like validating
+that a buffer or texture size is a power of two, which many low-level
+systems require for efficiency.
 
 ---
 
