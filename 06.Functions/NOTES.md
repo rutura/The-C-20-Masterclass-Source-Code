@@ -107,11 +107,7 @@ Two things to keep straight:
 You do not have to write everything. The Standard Library ships
 **thousands of ready-made functions** across many headers - and it keeps
 growing, every standard adds more. Calling any of them is no different
-from calling your own: `#include` the header, then `name(arguments)`.
-
-Here is a small tour. The `(C++NN)` tag marks a more recent addition. Go
-through them one at a time on camera - each is just a function call, but
-knowing it *exists* saves writing (and debugging) it yourself.
+from calling your own defined functions.
 
 ---
 
@@ -146,7 +142,7 @@ computes it *without* the intermediate `a*a` overflowing or underflowing.
         │\
         │ \   hypot(3, 4) = 5
       4 │  \
-        │   \        (the classic 3-4-5 triangle)
+        │   \        
         │____\
           3
 ```
