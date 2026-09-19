@@ -13,6 +13,7 @@ name, hand it **arguments**, it runs, and it hands back a **result**.
         │                      ▼        ...
         │                  x=a, y=b, z=c
         │                      │        return largest;
+        │                           }
         └──────result──────────┘◄───────────┘
 ```
 
@@ -42,8 +43,8 @@ int rectangle_perimeter(int width, int height) {
     return 2 * (width + height);
 }
 
-rectangle_perimeter(3, 4);      // 14
-rectangle_perimeter(10, 10);    // 40  - one formula, called again
+rectangle_perimeter(3, 4)e_peri;      // 14
+rectanglmeter(10, 10);    // 40  - one formula, called again
 ```
 
 ### The call stack
