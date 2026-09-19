@@ -212,27 +212,23 @@ double value{std::lerp(a, b, t_clamped)};   // never overshoots a or b
 ```
 
 **Color gradients** are a good way to see all of this at once, since
-blending from one color to another is just `lerp` applied to each
-channel:
+blending from one color to another is just `lerp` applied to each of
+its red, green, and blue channels separately:
 
 ```cpp
-struct Color { double r, g, b; };
+// red   goes from 255 (red) to 0   (blue)
+// green stays    0                (unused here)
+// blue  goes from 0   (red) to 255 (blue)
 
-Color blend(Color a, Color b, double t)
-{
-    return {
-        std::lerp(a.r, b.r, t),
-        std::lerp(a.g, b.g, t),
-        std::lerp(a.b, b.b, t)
-    };
-}
+double t{0.5};   // 0.0 = pure red, 1.0 = pure blue
 
-Color red { 255, 0, 0 };
-Color blue{ 0, 0, 255 };
+double red  {std::lerp(255.0, 0.0, t)};
+double green{std::lerp(0.0,   0.0, t)};
+double blue {std::lerp(0.0,   255.0, t)};
 
-blend(red, blue, 0.0);   // (255, 0, 0)       -> red
-blend(red, blue, 0.5);   // (127.5, 0, 127.5) -> purple
-blend(red, blue, 1.0);   // (0, 0, 255)       -> blue
+// t = 0.0  ->  red=255, green=0, blue=0     -> red
+// t = 0.5  ->  red=127.5, green=0, blue=127.5 -> purple
+// t = 1.0  ->  red=0,  green=0, blue=255    -> blue
 ```
 
 ```
@@ -241,32 +237,6 @@ blend(red, blue, 1.0);   // (0, 0, 255)       -> blue
  color:  RED                   PURPLE                   BLUE
          (255,0,0)            (128,0,128)            (0,0,255)
 ```
-
-Extrapolating a color gradient means overshooting the target color,
-continuing the same channel-by-channel trend past where it was told to
-stop. Graphing the red channel as `t` sweeps from 0 to 1.5 makes the
-overshoot visible:
-
-```
- red channel over t, from 255 -> 0:
-
- 255 ┤●
-     │  ╲
- 200 ┤    ╲
-     │      ╲
- 128 ┤        ●
-     │          ╲
-  50 ┤            ╲
-     │              ╲
-   0 ┤                ●
-     │                  ╲            <- t > 1 keeps going negative
- -50 ┼───┬───┬───┬───┬───┬───┬──
-     0  .25 .5  .75  1  1.25 1.5   t
-```
-
-This is why overshoot is sometimes wanted on purpose — a spring or
-bounce animation deliberately lerps past its target before settling
-back — and why it's clamped away otherwise.
 
 **`std::midpoint(a, b)`** *(C++20)* — the value exactly between `a` and
 `b`. Conceptually `(a + b) / 2`, but written so that `a + b` cannot
