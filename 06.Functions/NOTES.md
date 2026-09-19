@@ -269,8 +269,8 @@ evenly.
 ```
    gcd(24, 36)  →  12
 
-   divisors of 24:  1  2  3  4  6  [8]  12  24
-   divisors of 36:  1  2  3  4  6  [9]  12  18  36
+   divisors of 24:  1  2  3  4  6  8  12  24
+   divisors of 36:  1  2  3  4  6  9  12  18  36
                     └─ common: 1 2 3 4 6 12 ─┘   largest = 12
 ```
 
@@ -280,8 +280,8 @@ the smallest number that both `a` and `b` divide into.
 ```
    lcm(4, 6)  →  12
 
-   multiples of 4:  4  8  [12]  16  20  24 ...
-   multiples of 6:  6  [12]  18  24 ...
+   multiples of 4:  4  8  12  16  20  24 ...
+   multiples of 6:  6  12  18  24 ...
                         └─ smallest shared = 12
 ```
 
