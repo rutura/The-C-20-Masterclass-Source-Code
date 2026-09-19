@@ -148,8 +148,13 @@ computes it *without* the intermediate `a*a` overflowing or underflowing.
 ```
 
 **`std::lerp(a, b, t)`** *(C++20)* — **l**inear int**erp**olation. Slide
-from `a` to `b` by the fraction `t`, where `t = 0` gives `a`, `t = 1`
+from `a` to `b` by the fraction `t`, where `t` is treated as a
+percentage of the distance from `a` to `b`: `t = 0` gives `a`, `t = 1`
 gives `b`, and `t = 0.5` gives the point exactly halfway.
+
+```
+   lerp(a, b, t) = a + t * (b - a)
+```
 
 ```
    lerp(0, 100, t):
@@ -161,8 +166,107 @@ gives `b`, and `t = 0.5` gives the point exactly halfway.
 
 ```
 
+```cpp
+std::lerp(0.0, 100.0, 0.25);   // 25.0  -> a quarter of the way from 0 to 100
+std::lerp(0.0, 100.0, 0.5);    // 50.0  -> halfway between 0 and 100
+std::lerp(0.0, 100.0, 1.0);    // 100.0 -> exactly b, guaranteed, no rounding error
+std::lerp(0.0, 100.0, 0.0);    // 0.0   -> exactly a, guaranteed, no rounding error
+```
+
+The return type is always floating-point (`double`, unless `float` or
+`long double` is used throughout) — even if `a` and `b` are integers,
+since the result is inherently fractional.
+
 Used for smooth movement, fades, blending a value from one setting to
 another over time.
+
+**Extrapolation.** `t` isn't required to stay between 0 and 1. The same
+formula keeps working outside that range, it just walks *past* `a` or
+`b` instead of stopping between them:
+
+```
+ t:    -0.5        0.0                    1.0        1.5
+        │───────────│──────────────────────│───────────│
+       -50           0                    100          150
+    (before a)      a=0                   b=100    (past b)
+
+        ◄── extrapolating ──►  interpolating  ◄── extrapolating ──►
+```
+
+```cpp
+std::lerp(0.0, 100.0, -0.5);  // -50.0  -> t < 0, lands before a
+std::lerp(0.0, 100.0,  1.5);  // 150.0  -> t > 1, lands past b
+```
+The rules:
+
+- `t < 0` → result lands before `a`
+- `0 <= t <= 1` → result lands between `a` and `b` (this is "interpolation" proper)
+- `t > 1` → result lands past `b`
+
+If overshoot isn't wanted, clamp `t` to `[0, 1]` before calling
+`lerp`:
+
+```cpp
+double t_clamped{std::clamp(t, 0.0, 1.0)};
+double value{std::lerp(a, b, t_clamped)};   // never overshoots a or b
+```
+
+**Color gradients** are a good way to see all of this at once, since
+blending from one color to another is just `lerp` applied to each
+channel:
+
+```cpp
+struct Color { double r, g, b; };
+
+Color blend(Color a, Color b, double t)
+{
+    return {
+        std::lerp(a.r, b.r, t),
+        std::lerp(a.g, b.g, t),
+        std::lerp(a.b, b.b, t)
+    };
+}
+
+Color red { 255, 0, 0 };
+Color blue{ 0, 0, 255 };
+
+blend(red, blue, 0.0);   // (255, 0, 0)       -> red
+blend(red, blue, 0.5);   // (127.5, 0, 127.5) -> purple
+blend(red, blue, 1.0);   // (0, 0, 255)       -> blue
+```
+
+```
+ t:      0.0        0.25        0.5        0.75        1.0
+         │───────────┼───────────┼───────────┼───────────│
+ color:  RED                   PURPLE                   BLUE
+         (255,0,0)            (128,0,128)            (0,0,255)
+```
+
+Extrapolating a color gradient means overshooting the target color,
+continuing the same channel-by-channel trend past where it was told to
+stop. Graphing the red channel as `t` sweeps from 0 to 1.5 makes the
+overshoot visible:
+
+```
+ red channel over t, from 255 -> 0:
+
+ 255 ┤●
+     │  ╲
+ 200 ┤    ╲
+     │      ╲
+ 128 ┤        ●
+     │          ╲
+  50 ┤            ╲
+     │              ╲
+   0 ┤                ●
+     │                  ╲            <- t > 1 keeps going negative
+ -50 ┼───┬───┬───┬───┬───┬───┬──
+     0  .25 .5  .75  1  1.25 1.5   t
+```
+
+This is why overshoot is sometimes wanted on purpose — a spring or
+bounce animation deliberately lerps past its target before settling
+back — and why it's clamped away otherwise.
 
 **`std::midpoint(a, b)`** *(C++20)* — the value exactly between `a` and
 `b`. Conceptually `(a + b) / 2`, but written so that `a + b` cannot
