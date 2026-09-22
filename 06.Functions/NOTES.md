@@ -538,11 +538,11 @@ two functions call each other.
 - The **definition's first line must agree** with the declaration
   (return type and parameter types).
 
-### Two words to pin down: *declaration* and *signature*
+### NOTE: *declaration* and *signature*
 
 **Declaration (prototype)** — a statement that names a function and
-gives its return type and parameter types, ending in `;`, with **no
-body**. It is a *promise*: "a function shaped like this exists somewhere;
+gives its return type and parameter types, ending in `;`, with **no body**. 
+It is a *promise*: "a function shaped like this exists somewhere;
 here is how to call it." The **definition** is the same first line plus
 the `{ }` body that actually does the work.
 
@@ -571,9 +571,8 @@ order**. That is *all*. The signature deliberately leaves out:
 ```
 
 - **return type** — not in the signature
-- **parameter names** — not in the signature (`double average(double x,
-  double y, double z)` and `double average(double, double, double)` have
-  the identical signature)
+- **parameter names** — not in the signature (`double average(double x,double y, double z)` 
+   and `double average(double, double, double)` have the identical signature)
 
 #### Why "return type is not in the signature" matters
 
@@ -641,7 +640,7 @@ anyway." The fraction is **truncated toward zero, not rounded**:
 `static_cast<int>(9.7)` is `9`, and `static_cast<int>(-9.7)` is `-9`.
 
 The other everyday use is the reverse - forcing a `double` context so
-integer division does not bite (the Chapter 5 pitfall):
+integer division does not bite: 
 
 ```cpp
 int total{4 + 8 + 15};                        // 27
