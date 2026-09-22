@@ -668,9 +668,9 @@ Do side-effecting work in its own statement first.
 
 ## 6.5 Default arguments
 
-A parameter can carry a **default** value. If the caller leaves that
-argument out, the default is used in its place - so one function can be
-called several ways without writing overloads.
+You can call the function without specifying some or all arguments
+and the compiler will use the defaults that are burned in the function
+declaration.
 
 ```cpp
 std::string greet(std::string_view name,
@@ -724,9 +724,7 @@ greet("Sara", "Hi", '?');  // all three supplied
 // greet("Sara", , '?');   // ERROR - no way to skip 'greeting'
 ```
 
-**4. Order the parameters so the ones most often left to default come
-last.** That is what makes the short calls read well - `greet("Sara")` is
-the common case, so `name` comes first and the rarely-changed
+**4. Order the parameters so the ones most often left to default comelast.** That is what makes the short calls read well - `greet("Sara")` isthe common case, so `name` comes first and the rarely-changed
 `punctuation` comes last.
 
 ---
