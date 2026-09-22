@@ -734,8 +734,7 @@ greet("Sara", "Hi", '?');  // all three supplied
 ### What we are building
 
 In this lecture, we are exploring the **random numbers** facilities in
-C++. As an excuse to explore them, we will build a simple **fortune
-teller** program.
+C++. As an excuse to explore them, we will build a simple **fortune teller** program.
 
 ```
    ┌─────────────────────────────────────────────┐
