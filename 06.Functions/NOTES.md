@@ -491,11 +491,6 @@ std::has_single_bit(64u);   // true   -> 64 is a power of two
 std::has_single_bit(65u);   // false
 ```
 
-**Practical nugget:** `has_single_bit` is the modern, readable way to
-check "is this a power of two?" — useful for things like validating
-that a buffer or texture size is a power of two, which many low-level
-systems require for efficiency.
-
 ---
 
 The takeaway: **before writing a helper, check whether the library
