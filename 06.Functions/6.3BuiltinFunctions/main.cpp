@@ -45,13 +45,9 @@ int main(){
     std::println("ends_with(\"world\")   = {}", message.ends_with("world"));
     std::println("contains(\"lo wo\")    = {}", message.contains("lo wo"));  // C++23
 
-
     // --- Bit inspection: <bit> (C++20) ---
     unsigned int flags{ 0b1011'0100 };
     std::println("popcount(0b10110100)      = {}", std::popcount(flags));   // set bits
     std::println("bit_width(0b10110100)     = {}", std::bit_width(flags));  // bits needed
     std::println("has_single_bit(64u)       = {}", std::has_single_bit(64u)); // power of two?
-
-
-
 }

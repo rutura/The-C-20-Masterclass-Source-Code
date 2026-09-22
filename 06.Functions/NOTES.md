@@ -509,7 +509,7 @@ A function has two forms:
    double average(double a, double b, double c);   ← PROTOTYPE: signature + ';',
                                                      no body. everything a caller needs
 
-   double average(double a, double b, double c) {  ← DEFINITION: prototype + { body }
+   double average(double a, double b, double c) {  ← DEFINITION: prototype +  body 
        return (a + b + c) / 3.0;
    }
 ```
