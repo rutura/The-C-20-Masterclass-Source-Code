@@ -42,10 +42,18 @@ int main(){
     std::println("average of 4, 8, 15 is {}", average(4, 8, 15));
 
 
+    /*
     double mean{ average(4, 8, 15) };        // 9.0
 
     // report(mean);                       // warning / error: 9.0 → int is narrowing
     report(static_cast<int>(mean));
+    */
+
+
+    // ORDER OF ARGUMENT EVALUATION IS UNSPECIFIED: the compiler may
+    // evaluate a call's arguments in any order. If one argument's side
+    // effect is observed by another, the result is not portable. Don't
+    // write average(n++, n, n) and expect a particular reading of n.
 }
 
 // FUNCTION DEFINITION: the declaration's signature plus the { body }.
