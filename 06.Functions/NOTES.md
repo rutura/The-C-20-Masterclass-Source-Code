@@ -1233,9 +1233,8 @@ Consequences:
 ### Type-safe linkage and name mangling
 
 The compiler enforces overloading by **encoding each function's name
-together with its parameter types** into a single internal symbol - **name
-mangling**. The linker then only ever sees distinct names, so the
-overloads cannot collide.
+together with its parameter types** into a single internal symbol - **name mangling**. 
+The linker then only ever sees distinct names, so the overloads cannot collide.
 
 ```
    your code                    GNU C++ mangled symbol
