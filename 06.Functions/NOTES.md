@@ -1034,7 +1034,70 @@ void grow_combo()  { static int high_score{50}; ++high_score; }   // 50→51, 51
 
 ## 6.8 Passing by value and reference
 
-An argument reaches a function in one of two ways. 
+### A copy is a separate variable
+
+Copy one variable into another with `=` and you get two independent
+objects that happen to hold the same value. Change one and the other is
+untouched:
+
+```cpp
+int original{100};
+int copy{original};           // copy gets original's VALUE, nothing more
+
+copy = 250;                   // only the copy changes
+
+std::println("original: {}", original);   // 100
+std::println("copy:     {}", copy);        // 250
+```
+
+Print their addresses and the proof is right there - two different memory
+locations:
+
+```cpp
+std::println("&original: {}", static_cast<void*>(&original));   // e.g. 0x7ffc5968e520
+std::println("&copy:     {}", static_cast<void*>(&copy));       // e.g. 0x7ffc5968e524 - different!
+```
+
+`&original` and `&copy` are different addresses because `copy` is its own
+object, living in its own storage. Nothing you do to `copy` can reach back
+and touch `original`.
+
+### A reference is another name for the same variable
+
+Declare a reference with `&` in the type and it does **not** create a new
+object. It binds to the existing one and becomes another name for it:
+
+```cpp
+int original{100};
+int& alias{original};         // alias IS original, under a second name
+
+alias = 250;                  // writes straight through to original
+
+std::println("original: {}", original);   // 250 - changed!
+std::println("alias:    {}", alias);       // 250
+```
+
+Print the addresses this time and they are identical:
+
+```cpp
+std::println("&original: {}", static_cast<void*>(&original));   // e.g. 0x7ffc5968e520
+std::println("&alias:    {}", static_cast<void*>(&alias));      // e.g. 0x7ffc5968e520 - same!
+```
+
+Same address, because there is only **one** object. `alias` never held a
+value of its own - it is just another label on `original`'s storage, so a
+change through either name shows up through both.
+
+```
+   copy                              reference
+   ────                              ─────────
+   original ──┐                     original ──┬── alias
+              │  &original          (one object)  &original == &alias
+   copy ──────┘  &copy (different)
+   (two objects, two addresses)     (one object, one address, two names)
+```
+
+This is the whole idea behind passing arguments to functions, too:
 
 - **Pass by value**: the function gets a **copy** of the argument. Changes
   inside the function do not affect the caller's variable.
