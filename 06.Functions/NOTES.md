@@ -1164,10 +1164,7 @@ void charge(double& balance, double fee) {
 
 - You only **read** the argument, and it is a small type (`int`,
   `double`): pass **by value** - a plain copy.
-- The function must **change** the caller's variable: pass **by
-  reference** - `T&`.
-- You need more than one **result** out of one call: use several `T&`
-  out-parameters, each written through.
+- The function must **change** the caller's variable: pass **by reference** - `T&`.
 
 ---
 
