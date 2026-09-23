@@ -1290,15 +1290,8 @@ differ.
 
 ## 6.10 Const variables and parameters
 
-`const` has shown up already, in passing - `const std::vector<int>&`
-parameters, `constexpr std::array` sizes. This lecture makes it a
-first-class topic: what `const` actually promises on a plain variable,
-what it promises (and does not promise) on a function parameter, and how
-`constexpr` is a stronger, different guarantee than `const`.
-
-This section stays on **free functions and plain variables**. `const`
-also shows up on class member functions (`void draw() const`) and we 
-will talk more on that later in the course. 
+In this lecture, we are zooming in on the `const` keyword in the context of 
+free standing variables and even functions.
 
 ### Const standalone variables
 
@@ -1307,8 +1300,8 @@ const int max_players{4};
 int current_players{1};   // NOT const - this one is meant to change
 ```
 
-`const` is a compiler-enforced promise: **this variable's value will not
-change after initialization.** If you try to assign to it later, the
+`const` is a compiler-enforced promise: 
+**this variable's value will not change after initialization.** If you try to assign to it later, the
 compiler will  rejects the change and trow a compiler error. 
 
 ```
@@ -1334,12 +1327,10 @@ int square_by_value(const int x) {
     return x * x;
 }
 ```
-
-Here is the part worth being precise about: **`const` on a by-value
-parameter does not protect the caller's variable.** It never could -
-pass-by-value already makes a fresh **copy** the instant the function is
-called, so the caller's original was never reachable from inside the
-function, `const` or not.
+FRIENDLY NOTE: 
+**`const` on a by-value parameter does not protect the caller's variable.** 
+It never could - pass-by-value already makes a fresh **copy** the instant the function is
+called, so the caller's original was never reachable from inside the function, `const` or not.
 
 ```
    caller                          square_by_value(n)
@@ -1367,15 +1358,15 @@ void print_label(const std::string& label) {
 ```
 
 A reference parameter is an **alias** for the caller's own object - no
-copy is made. This is the case where `const` is not just internal
-housekeeping; it is the actual promise the caller depends on:
+copy is made. Changes done through the reference would affect the original
+argument that was passed. **const** is doing **real** protection here.
 
 ```
    caller                          print_label(name)
    ──────                          ──────────────────
    ┌────────────┐      alias        ┌────────────┐
    │ name  "Ada"│ ◄───────────────► │ label      │   const on label means
-   └────────────┘      same          └────────────┘   the function CANNOT
+   └────────────┘      same         └────────────┘   the function CANNOT
         ▲              object              │           write through this
         │                                  │           alias back into
         └──────────────────────────────────┘           the caller's own
@@ -1384,15 +1375,7 @@ housekeeping; it is the actual promise the caller depends on:
                 this out
 ```
 
-```
-   const int x           (by value)     const std::string& label  (by reference)
-   ──────────────                       ─────────────────────────
-   protects a COPY the function          protects the CALLER's own object -
-   already owns - the caller was         this is the promise a reference
-   never at risk either way              parameter actually needs const for
-```
-
-Combining `const` with `&` gets both things at once: the no-copy speed
+NOTE: Combining `const` with `&` gets both things at once: the no-copy speed
 of a reference, and the safety of pass-by-value. 
 
 ### Constexpr variables: compile-time, not just unchanging
@@ -1459,9 +1442,6 @@ int runtime_cube{cube(side)};               // side is a runtime value
    ITSELF; 27 lands in the               happens at run time,
    binary - no runtime cost              same result either way
 ```
-
-Same function, same result - the only difference is *when* the
-computation happens, decided entirely by what the caller passes in.
 
 ### A brief word on `consteval` and `constinit` (C++20)
 
