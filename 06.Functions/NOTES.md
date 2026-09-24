@@ -1469,9 +1469,7 @@ without a dedicated example here:
 
 ## 6.11 Functions across files
 
-So far every function has shared one `main.cpp`. Real programs spread
-functions across many files, grouped by topic. This lecture builds a
-program from four files of helpers plus `main.cpp`.
+In this lecture, we are introducing a way to spread your code across several files.
 
 ```
    6.11FunctionsAcrossFiles/
