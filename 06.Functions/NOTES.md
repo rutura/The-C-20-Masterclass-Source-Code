@@ -2129,7 +2129,7 @@ what it does when it runs." This lecture opens up the step in between:
 **what does the computer actually do, physically, to run it?**
 
 You will not write any assembly yourself. You will *read* a little of
-it - on real examples pulled from chapters 3 through 6, things you
+it - on real examples pulled from chapters and lectures in the course, things you
 already know - so that ideas which have so far just been words ("a
 variable," "calling a function," "a loop") turn into something you can
 point at and watch happen, instruction by instruction.
@@ -2158,14 +2158,14 @@ decisions. It cannot compute directly on memory - it first has to pull a
 value in from memory, into one of a small number of **registers**: tiny
 storage slots built into the CPU chip itself, close enough that reading
 or writing one is close to instant. A typical x86-64 CPU has around 16
-of these. Each one has its own name, and - this is the part worth
-sitting with - **each one also has its own job**. A couple are general
+of these. Each one has its own name, and - this is the part you  should 
+remember - **each one also has its own job**. A couple are general
 scratch space for whatever a calculation needs. A few others are
 reserved, by long-standing convention, for one specific purpose each -
 "the register that always holds a function's answer," "the register
 that always tracks where the current function's workspace starts." You
 will meet each register by name, one at a time, exactly at the point
-where its job first matters - there is no list to memorise up front.
+where its job first matters in this lecture.
 
 ```
    CPU (a handful of registers, VERY fast)   memory (huge, slower)
@@ -2176,7 +2176,7 @@ where its job first matters - there is no list to memorise up front.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-That is genuinely most of it: **an instruction either moves a value
+That is most of it: **an instruction either moves a value
 between a register and memory, does arithmetic on a register, or
 decides where to jump to next.** Assembly is just a very long, very
 literal to-do list built entirely out of those three things.
