@@ -2323,9 +2323,10 @@ the manufacturer's own published spec) can sometimes just reflect what
 happens to be installed rather than the board's true engineered limit -
 worth keeping in mind whenever a number like this comes from the
 operating system rather than the hardware manufacturer directly.
-Either way, the CPU's 256 TiB of *address space* was never remotely
-close to being the constraint - the actual ceiling, 128 GiB, was
-sitting three steps closer to home the whole time, set by the
+Either way, the CPU's 256 TiB of *address space* (the 48-bit figure
+from a moment ago, not the full theoretical 64-bit one) was never
+remotely close to being the constraint - the actual ceiling, 128 GiB,
+was sitting three steps closer to home the whole time, set by the
 motherboard, not the CPU.
 
 **So if that 256 TiB was never a promise about physical RAM, what is it
@@ -2460,9 +2461,9 @@ address the *same physical register* at four different widths:
           │    │    │    │    │    │    │    │    │
           └────┴────┴────┴────┴────┴────┴────┴────┘
           └───────────────────────────────────────┘  rax  - all 8 bytes
-                                 └───────────────────┘  eax  - low 4 bytes
-                                           └──────────┘  ax   - low 2 bytes
-                                                └─────┘  al   - low 1 byte
+                              └───────────────────┘  eax  - low 4 bytes
+                                        └─────────┘  ax   - low 2 bytes
+                                             └────┘  al   - low 1 byte
 
    writing to eax also changes what rax holds (its low 4 bytes) -
    these are not separate storage, just different "how much of it
@@ -2478,8 +2479,33 @@ pattern later, live: the same argument shows up as `edi` when a function
 takes a plain `int`, and as `rdi` when it takes something that needs a
 full address, like a reference.
 
-That is most of it. Every single instruction you will meet in this
-lecture does one of exactly three things:
+Quick reference - keep this in mind for the rest of the lecture:
+
+- **`r`-prefix** (`rax`, `rdi`, `rbp`, `rsp`, ...) - the full 8 bytes;
+  wide enough to hold a memory address on this CPU
+- **`e`-prefix** (`eax`, `edi`, `ebp`, ...) - the low 4 bytes only;
+  wide enough for an `int`, not for an address
+- **no prefix, plain name** (`ax`, `di`, `bp`, `sp`, ...) - the low
+  2 bytes only
+- **`l`-suffix** (`al`, `dil`, `bpl`, `spl`, ...) - the low 1 byte only
+- all four names for a given register (e.g. `rax`/`eax`/`ax`/`al`) refer
+  to the **same physical storage** - writing through the narrower name
+  changes the low bytes of the wider one too
+
+Summing this up, programming at the assembly level is just a delicate dance
+you do between the CPU and Memory.
+
+```
+   CPU (a handful of registers, VERY fast)   memory (huge, slower)
+   ┌───────────────────────────────┐         ┌──────────────────────┐
+   │  [ a few named slots ]        │  ◄───►  │  address 1000: [ 7 ] │
+   │  [ some general purpose ]     │  load   │  address 1004: [ 3 ] │
+   │  [ some with a fixed job ]    │  store  │  address 1008: [   ] │
+   └───────────────────────────────┘         └──────────────────────┘
+```
+
+Every single instruction you will meet in this lecture does one of 
+exactly three things:
 
 - **move** a value between a register and memory (or another register)
 - **compute** - arithmetic or comparison, on a register
@@ -2496,12 +2522,12 @@ shows the resulting assembly on the right, updating live as you type:
 
 ```
    ┌─────────────────────────┐   ┌─────────────────────────┐
-   │  C++ source (you type)  │   │  assembly (auto-updates) │
-   │                         │   │                           │
-   │  int square(int num) {  │──►│  square(int):             │
-   │      return num * num;  │   │      imul   edi, edi       │
-   │  }                      │   │      mov    eax, edi       │
-   │                         │   │      ret                   │
+   │  C++ source (you type)  │   │ assembly (auto-updates) │
+   │                         │   │                         │
+   │  int square(int num) {  │──►│ square(int):            │
+   │      return num * num;  │   │      imul   edi, edi    │
+   │  }                      │   │      mov    eax, edi    │
+   │                         │   │      ret                │
    └─────────────────────────┘   └─────────────────────────┘
 ```
 
