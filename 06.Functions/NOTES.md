@@ -2158,7 +2158,7 @@ decisions. It cannot compute directly on memory - it first has to pull a
 value in from memory, into one of a small number of **registers**: tiny
 storage slots built into the CPU chip itself, close enough that reading
 or writing one is close to instant. A typical x86-64 CPU has around 16
-of these. Each one has its own name, and - this is the part you  should 
+of these. Each one has its own name, and - this is the part you should
 remember - **each one also has its own job**. A couple are general
 scratch space for whatever a calculation needs. A few others are
 reserved, by long-standing convention, for one specific purpose each -
@@ -2175,6 +2175,41 @@ where its job first matters in this lecture.
    │  [ some with a fixed job ]    │  store  │  address 1008: [   ] │
    └───────────────────────────────┘         └──────────────────────┘
 ```
+
+One more thing about registers, worth knowing before names like `eax`
+and `rax` both start showing up for what looks like "the same" register:
+**every general-purpose register is 8 bytes wide, but has multiple
+names, one per size**, because not every value needs all 8 bytes. An
+`int` (4 bytes) does not need the full width; a memory *address* (8
+bytes, on this CPU) does. Rather than waste a name, x86-64 lets you
+address the *same physical register* at four different widths:
+
+```
+   one physical register, eight bytes wide - four names, each one
+   naming a different amount of it, starting from the same low end
+
+   byte:    7    6    5    4    3    2    1    0
+          ┌────┬────┬────┬────┬────┬────┬────┬────┐
+          │    │    │    │    │    │    │    │    │
+          └────┴────┴────┴────┴────┴────┴────┴────┘
+          └───────────────────────────────────────┘  rax  - all 8 bytes
+                                 └───────────────────┘  eax  - low 4 bytes
+                                           └──────────┘  ax   - low 2 bytes
+                                                └─────┘  al   - low 1 byte
+
+   writing to eax also changes what rax holds (its low 4 bytes) -
+   these are not separate storage, just different "how much of it
+   am I using" views onto the exact same physical register
+```
+
+The naming pattern is consistent across every general-purpose register,
+not just this one: an `r` prefix means the full 8 bytes (`rax`, `rdi`,
+`rbp`, `rsp`...), an `e` prefix means the low 4 bytes (`eax`, `edi`,
+`ebp`...), and there are narrower 2-byte and 1-byte names too, for when
+even 4 bytes is more than a value needs. You will see this exact
+pattern later, live: the same argument shows up as `edi` when a function
+takes a plain `int`, and as `rdi` when it takes something that needs a
+full address, like a reference.
 
 That is most of it. Every single instruction you will meet in this
 lecture does one of exactly three things:
