@@ -1761,9 +1761,11 @@ add_executable(rooster
 
 ## 6.13 Function templates
 
-Say you need "is this value between these two bounds?" for `int`, for
-`double`, for `char`. Overloading (6.9) means writing the same body three
-times:
+In this lecture we are going to explore how you can set up bluprints for functions.
+
+Assume you need a function to check and see if a **value is within two bounds** for `int`, 
+for `double`, for `char`. One solution to this is **Overloading** as we have seen in a 
+previous lecture. That means writing the same body three times:
 
 ```cpp
 bool in_range(int    v, int    lo, int    hi) { return lo <= v && v <= hi; }
