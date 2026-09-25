@@ -2280,89 +2280,140 @@ instruction on the right would change. Every idea on the left would
 still be exactly, word-for-word, true. **Learn the left column. The
 right column is this lecture's chosen dialect for showing it to you.**
 
-### Before Step 1: where does a function keep anything?
+### Before Step 1: the stack, before `main` even starts
 
-One question needs answering before a single instruction will make
-sense: while a function is running, where does it keep its local
-variables, and where does it write down "come back to this exact spot
-when you are done"? The answer is a region of memory called **the stack** 
-- reserved automatically for exactly this - and it behaves like
-a stack of plates: the last thing placed on it is the first thing taken
-back off.
+**One piece of context the source code never shows you**: your program
+does not start itself. Before a single line of your code runs, your
+operating system loads the compiled program and runs its own startup
+code first. That startup code has already been keeping track of things
+in a reserved region of memory called **the stack** - and it hands that
+same stack straight to your program, already set up and in use, the
+moment it calls `main`.
 
-Every function call claims its own private slice of the stack the
-moment it starts, called that call's **stack frame** - a scratch area
-for its own local variables, plus a couple of bookkeeping values it
-needs to find its way back to whoever called it. That frame is handed
-back the moment the function returns.
-
-Two registers exist purely to manage this - and, as promised, here is
-where each one earns its name, before either shows up in any code:
+Picture that hand-off as a snapshot, right before `main` is called:
 
 ```
-   rsp   "stack pointer." Always points at the very top of the stack -
-         the next free spot. Whenever something is placed on the stack
-         or removed from it, rsp is the register that moves to track it.
+   the stack, drawn growing DOWNWARD on the page (also how x86-64
+   actually grows it - toward lower memory addresses)
 
-   rbp   "base pointer." A function copies rsp's CURRENT value into rbp
-         the moment it starts, then deliberately leaves rbp alone for
-         the rest of that call - unlike rsp, which keeps moving. That
-         makes rbp a fixed, unmoving anchor point for the rest of the
-         function: instructions can say "4 bytes below rbp" and mean
-         the exact same address all the way through, even while rsp
-         wanders as things get pushed and popped elsewhere.
+   ┌───────────────────────────────┐   ← the "bottom": where the stack
+   │                               │      started, furthest from being
+   │   (the OS startup code's      │      used up
+   │    own stuff lives up here -  │
+   │    not something you will     │
+   │    ever need to look at)      │
+   │                               │
+   ├───────────────────────────────┤ ◄── rsp points HERE:
+   │         (free space)          │      the next unused spot
+   └───────────────────────────────┘
 ```
 
-There are two instructions for moving things on and off the stack,
-worth knowing before you meet them in the first real example:
+Two things are already true at this exact moment, before your program
+has done anything: there is a register called **`rsp`**, and it is
+already pointing at the boundary between "stack space already claimed"
+and "stack space still free" - because the OS's own code has been using
+the stack too, for its own bookkeeping, before it ever got to your
+program.
+
+**`rsp`** stands for "stack pointer." Its one job, for the entire time
+your program runs, is to always point at the current top of the stack -
+whatever the next free spot is. Nothing else is special about it; it is
+simply the register every instruction that touches the stack keeps in
+sync.
+
+Now watch what happens the instant the OS calls `main`:
 
 ```
-   push   <register>   writes that register's current value into the
-                        next free spot on the stack, then moves rsp to
-                        point past it.
+   the OS calls main() - "call" is covered properly in Step 6; for now,
+   just watch what it does to the stack
 
-   pop    <register>   the exact reverse: reads a value back off the
-                        top of the stack into that register, then moves
-                        rsp back to point at it as free space again.
+   before the call:                the instant main starts running:
+
+   ┌───────────────────┐           ┌───────────────────┐
+   │  OS's own stuff   │           │  OS's own stuff   │
+   ├───────────────────┤ ◄ rsp     ├───────────────────┤
+   │      (free)       │           │  return address:  │ ◄ rsp
+   └───────────────────┘           │  "come back here  │
+                                    │   when main ends" │
+                                    ├───────────────────┤
+                                    │      (free)       │
+                                    └───────────────────┘
 ```
 
-```
-   before "push rbp":              after "push rbp":
+Calling a function does not just "jump" to it - it first writes down,
+on the stack, the exact address to come back to afterward, then moves
+`rsp` down past that new entry. That written-down address is how `main`
+- or any function - eventually finds its way back to whoever called it.
+(The instruction that does this writing-down is `call`, covered
+properly once you have a second function to call in Step 6. For now,
+the point is only: by the time `main`'s own first instruction runs,
+something has already been placed on the stack, and `rsp` has already
+moved to reflect it.)
 
-   ┌───────────────────────┐       ┌───────────────────────┐
-   │  ...older stuff...    │       │  ...older stuff...    │
-   ├───────────────────────┤ ◄ rsp ├───────────────────────┤
-   │   (unused)            │       │  rbp's OLD value      │ ◄ rsp
-   └───────────────────────┘       ├───────────────────────┤
-                                   │   (unused)            │
-                                   └───────────────────────┘
-
-   "push rbp" wrote rbp's current value into the next free spot,
-   then moved rsp down to point past it - that spot stays claimed
-   until a later "pop" hands it back
-```
-
-So why would a function push `rbp` onto the stack at all? Because `rbp`
-is about to be reused - repointed at *this* function's own frame - and
-whatever value it held before (the *caller's* anchor point) would
-otherwise be lost. Saving it first, and restoring it with a matching
-`pop` right before returning, is how a function borrows `rbp` for its
-own use without permanently disturbing whoever called it:
+`main` is about to want a private workspace of its own - somewhere to
+keep its own bookkeeping, separate from the OS's. That is what its very
+first two instructions set up, and this needs one more register,
+**`rbp`** ("base pointer"), which does not exist yet at the moment
+shown above - `main` is about to create its purpose for it:
 
 ```
-   push    rbp        save the CALLER's rbp value first, so it survives
-   mov     rbp, rsp    NOW repoint rbp - it anchors THIS function's frame
+   right after main's first two instructions run:
+
+   ┌───────────────────┐
+   │  OS's own stuff   │
+   ├───────────────────┤
+   │  return address   │
+   ├───────────────────┤ ◄ rsp, and now ALSO ◄ rbp
+   │  (main's own,     │
+   │   still empty)    │
+   └───────────────────┘
+
+   rbp now points at the same spot rsp does, but - unlike rsp - rbp
+   will NOT move again for the rest of main's run, even as rsp keeps
+   sliding around beneath it. rbp becomes a fixed anchor: the moment
+   main declares a local variable, it will be described as "so many
+   bytes below rbp" - an address that stays correct all the way through
+   main, precisely because rbp does not move.
+```
+
+That fixed anchor is worth having, but setting it up spends `rbp` -
+overwrites whatever it held before, which belonged to the OS's own
+code, not main's. Throwing that away would be a problem the instant
+`main` finishes and control needs to go back to code that still expects
+to find its own `rbp` value intact. So the very first thing any
+function does, before repointing `rbp` at itself, is **save the old
+value of `rbp` on the stack** - and the very last thing it does, right
+before returning, is **put that old value back**:
+
+```
+   push    rbp        first: save whatever rbp held before (the
+                       CALLER's anchor point), so it is not lost
+   mov     rbp, rsp    now: repoint rbp here - THIS function's own anchor
 
    ...the function's own body runs here, measured from rbp...
 
-   pop     rbp         put the CALLER's rbp value back exactly as found
-   ret                 (covered in Step 6) jump back to the caller
+   pop     rbp         restore the CALLER's rbp value, exactly as found
+   ret                 (Step 6) jump back to the address "call" saved
 ```
 
 This four-line shape - **push rbp, mov rbp/rsp, ..., pop rbp** - opens
 and closes essentially every function you are about to look at. It has
 two names: the opening two lines are a function's **prologue** (the
-setup), the closing two are its **epilogue** (the teardown).
+setup), the closing two are its **epilogue** (the teardown). You now
+know exactly what both are protecting and why.
+
+Two more instructions, met just now and worth naming plainly before
+moving on:
+
+```
+   push   <register>   write that register's value into the next free
+                        stack spot, then move rsp past it (rsp goes DOWN)
+
+   pop    <register>   the exact reverse: read a value back off the top
+                        of the stack into that register, then move rsp
+                        back to point at it as free space again (rsp
+                        goes back UP)
+```
 
 ### Step 1 - the smallest possible program
 
@@ -2372,15 +2423,8 @@ int main() {
 }
 ```
 
-**One piece of context the source code never shows you**: your program
-does not start itself. When you run the compiled program, your
-operating system's own startup code runs first, sets a few things up,
-and then makes an ordinary function call into your `main` - the same
-kind of call, mechanically, that you will use to call your own
-functions later in this lecture. `main` is simply the one function in
-your program that *something else* calls for you, first.
-
-Here is what gcc, at `-O0`, turns that empty `main` into:
+You already have everything needed to read this one. Here is what gcc,
+at `-O0`, turns it into:
 
 ```
 main:
