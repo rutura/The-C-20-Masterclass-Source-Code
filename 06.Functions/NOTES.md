@@ -2625,91 +2625,132 @@ in a reserved region of memory called **the stack** - and it hands that
 same stack straight to your program, already set up and in use, the
 moment it calls `main`.
 
-Picture that hand-off as a snapshot, right before `main` is called:
+Picture that hand-off as a snapshot, right before `main` is called -
+now with real-looking addresses attached, the same way every byte in
+memory has had an address since the very first diagram in this lecture.
+Stack addresses on a real 64-bit machine are long, ugly hex numbers
+(something like `0x00007ffd74aa7500`), so to keep this readable, the
+diagrams below use a shortened, made-up but realistic-shaped stand-in:
+**`0x7000`** as the address `rsp` happens to be sitting at, right this
+moment, before your program has run a single instruction:
 
 ```
    the stack, drawn growing DOWNWARD on the page (also how x86-64
-   actually grows it - toward lower memory addresses)
+   actually grows it - toward LOWER memory addresses, exactly like
+   the memory diagram earlier in this lecture, just running the other
+   direction on the page)
 
-   ┌───────────────────────────────┐   ← the "bottom": where the stack
-   │                               │      started, furthest from being
-   │   (the OS startup code's      │      used up
-   │    own stuff lives up here -  │
-   │    not something you will     │
-   │    ever need to look at)      │
-   │                               │
-   ├───────────────────────────────┤ ◄── rsp points HERE:
-   │         (free space)          │      the next unused spot
-   └───────────────────────────────┘
+                    ┌───────────────────────────────┐   ← the "bottom":
+                    │                               │      where the
+   address 0x6FE8:  │   (the OS startup code's      │      stack started,
+                    │    own stuff lives up here -  │      furthest from
+                    │    not something you will     │      being used up
+                    │    ever need to look at)      │
+                    │                               │
+   address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
+                    │         (free space)          │      (the next
+   address 0x7008:  │                               │       unused spot)
+                    └───────────────────────────────┘
 ```
 
 Two things are already true at this exact moment, before your program
-has done anything: there is a register called **`rsp`**, and it is
-already pointing at the boundary between "stack space already claimed"
-and "stack space still free" - because the OS's own code has been using
-the stack too, for its own bookkeeping, before it ever got to your
-program.
+has done anything: there is a register called **`rsp`**, and it holds
+an actual address - `0x7000` in this diagram - marking the boundary
+between "stack space already claimed" (the lower addresses, above it in
+this drawing) and "stack space still free" (the higher addresses,
+below it) - because the OS's own code has been using the stack too, for
+its own bookkeeping, before it ever got to your program.
 
 **`rsp`** stands for "stack pointer." Its one job, for the entire time
-your program runs, is to always point at the current top of the stack -
-whatever the next free spot is. Nothing else is special about it; it is
-simply the register every instruction that touches the stack keeps in
-sync.
+your program runs, is to always **hold the address** of the current top
+of the stack - whatever the next free address is. Nothing else is
+special about it; it is simply the register every instruction that
+touches the stack keeps in sync, the same way any other register can
+hold any other address (Step 2 will show a local variable's address
+sitting in a register exactly like this).
 
-Now watch what happens the instant the OS calls `main`:
+Now watch what happens the instant the OS calls `main`, with the
+addresses tracked at every step. A return address on this CPU is
+**8 bytes** (the same 8 bytes as one full `rax`/`rdi`/`rbp`-sized
+register - Step 2 covers exactly why an `int` is 4 bytes and an address
+is 8), so pushing one onto the stack always moves `rsp` down by exactly
+8:
 
 ```
    the OS calls main() - "call" is covered properly in Step 6; for now,
-   just watch what it does to the stack
+   just watch what it does to the stack, address by address
 
-   before the call:                the instant main starts running:
+   BEFORE the call:
 
-   ┌───────────────────┐           ┌───────────────────┐
-   │  OS's own stuff   │           │  OS's own stuff   │
-   ├───────────────────┤ ◄ rsp     ├───────────────────┤
-   │      (free)       │           │  return address:  │ ◄ rsp
-   └───────────────────┘           │  "come back here  │
-                                   │   when main ends" │
-                                   ├───────────────────┤
-                                   │      (free)       │
-                                   └───────────────────┘
+                    ┌───────────────────────────────┐
+   address 0x6FE8:  │         OS's own stuff        │
+                    ├───────────────────────────────┤
+   address 0x7000:  │             (free)            │ ◄── rsp = 0x7000
+                    │                               │
+   address 0x7008:  │             (free)            │
+                    └───────────────────────────────┘
+
+   THE INSTANT main starts running:
+
+                    ┌───────────────────────────────┐
+   address 0x6FE8:  │         OS's own stuff        │
+                    ├───────────────────────────────┤
+   address 0x6FF8:  │        return address:        │ ◄── rsp = 0x6FF8
+                    │   "come back here when main   │      (moved down
+                    │             ends"             │       by 8)
+                    ├───────────────────────────────┤
+   address 0x7000:  │   (free - no longer the top)  │
+                    └───────────────────────────────┘
 ```
 
-Calling a function does not just "jump" to it - it first writes down,
-on the stack, the exact address to come back to afterward, then moves
-`rsp` down past that new entry. That written-down address is how `main`
-- or any function - eventually finds its way back to whoever called it.
-(The instruction that does this writing-down is `call`, covered
-properly once you have a second function to call in Step 6. For now,
-the point is only: by the time `main`'s own first instruction runs,
-something has already been placed on the stack, and `rsp` has already
-moved to reflect it.)
+Calling a function does not just "jump" to it - it first **writes**
+that 8-byte return address into the next free spot (which was `0x7000`,
+where `rsp` was already pointing), then moves `rsp` DOWN by exactly 8,
+from `0x7000` to `0x6FF8`, so `rsp` again points at wherever the *new*
+top of the stack is. That written-down address is how `main` - or any
+function - eventually finds its way back to whoever called it. (The
+instruction that does this writing-down is `call`, covered properly
+once you have a second function to call in Step 6. For now, the point
+is only: by the time `main`'s own first instruction runs, an address
+has already been written to memory at `0x6FF8`, and `rsp` has already
+moved down by 8, from `0x7000` to `0x6FF8`, to reflect it.)
 
 `main` is about to want a private workspace of its own - somewhere to
 keep its own bookkeeping, separate from the OS's. That is what its very
 first two instructions set up, and this needs one more register,
-**`rbp`** ("base pointer"), which does not exist yet at the moment
-shown above - `main` is about to create its purpose for it:
+**`rbp`** ("base pointer"), which does not hold anything meaningful yet
+at the moment shown above - `main` is about to give it a purpose. Watch
+`rsp` move down by another 8 bytes as this happens:
 
 ```
    right after main's first two instructions run:
 
-   ┌───────────────────┐
-   │  OS's own stuff   │
-   ├───────────────────┤
-   │  return address   │
-   ├───────────────────┤ ◄ rsp, and now ALSO ◄ rbp
-   │  (main's own,     │
-   │   still empty)    │
-   └───────────────────┘
-
-   rbp now points at the same spot rsp does, but - unlike rsp - rbp
-   will NOT move again for the rest of main's run, even as rsp keeps
-   sliding around beneath it. rbp becomes a fixed anchor: the moment
-   main declares a local variable, it will be described as "so many
-   bytes below rbp" - an address that stays correct all the way through
-   main, precisely because rbp does not move.
+                    ┌─────────────────────────────────┐
+   address 0x6FE8:  │         OS's own stuff          │
+                    ├─────────────────────────────────┤
+   address 0x6FF0:  │    main's saved copy of the     │ ◄── rsp = 0x6FF0
+                    │        CALLER's old rbp         │ ◄── rbp = 0x6FF0
+                    ├─────────────────────────────────┤      (both agree,
+   address 0x6FF8:  │         return address          │       for now)
+                    │    (unchanged, from "call")     │
+                    ├─────────────────────────────────┤
+   address 0x7000:  │              (free)             │
+                    └─────────────────────────────────┘
 ```
+
+`rsp` moved AGAIN here - from `0x6FF8` down to `0x6FF0` - because
+`push rbp` just wrote another 8 bytes (the value `rbp` held a moment
+ago) onto the stack, at the new top. `rbp` then **copies** that same
+address, `0x6FF0`, via `mov rbp, rsp` - so `rsp` and `rbp` now briefly
+agree, both holding `0x6FF0`.
+
+From here on, though, they behave differently: `rsp` will keep moving to
+lower addresses as `main` uses more stack space, but `rbp` will **not**
+change again for the rest of `main`'s run. `rbp` becomes a fixed anchor:
+the moment `main` declares a local variable, its address will be
+described as "so many bytes below `rbp`" - e.g. `0x6FF0 - 4 = 0x6FEC` -
+and that arithmetic stays correct all the way through `main`, precisely
+because `rbp` itself never changes.
 
 That fixed anchor is worth having, but setting it up spends `rbp` -
 overwrites whatever it held before, which belonged to the OS's own
