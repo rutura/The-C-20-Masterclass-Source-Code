@@ -2328,6 +2328,76 @@ close to being the constraint - the actual ceiling, 128 GiB, was
 sitting three steps closer to home the whole time, set by the
 motherboard, not the CPU.
 
+**So if that 256 TiB was never a promise about physical RAM, what is it
+actually used for?** This is where **virtual memory** comes in - and
+the short answer is: your 256 TiB figure is real, but it is not one
+shared number for the whole machine. **Every single running program
+gets its own private 256 TiB (or whatever the CPU's address width
+allows) of address space, all to itself**, regardless of how much
+physical RAM the machine actually has installed.
+
+```
+   what "virtual address space" means, concretely
+
+   ┌─────────────────────────┐    ┌─────────────────────────┐
+   │   Program A is running  │    │   Program B is running  │
+   │                         │    │                         │
+   │   thinks it owns a      │    │   thinks it ALSO owns a │
+   │   private 0 .. 256 TiB  │    │   private 0 .. 256 TiB  │
+   │   range of addresses    │    │   range of addresses    │
+   └───────────┬─────────────┘    └───────────┬─────────────┘
+               │                              │
+               │   both ranges get privately  │
+               │   translated, separately     │
+               ▼                              ▼
+      ┌──────────────────────────────────────────────┐
+      │   the ONE real pool of physical RAM actually  │
+      │   installed in the machine (say, 64 GiB)      │
+      └──────────────────────────────────────────────┘
+```
+
+Neither program is lying to itself, and neither is somehow using more
+memory than physically exists. **Every address a running program uses
+is a *virtual* address - a number in its own private range - and the
+CPU (working together with the operating system) silently translates
+that virtual address into wherever the corresponding data actually
+lives in physical RAM**, a step called address translation, done via
+data structures called page tables. Two completely different programs
+can both use the exact same-looking address, say `0x00007F0000001000`,
+at the same moment, and land on two entirely different physical bytes -
+because each program's addresses are translated through its *own*
+private mapping, not a machine-wide one.
+
+A couple of consequences worth knowing, since this is the real
+foundation the earlier "one machine, one 256 TiB" framing was
+simplifying away:
+
+- **One process cannot see or corrupt another's memory just by
+  guessing an address** - the addresses it can even form only translate
+  through *its own* mapping. This isolation is a large part of why one
+  crashing program does not normally take the whole machine down with
+  it.
+- **A program's own virtual space can be larger than the physical RAM
+  installed.** The operating system can temporarily move a chunk of a
+  program's data out to disk (this is what "paging" or a "swap file"
+  is) and translate that virtual address to disk instead of RAM when
+  it is not currently needed, then bring it back when it is.
+- **On real 64-bit Windows specifically, a process does not even get
+  the CPU's full 256 TiB** - Windows reserves half of the addressable
+  range for its own kernel use and hands a 64-bit user program a
+  private range of **128 TiB** (`0x0000000000000000` through
+  `0x00007FFFFFFFFFFF`) to work with. The exact split is an operating
+  system policy choice layered on top of what the CPU's address width
+  makes possible, not a hardware limit itself.
+
+None of this changes anything about the assembly you are about to read
+- every `[rbp-4]`-style address in this lecture is, technically, one of
+these virtual addresses, silently translated for you by hardware you
+never see working. It is mentioned here so "each address names one
+byte" and "the CPU can address 256 TiB" both stay true statements,
+without accidentally implying your machine is somehow storing 256 TiB
+per running program.
+
 So "64-bit" describes the size of the *ruler* - how big a number the
 CPU is built to use to point at a byte - not the size of the boxes
 being measured, and in practice not even a promise that all 64 bits of
