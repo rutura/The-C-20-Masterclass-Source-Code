@@ -2334,10 +2334,10 @@ Now watch what happens the instant the OS calls `main`:
    ├───────────────────┤ ◄ rsp     ├───────────────────┤
    │      (free)       │           │  return address:  │ ◄ rsp
    └───────────────────┘           │  "come back here  │
-                                    │   when main ends" │
-                                    ├───────────────────┤
-                                    │      (free)       │
-                                    └───────────────────┘
+                                   │   when main ends" │
+                                   ├───────────────────┤
+                                   │      (free)       │
+                                   └───────────────────┘
 ```
 
 Calling a function does not just "jump" to it - it first writes down,
