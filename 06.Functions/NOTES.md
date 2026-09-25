@@ -2176,33 +2176,120 @@ actually describe? **The width of an address itself** - how large a
 number a register can hold to *name* a byte, not how many bytes that
 number points to.
 
-```
-   a 32-bit CPU:  an address is a 32-bit number
-                  → addresses run from 0 up to 2^32 - 1
-                  → about 4 billion distinct byte addresses reachable
-                  → roughly 4 GB of memory, maximum, ever
+**The 32-bit case, worked out in full.** A 32-bit address is a binary
+number with 32 digits - each digit either a 0 or a 1, so there are
+exactly `2 × 2 × 2 × ... ` (32 times) = `2^32` different numbers such an
+address can hold: `2^32 = 4'294'967'296`. Since every address names
+exactly one byte (established above), that is also the largest possible
+number of distinct bytes a 32-bit address could ever reach - about 4.3
+billion bytes.
 
-   a 64-bit CPU:  an address is a 64-bit number
-                  → addresses run from 0 up to 2^64 - 1
-                  → an astronomically larger range of byte addresses
-                  → far more memory reachable (in practice, current
-                    x86-64 chips only wire up ~48-57 of those 64 bits,
-                    but that ceiling is still enormously above what any
-                    machine today is fitted with)
+That raw number, "4.3 billion bytes," is correct but not a size anyone
+actually thinks in - nobody buys "4.3 billion bytes" of RAM, they buy
+gigabytes. So the next question is simply: **how many gigabytes is
+4.3 billion bytes?** Answering that means understanding the unit itself
+first.
+
+**What a GiB actually is, and why computers measure it in powers of 2 at
+all.** In everyday language, "kilo" means 1,000 and "giga" means
+1,000,000,000 - powers of **10**, because humans count in base 10 (we
+have 10 fingers). A computer's memory, though, is built entirely out of
+binary switches, each one either off or on, so the *natural* round
+numbers for a computer are powers of **2**, not powers of 10. To avoid
+ambiguity, the size that computing actually uses for "about a billion
+bytes" has its own name and its own precise definition:
+
+```
+   1 KiB  ("kibibyte")  =  2^10 bytes  =              1,024 bytes
+   1 MiB  ("mebibyte")  =  2^20 bytes  =          1,048,576 bytes
+   1 GiB  ("gibibyte")  =  2^30 bytes  =      1,073,741,824 bytes
+   1 TiB  ("tebibyte")  =  2^40 bytes  =  1,099,511,627,776 bytes
+
+   each step up is exactly 2^10 (= 1,024) times the one before it -
+   the same relationship "kilo → mega → giga" has in base 10, just
+   built from 1,024 instead of 1,000
+```
+
+`GiB` is "gigabyte" spelled precisely - close enough to 1 billion bytes
+(`1,073,741,824` vs. `1,000,000,000`) that people often just say
+"gigabyte" and "GB" for both, but `2^30` is the number a computer
+actually works with internally. **This is the whole reason the answer
+to "how many gigabytes is `2^32` bytes" comes out to a clean, exact
+number** - both the amount of memory (`2^32`) and the unit measuring it
+(`2^30` bytes per GiB) are themselves powers of 2, so dividing one by
+the other divides out perfectly, with nothing left over.
+
+**Now the division itself, spelled out.** "How many GiB is `2^32`
+bytes?" is just `2^32 ÷ 2^30`. There is a shortcut for dividing one
+power of 2 by another, and it is worth seeing *why* it works, not just
+using it as a rule:
+
+```
+   2^32  written out in full is:  2 × 2 × 2 × ... × 2     (32 twos)
+   2^30  written out in full is:  2 × 2 × 2 × ... × 2     (30 twos)
+
+   dividing them means CANCELLING one "2" from the top with
+   one "2" from the bottom, thirty times over:
+
+   2×2×2×...×2  (32 of them)          2×2  (only 2 left, uncancelled)
+   ─────────────────────────    =     ──────────────────────────────
+   2×2×2×...×2  (30 of them)                    1
+
+   30 of the 32 twos on top cancel exactly against the 30 twos on
+   the bottom - what survives is just the two LEFTOVER twos on top
+```
+
+That leftover count - 2 twos - is exactly `32 - 30`, the difference of
+the two original exponents. **That is the entire rule**: dividing
+`2^a ÷ 2^b` always leaves `2^(a - b)`, because division is cancellation,
+and cancelling matched pairs from top and bottom just subtracts how many
+pairs there were:
+
+```
+   2^32 ÷ 2^30  =  2^(32 - 30)  =  2^2  =  2 × 2  =  4
+```
+
+So `2^32` bytes is exactly **4 GiB** - not approximately, not "close
+to," genuinely exactly 4, because both numbers involved were powers of
+2 to begin with. This is exactly why 32-bit Windows famously could never
+use more than ~4 GB of RAM, no matter how much was physically installed:
+a 32-bit address simply cannot spell out any byte number past that
+point, and 4 GiB is precisely where that ceiling sits.
+
+**The 64-bit case is the same arithmetic, just with a bigger exponent -
+and here real hardware quietly does not go all the way.** `2^64` is
+about 18.4 quintillion - address space for exabytes of memory, far
+beyond anything any computer is built with today. Chip makers do not
+bother wiring up (or having software manage) all 64 bits for something
+no machine can use, so real x86-64 CPUs only implement a **usable
+prefix** of those 64 bits, and leave the rest architecturally reserved
+for future growth:
+
+```
+   how many of the 64 possible address bits are ACTUALLY wired up,
+   on real x86-64 hardware today
+
+   48-bit addressing (the long-standing default, most machines):
+        2^48 bytes  =  256 TiB of addressable memory
+
+   57-bit addressing ("5-level paging" - newer server-class chips):
+        2^57 bytes  =  128 PiB (petabytes) of addressable memory
 ```
 
 So "64-bit" describes the size of the *ruler* - how big a number the
-CPU can use to point at a byte - not the size of the boxes being
-measured. An `int` still takes up 4 bytes and a `char` still takes up 1,
-on a 32-bit or a 64-bit CPU alike; what changes between them is only how
-far the addressing can reach, because pointers/addresses themselves are
-32 bits wide on one and 64 bits wide on the other. This is exactly why
-`rax` (a full 64-bit register, wide enough to hold an address on this
-CPU) and `eax` (its low 32 bits, wide enough for an `int` but not a
-64-bit address) both exist and both matter - you will see this pairing
-constantly from here on.
+CPU is built to use to point at a byte - not the size of the boxes
+being measured, and in practice not even a promise that all 64 bits of
+that ruler are switched on. An `int` still takes up 4 bytes and a
+`char` still takes up 1, on a 32-bit or a 64-bit CPU alike; what changes
+between them is only how far the addressing can reach, because
+pointers/addresses themselves are 32 bits wide on one and (up to) 64
+bits wide on the other. This is exactly why `rax` (a full 64-bit
+register, wide enough to hold an address on this CPU) and `eax` (its
+low 32 bits, wide enough for an `int` but not a full address) both
+exist and both matter - you will see this pairing constantly from here
+on.
 
-When Step 2 shows three `int` variables living at addresses `rbp-4`,
+When we later on show three `int` variables living at addresses `rbp-4`,
 `rbp-8`, and `rbp-12` - 4 apart, not 1 - that gap is simply "an `int` is
 4 bytes, so the next variable's *first* byte starts 4 addresses later,"
 the same way a 3-letter mailbox label uses up 3 consecutive house
