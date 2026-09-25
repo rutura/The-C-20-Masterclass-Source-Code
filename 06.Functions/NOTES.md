@@ -1942,8 +1942,7 @@ int difference{ [](int a, int b) { return a - b; }(10, 4) };
 Useful when a variable needs a few lines of setup to compute its value:
 wrap the setup in a lambda, call it once with whatever inputs it needs,
 and the result initialises the variable - keeping the scratch work out of
-the surrounding scope. (This is sometimes called an *immediately-invoked
-lambda*.)
+the surrounding scope. (This is sometimes called an *immediately-invoked lambda*.)
 
 ### Captures: reaching outside the body
 
@@ -2011,12 +2010,12 @@ later changes, and its writes land on the original:
    [&x] / [&]        no, stores a link     yes                   yes
 ```
 
-A **`[&]` capture is only safe while the captured variable is still
-alive.** If the lambda outlives the scope it captured from - stored in a
+A **`[&]` capture is only safe while the captured variable is still alive.** 
+If the lambda outlives the scope it captured from - stored in a
 container, returned from a function - a `[&]` link becomes dangling.
 Prefer `[=]` (or naming exactly what you need) for a lambda that travels.
 
-### Where lambdas earn their keep: passing a callable
+### Where lambdas make most sense: passing a callable
 
 Standard-library algorithms take a **callable** that decides ordering,
 which elements match, what to do with each. A lambda at the call site is
