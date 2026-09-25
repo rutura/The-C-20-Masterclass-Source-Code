@@ -2276,6 +2276,56 @@ for future growth:
         2^57 bytes  =  128 PiB (petabytes) of addressable memory
 ```
 
+**That 256 TiB is not a promise you could actually install that much
+RAM** - it is only the CPU's own limit on how large a number it *could*
+use to name a byte. Three completely different, narrower ceilings sit
+in front of it before you would ever get near that number:
+
+```
+   the CPU's address width          "how big a number CAN
+   (e.g. 48 bits = 256 TiB)          the CPU even write down?"
+            │
+            ▼
+   the motherboard's own limit      "how much RAM will THIS BOARD'S
+   (a fixed spec, per board)         circuitry actually talk to?"
+            │
+            ▼
+   the number of physical slots     "how many separate memory
+   × the largest module that        sticks can even be PLUGGED IN,
+   fits in each one                 and how big can each one be?"
+            │
+            ▼
+   what you actually have           "what is plugged in right now?"
+   installed today
+```
+
+**Real numbers, read directly off the machine these lecture examples
+were compiled on** (on Windows, the `Win32_PhysicalMemoryArray` system
+class reports the board's own numbers; `Win32_PhysicalMemory` lists what
+is actually installed):
+
+```
+   this machine's motherboard reports:
+        4 total memory slots
+        a maximum supported capacity of 64 GiB
+
+   this machine currently has installed:
+        2 modules × 32 GiB  =  64 GiB total
+        (occupying 2 of the 4 slots - 2 slots sit empty)
+```
+
+Put plainly: **this specific machine is already sitting right at its
+motherboard's own ceiling** - 64 GiB installed against a 64 GiB maximum
+the board reports supporting. The 2 empty slots could physically accept
+more memory sticks, but the board's own reported limit means larger or
+additional modules would not gain anything past that 64 GiB figure
+(some boards' true maximum is actually higher than what this field
+reports and only becomes clear from the motherboard's own manual or
+manufacturer support page - this field is the machine's own best
+answer, not always the final word). Either way, the CPU's 256 TiB of
+*address space* was never the constraint - the actual ceiling was
+sitting three steps closer to home the whole time.
+
 So "64-bit" describes the size of the *ruler* - how big a number the
 CPU is built to use to point at a byte - not the size of the boxes
 being measured, and in practice not even a promise that all 64 bits of
