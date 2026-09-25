@@ -2399,6 +2399,72 @@ byte" and "the CPU can address 256 TiB" both stay true statements,
 without accidentally implying your machine is somehow storing 256 TiB
 per running program.
 
+### What a process's own private address space actually looks like
+
+One private range of addresses, all to itself, is not just one
+undivided slab a program fills up from one end. It has an internal
+**layout** - fixed regions with fixed jobs, at fixed ends of the range -
+and understanding that layout is what finally answers "the stack grows
+toward lower addresses, so where does it grow *into*, and why does that
+never collide with anything else?"
+
+```
+   one process's own virtual address space, low addresses at the TOP
+   of the page - a real, standard layout, not specific to this lecture
+
+   address 0x00000000  ┌───────────────────────────────────┐
+                       │ TEXT   - your compiled code       │  fixed size,
+                       │ (the actual machine               │  never grows
+                       │  instructions this lecture        │  (read-only,
+                       │  has been reading all along)      │  fixed at
+                       ├───────────────────────────────────┤  compile time)
+                       │ DATA   - global / static          │  fixed size,
+                       │ variables, string literals        │  set at
+                       ├───────────────────────────────────┤  program start
+                       │ HEAP   - grows toward HIGHER      │
+                       │ addresses as the program          │  ▲ grows UP
+                       │ requests more dynamic memory      │  (toward
+                       │ (std::vector, "new", etc. -       │   higher
+                       │  a later chapter's topic)         │   addresses)
+                       ├───────────────────────────────────┤
+                       │ (large UNUSED gap -                │  ← THIS is
+                       │  deliberately left                 │    the part
+                       │  empty, so heap and                │    missing
+                       │  stack both have real              │    before:
+                       │  room to grow into                 │    room to
+                       │  without colliding)                │    grow INTO
+                       ├───────────────────────────────────┤
+                       │ STACK  - grows toward LOWER       │
+                       │ addresses as functions call       │  ▼ grows DOWN
+                       │ other functions (exactly what     │  (toward
+                       │ this lecture has been drawing)    │   lower
+   address 0x7FFFFFFF  └───────────────────────────────────┘   addresses)
+```
+
+Four things this settles, all at once:
+
+- **The stack is not the only thing in a process's address space** -
+  it is one region, deliberately placed at the *high* end, with the
+  program's code and global data at the *low* end.
+- **The heap and the stack grow toward each other, from opposite ends**
+  - the heap climbing to higher addresses as the program allocates more
+    dynamic memory, the stack descending to lower addresses as function
+    calls nest deeper. This is why they are placed at opposite ends
+    instead of next to each other: each one needs room to grow *without
+    a neighbor immediately in the way*.
+- **The large gap in the middle is not wasted or unusable - it is
+  exactly the room the stack (and the heap) grow into.** A tiny
+  program's stack might only use a sliver of addresses near the very
+  top; a program with deep recursion (6.15) or many nested calls uses
+  more of that gap, descending further into it. Run out of that gap
+  entirely - grow either region so far it reaches the other - and that
+  is a **stack overflow** in the most literal, address-space sense.
+- **Every `rbp`/`rsp` value in this lecture's diagrams lives inside that
+  STACK region**, near the high end of this layout - the small
+  `0x6FE0`-`0x7020` range used throughout this lecture is a zoomed-in
+  view of just that bottom strip of the diagram above, not the whole
+  address space.
+
 So "64-bit" describes the size of the *ruler* - how big a number the
 CPU is built to use to point at a byte - not the size of the boxes
 being measured, and in practice not even a promise that all 64 bits of
@@ -2618,51 +2684,74 @@ for the CPU architecture (think instruction set (mov, mul,...)) we are targeting
 ### Before Step 1: the stack, before `main` even starts
 
 **One piece of context the source code never shows you**: your program
-does not start itself. Before a single line of your code runs, your
-operating system loads the compiled program and runs its own startup
-code first. That startup code has already been keeping track of things
-in a reserved region of memory called **the stack** - and it hands that
-same stack straight to your program, already set up and in use, the
-moment it calls `main`.
+does not start itself, and `main` is not the very first code that runs.
+The operating system loads the compiled program into memory and jumps
+to a fixed entry point - conventionally named **`_start`** - which is
+not part of your code at all, but a small amount of startup code the
+compiler links in automatically (part of the C runtime, "CRT"). `_start`
+sets a few things up and only then calls `main` - the exact same kind
+of function call `main` will later use to call your own functions. By
+the time that happens, the stack already exists and is already partway
+in use, handed to your program already set up.
 
-Picture that hand-off as a snapshot, right before `main` is called.
-Stack addresses on a real 64-bit machine are long, ugly hex numbers
-(something like `0x00007ffd74aa7500`), so to keep this readable, the
-diagrams below use a shortened, made-up but realistic-shaped stand-in:
-**`0x7000`** as the address `rsp` happens to be sitting at, right this
-moment, before your program has run a single instruction:
+Picture that hand-off as a snapshot, right before `main` is called - a
+zoomed-in view of just the STACK region from the full address-space
+layout above, the small strip near the very top of that earlier
+diagram, at its own scale. Stack addresses on a real 64-bit machine are
+long, ugly hex numbers (something like `0x00007ffd74aa7500`), so to
+keep this readable, the diagrams below use a shortened, made-up but
+realistic-shaped stand-in: **`0x7000`** as the address `rsp` happens to
+be sitting at, right this moment, before your program has run a single
+instruction:
 
 ```
-   the stack, drawn growing DOWNWARD on the page (also how x86-64
-   actually grows it - toward LOWER memory addresses)
+   the stack, drawn growing DOWNWARD on the page - meaning toward
+   LOWER memory addresses, exactly like the full layout diagram
+   above. This is the same direction, just zoomed in.
 
-   address 0x6FE0:  ┌───────────────────────────────┐   ← the "bottom":
-                    │   (the OS startup code's      │      where the
-                    │    own stuff lives up here -  │      stack started,
-                    │    not something you will     │      furthest from
-                    │    ever need to look at)      │      being used up
+   address 0x6FE0:  ┌───────────────────────────────┐   ← further into
+                    │                               │      the big gap
+                    │      (unused address space -   │      from the full
+                    │       part of the same large    │      layout above:
+                    │       gap shown in the full     │      room this
+                    │       layout diagram above -    │      stack has
+                    │       room for the stack to     │      not needed
+                    │       grow further into, if     │      yet, but
+                    │       deeper calls need it)     │      COULD grow
+                    │                               │      into
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
-                    │                               │      (this line IS
-                    │         (free space)          │       the boundary:
-                    │                               │       claimed above,
-   address 0x7020:  └───────────────────────────────┘       free below)
+                    │                               │      (the boundary
+                    │      (free - already claimed   │       IS 0x7000:
+                    │       stack space, not yet      │       claimed
+                    │       written to)               │       above, still
+                    │                               │      unwritten
+   address 0x7020:  └───────────────────────────────┘       below)
 ```
 
 Every address label in these diagrams sits on a **horizontal line**, never
 inside a box's text - because an address names a *boundary*, the exact
 edge where one byte ends and the next begins, not a labeled "room." The
 line at `address 0x7000:` above is not "roughly where `rsp` is" - it
-*is* `0x7000`, the precise dividing line `rsp` points at: everything
-above that line is already claimed stack space, everything below it is
-still free.
+*is* `0x7000`, the precise dividing line `rsp` points at.
 
-Two things are already true at this exact moment, before your program
-has done anything: there is a register called **`rsp`**, and it holds
-an actual address - `0x7000` in this diagram - marking the boundary
-between "stack space already claimed" (the lower addresses, above it in
-this drawing) and "stack space still free" (the higher addresses,
-below it) - because the OS's own code has been using the stack too, for
-its own bookkeeping, before it ever got to your program.
+**Two directions are at play here, and they are opposites - this is
+worth being completely explicit about.** Reading the diagram top to
+bottom, addresses climb: `0x6FE0` is lower than `0x7000`, which is
+lower than `0x7020`. But the **stack itself grows upward on this page**
+- toward `0x6FE0`, the lower numbers - as more gets pushed onto it. So
+"the stack grows" and "addresses increase" point in **opposite**
+directions from each other. Concretely: pushing something onto the
+stack does not add to `rsp`, it **subtracts** from it - `rsp` moving
+from `0x7000` to `0x6FF8` (coming up in the very next diagram) is a
+subtraction of 8, and that subtraction *is* the stack growing by 8
+bytes. "Stack grows toward lower addresses" and "pushing subtracts from
+rsp" are two phrasings of the exact same fact.
+
+There is a register called **`rsp`**, and it holds an actual address -
+`0x7000` in this diagram - marking the boundary between "stack space
+already claimed" (above it in this drawing, at the lower addresses) and
+"stack space not yet claimed" (below it, at the higher addresses, all
+the way down into that large gap from the full layout diagram).
 
 **`rsp`** stands for "stack pointer." Its one job, for the entire time
 your program runs, is to always **hold the address** of the current top
@@ -2682,8 +2771,15 @@ addresses tracked at every step. A return address on this CPU is
 
    BEFORE the call - same as the diagram just above, rsp still at 0x7000:
 
-   address 0x6FE0:  ┌───────────────────────────────┐
-                    │         OS's own stuff        │
+   address 0x6FE0:  ┌───────────────────────────────┐  ← "_start" - the C
+                    │        the C runtime's        │     runtime's own
+                    │    startup frame ("_start")   │     startup code,
+                    │                               │     NOT the OS and
+                    │                               │     NOT main - the
+                    │                               │     thing that
+                    │                               │     actually calls
+                    │                               │     main. Below it:
+                    │                               │     the big gap.
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
                     │                               │      (the boundary
                     │             (free)            │       IS 0x7000)
@@ -2693,7 +2789,8 @@ addresses tracked at every step. A return address on this CPU is
    0x7000 boundary above, and pushed rsp down past them to a NEW boundary:
 
    address 0x6FE0:  ┌───────────────────────────────┐
-                    │         OS's own stuff        │
+                    │        the C runtime's        │
+                    │    startup frame ("_start")   │
    address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
                     │  return address: "come back   │      (moved down
                     │   here when main ends"        │       by 8, from
@@ -2715,8 +2812,8 @@ has already been written to memory at `0x6FF8`, and `rsp` has already
 moved down by 8, from `0x7000` to `0x6FF8`, to reflect it.)
 
 `main` is about to want a private workspace of its own - somewhere to
-keep its own bookkeeping, separate from the OS's. That is what its very
-first two instructions set up, and this needs one more register,
+keep its own bookkeeping, separate from `_start`'s. That is what its
+very first two instructions set up, and this needs one more register,
 **`rbp`** ("base pointer"), which does not hold anything meaningful yet
 at the moment shown above - `main` is about to give it a purpose. Watch
 `rsp` move down by another 8 bytes as this happens:
@@ -2727,7 +2824,8 @@ at the moment shown above - `main` is about to give it a purpose. Watch
    to a new boundary, 0x6FF0, which rbp then copies for itself:
 
    address 0x6FE0:  ┌─────────────────────────────────┐
-                    │          OS's own stuff         │
+                    │         the C runtime's         │
+                    │     startup frame ("_start")    │
    address 0x6FF0:  ├─────────────────────────────────┤ ◄── rsp = 0x6FF0
                     │     main's saved copy of the    │ ◄── rbp = 0x6FF0
                     │         CALLER's old rbp        │      (both agree,
@@ -2754,7 +2852,7 @@ and that arithmetic stays correct all the way through `main`, precisely
 because `rbp` itself never changes.
 
 That fixed anchor is worth having, but setting it up spends `rbp` -
-overwrites whatever it held before, which belonged to the OS's own
+overwrites whatever it held before, which belonged to `_start`'s own
 code, not main's. Throwing that away would be a problem the instant
 `main` finishes and control needs to go back to code that still expects
 to find its own `rbp` value intact. So the very first thing any
