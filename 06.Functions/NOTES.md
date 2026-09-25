@@ -2558,8 +2558,8 @@ Two settings matter, both on the assembly pane's toolbar:
 
 ### Assembly belongs to one specific CPU
 
-One more thing before the first real example: assembly is **not
-portable** the way C++ is. It is written directly in one CPU family's
+One more thing before the first real example: assembly is **not portable** 
+the way C++ is. It is written directly in one CPU family's
 own private vocabulary of instruction names and register names, so the
 exact same C++ function produces completely different-looking assembly
 depending on which CPU it was compiled for.
@@ -2588,15 +2588,16 @@ different register names (`w0`, `w8`, `w9`).
 **This whole lecture, every example from here on, targets x86-64**
 (also written `x86_64` or `amd64`) - the instruction set used inside
 essentially every Windows and Linux desktop or laptop, and older
-Intel-based Macs. It is also Compiler Explorer's default and the ISA
-this course's Docker containers compile for. If your own machine is an
-Apple Silicon Mac (M1/M2/M3/M4), its *native* code is actually the
-ARM64 shown above - Compiler Explorer will still cross-compile to
-x86-64 for you regardless, which is why every screenshot below is safe
-to follow along with on any machine.
+Intel-based Macs. If your own machine is an Apple Silicon Mac (M1/M2/M3/M4), 
+its *native* code is actually the ARM64 shown above - Compiler Explorer will 
+still compile to x86-64 (in the browser) for you regardless.
 
 Two different things are being taught in this lecture, and telling them
 apart matters more than anything else in it:
+
+One of the main points we are trying to make in the lecture here is that the
+C++ you write is portable and can be compiled for any CPU, but the compiled
+version of the code (assembly), is specific to a given CPU. 
 
 ```
    WILL transfer to any CPU               will NOT transfer - x86-64 only
@@ -2610,8 +2611,9 @@ apart matters more than anything else in it:
 
 If you switched Compiler Explorer to an ARM64 compiler, every
 instruction on the right would change. Every idea on the left would
-still be exactly, word-for-word, true. **Learn the left column. The
-right column is this lecture's chosen dialect for showing it to you.**
+still be exactly, word-for-word, true. C++ allows us to write our ideas
+out in a portable format, and the compiler takes on the heavy lifting of compiling
+for the CPU architecture (think instruction set (mov, mul,...)) we are targeting.
 
 ### Before Step 1: the stack, before `main` even starts
 
