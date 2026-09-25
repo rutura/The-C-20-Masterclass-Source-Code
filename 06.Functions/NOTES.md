@@ -2126,11 +2126,13 @@ past and look up later.
 
 Everything so far has been "here is C++ code, here is what it does when
 it runs." This lecture looks at the step in between: **what the compiler
-turns your code into**. You will not write assembly - you will *read* a
-little of it, just enough to see, with your own eyes, ideas from this
-chapter that were otherwise invisible: that a variable is a slot in
-memory, that a function call has real overhead, that `inline` and
-`constexpr` are not just decoration.
+turns your code into**, and **what the CPU actually runs**. You will not
+write assembly - you will *read* a little of it, on real examples pulled
+from chapters 3 through 6, so ideas you already know stop being
+descriptions and become things you can point at: a variable is an
+address, `if` is a comparison plus a jump, a loop is a jump backwards,
+`unsigned` wraparound is not a special case the CPU knows about, a
+reference is a hidden address.
 
 ```
    your C++           the compiler              what the CPU runs
@@ -2141,9 +2143,10 @@ memory, that a function call has real overhead, that `inline` and
 
 **Assembly** is a thin, readable stand-in for the raw ones-and-zeros
 **machine code** the CPU executes. Each line is one small instruction:
-move a value, add two numbers, call a function, return. You already know
-the *ideas* - a variable, a call, a return value - assembly just shows
-them stripped down to the machine's own vocabulary.
+move a value, add two numbers, compare, jump, call a function, return.
+You already know the *ideas* - a variable, a branch, a call, a return
+value - assembly just shows them stripped down to the machine's own
+vocabulary, with nothing left implicit.
 
 ### The tool: Compiler Explorer (Godbolt)
 
@@ -2164,63 +2167,167 @@ resulting assembly on the right, live, as you type:
 
 Two settings matter, both on the assembly pane's toolbar:
 
-- **Compiler** - pick `x86-64 gcc` (any recent version). MSVC and clang
-  work too; the ideas are the same, the exact instructions differ
-  slightly.
-- **Compiler options** - type `-O0` (letter O, zero) to turn
-  **optimisation off**. This is the setting for this whole lecture: `-O0`
-  keeps the assembly close to a literal translation of your source, one
-  idea at a time. Every screenshot and example below assumes `-O0`
-  unless it says otherwise.
+- **Compiler** - a dropdown offering `x86-64 gcc`, `x86-64 clang`, and
+  (on Windows, or via the "x86-64 msvc" entry) `x86-64 msvc`. This
+  lecture shows **gcc and clang**, the two you can run locally right now
+  from this course's Linux containers (chapter 2). Where MSVC genuinely
+  differs, it is called out by name below - so if you build with MSVC
+  day to day, you are not left guessing.
+- **Compiler options** - type `-O0` (letter O, zero; MSVC spells it
+  `/Od`) to turn **optimisation off**. That is the setting for most of
+  this lecture: `-O0` keeps the assembly close to a literal, line-by-line
+  translation of your source. Near the end we flip to `-O2` (`/O2` on
+  MSVC) on purpose, to see what optimisation actually removes.
 
 Hovering a line of C++ highlights the assembly it produced, and vice
 versa - that link is most of what makes this useful as a learning tool.
 
-### A variable is a slot in memory
+### Assembly belongs to a specific CPU
 
-```cpp
-int square(int num) {
-    return num * num;
-}
-```
-
-```
-square(int):
-        push    rbp
-        mov     rbp, rsp
-        mov     DWORD PTR [rbp-4], edi   ← num's slot: store the argument here
-        mov     eax, DWORD PTR [rbp-4]   ← load num back out
-        imul    eax, eax                ← eax = eax * eax
-        pop     rbp
-        ret                             ← answer comes back in eax
-```
-
-Read it against the source, instruction by instruction:
+Unlike C++, assembly is **not portable**. It is written directly in one
+CPU family's own instruction set - its exact vocabulary of `mov`, `add`,
+`call`, and the names and sizes of its registers - so the *same compiled
+program* looks completely different depending on what hardware it was
+compiled for.
 
 ```
-   DWORD PTR [rbp-4]     "a 4-byte slot, at this address"   ← this IS num
-   mov   [rbp-4], edi     num = (the argument the caller put in edi)
-   mov   eax, [rbp-4]     read num
-   imul  eax, eax         eax = eax * num                    (num * num)
-   ret                    hand back whatever is in eax
+   the SAME square(int), cross-compiled for two different CPUs
+
+   x86-64                              ARM64
+   ───────────────────────────────     ───────────────────────────────
+   square(int):                        square(int):
+           sub   rsp, ...                      sub   sp, sp, #16
+           mov   DWORD PTR [...], edi          str   w0, [sp, #12]
+           mov   eax, DWORD PTR [...]          ldr   w8, [sp, #12]
+           imul  eax, eax                      ldr   w9, [sp, #12]
+           ret                                 mul   w0, w8, w9
+                                                add   sp, sp, #16
+                                                ret
 ```
 
-A local variable is not a magical named thing to the CPU - it is a
-labelled **address**, `[rbp-4]`, that instructions read from and write
-to. `num * num` is not one step either; it is *load*, *multiply*,
-*return*. C++ hides all of this. Assembly is where it stops being
-hidden.
+That ARM64 column is real output - the same `square` shown just above,
+cross-compiled - not a guess: different mnemonics (`str`/`ldr` instead of
+`mov`, `mul` taking three operands instead of `imul`'s two), different
+register names (`w0`, `w8`, `w9` - 32-bit views of `x0`, `x8`, `x9`), and
+stack space reserved with `sub sp, sp, #16` instead of x86-64's
+`push`/`pop` pair.
 
-Try it: change `int num` to `int lucky_number{7}` inside a function with
-no parameters and watch a `mov ..., 7` appear - a literal, stored
-straight into its slot, no loading required.
+Every compiler in that "Compiler" dropdown is really a **compiler
+targeting one specific instruction set**, not one interchangeable
+"assembly." This whole lecture, every example, targets **x86-64** (also
+written `x86_64` or `amd64`) - the instruction set inside essentially all
+Windows and Linux desktops/laptops, and older Intel-based Macs. It is
+also the default target on godbolt.org and the ISA this course's Docker
+containers (chapter 2) compile for. If you are on an Apple Silicon Mac
+(M1/M2/M3/M4), your machine's *native* code is actually **ARM64**, shown
+above - though Compiler Explorer (and this course's clang container,
+with `-target aarch64-linux-gnu`) will happily cross-compile to x86-64 or
+ARM64 regardless of which chip you are typing on.
 
-### `main` is just another function
+Two different things are being taught here, and it matters which is
+which:
+
+```
+   WILL transfer to any CPU               will NOT transfer - x86-64 only
+   ─────────────────────────              ────────────────────────────────
+   a variable is an address                the instruction is called "mov"
+   a call = remember, then jump in         the registers are called
+   a return = jump back                    eax, edi, rbp, rsp
+   a loop = a jump backwards               a multiply is "imul"
+```
+
+If you switch Compiler Explorer's target to ARM64, every instruction on
+the right changes - `mov` becomes `str`/`ldr`, `imul` becomes `mul`,
+`eax`/`edi` become `w0`/`w8` - but every idea on the left still applies
+without a single change. 
+
+### A short glossary, before the first example
+
+A handful of names come up constantly. You do not need to memorise
+these - just recognise them as you meet them below.
+
+```
+   register    a tiny, fixed storage slot INSIDE the CPU - far faster
+               than memory. eax, edi, rax, rdi, rbp, rsp... are register
+               names. Some hold a whole address (8 bytes: rax); the
+               same physical register's low 4 bytes have their own name
+               (eax) for a plain int.
+
+   rsp / rbp   two special registers that track the CURRENT function's
+               slice of the stack - rsp the very top, rbp a fixed
+               reference point inside it that local variables are
+               measured from (that is what "[rbp-4]" means: "4 bytes
+               below rbp").
+
+   mov         copy a value from one place to another (register,
+               memory address, or a literal) - the single most common
+               instruction you will see.
+
+   prologue /  the few instructions every function starts and ends
+   epilogue    with, to set up and tear down its own stack frame
+               (push rbp; mov rbp, rsp   ...   pop rbp; ret).
+```
+
+### Step 1 - the smallest possible program
 
 ```cpp
 int main() {
-    int result{square(6)};
     return 0;
+}
+```
+
+Even this compiles to real instructions. Here is gcc, `-O0`:
+
+```
+main:
+        push    rbp              ← prologue: save caller's frame pointer
+        mov     rbp, rsp         ← prologue: rbp now anchors THIS frame
+        mov     eax, 0           ← the return value goes in eax
+        pop     rbp              ← epilogue: restore caller's frame pointer
+        ret                      ← jump back to whoever called main
+```
+
+Nothing about `main` is magic to the compiler - it is a function like
+any other, with a prologue, a body, and an epilogue. What *is* special
+is who calls it: your operating system's startup code calls `main`, the
+same way `main` will call your own functions below.
+
+**A first compiler difference, already.** Clang, same source, same
+`-O0`:
+
+```
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     dword ptr [rbp - 4], 0   ← reserves a slot for main's own
+                                          ←   "return 0", THEN copies it out
+        xor     eax, eax                 ← eax = 0, via XOR instead of MOV
+        pop     rbp
+        ret
+```
+
+Same behaviour, two different instruction choices: gcc loads `0` into
+`eax` directly; clang zeroes `eax` with `xor eax, eax` (a common
+"set to zero" idiom - XORing anything with itself is always `0`, and on
+most CPUs it is marginally cheaper than a `mov`) and, at `-O0`, also
+keeps an unused stack slot around for the return value before copying
+it out. **This is the lesson underneath every difference in this
+lecture: C++ defines *what* your program computes, not which
+instructions get there.** Different compilers - and different versions
+of the same compiler - are free to choose differently, as long as the
+observable result is identical. MSVC, `/Od`, makes yet another
+reasonable choice of its own; the shape (prologue, store a `0`,
+epilogue) is the same, the exact instructions are not, and that is
+expected, not a bug in either compiler.
+
+### Step 2 - a variable is a slot in memory
+
+```cpp
+int main() {
+    int width{4};
+    int height{3};
+    int area{width * height};
+    return area;
 }
 ```
 
@@ -2228,51 +2335,315 @@ int main() {
 main:
         push    rbp
         mov     rbp, rsp
-        sub     rsp, 16                  ← main's own stack frame
-        mov     edi, 6                   ← put the argument where square expects it
-        call    square(int)              ← jump into square, remember where to come back
-        mov     DWORD PTR [rbp-4], eax   ← result = whatever square returned (in eax)
-        mov     eax, 0                   ← main's own return value
-        leave
+        mov     DWORD PTR [rbp-4], 4    ← width  lives at [rbp-4]
+        mov     DWORD PTR [rbp-8], 3    ← height lives at [rbp-8]
+        mov     eax, DWORD PTR [rbp-4]  ← load width into eax
+        imul    eax, DWORD PTR [rbp-8]  ← eax = eax * height
+        mov     DWORD PTR [rbp-12], eax ← area lives at [rbp-12]
+        mov     eax, DWORD PTR [rbp-12] ← return value = area
+        pop     rbp
         ret
 ```
 
-`main` gets **no special treatment**. It has a prologue (`push rbp; mov
-rbp, rsp`), a body, an epilogue (`leave; ret`), exactly like `square`
-does. The one thing that *is* special about it is who calls it: the
-operating system's startup code calls `main`, the same way `main` here
-calls `square`.
-
-### The call, made concrete: `call` and `ret`
-
-This is 6.2's stack-frame diagram, now with the two instructions that
-actually build and tear it down:
-
 ```
-   main calls square(6)
+   stack frame for main, sketched:
 
+        higher addresses
    ┌───────────────────────────┐
-   │  main:                    │
-   │      mov   edi, 6         │   1. argument goes into a register
-   │      call  square(int)    │   2. push return address, jump in
-   │  ┌────────────────────┐   │
-   │  │ square(int):       │◄──┘   3. new frame: square's own num
-   │  │     ...work...     │
-   │  │     mov  eax, ...  │       4. answer placed in eax
-   │  │     ret            │───┐   5. pop return address, jump back
-   │  └────────────────────┘   │
-   │      mov  [rbp-4], eax  ◄─┘   6. main stores square's answer
+   │  ...caller's stuff...     │
+   ├───────────────────────────┤  ← rbp  (frame pointer)
+   │  width    [rbp-4]    = 4  │
+   │  height   [rbp-8]    = 3  │
+   │  area     [rbp-12]   = 12 │
    └───────────────────────────┘
+        lower addresses, stack grows this way
 ```
 
-`call` is not one thing - it is "remember where I am, then jump."
-`ret` is its mirror: "jump back to wherever `call` remembered." Every
-`{ }` function body you have written compiles to some shape of this.
-This is also *why* a call is not free (6.2's "call overhead") - steps 1,
-2, 5, and 6 all cost real instructions, on top of the work inside the
-function.
+A variable is not a magical named box to the CPU - it is a labelled
+**address**, and every read or write of it is an explicit `mov`.
+`width * height` is not one step either; it is *load width*, *multiply
+by height*, *store the result*. C++ hides every one of these steps
+behind `int area{width * height};`. This is where that hiding stops.
 
-### `inline`: watching the call disappear
+### Step 3 - `if` is a comparison plus a jump
+
+```cpp
+int main() {
+    int score{72};
+    if (score >= 60) {
+        score = 1;
+    } else {
+        score = 0;
+    }
+    return score;
+}
+```
+
+```
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], 72
+        cmp     DWORD PTR [rbp-4], 59    ← compare score to 59
+        jle     .L2                      ← "jump if less-or-equal" to L2
+        mov     DWORD PTR [rbp-4], 1     ← the "if" branch: score = 1
+        jmp     .L3                      ← skip over the else branch
+.L2:
+        mov     DWORD PTR [rbp-4], 0     ← the "else" branch: score = 0
+.L3:
+        mov     eax, DWORD PTR [rbp-4]
+        pop     rbp
+        ret
+```
+
+```
+   score >= 60 ?
+        │
+   compiler flips it: score <= 59 ?  ──yes──►  jump to .L2 (else branch)
+        │no
+        ▼
+   fall straight into the "if" branch
+```
+
+There is no `if` instruction. The compiler turns the *condition* into a
+`cmp` (compare) and a conditional jump - `jle`, `jl`, `jg`, `je`, `jne`,
+and friends, one per relational/equality operator from 5.4 - and turns
+the two `{ }` bodies into plain runs of instructions with **labels**
+(`.L2`, `.L3`) the jumps target. Notice it also **flipped the
+condition** (`>= 60` became `<= 59` and jumps to the *else* branch) -
+compilers routinely restructure your logic like this as long as the
+result behaves identically; it is not something to chase in your own
+code.
+
+### Step 4 - a loop is a jump backwards
+
+```cpp
+int main() {
+    int total{0};
+    for (int i{0}; i < 5; ++i) {
+        total += i;
+    }
+    return total;
+}
+```
+
+```
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], 0     ← total = 0
+        mov     DWORD PTR [rbp-8], 0     ← i = 0
+        jmp     .L2                      ← jump straight to the CHECK
+.L3:
+        mov     eax, DWORD PTR [rbp-8]
+        add     DWORD PTR [rbp-4], eax   ← total += i
+        add     DWORD PTR [rbp-8], 1     ← ++i
+.L2:
+        cmp     DWORD PTR [rbp-8], 4     ← i <= 4  ( i.e. i < 5 )
+        jle     .L3                      ← if true, jump BACK to the body
+        mov     eax, DWORD PTR [rbp-4]
+        pop     rbp
+        ret
+```
+
+```
+              ┌────────────────────────────────┐
+              │                                │
+              ▼                                │
+   .L2: check i < 5 ──true──► .L3: run body ────┘  (loops back up)
+              │
+             false
+              ▼
+        fall through, return total
+```
+
+A `for` loop is not a distinct machine concept either - it is exactly
+the `if`-style `cmp` + conditional jump from Step 3, except the jump
+target (`.L3`) sits **above** the check instead of below it, so control
+can flow back **up**. Every loop shape you know - `while`, `do...while`,
+`for` - compiles down to some arrangement of *label*, *body*, *check*,
+*jump back*. `while` and `for` check before the first pass (jump to the
+check first, as above); `do...while` runs the body once unconditionally
+before the first check, which is the one structural difference you can
+usually spot in the assembly.
+
+### Step 5 - `unsigned` wraparound: the CPU never saw a bug
+
+This is 4.3 and 4.4's wraparound bug, made completely literal.
+
+```cpp
+int main() {
+    unsigned int points{350u};
+    points = points - 400u;   // "should" be -50
+    return static_cast<int>(points);
+}
+```
+
+```
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], 350
+        sub     DWORD PTR [rbp-4], 400   ← one plain subtract instruction
+        mov     eax, DWORD PTR [rbp-4]
+        pop     rbp
+        ret
+```
+
+That is the **entire** assembly - one `sub`, nothing else. Compare it to
+Step 2's arithmetic: identical shape, identical `sub` instruction you
+would get for signed `int` too. **The CPU has no separate "unsigned
+subtract"** at this width; `sub` just flips the requested bits according
+to fixed binary rules, the same rules in either case. `350 - 400` under
+those rules produces the bit pattern for `4'294'966'946` - there is no
+special case, no check, no error, because *nothing in the instruction
+stream is watching for one*. Whether that bit pattern means "a huge
+positive number" or "well-defined wraparound" is entirely a **C++-level**
+decision, made once, back when `points` was declared `unsigned int`
+instead of `int` - the hardware just moves bits. This is exactly why the
+bug from 4.4 is silent: there is nothing at the machine level positioned
+to catch it.
+
+### Step 6 - calling a function: `call` and `ret`, made concrete
+
+Back to 3.3's own example, `add_numbers`, called from `main`:
+
+```cpp
+int add_numbers(int first, int second) {
+    int result{first + second};
+    return result;
+}
+
+int main() {
+    int sum{add_numbers(25, 7)};
+    return 0;
+}
+```
+
+```
+add_numbers(int, int):
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], edi   ← first  = the caller's 1st argument
+        mov     DWORD PTR [rbp-8], esi   ← second = the caller's 2nd argument
+        mov     eax, DWORD PTR [rbp-4]
+        add     eax, DWORD PTR [rbp-8]   ← eax = first + second
+        mov     DWORD PTR [rbp-12], eax  ← result = eax
+        mov     eax, DWORD PTR [rbp-12]  ← return value = result
+        pop     rbp
+        ret
+
+main:
+        push    rbp
+        mov     rbp, rsp
+        mov     esi, 7                        ← 2nd argument
+        mov     edi, 25                       ← 1st argument
+        call    add_numbers(int, int)         ← remember here, jump in
+        mov     DWORD PTR [rbp-4], eax         ← sum = whatever came back in eax
+        mov     eax, 0
+        pop     rbp
+        ret
+```
+
+```
+   main calls add_numbers(25, 7)
+
+   ┌────────────────────────────────┐
+   │  main:                         │
+   │      mov  edi, 25              │  1. arguments go into fixed registers
+   │      mov  esi, 7               │     (edi, esi, edx, ecx, r8d, r9d, ...
+   │      call add_numbers(int,int) │      on x86-64 Linux/macOS)
+   │  ┌─────────────────────────┐   │
+   │  │ add_numbers(int, int):  │◄──┘  2. push return address, jump in
+   │  │     ...work...          │
+   │  │     mov  eax, result    │      3. answer placed in eax
+   │  │     ret                 │───┐  4. pop return address, jump back
+   │  └─────────────────────────┘   │
+   │      mov  [rbp-4], eax  ◄──────┘  5. main stores add_numbers's answer
+   └────────────────────────────────┘
+```
+
+This is 6.2's call-stack diagram with names attached to every step.
+`call` is not one thing - it is "remember where I am, then jump."
+`ret` is its exact mirror: "jump back to wherever `call` remembered."
+Arguments travel in registers (not on the stack, on this calling
+convention), and the answer always comes back in `eax` (or `rax` for a
+64-bit / pointer-sized result). Every function you have written since
+3.3 compiles to some shape of this pattern - and it is exactly why a
+call is not free (6.2's "call overhead"): steps 1 through 5 are all real
+instructions, on top of whatever work happens inside the function.
+
+**Calling convention differs by platform - this matters if you use
+MSVC.** The register layout above (`edi, esi, edx, ecx, r8d, r9d` for
+integer arguments) is the **System V AMD64 ABI**, used on Linux and
+macOS - which is what gcc and clang in this course's containers target.
+**Windows x64 (what MSVC uses) is a different, incompatible convention**:
+the first four integer/pointer arguments go in `rcx, rdx, r8, r9`
+instead, and the caller must reserve 32 bytes of "shadow space" on the
+stack before every call, even though this example only uses two
+arguments. The *idea* - arguments in registers, answer in a return
+register, `call`/`ret` bracketing it all - is identical; only the
+specific register names change. This is also *why* you cannot link a
+`.lib` built with MSVC into a project built with gcc/clang without care:
+their functions do not agree on where to find the arguments.
+
+### Step 7 - a reference is a hidden address
+
+6.8's pass-by-value vs. pass-by-reference, now visible directly:
+
+```cpp
+void add_one_by_value(int n) {
+    n += 1;
+}
+
+void add_one_by_ref(int& n) {
+    n += 1;
+}
+```
+
+```
+add_one_by_value(int):
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], edi   ← n is its OWN 4-byte copy
+        add     DWORD PTR [rbp-4], 1     ← changes only the copy
+        pop     rbp
+        ret
+
+add_one_by_ref(int&):
+        push    rbp
+        mov     rbp, rsp
+        mov     QWORD PTR [rbp-8], rdi   ← n is an 8-byte ADDRESS, not a value
+        mov     rax, QWORD PTR [rbp-8]   ← load that address
+        mov     eax, DWORD PTR [rax]     ← follow it, read the caller's int
+        lea     edx, [rax+1]             ← edx = (that value) + 1
+        mov     rax, QWORD PTR [rbp-8]   ← reload the address
+        mov     DWORD PTR [rax], edx     ← write through it - the CALLER'S int changes
+        pop     rbp
+        ret
+```
+
+```
+   by value:  n IS a 4-byte int, own copy                edi (4 bytes)
+              add_one_by_value never touches
+              the caller's variable at all
+
+   by ref:    n IS an 8-byte ADDRESS                      rdi (8 bytes)
+              every use of "n" in the source becomes:
+                  1. load the address
+                  2. follow it ([address]) to reach the real int
+              "n += 1" -> read through the address, add 1, write back through it
+```
+
+This is the entire mechanism behind 6.8's "an alias for the caller's
+variable," with nothing left to imagine: `int&` is passed as a plain
+**address**, in an 8-byte register (`rdi`) instead of a 4-byte one
+(`edi`), and every single use of the parameter in the function body
+costs an extra "follow the address" step. A reference is not a special
+kind of variable to the machine - it is a pointer that C++'s type system
+will not let you treat like one.
+
+### Step 8 - `inline`: watching the call disappear
 
 ```cpp
 inline int cube(int num) {
@@ -2281,15 +2652,15 @@ inline int cube(int num) {
 
 int main() {
     int result{cube(3)};
-    return 0;
+    return result;
 }
 ```
 
-At `-O0`, `inline` usually changes **nothing** in the assembly - `call
-cube(int)` is still there. `inline` is a hint the compiler is free to
-ignore, and at `-O0` it mostly does (see 6.2 again: "a suggestion, not a
-command"). Switch the optimisation level to **`-O2`** in the dropdown
-and look again:
+At `-O0`, `inline` usually changes **nothing** - `call cube(int)` is
+still there, because `-O0` deliberately does the least work possible.
+`inline` is a hint the compiler is free to ignore (6.2: "a suggestion,
+not a command"), and at `-O0` it mostly does. Switch the compiler
+options to **`-O2`** and look again:
 
 ```
    -O0  (optimisations off)          -O2  (optimisations on)
@@ -2303,12 +2674,17 @@ and look again:
        ret
 ```
 
-At `-O2` the compiler inlines `cube`'s body into `main` - exactly as
-6.2 described in words - and then, since `cube(3)` never changes, it
-finishes the arithmetic itself and bakes in the literal `27`. Nothing
-is computed when the program runs; the whole function call is gone.
+At `-O2`, gcc inlines `cube`'s body straight into `main` - exactly as
+6.2 described in words - and then, since `cube(3)` never changes, finishes
+the arithmetic itself and bakes in the literal `27`. Nothing is computed
+when the program runs; the entire function call is gone. Clang and MSVC
+reach the same result at their own "optimise for speed" levels
+(`-O2`/`-O3` for clang, `/O2` for MSVC) - the exact threshold at which a
+given compiler decides to inline a particular function can differ, but
+"a small, frequently-called function tends to vanish into its caller
+under optimisation" is a reliable pattern across all three.
 
-### `constexpr`: computed before the program even runs
+### Step 9 - `constexpr`: computed before the program even runs
 
 ```cpp
 constexpr int square_ce(int num) {
@@ -2330,28 +2706,117 @@ constexpr int nine{square_ce(3)};
 
 A `constexpr` function *can* run at compile time, but only when every
 input it is called with is itself known at compile time (6.10 covers the
-rule). Call it with a literal like `square_ce(3)`, and the compiler does
+rule). Call it with a literal like `square_ce(3)` and the compiler does
 not emit a multiply at all - it does the arithmetic itself while
 compiling, and the assembly shows only the finished number, `9`, being
 stored. Call the same function with a value that is not known until
-runtime (something read from the user, say), and the assembly falls
-back to a normal call - `constexpr` never forces compile-time work, it
-only allows it.
+runtime (something read from the user, say), and the assembly falls back
+to a normal call - `constexpr` never forces compile-time work, it only
+allows it. Note this needs no `-O2`: unlike `inline`, folding away a
+genuinely compile-time-computable `constexpr` call happens even at `-O0`,
+because it is not an optimisation of runtime code - there is no runtime
+code generated for it in the first place.
+
+### Step 10 - recursion: a function calling itself, literally
+
+6.15's `sum_to`, seen in its own assembly:
+
+```cpp
+long sum_to(int n) {
+    if (n <= 0) { return 0; }
+    return n + sum_to(n - 1);
+}
+```
+
+```
+sum_to(int):
+        push    rbp
+        mov     rbp, rsp
+        push    rbx
+        sub     rsp, 24
+        mov     DWORD PTR [rbp-20], edi   ← this call's OWN n
+        cmp     DWORD PTR [rbp-20], 0
+        jg      .L2                       ← n > 0 ? skip the base case
+        mov     eax, 0                    ← base case: return 0
+        jmp     .L3
+.L2:
+        mov     eax, DWORD PTR [rbp-20]
+        movsxd  rbx, eax                  ← keep this call's n safe across the call below
+        mov     eax, DWORD PTR [rbp-20]
+        sub     eax, 1                    ← compute n - 1
+        mov     edi, eax                  ← argument for the next call
+        call    sum_to(int)               ← sum_to calls sum_to - a NEW frame, same code
+        add     rax, rbx                  ← n + (whatever the recursive call returned)
+.L3:
+        pop     rbx
+        leave
+        ret
+```
+
+There is no separate "recursive call" instruction - `call sum_to(int)`
+is the exact same `call` from Step 6, it just happens to target the
+function currently executing. Every nested call gets **its own fresh
+copy** of `[rbp-20]` (its own `n`), because every call gets its own
+stack frame, stacked on top of the one that made the call - which is
+precisely 6.15's "each pending call is a stack frame" diagram, now
+backed by an actual instruction (`call`) building each one.
+
+### Compiler differences, summarised
+
+You will see slightly different assembly from gcc, clang, and MSVC for
+identical C++, for the same reason two people can both correctly
+translate a sentence into different-but-equally-valid phrasing. What
+differs, and what does not:
+
+```
+                    gcc / clang (Linux, macOS)      MSVC (Windows)
+   ─────────────    ───────────────────────────     ───────────────────────
+   calling          System V AMD64 ABI:              Microsoft x64 ABI:
+   convention       args in edi/rdi, esi/rsi,        args in ecx/rcx, edx/rdx,
+                    edx/rdx, ecx/rcx, r8d, r9d        r8d/r8, r9d/r9 + 32-byte
+                                                       "shadow space" reserved
+                                                       by the caller
+
+   name             Itanium C++ ABI:                  MSVC's own scheme:
+   mangling         add_numbers(int,int)              ?add_numbers@@YAHHH@Z
+                     -> "_Z11add_numbersii"            (both encode the same
+                    (gcc and clang AGREE here,          info: name, params,
+                     which is why .o files from          return type, calling
+                     one can link against the other)     convention)
+
+   optimisation     -O0 -O1 -O2 -O3 -Os               /Od /O1 /O2 /Os
+   flags
+
+   exact            differ in instruction CHOICE       differ in instruction
+   instructions     (e.g. mov eax,0 vs xor eax,eax)    CHOICE, same idea
+   at -O0
+```
+
+What stays **constant** across all three, and is really the point of
+this lecture: a variable is an address; `if`/loops are compare-and-jump;
+a call is "remember and jump," a return is "jump back"; a reference is a
+hidden address; `unsigned` wraparound is just what subtraction does to
+bits, unwatched; and optimisation can remove work the source only
+*implies* is needed, not work it actually requires.
 
 ### What to take away
 
 ```
-   variable         →  a named address, read and written by mov
-   function call    →  call / ret,  arguments in registers, answer in eax
-   inline (-O2)     →  the call disappears, body pasted into the caller
-   constexpr (lit.) →  the whole computation disappears, only the answer remains
+   variable          →  a named address, read and written by mov
+   if / loop          →  cmp + a conditional jump (jle, jg, je, ...) + labels
+   unsigned wraparound →  the same sub/add as signed - no hardware check exists
+   function call       →  call / ret, arguments in registers, answer in eax
+   reference parameter →  an address passed in a register, followed on every use
+   inline (-O2)        →  the call disappears, body pasted into the caller
+   constexpr (literal) →  the whole computation disappears, only the answer remains
+   recursion            →  call targeting the same function, a fresh frame each time
 ```
 
 You will not be asked to write assembly, and most day-to-day C++ never
 needs it. What it gives you, even glanced at occasionally, is a way to
 settle "wait, what does this actually do?" with certainty instead of a
-guess - and a first look at what "the compiler optimised it away" means
-in practice, a phrase you will hear constantly from here on.
+guess - and a first, concrete look at what "the compiler optimised it
+away" means in practice, a phrase you will hear constantly from here on.
 
 ---
 
