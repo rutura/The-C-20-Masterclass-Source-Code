@@ -2300,31 +2300,33 @@ in front of it before you would ever get near that number:
 ```
 
 **Real numbers, read directly off the machine these lecture examples
-were compiled on** (on Windows, the `Win32_PhysicalMemoryArray` system
-class reports the board's own numbers; `Win32_PhysicalMemory` lists what
-is actually installed):
+were compiled on.** 
 
 ```
-   this machine's motherboard reports:
-        4 total memory slots
-        a maximum supported capacity of 64 GiB
+   this machine's motherboard, identified precisely:
+        ASUS TUF Gaming H670-Pro WiFi D4
+
+   the manufacturer's own official spec page for this exact board:
+        4 x DIMM slots, DDR4, MAXIMUM 128 GB
+                                        ↑ the board's real engineered ceiling
 
    this machine currently has installed:
         2 modules × 32 GiB  =  64 GiB total
         (occupying 2 of the 4 slots - 2 slots sit empty)
 ```
 
-Put plainly: **this specific machine is already sitting right at its
-motherboard's own ceiling** - 64 GiB installed against a 64 GiB maximum
-the board reports supporting. The 2 empty slots could physically accept
-more memory sticks, but the board's own reported limit means larger or
-additional modules would not gain anything past that 64 GiB figure
-(some boards' true maximum is actually higher than what this field
-reports and only becomes clear from the motherboard's own manual or
-manufacturer support page - this field is the machine's own best
-answer, not always the final word). Either way, the CPU's 256 TiB of
-*address space* was never the constraint - the actual ceiling was
-sitting three steps closer to home the whole time.
+So the real ceiling for this specific machine, confirmed against the
+manufacturer's own tech-spec page: **128 GiB**, of which 64 GiB is
+currently installed and 64 GiB more is available across the 2 empty
+slots. Note that an OS-reported "maximum capacity" field (as opposed to
+the manufacturer's own published spec) can sometimes just reflect what
+happens to be installed rather than the board's true engineered limit -
+worth keeping in mind whenever a number like this comes from the
+operating system rather than the hardware manufacturer directly.
+Either way, the CPU's 256 TiB of *address space* was never remotely
+close to being the constraint - the actual ceiling, 128 GiB, was
+sitting three steps closer to home the whole time, set by the
+motherboard, not the CPU.
 
 So "64-bit" describes the size of the *ruler* - how big a number the
 CPU is built to use to point at a byte - not the size of the boxes
