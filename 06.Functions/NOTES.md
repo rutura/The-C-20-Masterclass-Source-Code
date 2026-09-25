@@ -2625,9 +2625,7 @@ in a reserved region of memory called **the stack** - and it hands that
 same stack straight to your program, already set up and in use, the
 moment it calls `main`.
 
-Picture that hand-off as a snapshot, right before `main` is called -
-now with real-looking addresses attached, the same way every byte in
-memory has had an address since the very first diagram in this lecture.
+Picture that hand-off as a snapshot, right before `main` is called.
 Stack addresses on a real 64-bit machine are long, ugly hex numbers
 (something like `0x00007ffd74aa7500`), so to keep this readable, the
 diagrams below use a shortened, made-up but realistic-shaped stand-in:
@@ -2636,9 +2634,7 @@ moment, before your program has run a single instruction:
 
 ```
    the stack, drawn growing DOWNWARD on the page (also how x86-64
-   actually grows it - toward LOWER memory addresses, exactly like
-   the memory diagram earlier in this lecture, just running the other
-   direction on the page)
+   actually grows it - toward LOWER memory addresses)
 
                     ┌───────────────────────────────┐   ← the "bottom":
                     │                               │      where the
@@ -2666,14 +2662,11 @@ your program runs, is to always **hold the address** of the current top
 of the stack - whatever the next free address is. Nothing else is
 special about it; it is simply the register every instruction that
 touches the stack keeps in sync, the same way any other register can
-hold any other address (Step 2 will show a local variable's address
-sitting in a register exactly like this).
+hold any other address.
 
 Now watch what happens the instant the OS calls `main`, with the
 addresses tracked at every step. A return address on this CPU is
-**8 bytes** (the same 8 bytes as one full `rax`/`rdi`/`rbp`-sized
-register - Step 2 covers exactly why an `int` is 4 bytes and an address
-is 8), so pushing one onto the stack always moves `rsp` down by exactly
+**8 bytes**, so pushing one onto the stack always moves `rsp` down by exactly
 8:
 
 ```
