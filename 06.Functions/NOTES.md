@@ -1761,7 +1761,7 @@ add_executable(rooster
 
 ## 6.13 Function templates
 
-In this lecture we are going to explore how you can set up bluprints for functions.
+In this lecture we are going to explore how you can set up blueprints for functions.
 
 Assume you need a function to check and see if a **value is within two bounds** for `int`, 
 for `double`, for `char`. One solution to this is **Overloading** as we have seen in a 
