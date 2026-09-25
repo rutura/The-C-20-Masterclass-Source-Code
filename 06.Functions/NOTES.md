@@ -2146,12 +2146,70 @@ lives in one of these mailboxes, at its own unique **address** (just a
 number, like a house number). Memory is large (gigabytes) but, compared
 to the CPU itself, slow to reach.
 
-```
-   memory - one giant row of numbered boxes, each holding one byte
+Drawn top-to-bottom - the same direction the stack itself will be drawn
+in later, since the stack is simply a region of this same memory:
 
-   address:   ...  1000   1001   1002   1003   1004   1005   1006  ...
-   contents:  ...  [ 7 ]  [ 0 ]  [ 0 ]  [ 0 ]  [ 3 ]  [ 0 ]  [ 0 ]  ...
 ```
+   memory - one giant column of numbered boxes, EACH HOLDING EXACTLY
+   ONE BYTE, no matter what is stored there
+
+   address 1000:  [ 7 ]
+   address 1001:  [ 0 ]
+   address 1002:  [ 0 ]
+   address 1003:  [ 0 ]
+   address 1004:  [ 3 ]
+   address 1005:  [ 0 ]
+   address 1006:  [ 0 ]
+        ...          ...
+```
+
+Notice the addresses climb **by exactly 1 each time** - `1000`, `1001`,
+`1002`... This is not a detail specific to this diagram, it is how x86
+memory has worked since long before 64-bit CPUs existed: **every single
+address names exactly one byte, always.** There is no such thing as an
+address that skips ahead by 4 or by 8 - if you want the *next* byte
+after address `1000`, its address is `1001`, full stop.
+
+That raises an obvious question: if a 32-bit CPU and a 64-bit CPU both
+address memory **one byte at a time**, what does "32-bit" or "64-bit"
+actually describe? **The width of an address itself** - how large a
+number a register can hold to *name* a byte, not how many bytes that
+number points to.
+
+```
+   a 32-bit CPU:  an address is a 32-bit number
+                  → addresses run from 0 up to 2^32 - 1
+                  → about 4 billion distinct byte addresses reachable
+                  → roughly 4 GB of memory, maximum, ever
+
+   a 64-bit CPU:  an address is a 64-bit number
+                  → addresses run from 0 up to 2^64 - 1
+                  → an astronomically larger range of byte addresses
+                  → far more memory reachable (in practice, current
+                    x86-64 chips only wire up ~48-57 of those 64 bits,
+                    but that ceiling is still enormously above what any
+                    machine today is fitted with)
+```
+
+So "64-bit" describes the size of the *ruler* - how big a number the
+CPU can use to point at a byte - not the size of the boxes being
+measured. An `int` still takes up 4 bytes and a `char` still takes up 1,
+on a 32-bit or a 64-bit CPU alike; what changes between them is only how
+far the addressing can reach, because pointers/addresses themselves are
+32 bits wide on one and 64 bits wide on the other. This is exactly why
+`rax` (a full 64-bit register, wide enough to hold an address on this
+CPU) and `eax` (its low 32 bits, wide enough for an `int` but not a
+64-bit address) both exist and both matter - you will see this pairing
+constantly from here on.
+
+When Step 2 shows three `int` variables living at addresses `rbp-4`,
+`rbp-8`, and `rbp-12` - 4 apart, not 1 - that gap is simply "an `int` is
+4 bytes, so the next variable's *first* byte starts 4 addresses later,"
+the same way a 3-letter mailbox label uses up 3 consecutive house
+numbers. The underlying memory is still addressed one byte at a time
+throughout; a multi-byte value just occupies several consecutive
+one-byte addresses, and its own address is conventionally just the
+first of them.
 
 **The CPU** is the chip that actually does arithmetic and makes
 decisions. It cannot compute directly on memory - it first has to pull a
