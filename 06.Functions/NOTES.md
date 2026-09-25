@@ -2636,18 +2636,25 @@ moment, before your program has run a single instruction:
    the stack, drawn growing DOWNWARD on the page (also how x86-64
    actually grows it - toward LOWER memory addresses)
 
-                    ┌───────────────────────────────┐   ← the "bottom":
-                    │                               │      where the
-   address 0x6FE8:  │   (the OS startup code's      │      stack started,
-                    │    own stuff lives up here -  │      furthest from
-                    │    not something you will     │      being used up
-                    │    ever need to look at)      │
-                    │                               │
+   address 0x6FE0:  ┌───────────────────────────────┐   ← the "bottom":
+                    │   (the OS startup code's      │      where the
+                    │    own stuff lives up here -  │      stack started,
+                    │    not something you will     │      furthest from
+                    │    ever need to look at)      │      being used up
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
-                    │         (free space)          │      (the next
-   address 0x7008:  │                               │       unused spot)
-                    └───────────────────────────────┘
+                    │                               │      (this line IS
+                    │         (free space)          │       the boundary:
+                    │                               │       claimed above,
+   address 0x7020:  └───────────────────────────────┘       free below)
 ```
+
+Every address label in these diagrams sits on a **horizontal line**, never
+inside a box's text - because an address names a *boundary*, the exact
+edge where one byte ends and the next begins, not a labeled "room." The
+line at `address 0x7000:` above is not "roughly where `rsp` is" - it
+*is* `0x7000`, the precise dividing line `rsp` points at: everything
+above that line is already claimed stack space, everything below it is
+still free.
 
 Two things are already true at this exact moment, before your program
 has done anything: there is a register called **`rsp`**, and it holds
@@ -2673,27 +2680,26 @@ addresses tracked at every step. A return address on this CPU is
    the OS calls main() - "call" is covered properly in Step 6; for now,
    just watch what it does to the stack, address by address
 
-   BEFORE the call:
+   BEFORE the call - same as the diagram just above, rsp still at 0x7000:
 
-                    ┌───────────────────────────────┐
-   address 0x6FE8:  │         OS's own stuff        │
-                    ├───────────────────────────────┤
-   address 0x7000:  │             (free)            │ ◄── rsp = 0x7000
-                    │                               │
-   address 0x7008:  │             (free)            │
-                    └───────────────────────────────┘
+   address 0x6FE0:  ┌───────────────────────────────┐
+                    │         OS's own stuff        │
+   address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
+                    │                               │      (the boundary
+                    │             (free)            │       IS 0x7000)
+   address 0x7020:  └───────────────────────────────┘
 
-   THE INSTANT main starts running:
+   THE INSTANT main starts running - "call" wrote 8 bytes right at the
+   0x7000 boundary above, and pushed rsp down past them to a NEW boundary:
 
-                    ┌───────────────────────────────┐
-   address 0x6FE8:  │         OS's own stuff        │
-                    ├───────────────────────────────┤
-   address 0x6FF8:  │        return address:        │ ◄── rsp = 0x6FF8
-                    │   "come back here when main   │      (moved down
-                    │             ends"             │       by 8)
-                    ├───────────────────────────────┤
-   address 0x7000:  │   (free - no longer the top)  │
-                    └───────────────────────────────┘
+   address 0x6FE0:  ┌───────────────────────────────┐
+                    │         OS's own stuff        │
+   address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
+                    │  return address: "come back   │      (moved down
+                    │   here when main ends"        │       by 8, from
+   address 0x7000:  ├───────────────────────────────┤       0x7000)
+                    │             (free)            │
+   address 0x7020:  └───────────────────────────────┘
 ```
 
 Calling a function does not just "jump" to it - it first **writes**
@@ -2716,19 +2722,21 @@ at the moment shown above - `main` is about to give it a purpose. Watch
 `rsp` move down by another 8 bytes as this happens:
 
 ```
-   right after main's first two instructions run:
+   right after main's first two instructions run - "push rbp" wrote
+   another 8 bytes right at the 0x6FF8 boundary, and pushed rsp down
+   to a new boundary, 0x6FF0, which rbp then copies for itself:
 
-                    ┌─────────────────────────────────┐
-   address 0x6FE8:  │         OS's own stuff          │
-                    ├─────────────────────────────────┤
-   address 0x6FF0:  │    main's saved copy of the     │ ◄── rsp = 0x6FF0
-                    │        CALLER's old rbp         │ ◄── rbp = 0x6FF0
-                    ├─────────────────────────────────┤      (both agree,
-   address 0x6FF8:  │         return address          │       for now)
-                    │    (unchanged, from "call")     │
-                    ├─────────────────────────────────┤
-   address 0x7000:  │              (free)             │
-                    └─────────────────────────────────┘
+   address 0x6FE0:  ┌─────────────────────────────────┐
+                    │          OS's own stuff         │
+   address 0x6FF0:  ├─────────────────────────────────┤ ◄── rsp = 0x6FF0
+                    │     main's saved copy of the    │ ◄── rbp = 0x6FF0
+                    │         CALLER's old rbp        │      (both agree,
+   address 0x6FF8:  ├─────────────────────────────────┤       for now)
+                    │    return address (unchanged,   │
+                    │    written earlier by "call")   │
+   address 0x7000:  ├─────────────────────────────────┤
+                    │              (free)             │
+   address 0x7020:  └─────────────────────────────────┘
 ```
 
 `rsp` moved AGAIN here - from `0x6FF8` down to `0x6FF0` - because
