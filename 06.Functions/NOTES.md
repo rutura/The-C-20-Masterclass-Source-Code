@@ -2176,10 +2176,15 @@ where its job first matters in this lecture.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-That is most of it: **an instruction either moves a value
-between a register and memory, does arithmetic on a register, or
-decides where to jump to next.** Assembly is just a very long, very
-literal to-do list built entirely out of those three things.
+That is most of it. Every single instruction you will meet in this
+lecture does one of exactly three things:
+
+- **move** a value between a register and memory (or another register)
+- **compute** - arithmetic or comparison, on a register
+- **jump** - decide where to continue running next
+
+Assembly is just a very long, very literal to-do list built entirely
+out of those three things.
 
 ### The tool: Compiler Explorer (Godbolt)
 
