@@ -2214,11 +2214,11 @@ reads clearly. Even then, watch the depth.
 
 ## 6.16 Intro to C++ attributes
 
-An **attribute** is a note to the compiler, written in **double square
-brackets**: `[[name]]` or `[[name("some text")]]`. It does **not change
-what the code computes**. It tells the compiler something extra about a
-function, a variable, or a statement, so the compiler can **warn you
-better** (or, for a couple of them, optimise better).
+An **attribute** is a note to the compiler, written in 
+**double square brackets**: `[[name]]` or `[[name("some text")]]`. 
+It does **not change what the code computes**. It tells the compiler 
+something extra about a function, a variable, or a statement, so 
+the compiler can **warn you better** (or, for a couple of them, optimise better).
 
 ```
    [[nodiscard]] bool username_is_available(std::string_view name);
@@ -2326,7 +2326,7 @@ to the compiler:
 
 ```
    [[fallthrough]]              in a switch: "the missing break here is intentional"
-                               (stops the compiler's fall-through warning - see 5.11)
+                               (stops the compiler's fall-through warning)
    [[noreturn]]                 on a function that never returns to its caller -
                                it calls std::exit, throws, or loops forever
    [[likely]] / [[unlikely]]    tag the common / rare branch of an if or switch;
