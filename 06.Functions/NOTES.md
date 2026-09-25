@@ -2122,7 +2122,240 @@ past and look up later.
 
 ---
 
-## 6.17 Project: writing an image
+## 6.17 Intro to assembly
+
+Everything so far has been "here is C++ code, here is what it does when
+it runs." This lecture looks at the step in between: **what the compiler
+turns your code into**. You will not write assembly - you will *read* a
+little of it, just enough to see, with your own eyes, ideas from this
+chapter that were otherwise invisible: that a variable is a slot in
+memory, that a function call has real overhead, that `inline` and
+`constexpr` are not just decoration.
+
+```
+   your C++           the compiler              what the CPU runs
+   ────────           ───────────                ─────────────────
+   main.cpp    ──►   translates + optimises ──►   assembly / machine code
+   (source)           (gcc, clang, MSVC...)        (mov, imul, call, ret...)
+```
+
+**Assembly** is a thin, readable stand-in for the raw ones-and-zeros
+**machine code** the CPU executes. Each line is one small instruction:
+move a value, add two numbers, call a function, return. You already know
+the *ideas* - a variable, a call, a return value - assembly just shows
+them stripped down to the machine's own vocabulary.
+
+### The tool: Compiler Explorer (Godbolt)
+
+You do not need to install anything. **Compiler Explorer**, at
+**godbolt.org**, compiles code you type on the left and shows the
+resulting assembly on the right, live, as you type:
+
+```
+   ┌─────────────────────────┐   ┌─────────────────────────┐
+   │  C++ source (you type)  │   │  assembly (auto-updates) │
+   │                         │   │                           │
+   │  int square(int num) {  │──►│  square(int):             │
+   │      return num * num;  │   │      imul   edi, edi       │
+   │  }                      │   │      mov    eax, edi       │
+   │                         │   │      ret                   │
+   └─────────────────────────┘   └─────────────────────────┘
+```
+
+Two settings matter, both on the assembly pane's toolbar:
+
+- **Compiler** - pick `x86-64 gcc` (any recent version). MSVC and clang
+  work too; the ideas are the same, the exact instructions differ
+  slightly.
+- **Compiler options** - type `-O0` (letter O, zero) to turn
+  **optimisation off**. This is the setting for this whole lecture: `-O0`
+  keeps the assembly close to a literal translation of your source, one
+  idea at a time. Every screenshot and example below assumes `-O0`
+  unless it says otherwise.
+
+Hovering a line of C++ highlights the assembly it produced, and vice
+versa - that link is most of what makes this useful as a learning tool.
+
+### A variable is a slot in memory
+
+```cpp
+int square(int num) {
+    return num * num;
+}
+```
+
+```
+square(int):
+        push    rbp
+        mov     rbp, rsp
+        mov     DWORD PTR [rbp-4], edi   ← num's slot: store the argument here
+        mov     eax, DWORD PTR [rbp-4]   ← load num back out
+        imul    eax, eax                ← eax = eax * eax
+        pop     rbp
+        ret                             ← answer comes back in eax
+```
+
+Read it against the source, instruction by instruction:
+
+```
+   DWORD PTR [rbp-4]     "a 4-byte slot, at this address"   ← this IS num
+   mov   [rbp-4], edi     num = (the argument the caller put in edi)
+   mov   eax, [rbp-4]     read num
+   imul  eax, eax         eax = eax * num                    (num * num)
+   ret                    hand back whatever is in eax
+```
+
+A local variable is not a magical named thing to the CPU - it is a
+labelled **address**, `[rbp-4]`, that instructions read from and write
+to. `num * num` is not one step either; it is *load*, *multiply*,
+*return*. C++ hides all of this. Assembly is where it stops being
+hidden.
+
+Try it: change `int num` to `int lucky_number{7}` inside a function with
+no parameters and watch a `mov ..., 7` appear - a literal, stored
+straight into its slot, no loading required.
+
+### `main` is just another function
+
+```cpp
+int main() {
+    int result{square(6)};
+    return 0;
+}
+```
+
+```
+main:
+        push    rbp
+        mov     rbp, rsp
+        sub     rsp, 16                  ← main's own stack frame
+        mov     edi, 6                   ← put the argument where square expects it
+        call    square(int)              ← jump into square, remember where to come back
+        mov     DWORD PTR [rbp-4], eax   ← result = whatever square returned (in eax)
+        mov     eax, 0                   ← main's own return value
+        leave
+        ret
+```
+
+`main` gets **no special treatment**. It has a prologue (`push rbp; mov
+rbp, rsp`), a body, an epilogue (`leave; ret`), exactly like `square`
+does. The one thing that *is* special about it is who calls it: the
+operating system's startup code calls `main`, the same way `main` here
+calls `square`.
+
+### The call, made concrete: `call` and `ret`
+
+This is 6.2's stack-frame diagram, now with the two instructions that
+actually build and tear it down:
+
+```
+   main calls square(6)
+
+   ┌───────────────────────────┐
+   │  main:                    │
+   │      mov   edi, 6         │   1. argument goes into a register
+   │      call  square(int)    │   2. push return address, jump in
+   │  ┌────────────────────┐   │
+   │  │ square(int):       │◄──┘   3. new frame: square's own num
+   │  │     ...work...     │
+   │  │     mov  eax, ...  │       4. answer placed in eax
+   │  │     ret            │───┐   5. pop return address, jump back
+   │  └────────────────────┘   │
+   │      mov  [rbp-4], eax  ◄─┘   6. main stores square's answer
+   └───────────────────────────┘
+```
+
+`call` is not one thing - it is "remember where I am, then jump."
+`ret` is its mirror: "jump back to wherever `call` remembered." Every
+`{ }` function body you have written compiles to some shape of this.
+This is also *why* a call is not free (6.2's "call overhead") - steps 1,
+2, 5, and 6 all cost real instructions, on top of the work inside the
+function.
+
+### `inline`: watching the call disappear
+
+```cpp
+inline int cube(int num) {
+    return num * num * num;
+}
+
+int main() {
+    int result{cube(3)};
+    return 0;
+}
+```
+
+At `-O0`, `inline` usually changes **nothing** in the assembly - `call
+cube(int)` is still there. `inline` is a hint the compiler is free to
+ignore, and at `-O0` it mostly does (see 6.2 again: "a suggestion, not a
+command"). Switch the optimisation level to **`-O2`** in the dropdown
+and look again:
+
+```
+   -O0  (optimisations off)          -O2  (optimisations on)
+   ───────────────────────           ───────────────────────
+   main:                             main:
+       mov   edi, 3                      mov   eax, 27      ← no call at all
+       call  cube(int)                   ret
+       ...
+   cube(int):                       cube(int) does not even
+       ... multiply, multiply ...   appear in the output
+       ret
+```
+
+At `-O2` the compiler inlines `cube`'s body into `main` - exactly as
+6.2 described in words - and then, since `cube(3)` never changes, it
+finishes the arithmetic itself and bakes in the literal `27`. Nothing
+is computed when the program runs; the whole function call is gone.
+
+### `constexpr`: computed before the program even runs
+
+```cpp
+constexpr int square_ce(int num) {
+    return num * num;
+}
+
+constexpr int nine{square_ce(3)};
+```
+
+```
+   square(6) at runtime            square_ce(3) as a constexpr call
+   ───────────────────             ─────────────────────────────────
+   argument only known             argument is a literal, known
+   while the program runs          while the compiler is still running
+        │                                    │
+        ▼                                    ▼
+   mov edi, 6 ; call square         mov [rbp-8], 9    ← just the answer, no work
+```
+
+A `constexpr` function *can* run at compile time, but only when every
+input it is called with is itself known at compile time (6.10 covers the
+rule). Call it with a literal like `square_ce(3)`, and the compiler does
+not emit a multiply at all - it does the arithmetic itself while
+compiling, and the assembly shows only the finished number, `9`, being
+stored. Call the same function with a value that is not known until
+runtime (something read from the user, say), and the assembly falls
+back to a normal call - `constexpr` never forces compile-time work, it
+only allows it.
+
+### What to take away
+
+```
+   variable         →  a named address, read and written by mov
+   function call    →  call / ret,  arguments in registers, answer in eax
+   inline (-O2)     →  the call disappears, body pasted into the caller
+   constexpr (lit.) →  the whole computation disappears, only the answer remains
+```
+
+You will not be asked to write assembly, and most day-to-day C++ never
+needs it. What it gives you, even glanced at occasionally, is a way to
+settle "wait, what does this actually do?" with certainty instead of a
+guess - and a first look at what "the compiler optimised it away" means
+in practice, a phrase you will hear constantly from here on.
+
+---
+
+## 6.18 Project: writing an image
 
 Everything in this chapter comes together in one small program that
 **draws a picture and saves it to a file**. The picture is deliberately
@@ -2412,7 +2645,7 @@ output written.
                                                └─ C: stbi_write_png() header fetched by CMake
 ```
 
-### A. No dependency at all (`6.17ProjectImageWriter`)
+### A. No dependency at all (`6.18ProjectImageWriter`)
 
 #### What PPM is, and how it compares
 
@@ -2601,7 +2834,7 @@ add_executable(rooster main.cpp image.cpp image.h)
 
 The lesson: Writting your ppm file by hand. 
 
-### B. A vendored single-header library (`6.18ProjectVendoredHeader`)
+### B. A vendored single-header library (`6.19ProjectVendoredHeader`)
 
 As we just saw, PPM is bulky and not something most people can
 double-click to open. To write a compressed, universally-supported
@@ -2611,7 +2844,7 @@ double-click to open. To write a compressed, universally-supported
 project under `vendor/`.
 
 ```
-   6.18ProjectVendoredHeader/
+   6.19ProjectVendoredHeader/
    ├── vendor/
    │   ├── stb_image_write.h   ← the library, committed with our code
    │   └── LICENSE
@@ -2695,7 +2928,7 @@ target_include_directories(rooster SYSTEM PRIVATE
   class of "nasty linker error" that comes from mixing a prebuilt binary
   with a different toolchain simply cannot happen here.
 
-### C. Fetched by CMake (`6.19ProjectFetchContent`)
+### C. Fetched by CMake (`6.20ProjectFetchContent`)
 
 The C++ code is **identical to B** - `image.h`, `image.cpp`,
 `stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no
@@ -2765,7 +2998,7 @@ What happens when you press *Configure*:
 
 ---
 
-## 6.20 Assignment
+## 6.21 Assignment
 
 One small program - a terminal stats / bar-chart tool over a fixed list
 of numbers - built in eight steps. `main.cpp` has the eight stubbed

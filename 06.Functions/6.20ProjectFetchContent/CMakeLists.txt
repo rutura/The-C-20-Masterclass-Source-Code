@@ -26,7 +26,7 @@ add_executable(rooster
     main.cpp
     image.cpp
     image.h
-    stb_impl.cpp          # compiles stb's function bodies, as in 6.17
+    stb_impl.cpp          # compiles stb's function bodies, as in 6.18
 )
 
 # Point at the fetched sources so #include "stb_image_write.h" resolves.
