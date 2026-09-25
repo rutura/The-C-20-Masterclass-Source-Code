@@ -2154,21 +2154,25 @@ to the CPU itself, slow to reach.
 ```
 
 **The CPU** is the chip that actually does arithmetic and makes
-decisions. It cannot compute directly on memory - it first has to pull
-a value in from memory, into one of a small number of **registers**:
-tiny storage slots built into the CPU chip itself, close enough that
-reading or writing one is close to instant. A typical x86-64 CPU has
-about 16 general-purpose registers. Each one has a name - `eax`, `edi`,
-`ebx`, and so on - the same small set of names, reused constantly, in
-every function you will look at below.
+decisions. It cannot compute directly on memory - it first has to pull a
+value in from memory, into one of a small number of **registers**: tiny
+storage slots built into the CPU chip itself, close enough that reading
+or writing one is close to instant. A typical x86-64 CPU has around 16
+of these. Each one has its own name, and - this is the part worth
+sitting with - **each one also has its own job**. A couple are general
+scratch space for whatever a calculation needs. A few others are
+reserved, by long-standing convention, for one specific purpose each -
+"the register that always holds a function's answer," "the register
+that always tracks where the current function's workspace starts." You
+will meet each register by name, one at a time, exactly at the point
+where its job first matters - there is no list to memorise up front.
 
 ```
-   CPU (a few registers, VERY fast)          memory (huge, slower)
+   CPU (a handful of registers, VERY fast)   memory (huge, slower)
    ┌───────────────────────────────┐         ┌──────────────────────┐
-   │  eax:  [        ]              │  ◄───►  │  address 1000: [ 7 ] │
-   │  edi:  [        ]              │  load   │  address 1004: [ 3 ] │
-   │  ebx:  [        ]              │  store  │  address 1008: [   ] │
-   │  ...                            │         │  ...                  │
+   │  [ a few named slots ]        │  ◄───►  │  address 1000: [ 7 ] │
+   │  [ some general purpose ]     │  load   │  address 1004: [ 3 ] │
+   │  [ some with a fixed job ]    │  store  │  address 1008: [   ] │
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
@@ -2276,6 +2280,90 @@ instruction on the right would change. Every idea on the left would
 still be exactly, word-for-word, true. **Learn the left column. The
 right column is this lecture's chosen dialect for showing it to you.**
 
+### Before Step 1: where does a function keep anything?
+
+One question needs answering before a single instruction will make
+sense: while a function is running, where does it keep its local
+variables, and where does it write down "come back to this exact spot
+when you are done"? The answer is a region of memory called **the stack** 
+- reserved automatically for exactly this - and it behaves like
+a stack of plates: the last thing placed on it is the first thing taken
+back off.
+
+Every function call claims its own private slice of the stack the
+moment it starts, called that call's **stack frame** - a scratch area
+for its own local variables, plus a couple of bookkeeping values it
+needs to find its way back to whoever called it. That frame is handed
+back the moment the function returns.
+
+Two registers exist purely to manage this - and, as promised, here is
+where each one earns its name, before either shows up in any code:
+
+```
+   rsp   "stack pointer." Always points at the very top of the stack -
+         the next free spot. Whenever something is placed on the stack
+         or removed from it, rsp is the register that moves to track it.
+
+   rbp   "base pointer." A function copies rsp's CURRENT value into rbp
+         the moment it starts, then deliberately leaves rbp alone for
+         the rest of that call - unlike rsp, which keeps moving. That
+         makes rbp a fixed, unmoving anchor point for the rest of the
+         function: instructions can say "4 bytes below rbp" and mean
+         the exact same address all the way through, even while rsp
+         wanders as things get pushed and popped elsewhere.
+```
+
+There are two instructions for moving things on and off the stack,
+worth knowing before you meet them in the first real example:
+
+```
+   push   <register>   writes that register's current value into the
+                        next free spot on the stack, then moves rsp to
+                        point past it.
+
+   pop    <register>   the exact reverse: reads a value back off the
+                        top of the stack into that register, then moves
+                        rsp back to point at it as free space again.
+```
+
+```
+   before "push rbp":              after "push rbp":
+
+   ┌───────────────────────┐       ┌───────────────────────┐
+   │  ...older stuff...    │       │  ...older stuff...    │
+   ├───────────────────────┤ ◄ rsp ├───────────────────────┤
+   │   (unused)            │       │  rbp's OLD value      │ ◄ rsp
+   └───────────────────────┘       ├───────────────────────┤
+                                   │   (unused)            │
+                                   └───────────────────────┘
+
+   "push rbp" wrote rbp's current value into the next free spot,
+   then moved rsp down to point past it - that spot stays claimed
+   until a later "pop" hands it back
+```
+
+So why would a function push `rbp` onto the stack at all? Because `rbp`
+is about to be reused - repointed at *this* function's own frame - and
+whatever value it held before (the *caller's* anchor point) would
+otherwise be lost. Saving it first, and restoring it with a matching
+`pop` right before returning, is how a function borrows `rbp` for its
+own use without permanently disturbing whoever called it:
+
+```
+   push    rbp        save the CALLER's rbp value first, so it survives
+   mov     rbp, rsp    NOW repoint rbp - it anchors THIS function's frame
+
+   ...the function's own body runs here, measured from rbp...
+
+   pop     rbp         put the CALLER's rbp value back exactly as found
+   ret                 (covered in Step 6) jump back to the caller
+```
+
+This four-line shape - **push rbp, mov rbp/rsp, ..., pop rbp** - opens
+and closes essentially every function you are about to look at. It has
+two names: the opening two lines are a function's **prologue** (the
+setup), the closing two are its **epilogue** (the teardown).
+
 ### Step 1 - the smallest possible program
 
 ```cpp
@@ -2284,13 +2372,13 @@ int main() {
 }
 ```
 
-**Before looking at the assembly, one piece of context the source code
-never shows you**: your program does not start itself. When you run the
-compiled program, your operating system's own startup code runs first,
-sets a few things up, and then **calls** your `main` function - the
-exact same kind of function call you will use to call your own
-functions below. `main` is the one function in your program that
-*something else* calls for you.
+**One piece of context the source code never shows you**: your program
+does not start itself. When you run the compiled program, your
+operating system's own startup code runs first, sets a few things up,
+and then makes an ordinary function call into your `main` - the same
+kind of call, mechanically, that you will use to call your own
+functions later in this lecture. `main` is simply the one function in
+your program that *something else* calls for you, first.
 
 Here is what gcc, at `-O0`, turns that empty `main` into:
 
@@ -2303,103 +2391,36 @@ main:
         ret
 ```
 
-Five lines for a function whose body is a single `return 0;`. Read them
-one at a time - every single line is one of "move a value" or "jump":
+The first two lines and the last two are exactly the prologue and
+epilogue you just walked through above - nothing new to figure out
+there. That leaves exactly one line in the middle that is new, plus
+`ret`:
 
 ```
-   push    rbp     "push" means: write rbp's current value onto the
-                   stack (more on the stack in a moment), then move
-                   the stack pointer to point past it. This is step 1
-                   of every function: save a value main will need to
-                   restore before it leaves, so it does not disturb
-                   whatever called it.
+   mov     eax, 0    copy the literal value 0 into a register called
+                     eax. eax has a fixed, special job on this ABI
+                     (the calling convention chapter 2's containers and
+                     Compiler Explorer both use): it is always where a
+                     function leaves its return value for whoever
+                     called it to find. "return 0;" in your source
+                     becomes, quite literally, "put 0 in eax."
 
-   mov     rbp, rsp    copy the value in register rsp into register rbp.
-                       (what this actually accomplishes is explained
-                       right below - it needs the stack introduced first)
-
-   mov     eax, 0      copy the literal number 0 into register eax.
-
-   pop     rbp         the exact reverse of "push rbp" above: read a
-                       value back off the stack into rbp, undoing the
-                       very first line.
-
-   ret                 "return": jump back to wherever this function
-                       was called FROM. For main, that is the
-                       operating system's own startup code.
+   ret               "return." Jump back to wherever this function was
+                     CALLED from - for main, that is the operating
+                     system's own startup code from a moment ago. (How
+                     "wherever it was called from" is actually
+                     remembered is Step 6's `call`/`ret` pair - main
+                     here is simply on the receiving end of one.)
 ```
 
-Two lines - `mov eax, 0` and `ret` - are the only two that do anything
-resembling what `return 0;` reads as in the source. The other three
-(`push rbp`, `mov rbp, rsp`, `pop rbp`) are bookkeeping every function
-does, called its **prologue** (the setup, at the start) and **epilogue**
-(the teardown, at the end). What that bookkeeping is actually *for* is
-the subject of the next section - it needs the stack explained first,
-properly, since every function you look at from here on will have one.
+So the whole five-line function reads, once you have both halves: save
+the caller's `rbp`, claim this frame as your own, put the answer `0`
+where callers look for it, give the caller's `rbp` back, jump back to
+whoever called you. Every one of those five lines is either "move a
+value" or "jump" - nothing more exotic happens anywhere in assembly.
 
 **Try it**: type this exact `main` into Compiler Explorer (gcc, `-O0`)
 and confirm you see the same five lines.
-
-### What "the stack" actually is
-
-Every function call in your program - `main` calling one of your
-functions, that function calling another - needs somewhere to keep its
-own local variables and a couple of bookkeeping values, for as long as
-that particular call is still running. That "somewhere" is a region of
-memory called **the stack**, and it works like a stack of plates: the
-last thing placed on it is the first thing taken back off.
-
-```
-   the stack, drawn growing DOWNWARD on the page - this is also how
-   x86-64 actually grows it: toward lower memory addresses
-
-   before "push rbp":              after "push rbp":
-
-   ┌───────────────────────┐       ┌───────────────────────┐
-   │  ...older stuff...    │       │  ...older stuff...    │
-   ├───────────────────────┤ ◄ rsp ├───────────────────────┤
-   │   (unused)            │       │  rbp's OLD value       │ ◄ rsp
-   └───────────────────────┘       ├───────────────────────┤
-                                    │   (unused)            │
-                                    └───────────────────────┘
-
-   "push rbp" wrote rbp's current value into the next free spot,
-   then moved rsp down to point past it - that free spot is gone
-   until a matching "pop" hands it back
-```
-
-Two registers exist purely to keep track of this:
-
-```
-   rsp   "stack pointer" - always points at the very top of the stack,
-         i.e. the next free spot. Every push/pop moves it.
-
-   rbp   "base pointer" - once a function starts, it copies rsp's
-         current value into rbp and then leaves rbp alone for the
-         rest of that call. rbp becomes a fixed anchor point for
-         THIS function's own local variables, so instructions can say
-         "4 bytes below rbp" and mean the same address throughout the
-         whole function, even while rsp keeps moving as things are
-         pushed and popped.
-```
-
-That is exactly what `main`'s first two lines above were doing:
-
-```
-   push    rbp        save the CALLER's rbp value (so it is not lost)
-   mov     rbp, rsp    rbp now anchors THIS function's own frame
-
-   ...body of the function runs here, using rbp as its reference point...
-
-   pop     rbp         restore the CALLER's rbp value
-   ret                 jump back to the caller
-```
-
-The slice of stack memory one function call claims for itself - its own
-local variables, plus these two bookkeeping values - is called that
-call's **stack frame**. `main`'s empty body needed none of its own
-local variables, so its frame here is about as small as a frame gets;
-the next example gives it something to actually hold.
 
 ### Step 2 - a variable is an address in memory
 
@@ -2494,7 +2515,7 @@ int pass_or_fail(int score) {
 pass_or_fail(int):
         push    rbp
         mov     rbp, rsp
-        mov     DWORD PTR [rbp-4], edi   ← score = the argument, see Step 6
+        mov     DWORD PTR [rbp-4], edi
         cmp     DWORD PTR [rbp-4], 59
         jle     .L2
         mov     eax, 1
@@ -2506,7 +2527,22 @@ pass_or_fail(int):
         ret
 ```
 
-Two new kinds of instruction here:
+That very first body line introduces a new register: `edi`. `score` is
+a **parameter** here, not a local variable the function invented for
+itself - it is a value the *caller* has to hand over. Registers are the
+fastest way to hand a value from one function to another, so this ABI
+(the same convention Step 6 covers properly) reserves `edi` as a fixed,
+agreed-on slot: **"the first whole-number argument always arrives in
+`edi`."** Every compiler targeting this platform honours that agreement,
+which is exactly how a function compiled by gcc can call one compiled
+by clang and both land on the same page about where the argument is.
+`mov DWORD PTR [rbp-4], edi` is simply this function's very first move:
+copy whatever the caller left in `edi` into `score`'s own stack slot, so
+the rest of the function can treat `score` the same way Step 2 treated
+`width` and `height` - a plain address, read and written by `mov`.
+
+Two new *kinds* of instruction also show up here, both used for the
+first time:
 
 ```
    cmp   DWORD PTR [rbp-4], 59    "compare score against 59" - this does
@@ -2729,27 +2765,34 @@ main:
         ret
 ```
 
-Two new instructions, and one convention behind them both:
+Two brand new instructions here, plus one new register.
+
+The register first, since it is the smaller idea: `add_numbers` takes
+*two* parameters, and Step 3 already covered where the first one, `edi`,
+comes from. The second whole-number argument gets its own fixed slot
+too, by that same convention - `esi`. Same idea as `edi`, just the
+agreed-on spot for argument number two.
+
+Now the two instructions that actually make a function call happen:
 
 ```
-   call    jump to another function's first instruction, but FIRST
-           push the address of the instruction right after this
-           "call" onto the stack - remembering exactly where to come
-           back to.
+   call    jump to another function's first instruction - but FIRST,
+           push the address of the instruction right after this "call"
+           onto the stack. That is the one and only way the CPU has of
+           remembering where to come back to once the called function
+           finishes.
 
    ret     pop that saved address back off the stack, and jump to it.
            This is how a function knows where to return TO - it is not
-           magic, the address was written down on the stack by "call"
-           the moment the function started.
+           magic, the address was written there by "call" itself, the
+           moment this function was entered.
 ```
 
-And the convention: on this ABI (chapter 2's Linux containers; details
-in the next section), the first integer argument to a function always
-goes in register `edi`, the second in `esi` - fixed slots, agreed on by
-every compiler targeting this platform, so that a function compiled by
-one tool can call a function compiled by another and both agree on
-where the arguments are. The answer a function hands back always comes
-out in `eax`.
+Put the two together and every function call you have seen `ret` end
+with so far makes sense: `ret` always jumps back to whatever `call`
+most recently pushed - which, for every function *except* `main`, was
+written by another one of your own functions; for `main`, by the
+operating system's own startup code (Step 1).
 
 Walk through the whole call as one sequence:
 
@@ -2822,13 +2865,28 @@ add_one_by_ref(int&):
         ret
 ```
 
-Two things to notice, side by side. First, `QWORD PTR` instead of
-`DWORD PTR` for `add_one_by_ref`'s `n`: **QWORD** means 8 bytes (a
-"quad word"), because on this CPU a memory address itself is 8 bytes
-long - `add_one_by_ref`'s `n` is not holding a 4-byte `int` at all, it
-is holding the *address of* one. Second, `edi` (4 bytes) became `rdi`
-(8 bytes) - same register, but the compiler is now using its full
-64-bit width, because an address needs all 8 bytes to store.
+Three things to notice, in order down that second listing.
+
+First, `QWORD PTR` instead of `DWORD PTR` for `add_one_by_ref`'s `n`:
+**QWORD** means 8 bytes (a "quad word"), because on this CPU a memory
+address itself is 8 bytes long - `add_one_by_ref`'s `n` is not holding a
+4-byte `int` at all, it is holding the *address of* one.
+
+Second, `edi` (4 bytes, from Step 3) became `rdi` (8 bytes) - the exact
+same register, just its full 64-bit width instead of its 4-byte one,
+because an address needs all 8 bytes to store. The same relationship as
+`eax` and `rax`: one physical register, two names, depending how many of
+its bytes an instruction is using.
+
+Third, one new register and one new instruction on the `lea` line:
+`edx` is simply another general-purpose register, playing the same role
+`eax` usually does - a scratch spot to hold a value briefly. `lea` -
+"load effective address" - normally computes an address without reading
+memory at all, but here it is being used as a shortcut for plain
+addition: `lea edx, [rax+1]` means "put `rax + 1` into `edx`," done this
+way because this particular addition happened to line up with an
+address-arithmetic instruction the compiler already had available. It
+is worth being able to recognise, not worth dwelling on.
 
 ```
    by value:   n IS the int itself                    4-byte value in edi
