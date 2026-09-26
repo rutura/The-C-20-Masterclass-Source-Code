@@ -2134,24 +2134,24 @@ already know - so that ideas which have so far just been words ("a
 variable," "calling a function," "a loop") turn into something you can
 point at and watch happen, instruction by instruction.
 
-### First, two pieces of hardware: memory and the CPU
+### Two pieces of hardware: memory and the CPU
 
 Before any assembly makes sense, two physical things need to be
-straight in your head, because every single instruction below is one of
-these two things talking to the other.
+straight in your head: Memory and CPU.
 
 **Memory (RAM)** is one enormous street of numbered mailboxes. Every
 single byte your program uses - every variable, every piece of text -
 lives in one of these mailboxes, at its own unique **address** (just a
-number, like a house number). Memory is large (gigabytes) but, compared
-to the CPU itself, slow to reach.
+number, like a house number). Two ideas for you to keep in mind: 
 
-Drawn top-to-bottom - the same direction the stack itself will be drawn
-in later, since the stack is simply a region of this same memory:
+- Memory is **big** but **slow** to reach
+- CPU storage is **smaller** but way **fast**
+
+Memory is divided in `byte` sized chunks:
 
 ```
    memory - one giant column of numbered boxes, EACH HOLDING EXACTLY
-   ONE BYTE, no matter what is stored there
+   ONE BYTE.
 
    address 1000:  [ 7 ]
    address 1001:  [ 0 ]
@@ -2164,17 +2164,13 @@ in later, since the stack is simply a region of this same memory:
 ```
 
 Notice the addresses climb **by exactly 1 each time** - `1000`, `1001`,
-`1002`... This is not a detail specific to this diagram, it is how x86
-memory has worked since long before 64-bit CPUs existed: **every single
-address names exactly one byte, always.** There is no such thing as an
-address that skips ahead by 4 or by 8 - if you want the *next* byte
-after address `1000`, its address is `1001`, full stop.
+`1002`...  **every single address names exactly one byte, always.** 
 
 That raises an obvious question: if a 32-bit CPU and a 64-bit CPU both
 address memory **one byte at a time**, what does "32-bit" or "64-bit"
 actually describe? **The width of an address itself** - how large a
-number a register can hold to *name* a byte, not how many bytes that
-number points to.
+number a register (a bunch of bytes in the CPU) can hold to *name* a byte, 
+not how many bytes that number points to.
 
 **The 32-bit case, worked out in full.** A 32-bit address is a binary
 number with 32 digits - each digit either a 0 or a 1, so there are
