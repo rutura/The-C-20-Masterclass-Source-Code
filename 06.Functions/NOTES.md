@@ -2667,6 +2667,25 @@ and "stack space not yet claimed" (above it, at the lower addresses).
 **`rsp`** stands for "stack pointer." Its one job is to always 
 **hold the address** of the current top of the stack. 
 
+Here is the program we are about to trace - the smallest `main`
+possible - with its C++ source on the left and the assembly gcc turns
+it into at `-O0` on the right:
+
+```
+   C++ source                 gcc -O0 assembly
+   ────────────────           ─────────────────────────────
+   int main() {        ──►    main:
+                                      push    rbp        
+                                      mov     rbp, rsp   
+       return 0;       ──►            mov     eax, 0     
+   }                   ──►            pop     rbp        
+                                      ret                
+```
+
+Before any of these five lines runs, `_start` has already called
+`main`. The next two diagrams show that call, and then these first two
+lines.
+
 Now watch what happens the instant the OS calls `main`, with the
 addresses tracked at every step. A return address on this CPU is
 **8 bytes**, so pushing one onto the stack always subtracts exactly 8
@@ -2722,11 +2741,38 @@ instruction runs, an address has already been written to memory at
 to `0x6FF8`, to reflect it.)
 
 `main` is about to want a private workspace of its own - somewhere to
-keep its own bookkeeping, separate from `_start`'s. That is what its
-very first two instructions set up, and this needs one more register,
-**`rbp`** ("base pointer"), which does not hold anything meaningful yet
-at the moment shown above - `main` is about to give it a purpose. Watch
-`rsp` move up the page by another 8 bytes as this happens:
+keep its own bookkeeping, separate from `_start`'s. 
+
+That is what the statements
+
+```
+push rbp
+mov rbp, rsp
+```
+
+do. **`rbp`** is the **base pointer**, and the easiest way to picture
+it is as a pin stuck into the stack at the spot where a function's
+workspace begins.
+
+`rsp` can't do that job, because it moves every time something is
+pushed or popped. If a function tried to find its own variables by
+counting from `rsp`, the count would keep changing as the function
+ran - "my variable is 4 bytes from `rsp`" would be true one moment and
+wrong the next. So each function plants `rbp` once, right at its
+start, and leaves it there. From then on every local variable has a
+permanent, easy address: "4 bytes from the pin", "8 bytes from the
+pin", no matter how much `rsp` moves around in the meantime.
+
+In short: **`rsp` marks where the stack ends right now; `rbp` marks
+where *this function's* part of the stack begins.**
+
+The  diagram below shows the state after the two statements, reproduced
+below for convenience, run:
+
+```
+push rbp
+mov rbp, rsp
+```
 
 ```
    right after main's first two instructions run - "push rbp" wrote
