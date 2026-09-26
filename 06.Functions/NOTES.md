@@ -2764,15 +2764,28 @@ permanent, easy address: "4 bytes from the pin", "8 bytes from the
 pin", no matter how much `rsp` moves around in the meantime.
 
 In short: **`rsp` marks where the stack ends right now; `rbp` marks
-where *this function's* part of the stack begins.**
+where *this function's* part of the stack begins.** Each function needs
+a base pointer to work with, including the starter code that calls our 
+main function. so before we give control to our own main function, we 
+push the base pointers of the caller of main to the stack, and after that, 
+we store the current stack pointer as the base pointer of our main function.
 
 The  diagram below shows the state after the two statements, reproduced
 below for convenience, run:
 
 ```
-push rbp
-mov rbp, rsp
+push rbp          ; save rbp's current value on the stack
+mov rbp, rsp      ; copy rsp INTO rbp   (rbp ◄── rsp)
 ```
+
+**`mov` copies from right to left.** The first name after `mov` is the
+**destination** - where the value ends up - and the second is the
+**source** - where it comes from. So `mov rbp, rsp` means "copy the
+value in `rsp` into `rbp`"; `rsp` itself is left unchanged. It reads
+exactly like assignment in C++: `rbp = rsp;` - the thing on the left
+receives, the thing on the right is read. Every `mov` in this lecture
+follows that same rule - `mov eax, 0` in the listing above, for
+example, puts `0` into `eax`.
 
 ```
    right after main's first two instructions run - "push rbp" wrote
@@ -2804,11 +2817,10 @@ lower addresses (further up the page) as `main` uses more stack space,
 but `rbp` will **not** change again for the rest of `main`'s run. `rbp`
 becomes a fixed anchor: the moment `main` declares a local variable,
 its address will be described as "so many bytes lower than `rbp`" -
-e.g. `0x6FF0 - 4 = 0x6FEC`, drawn just *above* `rbp` on the page - and
-that arithmetic stays correct all the way through `main`, precisely
-because `rbp` itself never changes.
+e.g. `0x6FF0 - 4 = 0x6FEC`, and that arithmetic stays correct all the way 
+through `main`, precisely because `rbp` itself never changes.
 
-That fixed anchor is worth having, but setting it up spends `rbp` -
+Again, that fixed anchor is worth having, but setting it up spends `rbp` -
 overwrites whatever it held before, which belonged to `_start`'s own
 code, not main's. Throwing that away would be a problem the instant
 `main` finishes and control needs to go back to code that still expects
@@ -2825,7 +2837,7 @@ before returning, is **put that old value back**:
    ...the function's own body runs here, measured from rbp...
 
    pop     rbp         restore the CALLER's rbp value, exactly as found
-   ret                 (Step 6) jump back to the address "call" saved
+   ret                 jump back to the address "call" saved
 ```
 
 This four-line shape - **push rbp, mov rbp/rsp, ..., pop rbp** - opens
