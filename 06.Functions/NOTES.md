@@ -2521,10 +2521,7 @@ shows the resulting assembly on the right, updating live as you type:
 **Try it now, before reading any further**: open godbolt.org, delete
 whatever is in the left pane, and type exactly the `square` function
 above (no `#include`, no `main` needed - a lone function is enough).
-Watch the right pane fill in as you type the closing `}`. That
-live-updating link between a line of your C++ and the instructions it
-produced - hover a line on either side and the matching one highlights
-- is most of what makes this tool worth using.
+Watch the right pane fill in as you type the closing `}`. 
 
 Two settings matter, both on the assembly pane's toolbar:
 
@@ -2545,11 +2542,10 @@ Two settings matter, both on the assembly pane's toolbar:
 
 ### Assembly belongs to one specific CPU
 
-One more thing before the first real example: assembly is **not portable** 
-the way C++ is. It is written directly in one CPU family's
-own private vocabulary of instruction names and register names, so the
-exact same C++ function produces completely different-looking assembly
-depending on which CPU it was compiled for.
+Assembly is **not portable**  the way C++ is. It is written directly in 
+one CPU family's own private vocabulary of instruction names and register 
+names, so the exact same C++ function produces completely different-looking 
+assembly depending on which CPU it was compiled for.
 
 ```
    the SAME square(int) function, compiled for two different CPUs
@@ -2566,21 +2562,16 @@ depending on which CPU it was compiled for.
                                                 ret
 ```
 
-That ARM64 column is real, verified output - not a guess - for the same
-`square` function you just typed into Compiler Explorer, compiled for a
-different chip. Different instruction names (`str`/`ldr` instead of
+Different instruction names (`str`/`ldr` instead of
 `mov`), a `mul` that takes three registers instead of `imul`'s two,
 different register names (`w0`, `w8`, `w9`).
 
-**This whole lecture, every example from here on, targets x86-64**
-(also written `x86_64` or `amd64`) - the instruction set used inside
-essentially every Windows and Linux desktop or laptop, and older
-Intel-based Macs. If your own machine is an Apple Silicon Mac (M1/M2/M3/M4), 
-its *native* code is actually the ARM64 shown above - Compiler Explorer will 
-still compile to x86-64 (in the browser) for you regardless.
-
-Two different things are being taught in this lecture, and telling them
-apart matters more than anything else in it:
+**This lecture targets x86-64** (also written `x86_64` or `amd64`) - 
+the instruction set used inside essentially every Windows and Linux 
+desktop or laptop, and older Intel-based Macs. If your own machine is 
+an Apple Silicon Mac (M1/M2/M3/M4), its *native* code is actually the 
+ARM64 shown above - Compiler Explorer will still compile to x86-64 
+(in the browser) for you regardless.
 
 One of the main points we are trying to make in the lecture here is that the
 C++ you write is portable and can be compiled for any CPU, but the compiled
@@ -2596,15 +2587,9 @@ version of the code (assembly), is specific to a given CPU.
    a loop is a jump backwards
 ```
 
-If you switched Compiler Explorer to an ARM64 compiler, every
-instruction on the right would change. Every idea on the left would
-still be exactly, word-for-word, true. C++ allows us to write our ideas
-out in a portable format, and the compiler takes on the heavy lifting of compiling
-for the CPU architecture (think instruction set (mov, mul,...)) we are targeting.
-
 ### Before Step 1: the stack, before `main` even starts
 
-**One piece of context the source code never shows you**: your program
+**There are things that happen before `main` runs**: your program
 does not start itself, and `main` is not the very first code that runs.
 The operating system loads the compiled program into memory and jumps
 to a fixed entry point - conventionally named **`_start`** - which is
@@ -2614,16 +2599,6 @@ sets a few things up and only then calls `main` - the exact same kind
 of function call `main` will later use to call your own functions. By
 the time that happens, the stack already exists and is already partway
 in use, handed to your program already set up.
-
-Picture that hand-off as a snapshot, right before `main` is called - a
-zoomed-in view of just the STACK region from the full address-space
-layout above, the small strip near the very top of that earlier
-diagram, at its own scale. Stack addresses on a real 64-bit machine are
-long, ugly hex numbers (something like `0x00007ffd74aa7500`), so to
-keep this readable, the diagrams below use a shortened, made-up but
-realistic-shaped stand-in: **`0x7000`** as the address `rsp` happens to
-be sitting at, right this moment, before your program has run a single
-instruction:
 
 ```
    the stack, drawn growing DOWNWARD on the page - meaning toward
