@@ -2436,8 +2436,6 @@ where its job first matters in this lecture.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-One more thing about registers, worth knowing before names like `eax`
-and `rax` both start showing up for what looks like "the same" register:
 **every general-purpose register is 8 bytes wide, but has multiple
 names, one per size**, because not every value needs all 8 bytes. An
 `int` (4 bytes) does not need the full width; a memory *address* (8
@@ -2445,8 +2443,7 @@ bytes, on this CPU) does. Rather than waste a name, x86-64 lets you
 address the *same physical register* at four different widths:
 
 ```
-   one physical register, eight bytes wide - four names, each one
-   naming a different amount of it, starting from the same low end
+   We can access parts of a register
 
    byte:    7    6    5    4    3    2    1    0
           ┌────┬────┬────┬────┬────┬────┬────┬────┐
@@ -2457,9 +2454,7 @@ address the *same physical register* at four different widths:
                                         └─────────┘  ax   - low 2 bytes
                                              └────┘  al   - low 1 byte
 
-   writing to eax also changes what rax holds (its low 4 bytes) -
-   these are not separate storage, just different "how much of it
-   am I using" views onto the exact same physical register
+   writing to eax also changes what rax holds (its low 4 bytes) 
 ```
 
 The naming pattern is consistent across every general-purpose register,
@@ -2467,7 +2462,7 @@ not just this one: an `r` prefix means the full 8 bytes (`rax`, `rdi`,
 `rbp`, `rsp`...), an `e` prefix means the low 4 bytes (`eax`, `edi`,
 `ebp`...), and there are narrower 2-byte and 1-byte names too, for when
 even 4 bytes is more than a value needs. You will see this exact
-pattern later, live: the same argument shows up as `edi` when a function
+pattern later: the same argument shows up as `edi` when a function
 takes a plain `int`, and as `rdi` when it takes something that needs a
 full address, like a reference.
 
@@ -2496,7 +2491,7 @@ you do between the CPU and Memory.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-Every single instruction you will meet in this lecture does one of 
+Every instruction you will meet in this lecture does one of 
 exactly three things:
 
 - **move** a value between a register and memory (or another register)
