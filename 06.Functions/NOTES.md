@@ -2357,11 +2357,7 @@ space. Let's draw it out.
 
 ```
    one process's own virtual address space, low addresses at the TOP
-   of the page (so this picture is upside down compared to the usual
-   "the stack grows down" phrasing) - a simplified, classic layout:
-   real ones also hold DLLs and one stack per thread, get shuffled
-   around at load time (ASLR), and leave the lowest addresses unmapped
-   so that using a null pointer crashes
+   of the page - a simplified, classic layout:
 
    0x0000000000000000  ┌───────────────────────────────────┐
                        │ TEXT   - your compiled code       │  
