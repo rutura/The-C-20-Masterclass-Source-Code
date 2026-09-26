@@ -2273,57 +2273,14 @@ of those 64 bits, and leave the rest architecturally reserved for future growth:
         2^57 bytes  =  128 PiB (pebibytes) of addressable memory
 ```
 
-**That 256 TiB is not a promise you could actually install that much
-RAM** - it is only the CPU's own limit on how large a number it *could*
-use to name a byte. Three completely different, narrower ceilings sit
-in front of it before you would ever get near that number:
+**Let's put this in perspective.** 
 
-```
-   the CPU's address width          "how big a number CAN
-   (e.g. 48 bits = 256 TiB)          the CPU even write down?"
-            │
-            ▼
-   the motherboard's own limit      "how much RAM will THIS BOARD'S
-   (a fixed spec, per board)         circuitry actually talk to?"
-            │
-            ▼
-   the number of physical slots     "how many separate memory
-   × the largest module that        sticks can even be PLUGGED IN,
-   fits in each one                 and how big can each one be?"
-            │
-            ▼
-   what you actually have           "what is plugged in right now?"
-   installed today
-```
-
-**Real numbers, read directly off the machine sitting in my office.** 
-
-```
-   this machine's motherboard, identified precisely:
-        ASUS TUF Gaming H670-Pro WiFi D4
-
-   the manufacturer's own official spec page for this exact board:
-        4 x DIMM slots, DDR4, MAXIMUM 128 GB
-                                        ↑ the board's real engineered ceiling
-
-   this machine currently has installed:
-        2 modules × 32 GiB  =  64 GiB total
-        (occupying 2 of the 4 slots - 2 slots sit empty)
-```
-
-So the real ceiling for this specific machine, confirmed against the
-manufacturer's own tech-spec page: **128 GiB**, of which 64 GiB is
-currently installed and 64 GiB more is available across the 2 empty
-slots. Note that an OS-reported "maximum capacity" field (as opposed to
-the manufacturer's own published spec) can sometimes just reflect what
-happens to be installed rather than the board's true engineered limit -
-worth keeping in mind whenever a number like this comes from the
-operating system rather than the hardware manufacturer directly.
-Either way, the CPU's 256 TiB of *address space* (the 48-bit figure
-from a moment ago, not the full theoretical 64-bit one) was never
-remotely close to being the constraint - the actual ceiling, 128 GiB,
-was sitting three steps closer to home the whole time, set by the
-motherboard, not the CPU.
+- You are using a 64-bit system -> 2^64 addressable space
+- Out of the 2^64 addresses, the CPU states you could use 2^48 : 256 TiB
+- In 2026, there's no computer with this amount of RAM so this must be impossible!
+- What happens, the OS lies to each program that it can access such amounts of memory
+   and it has a way to map the address space the program sees to the address space that is 
+   actually available on your machine.
 
 **So if that 256 TiB was never a promise about physical RAM, what is it
 actually used for?** This is where **virtual memory** comes in - and
@@ -2348,8 +2305,8 @@ physical RAM the machine actually has installed.
                │   translated, separately     │
                ▼                              ▼
       ┌──────────────────────────────────────────────┐
-      │   the ONE real pool of physical RAM actually  │
-      │   installed in the machine (say, 64 GiB)      │
+      │  the ONE real pool of physical RAM actually  │
+      │  installed in the machine (say, 64 GiB)      │
       └──────────────────────────────────────────────┘
 ```
 
@@ -2365,9 +2322,7 @@ at the same moment, and land on two entirely different physical bytes -
 because each program's addresses are translated through its *own*
 private mapping, not a machine-wide one.
 
-A couple of consequences worth knowing, since this is the real
-foundation the earlier "one machine, one 256 TiB" framing was
-simplifying away:
+A couple of consequences worth knowing: 
 
 - **One process cannot see or corrupt another's memory just by
   guessing an address** - the addresses it can even form only translate
@@ -2387,51 +2342,42 @@ simplifying away:
   system policy choice layered on top of what the CPU's address width
   makes possible, not a hardware limit itself.
 
-None of this changes anything about the assembly you are about to read
-- every `[rbp-4]`-style address in this lecture is, technically, one of
-these virtual addresses, silently translated for you by hardware you
-never see working. It is mentioned here so "each address names one
-byte" and "the CPU can address 256 TiB" both stay true statements,
-without accidentally implying your machine is somehow storing 256 TiB
-per running program.
+The addresses we will be working with in our assembly programs, are
+**virtual addresses**.
 
 ### What a process's own private address space actually looks like
 
-One private range of addresses, all to itself, is not just one
-undivided slab a program fills up from one end. It has an internal
-**layout** - fixed regions with fixed jobs, at fixed ends of the range -
-and understanding that layout is what finally answers "the stack grows
-toward lower addresses, so where does it grow *into*, and why does that
-never collide with anything else?"
+We have seen that each process running on your OS has its own virtual address 
+space. Let's draw it out.
 
 ```
    one process's own virtual address space, low addresses at the TOP
    of the page - a real, standard layout, not specific to this lecture
 
    address 0x00000000  ┌───────────────────────────────────┐
-                       │ TEXT   - your compiled code       │  fixed size,
-                       │ (the actual machine               │  never grows
-                       │  instructions this lecture        │  (read-only,
-                       │  has been reading all along)      │  fixed at
-                       ├───────────────────────────────────┤  compile time)
-                       │ DATA   - global / static          │  fixed size,
-                       │ variables, string literals        │  set at
-                       ├───────────────────────────────────┤  program start
+                       │ TEXT   - your compiled code       │  
+                       │ (the actual machine               │  
+                       │  instructions this lecture        │  
+                       │  has been reading all along)      │  
+                       ├───────────────────────────────────┤  
+                       │ DATA   - global / static          │  
+                       │ variables, string literals        │  
+                       ├───────────────────────────────────┤  
                        │ HEAP   - grows toward HIGHER      │
-                       │ addresses as the program          │  ▲ grows UP
+                       │ addresses as the program          │  ▼ grows DOWN
                        │ requests more dynamic memory      │  (toward
                        │ (std::vector, "new", etc. -       │   higher
                        │  a later chapter's topic)         │   addresses)
                        ├───────────────────────────────────┤
-                       │ (large UNUSED gap -                │  ← THIS is
-                       │  deliberately left                 │    the part
-                       │  empty, so heap and                │    missing
-                       │  stack both have real              │    before:
-                       │  room to grow into                 │    room to
-                       │  without colliding)                │    grow INTO
+                       │                                   │ 
+                       │                                   │ 
+                       │                                   │ 
+                       │                                   │ 
+                       │                                   │ 
+                       │                                   │ 
                        ├───────────────────────────────────┤
                        │ STACK  - grows toward LOWER       │
-                       │ addresses as functions call       │  ▼ grows DOWN
+                       │ addresses as functions call       │  ▲ grows UP
                        │ other functions (exactly what     │  (toward
                        │ this lecture has been drawing)    │   lower
    address 0x7FFFFFFF  └───────────────────────────────────┘   addresses)
@@ -2451,37 +2397,10 @@ Four things this settles, all at once:
 - **The large gap in the middle is not wasted or unusable - it is
   exactly the room the stack (and the heap) grow into.** A tiny
   program's stack might only use a sliver of addresses near the very
-  top; a program with deep recursion (6.15) or many nested calls uses
+  top; a program with deep recursion or many nested calls uses
   more of that gap, descending further into it. Run out of that gap
   entirely - grow either region so far it reaches the other - and that
   is a **stack overflow** in the most literal, address-space sense.
-- **Every `rbp`/`rsp` value in this lecture's diagrams lives inside that
-  STACK region**, near the high end of this layout - the small
-  `0x6FE0`-`0x7020` range used throughout this lecture is a zoomed-in
-  view of just that bottom strip of the diagram above, not the whole
-  address space.
-
-So "64-bit" describes the size of the *ruler* - how big a number the
-CPU is built to use to point at a byte - not the size of the boxes
-being measured, and in practice not even a promise that all 64 bits of
-that ruler are switched on. An `int` still takes up 4 bytes and a
-`char` still takes up 1, on a 32-bit or a 64-bit CPU alike; what changes
-between them is only how far the addressing can reach, because
-pointers/addresses themselves are 32 bits wide on one and (up to) 64
-bits wide on the other. This is exactly why `rax` (a full 64-bit
-register, wide enough to hold an address on this CPU) and `eax` (its
-low 32 bits, wide enough for an `int` but not a full address) both
-exist and both matter - you will see this pairing constantly from here
-on.
-
-When we later on show three `int` variables living at addresses `rbp-4`,
-`rbp-8`, and `rbp-12` - 4 apart, not 1 - that gap is simply "an `int` is
-4 bytes, so the next variable's *first* byte starts 4 addresses later,"
-the same way a 3-letter mailbox label uses up 3 consecutive house
-numbers. The underlying memory is still addressed one byte at a time
-throughout; a multi-byte value just occupies several consecutive
-one-byte addresses, and its own address is conventionally just the
-first of them.
 
 **The CPU** is the chip that actually does arithmetic and makes
 decisions. It cannot compute directly on memory - it first has to pull a
