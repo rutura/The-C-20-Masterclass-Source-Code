@@ -2249,8 +2249,15 @@ an address space of 4 GiB max!
 
 **The 64-bit case is the same arithmetic, just with a bigger exponent -
 and here real hardware quietly does not go all the way.** `2^64` is
-about 18.4 quintillion - address space for exabytes of memory, far
-beyond anything any computer is built with today. Chip makers do not
+about 18.4 quintillion bytes. Using the same division trick with the
+biggest unit from the table above, TiB (`2^40` bytes):
+
+```
+   2^64 ÷ 2^40  =  2^(64 - 40)  =  2^24  =  16,777,216 TiB
+```
+
+That is almost **17 million TiB** of address space (16 EiB, "exbibytes"),
+far beyond anything any computer is built with today. Chip makers do not
 bother wiring up (or having software manage) all 64 bits for something
 no machine can use, so real x86-64 CPUs only implement a **usable prefix** 
 of those 64 bits, and leave the rest architecturally reserved for future growth:
@@ -2263,7 +2270,7 @@ of those 64 bits, and leave the rest architecturally reserved for future growth:
         2^48 bytes  =  256 TiB of addressable memory
 
    57-bit addressing ("5-level paging" - newer server-class chips):
-        2^57 bytes  =  128 PiB (petabytes) of addressable memory
+        2^57 bytes  =  128 PiB (pebibytes) of addressable memory
 ```
 
 **That 256 TiB is not a promise you could actually install that much
@@ -2289,8 +2296,7 @@ in front of it before you would ever get near that number:
    installed today
 ```
 
-**Real numbers, read directly off the machine these lecture examples
-were compiled on.** 
+**Real numbers, read directly off the machine sitting in my office.** 
 
 ```
    this machine's motherboard, identified precisely:
