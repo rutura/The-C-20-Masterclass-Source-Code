@@ -2896,10 +2896,7 @@ there. That leaves exactly one line in the middle that is new, plus
 
    ret               "return." Jump back to wherever this function was
                      CALLED from - for main, that is the operating
-                     system's own startup code from a moment ago. (How
-                     "wherever it was called from" is actually
-                     remembered is Step 6's `call`/`ret` pair - main
-                     here is simply on the receiving end of one.)
+                     system's own startup code from a moment ago. 
 ```
 
 So the whole five-line function reads, once you have both halves: save
