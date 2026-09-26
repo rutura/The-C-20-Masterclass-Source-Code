@@ -2715,8 +2715,8 @@ subtracting 8, from `0x7000` to `0x6FF8` - so `rsp` again marks
 wherever the *new* top of the stack is. That written-down address is
 how `main` - or any function - eventually finds its way back to
 whoever called it. (The instruction that does this writing-down is
-`call`, covered properly once you have a second function to call in
-Step 6. For now, the point is only: by the time `main`'s own first
+`call`, covered properly once you have a second function to call later
+on in the lecture. For now, the point is only: by the time `main`'s own first
 instruction runs, an address has already been written to memory at
 `0x6FF8`, and `rsp` has already moved up the page by 8, from `0x7000`
 to `0x6FF8`, to reflect it.)
