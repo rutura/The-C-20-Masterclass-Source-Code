@@ -2625,6 +2625,40 @@ already set up.
    address 0x7020:  └───────────────────────────────┘
 ```
 
+The stack's real size limit (about 1 MiB by default on MSVC) is
+far above the top of this picture. The addresses here are kept small
+so they are easy to read; real ones are much larger (see the full
+layout diagram).
+
+```
+   every byte has its own address - counting from the top edge of
+   this picture down to rsp, in hex:
+
+   0x6FE0   ← top edge of the picture
+   0x6FE1
+   0x6FE2
+   0x6FE3
+   0x6FE4
+   0x6FE5
+   0x6FE6
+   0x6FE7
+   0x6FE8
+   0x6FE9   (next comes 0x6FEA, not 0x6FF0 - hex digits run 0-9, then A-F)
+     ...
+   0x6FF7
+   0x6FF8   ← the next diagram's return address starts here
+   0x6FF9
+   0x6FFA
+   0x6FFB
+   0x6FFC
+   0x6FFD
+   0x6FFE
+   0x6FFF   ← last byte before rsp - one more rolls every F over:
+   0x7000   ← rsp: the boundary
+
+   0x7000 - 0x6FE0 = 0x20 = 32 bytes of free space in this picture
+```
+
 There is a register called **`rsp`**, and it holds an actual address -
 `0x7000` in this diagram - marking the boundary between "stack space
 already claimed" (below it in this drawing, at the higher addresses)
