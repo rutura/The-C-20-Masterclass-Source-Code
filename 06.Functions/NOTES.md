@@ -2597,10 +2597,9 @@ The operating system loads the compiled program into memory and jumps
 to a fixed entry point - conventionally named **`_start`** - which is
 not part of your code at all, but a small amount of startup code the
 compiler links in automatically (part of the C runtime, "CRT"). `_start`
-sets a few things up and only then calls `main` - the exact same kind
-of function call `main` will later use to call your own functions. By
-the time that happens, the stack already exists and is already partway
-in use, handed to your program already set up.
+sets a few things up and only then calls `main`. By the time that happens, 
+the stack already exists and is already partway in use, handed to your program 
+already set up.
 
 ```
    the bottom end of the full layout diagram above, zoomed in: low
@@ -2610,55 +2609,29 @@ in use, handed to your program already set up.
 
    address 0x6FE0:  ┌───────────────────────────────┐   ▲ toward the big
                     │                               │   │ gap from the full
-                    │      (free - not yet claimed;   │     layout above:
-                    │       part of the same large    │     room this stack
-                    │       gap shown in the full     │     has not needed
-                    │       layout diagram above -    │     yet, but COULD
-                    │       room for the stack to     │     grow UP into
-                    │       grow up into, if deeper   │
-                    │       calls need it)            │
+                    │    (free - not yet claimed;   │     layout above:
+                    │     part of the same large    │     room this stack
+                    │     gap shown in the full     │     has not needed
+                    │     layout diagram above -    │     yet, but COULD
+                    │     room for the stack to     │     grow UP into
+                    │     grow up into, if deeper   │
+                    │     calls need it)            │
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
                     │                               │      (the boundary
-                    │      (already claimed - in     │       IS 0x7000:
-                    │       use by the code that      │       free above,
-                    │       runs before main)         │       claimed
+                    │     (already claimed - in     │       IS 0x7000:
+                    │     use by the code that      │       free above,
+                    │     runs before main)         │       claimed
                     │                               │      below)
    address 0x7020:  └───────────────────────────────┘
 ```
 
-Every address label in these diagrams sits on a **horizontal line**, never
-inside a box's text - because an address names a *boundary*, the exact
-edge where one byte ends and the next begins, not a labeled "room." The
-line at `address 0x7000:` above is not "roughly where `rsp` is" - it
-*is* `0x7000`, the precise dividing line `rsp` points at.
-
-**Two directions are at play here, and they are opposites - this is
-worth being completely explicit about.** Reading the diagram top to
-bottom, addresses climb: `0x6FE0` is lower than `0x7000`, which is
-lower than `0x7020`. But the **stack itself grows upward on this page**
-- toward `0x6FE0`, the lower numbers - as more gets pushed onto it. So
-"the stack grows" and "addresses increase" point in **opposite**
-directions from each other. Concretely: pushing something onto the
-stack does not add to `rsp`, it **subtracts** from it - `rsp` moving
-from `0x7000` to `0x6FF8` (coming up in the very next diagram) is a
-subtraction of 8, and that subtraction *is* the stack growing by 8
-bytes. "Stack grows toward lower addresses" and "pushing subtracts from
-rsp" are two phrasings of the exact same fact.
-
 There is a register called **`rsp`**, and it holds an actual address -
 `0x7000` in this diagram - marking the boundary between "stack space
 already claimed" (below it in this drawing, at the higher addresses)
-and "stack space not yet claimed" (above it, at the lower addresses,
-all the way up into that large gap from the full layout diagram).
+and "stack space not yet claimed" (above it, at the lower addresses).
 
-**`rsp`** stands for "stack pointer." Its one job, for the entire time
-your program runs, is to always **hold the address** of the current top
-of the stack. "Top" here means the lowest address the stack has
-claimed so far - which, in this orientation, really is the upper edge
-of the stack on the page. Nothing else is
-special about it; it is simply the register every instruction that
-touches the stack keeps in sync, the same way any other register can
-hold any other address.
+**`rsp`** stands for "stack pointer." Its one job is to always 
+**hold the address** of the current top of the stack. 
 
 Now watch what happens the instant the OS calls `main`, with the
 addresses tracked at every step. A return address on this CPU is
@@ -2666,8 +2639,7 @@ addresses tracked at every step. A return address on this CPU is
 from `rsp` - moving it 8 bytes UP the page:
 
 ```
-   the OS calls main() - "call" is covered properly in Step 6; for now,
-   just watch what it does to the stack, address by address
+   the OS calls main() 
 
    BEFORE the call - same as the diagram just above, rsp still at 0x7000:
 
@@ -2687,7 +2659,7 @@ from `rsp` - moving it 8 bytes UP the page:
                                                           actually calls
                                                           main.
 
-   THE INSTANT main starts running - "call" claimed the 8 bytes just
+   THE INSTANT main starts running -  the system claimed the 8 bytes just
    above the 0x7000 boundary, wrote into them, and moved rsp UP the page
    to a NEW boundary:
 
