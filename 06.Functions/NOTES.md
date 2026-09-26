@@ -2186,14 +2186,15 @@ gigabytes. So the next question is simply: **how many gigabytes is
 4.3 billion bytes?** Answering that means understanding the unit itself
 first.
 
-**What a GiB actually is, and why computers measure it in powers of 2 at
+**What a GiB actually is, and why memory is measured in powers of 2 at
 all.** In everyday language, "kilo" means 1,000 and "giga" means
 1,000,000,000 - powers of **10**, because humans count in base 10 (we
 have 10 fingers). A computer's memory, though, is built entirely out of
-binary switches, each one either off or on, so the *natural* round
-numbers for a computer are powers of **2**, not powers of 10. To avoid
-ambiguity, the size that computing actually uses for "about a billion
-bytes" has its own name and its own precise definition:
+binary switches, each one either off or on, and memory addresses are
+counted in binary - so the *natural* round numbers for memory sizes are
+powers of **2**, not powers of 10. Because "kilo", "mega" and "giga"
+already mean powers of 10, the power-of-2 sizes were given their own
+names (standardized by the IEC in 1998) so the two can't be confused:
 
 ```
    1 KiB  ("kibibyte")  =  2^10 bytes  =              1,024 bytes
@@ -2201,65 +2202,58 @@ bytes" has its own name and its own precise definition:
    1 GiB  ("gibibyte")  =  2^30 bytes  =      1,073,741,824 bytes
    1 TiB  ("tebibyte")  =  2^40 bytes  =  1,099,511,627,776 bytes
 
-   each step up is exactly 2^10 (= 1,024) times the one before it -
-   the same relationship "kilo → mega → giga" has in base 10, just
-   built from 1,024 instead of 1,000
+   each step up is exactly 2^10 (= 1,024) times the one before it
 ```
 
-`GiB` is "gigabyte" spelled precisely - close enough to 1 billion bytes
-(`1,073,741,824` vs. `1,000,000,000`) that people often just say
-"gigabyte" and "GB" for both, but `2^30` is the number a computer
-actually works with internally. **This is the whole reason the answer
-to "how many gigabytes is `2^32` bytes" comes out to a clean, exact
-number** - both the amount of memory (`2^32`) and the unit measuring it
-(`2^30` bytes per GiB) are themselves powers of 2, so dividing one by
-the other divides out perfectly, with nothing left over.
+The `bi` in there stands for binary. For comparison, here are the 
+regular (decimal, SI) units they are modelled on, where each step up is 
+exactly 1,000 times the one before:
+
+```
+   1 kB  ("kilobyte")   =  10^3  bytes  =              1,000 bytes
+   1 MB  ("megabyte")   =  10^6  bytes  =          1,000,000 bytes
+   1 GB  ("gigabyte")   =  10^9  bytes  =      1,000,000,000 bytes
+   1 TB  ("terabyte")   =  10^12 bytes  =  1,000,000,000,000 bytes
+
+   binary vs. decimal, side by side:
+      1 KiB is  2.4% bigger than 1 kB
+      1 MiB is  4.9% bigger than 1 MB
+      1 GiB is  7.4% bigger than 1 GB
+      1 TiB is 10.0% bigger than 1 TB    (the gap grows at every step)
+```
+
+A `GiB` (gibibyte) is *not* the same unit as a `GB` (gigabyte): a GB is
+exactly `10^9` bytes, a GiB is exactly `2^30` bytes. They are close
+enough that people - and Windows, which calculates in GiB but labels it
+"GB" - often use "GB" for both. 
 
 **Now the division itself, spelled out.** "How many GiB is `2^32`
-bytes?" is just `2^32 ÷ 2^30`. There is a shortcut for dividing one
-power of 2 by another, and it is worth seeing *why* it works, not just
-using it as a rule:
+bytes?" is just `2^32 ÷ 2^30`. 
 
 ```
    2^32  written out in full is:  2 × 2 × 2 × ... × 2     (32 twos)
    2^30  written out in full is:  2 × 2 × 2 × ... × 2     (30 twos)
 
-   dividing them means CANCELLING one "2" from the top with
-   one "2" from the bottom, thirty times over:
-
    2×2×2×...×2  (32 of them)          2×2  (only 2 left, uncancelled)
    ─────────────────────────    =     ──────────────────────────────
    2×2×2×...×2  (30 of them)                    1
 
-   30 of the 32 twos on top cancel exactly against the 30 twos on
-   the bottom - what survives is just the two LEFTOVER twos on top
 ```
-
-That leftover count - 2 twos - is exactly `32 - 30`, the difference of
-the two original exponents. **That is the entire rule**: dividing
-`2^a ÷ 2^b` always leaves `2^(a - b)`, because division is cancellation,
-and cancelling matched pairs from top and bottom just subtracts how many
-pairs there were:
 
 ```
    2^32 ÷ 2^30  =  2^(32 - 30)  =  2^2  =  2 × 2  =  4
 ```
 
-So `2^32` bytes is exactly **4 GiB** - not approximately, not "close
-to," genuinely exactly 4, because both numbers involved were powers of
-2 to begin with. This is exactly why 32-bit Windows famously could never
-use more than ~4 GB of RAM, no matter how much was physically installed:
-a 32-bit address simply cannot spell out any byte number past that
-point, and 4 GiB is precisely where that ceiling sits.
+So `2^32` bytes is exactly **4 GiB**, meaning that a 32-bit system can have
+an address space of 4 GiB max!
 
 **The 64-bit case is the same arithmetic, just with a bigger exponent -
 and here real hardware quietly does not go all the way.** `2^64` is
 about 18.4 quintillion - address space for exabytes of memory, far
 beyond anything any computer is built with today. Chip makers do not
 bother wiring up (or having software manage) all 64 bits for something
-no machine can use, so real x86-64 CPUs only implement a **usable
-prefix** of those 64 bits, and leave the rest architecturally reserved
-for future growth:
+no machine can use, so real x86-64 CPUs only implement a **usable prefix** 
+of those 64 bits, and leave the rest architecturally reserved for future growth:
 
 ```
    how many of the 64 possible address bits are ACTUALLY wired up,
