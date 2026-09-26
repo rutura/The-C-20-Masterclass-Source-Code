@@ -2245,7 +2245,9 @@ bytes?" is just `2^32 ÷ 2^30`.
 ```
 
 So `2^32` bytes is exactly **4 GiB**, meaning that a 32-bit system can have
-an address space of 4 GiB max!
+an address space of 4 GiB max! (Some 32-bit systems used a trick called
+PAE to install more *physical* RAM than that, but each program still
+only ever saw a 4 GiB address space.)
 
 **The 64-bit case is the same arithmetic, just with a bigger exponent -
 and here real hardware quietly does not go all the way.** `2^64` is
@@ -2259,8 +2261,9 @@ biggest unit from the table above, TiB (`2^40` bytes):
 That is almost **17 million TiB** of address space (16 EiB, "exbibytes"),
 far beyond anything any computer is built with today. Chip makers do not
 bother wiring up (or having software manage) all 64 bits for something
-no machine can use, so real x86-64 CPUs only implement a **usable prefix** 
-of those 64 bits, and leave the rest architecturally reserved for future growth:
+no machine can use, so real x86-64 CPUs only implement the **low bits** 
+of those 64 (the upper bits must just repeat the highest implemented bit),
+and leave the rest architecturally reserved for future growth:
 
 ```
    how many of the 64 possible address bits are ACTUALLY wired up,
@@ -2332,15 +2335,17 @@ A couple of consequences worth knowing:
 - **A program's own virtual space can be larger than the physical RAM
   installed.** The operating system can temporarily move a chunk of a
   program's data out to disk (this is what "paging" or a "swap file"
-  is) and translate that virtual address to disk instead of RAM when
-  it is not currently needed, then bring it back when it is.
+  is) when it is not currently needed, marking that virtual address as
+  "not in RAM right now". The next time the program touches it, the CPU
+  stops and lets the operating system bring the data back into RAM
+  first, then the program carries on as if nothing happened.
 - **On real 64-bit Windows specifically, a process does not even get
   the CPU's full 256 TiB** - Windows reserves half of the addressable
   range for its own kernel use and hands a 64-bit user program a
   private range of **128 TiB** (`0x0000000000000000` through
-  `0x00007FFFFFFFFFFF`) to work with. The exact split is an operating
-  system policy choice layered on top of what the CPU's address width
-  makes possible, not a hardware limit itself.
+  `0x00007FFFFFFFFFFF`) to work with. The CPU's address rules already
+  split the range into a low half and a high half; giving the high half
+  to the kernel is the choice Windows (and Linux) make on top of that.
 
 The addresses we will be working with in our assembly programs, are
 **virtual addresses**.
@@ -2352,9 +2357,13 @@ space. Let's draw it out.
 
 ```
    one process's own virtual address space, low addresses at the TOP
-   of the page - a real, standard layout, not specific to this lecture
+   of the page (so this picture is upside down compared to the usual
+   "the stack grows down" phrasing) - a simplified, classic layout:
+   real ones also hold DLLs and one stack per thread, get shuffled
+   around at load time (ASLR), and leave the lowest addresses unmapped
+   so that using a null pointer crashes
 
-   address 0x00000000  ┌───────────────────────────────────┐
+   0x0000000000000000  ┌───────────────────────────────────┐
                        │ TEXT   - your compiled code       │  
                        │ (the actual machine               │  
                        │  instructions this lecture        │  
@@ -2380,10 +2389,10 @@ space. Let's draw it out.
                        │ addresses as functions call       │  ▲ grows UP
                        │ other functions (exactly what     │  (toward
                        │ this lecture has been drawing)    │   lower
-   address 0x7FFFFFFF  └───────────────────────────────────┘   addresses)
+   0x00007FFFFFFFFFFF  └───────────────────────────────────┘   addresses)
 ```
 
-Four things this settles, all at once:
+Three things this settles, all at once:
 
 - **The stack is not the only thing in a process's address space** -
   it is one region, deliberately placed at the *high* end, with the
@@ -2394,13 +2403,15 @@ Four things this settles, all at once:
     calls nest deeper. This is why they are placed at opposite ends
     instead of next to each other: each one needs room to grow *without
     a neighbor immediately in the way*.
-- **The large gap in the middle is not wasted or unusable - it is
-  exactly the room the stack (and the heap) grow into.** A tiny
-  program's stack might only use a sliver of addresses near the very
-  top; a program with deep recursion or many nested calls uses
-  more of that gap, descending further into it. Run out of that gap
-  entirely - grow either region so far it reaches the other - and that
-  is a **stack overflow** in the most literal, address-space sense.
+- **The large gap in the middle is the room the stack (and the heap)
+  grow into** - and on 64-bit it is enormous, with shared libraries and
+  other mappings living in it too. A tiny program's stack might only
+  use a sliver of addresses near the very top; a program with deep
+  recursion or many nested calls uses more, descending further. But
+  the stack never gets the whole gap: its maximum size is fixed up
+  front (1 MiB by default on Windows/MSVC, typically 8 MiB on Linux),
+  with a guard page at the end. Grow past that limit and you get a
+  **stack overflow**, long before the stack could ever reach the heap.
 
 **The CPU** is the chip that actually does arithmetic and makes
 decisions. It cannot compute directly on memory - it first has to pull a
