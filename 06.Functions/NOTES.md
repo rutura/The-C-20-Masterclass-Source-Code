@@ -2231,7 +2231,7 @@ Where an attribute can sit:
 ```
    [[nodiscard]] int f();          ← on a function
    [[maybe_unused]] int x{0};      ← on a variable
-   [[deprecated]] void old_api();  ← on a declaration
+   [[deprecated]] void old_api();  ← on a function
    switch (t) {
        case A:
            step();
