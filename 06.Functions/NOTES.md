@@ -2398,16 +2398,18 @@ Three things this settles, all at once:
   it is one region, deliberately placed at the *high* end, with the
   program's code and global data at the *low* end.
 - **The heap and the stack grow toward each other, from opposite ends**
-  - the heap climbing to higher addresses as the program allocates more
-    dynamic memory, the stack descending to lower addresses as function
-    calls nest deeper. This is why they are placed at opposite ends
-    instead of next to each other: each one needs room to grow *without
-    a neighbor immediately in the way*.
+  - the heap growing DOWN the page, toward higher addresses, as the
+    program allocates more dynamic memory; the stack growing UP the
+    page, toward lower addresses, as function calls nest deeper. This
+    is why they are placed at opposite ends instead of next to each
+    other: each one needs room to grow *without a neighbor immediately
+    in the way*.
 - **The large gap in the middle is the room the stack (and the heap)
   grow into** - and on 64-bit it is enormous, with shared libraries and
   other mappings living in it too. A tiny program's stack might only
-  use a sliver of addresses near the very top; a program with deep
-  recursion or many nested calls uses more, descending further. But
+  use a sliver of addresses near the very bottom of the diagram (the
+  highest addresses); a program with deep recursion or many nested
+  calls uses more, climbing further up the page into the gap. But
   the stack never gets the whole gap: its maximum size is fixed up
   front (1 MiB by default on Windows/MSVC, typically 8 MiB on Linux),
   with a guard page at the end. Grow past that limit and you get a
@@ -2601,27 +2603,27 @@ the time that happens, the stack already exists and is already partway
 in use, handed to your program already set up.
 
 ```
-   the stack, drawn growing DOWNWARD on the page - meaning toward
-   LOWER memory addresses, exactly like the full layout diagram
-   above. This is the same direction, just zoomed in.
+   the bottom end of the full layout diagram above, zoomed in: low
+   addresses at the TOP, high addresses at the BOTTOM, and the stack
+   growing UP the page (toward lower addresses) - same orientation,
+   same direction, just a closer look.
 
-   address 0x6FE0:  ┌───────────────────────────────┐   ← further into
-                    │                               │      the big gap
-                    │      (unused address space -   │      from the full
-                    │       part of the same large    │      layout above:
-                    │       gap shown in the full     │      room this
-                    │       layout diagram above -    │      stack has
-                    │       room for the stack to     │      not needed
-                    │       grow further into, if     │      yet, but
-                    │       deeper calls need it)     │      COULD grow
-                    │                               │      into
+   address 0x6FE0:  ┌───────────────────────────────┐   ▲ toward the big
+                    │                               │   │ gap from the full
+                    │      (free - not yet claimed;   │     layout above:
+                    │       part of the same large    │     room this stack
+                    │       gap shown in the full     │     has not needed
+                    │       layout diagram above -    │     yet, but COULD
+                    │       room for the stack to     │     grow UP into
+                    │       grow up into, if deeper   │
+                    │       calls need it)            │
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
                     │                               │      (the boundary
-                    │      (free - already claimed   │       IS 0x7000:
-                    │       stack space, not yet      │       claimed
-                    │       written to)               │       above, still
-                    │                               │      unwritten
-   address 0x7020:  └───────────────────────────────┘       below)
+                    │      (already claimed - in     │       IS 0x7000:
+                    │       use by the code that      │       free above,
+                    │       runs before main)         │       claimed
+                    │                               │      below)
+   address 0x7020:  └───────────────────────────────┘
 ```
 
 Every address label in these diagrams sits on a **horizontal line**, never
@@ -2645,21 +2647,23 @@ rsp" are two phrasings of the exact same fact.
 
 There is a register called **`rsp`**, and it holds an actual address -
 `0x7000` in this diagram - marking the boundary between "stack space
-already claimed" (above it in this drawing, at the lower addresses) and
-"stack space not yet claimed" (below it, at the higher addresses, all
-the way down into that large gap from the full layout diagram).
+already claimed" (below it in this drawing, at the higher addresses)
+and "stack space not yet claimed" (above it, at the lower addresses,
+all the way up into that large gap from the full layout diagram).
 
 **`rsp`** stands for "stack pointer." Its one job, for the entire time
 your program runs, is to always **hold the address** of the current top
-of the stack - whatever the next free address is. Nothing else is
+of the stack. "Top" here means the lowest address the stack has
+claimed so far - which, in this orientation, really is the upper edge
+of the stack on the page. Nothing else is
 special about it; it is simply the register every instruction that
 touches the stack keeps in sync, the same way any other register can
 hold any other address.
 
 Now watch what happens the instant the OS calls `main`, with the
 addresses tracked at every step. A return address on this CPU is
-**8 bytes**, so pushing one onto the stack always moves `rsp` down by exactly
-8:
+**8 bytes**, so pushing one onto the stack always subtracts exactly 8
+from `rsp` - moving it 8 bytes UP the page:
 
 ```
    the OS calls main() - "call" is covered properly in Step 6; for now,
@@ -2667,61 +2671,64 @@ addresses tracked at every step. A return address on this CPU is
 
    BEFORE the call - same as the diagram just above, rsp still at 0x7000:
 
-   address 0x6FE0:  ┌───────────────────────────────┐  ← "_start" - the C
-                    │        the C runtime's        │     runtime's own
-                    │    startup frame ("_start")   │     startup code,
-                    │                               │     NOT the OS and
-                    │                               │     NOT main - the
-                    │                               │     thing that
-                    │                               │     actually calls
-                    │                               │     main. Below it:
-                    │                               │     the big gap.
+   address 0x6FE0:  ┌───────────────────────────────┐   ▲ toward the
+                    │                               │   │ big gap
+                    │             (free)            │
+                    │                               │
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
-                    │                               │      (the boundary
-                    │             (free)            │       IS 0x7000)
-   address 0x7020:  └───────────────────────────────┘
+                    │        the C runtime's        │      (the boundary
+                    │    startup frame ("_start")   │       IS 0x7000)
+                    │                               │   ← "_start" - the C
+                    │                               │     runtime's own
+   address 0x7020:  └───────────────────────────────┘     startup code,
+                                                          NOT the OS and
+                                                          NOT main - the
+                                                          thing that
+                                                          actually calls
+                                                          main.
 
-   THE INSTANT main starts running - "call" wrote 8 bytes right at the
-   0x7000 boundary above, and pushed rsp down past them to a NEW boundary:
+   THE INSTANT main starts running - "call" claimed the 8 bytes just
+   above the 0x7000 boundary, wrote into them, and moved rsp UP the page
+   to a NEW boundary:
 
    address 0x6FE0:  ┌───────────────────────────────┐
+                    │             (free)            │
+   address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
+                    │  return address: "come back   │      (moved UP by 8:
+                    │   here when main ends"        │       0x7000 - 8)
+   address 0x7000:  ├───────────────────────────────┤
                     │        the C runtime's        │
                     │    startup frame ("_start")   │
-   address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
-                    │  return address: "come back   │      (moved down
-                    │   here when main ends"        │       by 8, from
-   address 0x7000:  ├───────────────────────────────┤       0x7000)
-                    │             (free)            │
    address 0x7020:  └───────────────────────────────┘
 ```
 
 Calling a function does not just "jump" to it - it first **writes**
-that 8-byte return address into the next free spot (which was `0x7000`,
-where `rsp` was already pointing), then moves `rsp` DOWN by exactly 8,
-from `0x7000` to `0x6FF8`, so `rsp` again points at wherever the *new*
-top of the stack is. That written-down address is how `main` - or any
-function - eventually finds its way back to whoever called it. (The
-instruction that does this writing-down is `call`, covered properly
-once you have a second function to call in Step 6. For now, the point
-is only: by the time `main`'s own first instruction runs, an address
-has already been written to memory at `0x6FF8`, and `rsp` has already
-moved down by 8, from `0x7000` to `0x6FF8`, to reflect it.)
+that 8-byte return address into the 8 bytes just above `rsp` on the
+page (`0x6FF8` up to `0x7000`), and moves `rsp` to that new boundary -
+subtracting 8, from `0x7000` to `0x6FF8` - so `rsp` again marks
+wherever the *new* top of the stack is. That written-down address is
+how `main` - or any function - eventually finds its way back to
+whoever called it. (The instruction that does this writing-down is
+`call`, covered properly once you have a second function to call in
+Step 6. For now, the point is only: by the time `main`'s own first
+instruction runs, an address has already been written to memory at
+`0x6FF8`, and `rsp` has already moved up the page by 8, from `0x7000`
+to `0x6FF8`, to reflect it.)
 
 `main` is about to want a private workspace of its own - somewhere to
 keep its own bookkeeping, separate from `_start`'s. That is what its
 very first two instructions set up, and this needs one more register,
 **`rbp`** ("base pointer"), which does not hold anything meaningful yet
 at the moment shown above - `main` is about to give it a purpose. Watch
-`rsp` move down by another 8 bytes as this happens:
+`rsp` move up the page by another 8 bytes as this happens:
 
 ```
    right after main's first two instructions run - "push rbp" wrote
-   another 8 bytes right at the 0x6FF8 boundary, and pushed rsp down
+   another 8 bytes just above the 0x6FF8 boundary, and moved rsp UP
    to a new boundary, 0x6FF0, which rbp then copies for itself:
 
    address 0x6FE0:  ┌─────────────────────────────────┐
-                    │         the C runtime's         │
-                    │     startup frame ("_start")    │
+                    │              (free)             │
    address 0x6FF0:  ├─────────────────────────────────┤ ◄── rsp = 0x6FF0
                     │     main's saved copy of the    │ ◄── rbp = 0x6FF0
                     │         CALLER's old rbp        │      (both agree,
@@ -2729,22 +2736,24 @@ at the moment shown above - `main` is about to give it a purpose. Watch
                     │    return address (unchanged,   │
                     │    written earlier by "call")   │
    address 0x7000:  ├─────────────────────────────────┤
-                    │              (free)             │
+                    │         the C runtime's         │
+                    │     startup frame ("_start")    │
    address 0x7020:  └─────────────────────────────────┘
 ```
 
-`rsp` moved AGAIN here - from `0x6FF8` down to `0x6FF0` - because
+`rsp` moved AGAIN here - up the page from `0x6FF8` to `0x6FF0` - because
 `push rbp` just wrote another 8 bytes (the value `rbp` held a moment
 ago) onto the stack, at the new top. `rbp` then **copies** that same
 address, `0x6FF0`, via `mov rbp, rsp` - so `rsp` and `rbp` now briefly
 agree, both holding `0x6FF0`.
 
 From here on, though, they behave differently: `rsp` will keep moving to
-lower addresses as `main` uses more stack space, but `rbp` will **not**
-change again for the rest of `main`'s run. `rbp` becomes a fixed anchor:
-the moment `main` declares a local variable, its address will be
-described as "so many bytes below `rbp`" - e.g. `0x6FF0 - 4 = 0x6FEC` -
-and that arithmetic stays correct all the way through `main`, precisely
+lower addresses (further up the page) as `main` uses more stack space,
+but `rbp` will **not** change again for the rest of `main`'s run. `rbp`
+becomes a fixed anchor: the moment `main` declares a local variable,
+its address will be described as "so many bytes lower than `rbp`" -
+e.g. `0x6FF0 - 4 = 0x6FEC`, drawn just *above* `rbp` on the page - and
+that arithmetic stays correct all the way through `main`, precisely
 because `rbp` itself never changes.
 
 That fixed anchor is worth having, but setting it up spends `rbp` -
@@ -2777,13 +2786,14 @@ Two more instructions, met just now and worth naming plainly before
 moving on:
 
 ```
-   push   <register>   write that register's value into the next free
-                        stack spot, then move rsp past it (rsp goes DOWN)
+   push   <register>   claim the next 8 free bytes just above rsp and
+                        write that register's value into them (rsp
+                        DECREASES by 8 - the stack grows UP the page)
 
-   pop    <register>   the exact reverse: read a value back off the top
-                        of the stack into that register, then move rsp
-                        back to point at it as free space again (rsp
-                        goes back UP)
+   pop    <register>   the exact reverse: read the value at the top of
+                        the stack into that register, then hand those
+                        8 bytes back as free space (rsp INCREASES by 8 -
+                        the stack shrinks back DOWN the page)
 ```
 
 ### Step 1 - the smallest possible program
@@ -2868,9 +2878,10 @@ and one piece of new notation: **`DWORD PTR [rbp-4]`**. Read it in
 pieces:
 
 ```
-   [rbp-4]        "the memory address that is 4 bytes below wherever
-                  rbp is pointing" - an address, computed from the
-                  frame's own anchor point.
+   [rbp-4]        "the memory address that is 4 bytes lower than
+                  wherever rbp is pointing" - an address, computed from
+                  the frame's own anchor point. Lower address means
+                  drawn just ABOVE rbp in this lecture's diagrams.
 
    DWORD PTR      "treat whatever is at that address as a 4-byte value"
                   (DWORD = "double word" = 4 bytes, the size of an int
@@ -2879,7 +2890,7 @@ pieces:
 ```
 
 So `mov DWORD PTR [rbp-4], 4` reads as: "write the 4-byte value 4 into
-memory, at the address 4 bytes below rbp." **That address is `width`.**
+memory, at the address 4 bytes lower than rbp." **That address is `width`.**
 Not a name the CPU knows about - the name `width` existed only in your
 source code, for you to read. To the compiled program, `width` simply
 *is* a particular address, and every place your C++ used the name
@@ -2889,18 +2900,25 @@ Three variables, three addresses, spaced 4 bytes apart because each is
 a 4-byte `int`:
 
 ```
-   this function's stack frame:
+   this function's stack frame - low addresses at the TOP, the same
+   orientation as every other stack diagram in this lecture:
 
-        rbp  ──────────────────────►  ┌─────────────────────────┐
-                                       │  (rbp's saved old value) │
-             rbp - 4    width         ├─────────────────────────┤
-                                       │           4              │
-             rbp - 8    height        ├─────────────────────────┤
-                                       │           3              │
-             rbp - 12   area          ├─────────────────────────┤
-                                       │          12               │
-                                       └─────────────────────────┘
+   address rbp - 12:  ┌─────────────────────────┐
+                      │  area    = 12           │
+   address rbp - 8:   ├─────────────────────────┤
+                      │  height  = 3            │
+   address rbp - 4:   ├─────────────────────────┤
+                      │  width   = 4            │
+   address rbp:       ├─────────────────────────┤ ◄── rbp
+                      │  caller's saved rbp     │
+   address rbp + 8:   ├─────────────────────────┤
+                      │  return address         │
+   address rbp + 16:  └─────────────────────────┘
 ```
+
+Each local sits at a *lower* address than the one declared before it,
+so each new variable is drawn one row further UP the page - the same
+direction the stack itself grows.
 
 And `int area{width * height};` itself is not one step to the CPU - it
 is three: **load** `width` from its address into the register `eax`,
@@ -3432,7 +3450,7 @@ long sum_to(int n) {
 Two small new pieces show up here, worth naming before the full listing:
 `rbx` is just another general-purpose register, being borrowed here as
 extra scratch space; and `leave` is a one-instruction shorthand for the
-`mov rbp, rsp` / `pop rbp` pair you have already seen close out every
+`mov rsp, rbp` / `pop rbp` pair you have already seen close out every
 other function in this lecture - same epilogue, spelled more briefly.
 
 ```
