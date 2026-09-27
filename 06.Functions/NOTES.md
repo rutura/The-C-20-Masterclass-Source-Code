@@ -3146,13 +3146,6 @@ jumping **backward**, re-running instructions the CPU already ran once.
                 mov  eax, total         5. no: fall through, return total
 ```
 
-Also notice the very first instruction after `i`'s initialization is
-`jmp .L2` - an **unconditional** jump (no `cmp` needed first, it always
-happens) straight down to the check, *before* the body has run even
-once. That is `for`'s "check the condition before the first iteration"
-rule (5.9), made literal: the very first thing that happens is the
-check, not the body.
-
 Every loop shape you know - `while`, `for`, `do...while` - compiles
 down to some arrangement of *label*, *body*, *check*, *jump backward*.
 The one structural difference you can usually spot for `do...while` is
@@ -3162,8 +3155,7 @@ before checking" from 5.10.
 
 **Try it**: change the `for` loop above to an equivalent `while` loop
 and compare - the assembly should end up nearly identical, because
-`for` and `while` are the same loop, just spelled differently in
-source.
+`for` and `while` are the same loop, just spelled differently in C++ source.
 
 ### Step 5 - `unsigned` wraparound: the CPU never saw a bug
 
