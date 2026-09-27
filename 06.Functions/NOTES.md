@@ -3128,17 +3128,16 @@ sum_below_five():
 Notice this uses **exactly** the same two instructions as Step 3 - one
 `cmp`, one `jle` - nothing new. The only structural difference from an
 `if` is *where the label being jumped to sits*: `.L3` (the loop body)
-is written **above** `.L2` (the check) in the instruction list, so
-jumping to it means jumping **backward**, re-running instructions the
-CPU already ran once.
+is written **above** `.L2` (the check), so jumping to it means 
+jumping **backward**, re-running instructions the CPU already ran once.
 
 ```
    .L2:  cmp i, 4  ──true──►  .L3:  run the body  ──┐
-          │                                          │  (jumps back up)
-        false                                        │
-          │                                           │
-          ▼                                           │
-   fall through, return total  ◄─────────────────────┘
+          │                                         │  (jumps back up)
+        false                                       │
+          │                                         │
+          ▼                                         │
+   fall through, return total  ◄────────────────────┘
                                    (this arrow is the "backward jump")
 ```
 
