@@ -3021,15 +3021,13 @@ pass_or_fail(int):
         ret
 ```
 
-That very first body line introduces a new register: `edi`. `score` is
-a **parameter** here, not a local variable the function invented for
-itself - it is a value the *caller* has to hand over. Registers are the
-fastest way to hand a value from one function to another, so this ABI
-(the same convention Step 6 covers properly) reserves `edi` as a fixed,
-agreed-on slot: **"the first whole-number argument always arrives in
-`edi`."** Every compiler targeting this platform honours that agreement,
-which is exactly how a function compiled by gcc can call one compiled
-by clang and both land on the same page about where the argument is.
+In this code snippet, we introduce  a new register:`edi`. 
+`score` is a **parameter** here, not a local variable the function 
+invented for itself - it is a value the *caller* has to hand over. 
+Registers are the fastest way to hand a value from one function to another, 
+so this ABI reserves `edi` as a fixed, agreed-on slot: 
+**"the first whole-number argument always arrives in `edi`."** Every 
+compiler targeting this platform honours that agreement.
 `mov DWORD PTR [rbp-4], edi` is simply this function's very first move:
 copy whatever the caller left in `edi` into `score`'s own stack slot, so
 the rest of the function can treat `score` the same way Step 2 treated
