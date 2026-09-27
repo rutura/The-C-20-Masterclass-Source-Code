@@ -3132,13 +3132,18 @@ is written **above** `.L2` (the check), so jumping to it means
 jumping **backward**, re-running instructions the CPU already ran once.
 
 ```
-   .L2:  cmp i, 4  ──true──►  .L3:  run the body  ──┐
-          │                                         │  (jumps back up)
-        false                                       │
-          │                                         │
-          ▼                                         │
-   fall through, return total  ◄────────────────────┘
-                                   (this arrow is the "backward jump")
+   the loop, in the order its instructions sit in the listing
+   (the numbers on the right are the order things HAPPEN):
+
+          jmp  .L2  ────────────────┐   1. skip straight to the check
+                                    │
+   ┌───►  .L3:  total += i          │   3. run the body...
+   │            ++i                 │      ...then fall down into the check
+   │                                │
+   │      .L2:  cmp  i, 4  ◄────────┘   2. is i <= 4 ?
+   └──────────  jle  .L3                4. yes: jump BACK UP to .L3
+                                           - THIS is the backward jump
+                mov  eax, total         5. no: fall through, return total
 ```
 
 Also notice the very first instruction after `i`'s initialization is
