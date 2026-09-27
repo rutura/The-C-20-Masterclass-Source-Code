@@ -3149,9 +3149,7 @@ jumping **backward**, re-running instructions the CPU already ran once.
 Every loop shape you know - `while`, `for`, `do...while` - compiles
 down to some arrangement of *label*, *body*, *check*, *jump backward*.
 The one structural difference you can usually spot for `do...while` is
-that it skips the initial `jmp` straight to the check - it falls
-straight into the body first, exactly matching "run the body once
-before checking" from 5.10.
+that it skips the initial `jmp` straight to the check.
 
 **Try it**: change the `for` loop above to an equivalent `while` loop
 and compare - the assembly should end up nearly identical, because
