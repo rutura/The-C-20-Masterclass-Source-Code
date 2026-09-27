@@ -2887,9 +2887,7 @@ there. That leaves exactly one line in the middle that is new, plus
 
 ```
    mov     eax, 0    copy the literal value 0 into a register called
-                     eax. eax has a fixed, special job on this ABI
-                     (the calling convention chapter 2's containers and
-                     Compiler Explorer both use): it is always where a
+                     eax. eax has a fixed, special job : it is always where a
                      function leaves its return value for whoever
                      called it to find. "return 0;" in your source
                      becomes, quite literally, "put 0 in eax."
@@ -2935,14 +2933,12 @@ rectangle_area():
 
 The prologue and epilogue are the same two lines as Step 1 - skip past
 those, you already know what they are doing. What is new is the body,
-and one piece of new notation: **`DWORD PTR [rbp-4]`**. Read it in
-pieces:
+is this piece of new notation: **`DWORD PTR [rbp-4]`**. Read it in chunks:
 
 ```
    [rbp-4]        "the memory address that is 4 bytes lower than
                   wherever rbp is pointing" - an address, computed from
-                  the frame's own anchor point. Lower address means
-                  drawn just ABOVE rbp in this lecture's diagrams.
+                  the frame's own anchor point. 
 
    DWORD PTR      "treat whatever is at that address as a 4-byte value"
                   (DWORD = "double word" = 4 bytes, the size of an int
@@ -2961,8 +2957,7 @@ Three variables, three addresses, spaced 4 bytes apart because each is
 a 4-byte `int`:
 
 ```
-   this function's stack frame - low addresses at the TOP, the same
-   orientation as every other stack diagram in this lecture:
+   this function's stack frame: 
 
    address rbp - 12:  ┌─────────────────────────┐
                       │  area    = 12           │
@@ -2978,14 +2973,19 @@ a 4-byte `int`:
 ```
 
 Each local sits at a *lower* address than the one declared before it,
-so each new variable is drawn one row further UP the page - the same
-direction the stack itself grows.
+so each new variable is drawn one row further UP the page.
 
 And `int area{width * height};` itself is not one step to the CPU - it
 is three: **load** `width` from its address into the register `eax`,
 **multiply** `eax` by whatever is at `height`'s address, **store** the
 result at `area`'s address. C++ lets you write the whole idea as one
 line; the CPU only ever does one small thing at a time.
+
+```
+        mov     eax, DWORD PTR [rbp-4]   ← read width into eax
+        imul    eax, DWORD PTR [rbp-8]   ← eax = eax * height
+        mov     DWORD PTR [rbp-12], eax  ← area
+```
 
 **Try it**: paste this exact function into Compiler Explorer. Then
 change `int height{3};` to `int height{9};` and watch only the `3` in
