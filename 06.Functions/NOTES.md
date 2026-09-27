@@ -3155,60 +3155,7 @@ that it skips the initial `jmp` straight to the check.
 and compare - the assembly should end up nearly identical, because
 `for` and `while` are the same loop, just spelled differently in C++ source.
 
-### Step 5 - `unsigned` wraparound: the CPU never saw a bug
-
-This is 4.3 and 4.4's wraparound bug, with nothing left to take on
-faith.
-
-```cpp
-unsigned int mistaken_refund() {
-    unsigned int points{350u};
-    points = points - 400u;   // "should" be -50
-    return points;
-}
-```
-
-```
-mistaken_refund():
-        push    rbp
-        mov     rbp, rsp
-        mov     DWORD PTR [rbp-4], 350
-        sub     DWORD PTR [rbp-4], 400
-        mov     eax, DWORD PTR [rbp-4]
-        pop     rbp
-        ret
-```
-
-That `sub DWORD PTR [rbp-4], 400` is the entire subtraction - one
-instruction, no branch, no check. Now compare it to what you get if
-`points` were declared `int` (signed) instead of `unsigned int`, same
-numbers:
-
-```
-   unsigned int version                 int version
-   ─────────────────────                ─────────────────────
-   sub   DWORD PTR [rbp-4], 400          sub   DWORD PTR [rbp-4], 400
-
-   IDENTICAL. Same instruction, same operands, either way.
-```
-
-**This is the entire point of the example.** `sub` does not know, and
-does not care, whether the 4 bytes it is subtracting from are meant to
-represent a signed or an unsigned number - it just flips bits according
-to one fixed binary rule, every time. `350 - 400` under that rule
-produces the bit pattern that `int` would read back as `-50`, and that
-the exact same bits, read back as `unsigned int`, become
-`4'294'967'246`. **The value in memory is identical either way; only the
-meaning your C++ type assigns to those bits differs.** There is no
-"unsigned subtract" instruction standing by to catch this and no flag
-raised - which is exactly why 4.4 called this bug *silent*: nothing at
-the machine level was ever positioned to notice.
-
-**Try it**: change `unsigned int` to `int` in this function on Compiler
-Explorer and confirm the assembly does not change at all - proving the
-CPU genuinely cannot tell the difference at this step.
-
-### Step 6 - calling a function: `call` and `ret`, made concrete
+### Step 5 - calling a function: `call` and `ret`, made concrete
 
 Back to 3.3's own example, `add_numbers`, called from `main`:
 
@@ -3306,14 +3253,14 @@ that run on **every single call**, on top of whatever work happens
 inside `add_numbers` itself. For a large, complex function that
 overhead is negligible; for a one-line function called millions of
 times in a loop, it can matter - which is exactly the problem `inline`
-(Step 8, below) exists to address.
+(Step 7, below) exists to address.
 
 **Try it**: paste both functions into Compiler Explorer together and
 find, in `main`'s assembly, the exact moment control transfers into
 `add_numbers` - the `call` line - and the exact moment it comes back -
 right after it.
 
-### Step 7 - a reference is a hidden address
+### Step 6 - a reference is a hidden address
 
 6.8's pass-by-value vs. pass-by-reference, made completely literal.
 
@@ -3396,7 +3343,7 @@ never lets you ask for the address it is secretly built from.
 in each body - `add_one_by_ref` needs noticeably more, purely to keep
 following that address.
 
-### Step 8 - `inline`: watching the call disappear
+### Step 7 - `inline`: watching the call disappear
 
 ```cpp
 inline int cube(int num) {
@@ -3446,7 +3393,7 @@ across all three.
 **Try it**: flip the compiler options box between `-O0` and `-O2` on
 this exact example and watch `cube(int)` appear and disappear.
 
-### Step 9 - `constexpr`: computed before the program even runs
+### Step 8 - `constexpr`: computed before the program even runs
 
 ```cpp
 constexpr int square_ce(int num) {
@@ -3478,7 +3425,7 @@ the user, say), and the assembly falls back to an ordinary `call` - a
 *allows* it when the inputs make that possible.
 
 One detail worth being precise about: this needs no `-O2`. Unlike
-`inline` in Step 8, folding away a genuinely compile-time-computable
+`inline` in Step 7, folding away a genuinely compile-time-computable
 `constexpr` call is not an optimisation being applied to generated
 code - there was never any runtime code generated for it to begin with,
 even at `-O0`.
@@ -3487,7 +3434,7 @@ even at `-O0`.
 `square_ce(3)`) and once with a variable whose value the compiler
 cannot know ahead of time - compare the two call sites' assembly.
 
-### Step 10 - recursion: a function calling itself, literally
+### Step 9 - recursion: a function calling itself, literally
 
 6.15's `sum_to`, in its own assembly.
 
@@ -3532,7 +3479,7 @@ sum_to(int):
 ```
 
 There is no separate "recursive call" instruction - `call sum_to(int)`
-is the **exact same `call`** you saw in Step 6, it just happens to
+is the **exact same `call`** you saw in Step 5, it just happens to
 target the very function that is currently running. What makes
 recursion work is something you already know from Step 1: every `call`
 gets **its own fresh stack frame**, stacked on top of whichever frame
@@ -3554,7 +3501,6 @@ out what the function computes.
 ```
    variable             →  a named address in memory, read/written by mov
    if / loop             →  cmp + a conditional jump (jle, jg, je, ...) + labels
-   unsigned wraparound    →  the same sub/add as signed - no hardware check exists
    function call           →  call / ret; arguments in fixed registers, answer in eax
    reference parameter      →  an address passed in a register, followed on every use
    inline (-O2)              →  the call disappears, body pasted into the caller
