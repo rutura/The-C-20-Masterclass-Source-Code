@@ -3155,9 +3155,9 @@ that it skips the initial `jmp` straight to the check.
 and compare - the assembly should end up nearly identical, because
 `for` and `while` are the same loop, just spelled differently in C++ source.
 
-### Step 5 - calling a function: `call` and `ret`, made concrete
+### Step 5 - calling a function: `call` and `ret`
 
-Back to 3.3's own example, `add_numbers`, called from `main`:
+We have a `add_numbers` function, called from `main`:
 
 ```cpp
 int add_numbers(int first, int second) {
