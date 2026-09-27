@@ -3268,7 +3268,7 @@ parameter and make sense of the generated assembly. You can do it!
 
 ### Step 6 - a reference is a hidden address
 
-6.8's pass-by-value vs. pass-by-reference, made completely literal.
+Let's see how references are actually handled by assembly.
 
 ```cpp
 void add_one_by_value(int n) {
@@ -3309,11 +3309,9 @@ First, `QWORD PTR` instead of `DWORD PTR` for `add_one_by_ref`'s `n`:
 address itself is 8 bytes long - `add_one_by_ref`'s `n` is not holding a
 4-byte `int` at all, it is holding the *address of* one.
 
-Second, `edi` (4 bytes, from Step 3) became `rdi` (8 bytes) - the exact
-same register, just its full 64-bit width instead of its 4-byte one,
-because an address needs all 8 bytes to store. The same relationship as
-`eax` and `rax`: one physical register, two names, depending how many of
-its bytes an instruction is using.
+Second, `edi` became `rdi` (8 bytes) - the  same register, just its full 
+64-bit width instead of its 4-byte one, because an address needs all 8 bytes 
+to store. 
 
 Third, one new register and one new instruction on the `lea` line:
 `edx` is simply another general-purpose register, playing the same role
