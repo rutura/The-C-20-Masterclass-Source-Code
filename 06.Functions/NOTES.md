@@ -3204,6 +3204,25 @@ comes from. The second whole-number argument gets its own fixed slot
 too, by that same convention - `esi`. Same idea as `edi`, just the
 agreed-on spot for argument number two.
 
+C++ lets a function take as many parameters as you like, but the CPU
+only has a handful of registers, so the convention hands out registers
+for the first few arguments and puts the **rest on the stack**:
+
+```
+   argument:    1st    2nd    3rd    4th    5th    6th    7th and beyond
+   ────────     ────   ────   ────   ────   ────   ────   ──────────────
+   gcc/clang    rdi    rsi    rdx    rcx    r8     r9     on the stack
+   (Linux/Mac)
+
+   MSVC         rcx    rdx    r8     r9     on the stack ─────────────►
+   (Windows)
+```
+
+(These are the full 8-byte names; an `int` argument uses the 4-byte
+`e` form, like the `edi`/`esi` above. `double`/`float` arguments use a
+separate set of registers, `xmm0`, `xmm1`, ...) So the two platforms
+agree on the idea but not on the register names. 
+
 Now the two instructions that actually make a function call happen:
 
 ```
@@ -3214,16 +3233,13 @@ Now the two instructions that actually make a function call happen:
            finishes.
 
    ret     pop that saved address back off the stack, and jump to it.
-           This is how a function knows where to return TO - it is not
-           magic, the address was written there by "call" itself, the
-           moment this function was entered.
+           This is how a function knows where to return TO, the address 
+           was written there by "call" itself, the moment this function was entered.
 ```
 
-Put the two together and every function call you have seen `ret` end
-with so far makes sense: `ret` always jumps back to whatever `call`
-most recently pushed - which, for every function *except* `main`, was
-written by another one of your own functions; for `main`, by the
-operating system's own startup code (Step 1).
+`ret` always jumps back to whatever `call` most recently pushed - which, for every 
+function *except* `main`, was written by another one of your own functions; for `main`, 
+by the operating system's own startup code.
 
 Walk through the whole call as one sequence:
 
@@ -3246,19 +3262,9 @@ Walk through the whole call as one sequence:
    └────────────────────────────────┘
 ```
 
-This is 6.2's stack-frame diagram, now with an actual instruction
-(`call`) behind every arrow in it. It is also *why* 6.2 said a function
-call is "not free": steps 1 through 7 above are all real instructions
-that run on **every single call**, on top of whatever work happens
-inside `add_numbers` itself. For a large, complex function that
-overhead is negligible; for a one-line function called millions of
-times in a loop, it can matter - which is exactly the problem `inline`
-(Step 7, below) exists to address.
-
 **Try it**: paste both functions into Compiler Explorer together and
-find, in `main`'s assembly, the exact moment control transfers into
-`add_numbers` - the `call` line - and the exact moment it comes back -
-right after it.
+make sense of what is going on. Modify the C++ code by adding a third 
+parameter and make sense of the generated assembly. You can do it!
 
 ### Step 6 - a reference is a hidden address
 
