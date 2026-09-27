@@ -3072,29 +3072,27 @@ Trace it as a flowchart, which is really all this is:
            .L2:  mov eax, 0         │
                   │                 │
                   └────────┬────────┘
-                            ▼
+                           ▼
                       .L3: pop rbp ; ret
 ```
 
 There is no dedicated "if" instruction anywhere on this CPU. `if`/`else`
 in your source compiles down to exactly this: one `cmp`, one
 conditional jump, two runs of plain instructions, and labels for the
-jumps to land on. Every relational operator from 5.4 (`<`, `<=`, `>`,
-`>=`, `==`, `!=`) has its own matching conditional jump - `jl`, `jle`,
-`jg`, `jge`, `je`, `jne`.
+jumps to land on. Every relational operator we have seen before in C++ 
+(`<`, `<=`, `>`, `>=`, `==`, `!=`) has its own matching conditional 
+jump - `jl`, `jle`, `jg`, `jge`, `je`, `jne`.
 
-One thing worth pointing out so it does not look like a mistake: the
-condition got **flipped**. Your source says `score >= 60`; the assembly
-tests `score <= 59` and jumps to the *else* branch on true. That is a
-compiler doing the exact same job a different, equally correct way -
-"jump away from the if-branch when the condition is false" reaches the
-same outcome as "jump into the if-branch when the condition is true."
-Compilers do this kind of restructuring constantly; it is not something
-to chase in your own code.
+One thing worth pointing out: the condition got **flipped**. 
+Your source says `score >= 60`; the assembly tests `score <= 59` and 
+jumps to the *else* branch on true. That is a compiler doing the exact 
+same job a different, equally correct way - "jump away from the if-branch 
+when the condition is false" reaches the same outcome as "jump into the 
+if-branch when the condition is true." Compilers choose whatever instructions
+make the job easier. You don't have control over this. For example, depending
+on the hardware configuration in CPU, that instruction may be more beneficial.
 
-**Try it**: change `>= 60` to `> 60` and watch `jle .L2` become `jg`
-followed by different logic, or just `jle .L2` change its comparison
-value.
+**Try it**: change `>= 60` to `> 60` and try to make sense of the generated assembly. 
 
 ### Step 4 - a loop is a jump backwards
 
