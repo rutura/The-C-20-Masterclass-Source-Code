@@ -2463,8 +2463,8 @@ mapping:
 ```
 
 Every time `set_pixel` is asked to colour `(x, y)`, it has to work out
-*which byte* in that flat line the pixel lands on. Get that mapping
-right and everything else (gradient, border) is just calling
+*which byte* in that flat line the pixel lands on. Once we understand this 
+mapping, everything else (gradient, border) boils down to just calling
 `set_pixel` in a loop.
 
 Two facts fix the mapping:
@@ -2472,10 +2472,6 @@ Two facts fix the mapping:
 - **each pixel is 3 bytes** - red, then green, then blue, in that order
 - **rows are stored one after another**, top row first, no gaps - this
   is called *row-major* order
-
-The picture this project actually draws is **`width = 400`,
-`height = 300`** (see `main.cpp`), so `make_canvas(400, 300)` allocates
-`400 * 300 * 3 = 360'000` bytes, all zero.
 
 #### The two views, side by side
 
@@ -2503,8 +2499,7 @@ at the bottom):
 
 **View 2 - the 1D vector it actually lives in.** Take the rows above
 and lay them end to end, left to right, top row first. Then expand each
-pixel into its 3 bytes. This is the entire 36-byte vector, nothing
-hidden:
+pixel into its 3 bytes. The view of the entire 36-byte vector is shown below:
 
 ```
    ┌─────────────── row y=0 (4 pixels) ─────┬─────────────── row y=1 (4 pixels) ─────┬─────────────── row y=2 (4 pixels) ─────┐
