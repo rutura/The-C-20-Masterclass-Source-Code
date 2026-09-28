@@ -2513,8 +2513,10 @@ pixel into its 3 bytes. The view of the entire 36-byte vector is shown below:
    (start of row 0)                            (start of row 1)                         (start of row 2)
 ```
 
-Notice row `y` starts at pixel `y * width`: row 0 at pixel 0, row 1 at
-pixel `1 * 4 = 4`, row 2 at pixel `2 * 4 = 8`. That is the whole trick.
+Notice row `y` starts at pixel `y * width`: 
+- row 0 at pixel 0, 
+- row 1 at pixel `1 * 4 = 4`, 
+- row 2 at pixel `2 * 4 = 8` 
 
 #### The mapping formula
 
@@ -2542,13 +2544,11 @@ it:
    y * width + x   =   1 * 4 + 2   =   6        ← pixel number 6 (0-based)
    * 3             =   18                       ← its Red byte is index 18
 
-   ...  16  17 │ 18  19  20 │ 21  22  ...
-               │  R   G   B │
-               └── pixel (2,1) ──┘              bytes[18]=R  bytes[19]=G  bytes[20]=B
+   ...  16   17   │  18    19    20    │  21    22  ...
+                  │  R     G     B     │
+                  └──────pixel (2,1) ──┘              bytes[18]=R  bytes[19]=G  bytes[20]=B
 ```
 
-Check it against View 2 above: pixel `(2,1)` sits at bytes `18..20`. It
-matches.
 
 **Worked example 2 - the real image, `width = 400`.** Same formula, the
 centre pixel `(200, 150)` of the 400x300 picture:
@@ -2559,9 +2559,6 @@ centre pixel `(200, 150)` of the 400x300 picture:
                                                            (dead centre of the 360'000)
 ```
 
-That is exactly what `set_pixel` computes - `width` here is the same
-value passed to `make_canvas`:
-
 ```cpp
 const std::size_t i{(static_cast<std::size_t>(y) * width + x) * 3};
 pixels[i + 0] = r;   // Red
@@ -2569,13 +2566,8 @@ pixels[i + 1] = g;   // Green
 pixels[i + 2] = b;   // Blue
 ```
 
-The `static_cast<std::size_t>` matters: `y * width` for the real image
-is `149 * 400 ≈ 59'600` and the final index passes 180'000 - fine for
-`std::size_t`, but doing the multiply in `int` first is a habit worth
-dropping early.
-
-The helper functions are all pure chapter-6 material (signatures as in
-`image.h`):
+Some of the functions we'll use in this project. Just get an idea now. 
+The details will come later:
 
 ```cpp
 std::vector<std::uint8_t> make_canvas(int w, int h);              // all-zero buffer
@@ -2584,37 +2576,13 @@ void draw_gradient(buf&, int w, int h, l_r,l_g,l_b, r_r,r_g,r_b); // fill, blend
 void draw_border(buf&, int w, int h, int thickness, r,g,b);       // frame
 ```
 
-And `main.cpp` calls them with this project's actual numbers:
+We'll use them in `main.cpp`:
 
 ```cpp
 auto pixels = make_canvas(400, 300);                 // 360'000 bytes, all 0
 draw_gradient(pixels, 400, 300,  20, 30, 90,         // left  colour: deep blue
                                 240, 140, 40);       // right colour: warm orange
 draw_border(pixels, 400, 300, 8, 255, 255, 255);     // 8-px white frame
-```
-
-- a **header / source split** (6.11): declarations in `image.h`, bodies
-  in `image.cpp`
-- functions take the buffer **by reference** (6.8) and scalars by value
-- `draw_gradient` blends the two colours with a **lambda** (6.14) - for
-  the call above, `mix` runs `20 → 240` on red, `30 → 140` on green,
-  `90 → 40` on blue as `x` sweeps `0 → 399`:
-
-  ```cpp
-  const double t{static_cast<double>(x) / (width - 1)};   // 0.0 at x=0 .. 1.0 at x=399
-  const auto mix = [t](std::uint8_t a, std::uint8_t c) {
-      return static_cast<std::uint8_t>(a + t * (c - a));   // linear blend
-  };
-  ```
-
-**What changes between the three versions is only the last step - how
-the pixel buffer becomes a file.** Same helpers, three ways to get the
-output written.
-
-```
-   make_canvas → draw_gradient → draw_border → ┌─ A: write_ppm()      hand-rolled, no library
-                                               ├─ B: stbi_write_png() vendored header
-                                               └─ C: stbi_write_png() header fetched by CMake
 ```
 
 ### A. No dependency at all (`6.17ProjectImageWriter`)
