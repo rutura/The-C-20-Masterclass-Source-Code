@@ -2753,17 +2753,25 @@ The parts that matter:
 
 ### B. A vendored single-header library (`6.18ProjectVendoredHeader`)
 
-As we just saw, PPM is bulky and not something most people can
-double-click to open. To write a compressed, universally-supported
-**PNG** we use a real library - **`stb_image_write.h`** by Sean Barrett
-- but we
-**vendor** it: the one header file is committed straight into the
-project under `vendor/`.
+In this lecture, we will improve on our Image Writer project and get it
+to write actual PNG files that you can open in any mainstream image viewer app.
+PNG is great in that it compresses the image down to a smaller size so that it is
+easier to share between apps and people. When the viewer app opens it, it first
+decompresses the image, gets the bytes and then does the magic to display the 
+image for all to see. We use a real library named **`stb_image_write.h`** by Sean Barrett.
+
+This library is distributed as a single header you can download and put in your project
+for use right away. Some important links: 
+
+- GitHub Repo: https://github.com/nothings/stb (Read usage info from here)
+- Image Writer: https://github.com/nothings/stb/blob/master/stb_image_write.h (Download this header)
+
+We'll place the header in a `vendor` folder from the root of the project.
 
 ```
    6.18ProjectVendoredHeader/
    ├── vendor/
-   │   ├── stb_image_write.h   ← the library, committed with our code
+   │   ├── stb_image_write.h   
    │   └── LICENSE
    ├── image.h  image.cpp      ← our helpers (write_png calls stbi_write_png)
    ├── stb_impl.cpp            ← see below
@@ -2771,11 +2779,25 @@ project under `vendor/`.
    └── CMakeLists.txt
 ```
 
-**The single-header pattern.** A single-header library ships as *one
-file* that is both the header and the source. By default `#include`ing
-it gives you only **declarations**. In **exactly one** `.cpp` you write
-`#define STB_IMAGE_WRITE_IMPLEMENTATION` *before* the include, and that
-translation unit gets the **function bodies** too.
+**The single-header pattern.** Single header libraries are usually shipped as a 
+single `.h` file that you download, store in your project and include for use
+right away. They usually are bundled with full definitions for the functions that
+we need to use from them.
+
+This library is a bit different. In addition to downloading the header, it also
+requires to set up a companion `.cpp` file, in which we have to write some macro
+before including the header file.
+
+```
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+```
+
+The macro will do some magic to generate the definitions we need. All the logic to 
+make this work is bundled in the downloaded header file, but it's writen in some
+complex C macro jargon we don't want to involve ourselves with right now. We'll just 
+be happy to use the `stbi_write_png` function to write our **PNG** file.
+
 
 ```
    stb_impl.cpp                       image.cpp, main.cpp, ...
@@ -2790,10 +2812,11 @@ translation unit gets the **function bodies** too.
    linker: main.o / image.o's calls ──► resolved by stb_impl.o
 ```
 
-Put the `#define` in two `.cpp`s and the bodies compile twice - a
-"multiple definition" linker error. One file, always.
+NOTE: If you put the `#define` in two `.cpp`s, the bodies will compile
+twice and that will generate "multiple definition" linker error. Make sure 
+to have only one file defining this macro and including. 
 
-Our `write_png` just forwards to the library:
+Our `write_png` will just forward to the library:
 
 ```cpp
 bool write_png(std::string_view name, int w, int h, const buf& pixels) {
@@ -2806,25 +2829,16 @@ bool write_png(std::string_view name, int w, int h, const buf& pixels) {
 
 **What the last argument, the "stride", means.** `stbi_write_png` gets a
 bare pointer to our bytes (`pixels.data()`) and the width and height -
-but a pointer alone does not say *where each row ends and the next
-begins*. The stride is that missing piece: **the number of bytes from
-the start of one row to the start of the next row.** The library uses it
-to step down the image - row 1 starts `stride` bytes after row 0, row 2
-starts `stride` bytes after row 1, and so on.
+but a pointer alone does not say *where each row ends and the next begins*. 
+The stride is that missing piece: 
+**the number of bytes from the start of one row to the start of the next row.** 
+Another way to look at this is that it is the number of pixels in a row.
 
 For us the rows are packed end to end with no gap, so one row is exactly
 `width * 3` bytes (one pixel = 3 bytes). This project's image is 400
 wide, so the stride we pass is `400 * 3 = 1200`:
 
-```
-   width = 400, stride = 400 * 3 = 1200
-
-   byte:  0            1200         2400
-          ▼            ▼            ▼
-          [ row 0    ][ row 1    ][ row 2    ]     ← +1200 each time is the next row
-```
-
-`CMakeLists.txt` adds the implementation file and the include path:
+The `CMakeLists.txt` file will add the implementation file and the include path:
 
 ```cmake
 add_executable(rooster
@@ -2836,14 +2850,6 @@ target_include_directories(rooster SYSTEM PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor
 )
 ```
-
-- **`SYSTEM`** marks `vendor/` as third-party, so `-Wall -Wextra` do not
-  flag warnings inside stb's own code.
-- **No linking.** The header is compiled *from source* with our
-  compiler, our flags, our standard library. There is no external `.lib` / `.a` /
-  `.dll` in the picture, so there is **no ABI mismatch** possible - the
-  class of "nasty linker error" that comes from mixing a prebuilt binary
-  with a different toolchain simply cannot happen here.
 
 ### C. Fetched by CMake (`6.19ProjectFetchContent`)
 
