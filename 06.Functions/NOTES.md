@@ -2399,20 +2399,18 @@ give the whole block to a file writer in one call, later.
 
 ### A quick word on the types: `std::uint8_t` and `std::size_t`
 
-`image.h` and `image.cpp` use two type names you have not met yet:
+We are about to use two types some of you may not be familiar with: 
 `std::uint8_t` for colour bytes and `std::size_t` for the vector index.
 Neither is a new *kind* of type - both are just **aliases for built-in
-integer types you already know**, given clearer names.
+integer types you already know**, arguably given clearer names.
 
 **`std::uint8_t`** (from `<cstdint>`) means "an **u**nsigned **int**eger
-exactly **8** bits wide" - so its range is `0` to `255`, exactly one
-byte. On every compiler you will use, that is a plain `unsigned char`:
+exactly **8** bits wide" - so its range is `0` to `255`.
 
 ```cpp
 #include <cstdint>
 
 std::uint8_t red{255};        // same object as:  unsigned char red{255};
-unsigned char also_a_byte{0}; // the two names are interchangeable here
 ```
 
 We use `std::uint8_t` instead of `unsigned char` for two reasons.
@@ -2420,10 +2418,7 @@ First, **intent**: `unsigned char` reads like text handling; a pixel
 channel is a small number, and `uint8_t` says "one byte of data, 0-255"
 out loud. Second, **the range is guaranteed in the name** - `char` is
 only *required* to be at least 8 bits, and whether plain `char` is
-signed is compiler-dependent; `std::uint8_t` pins both down. The `8` is
-the whole point: `240` fits, `256` wraps back to `0`, which is why
-`draw_gradient` casts its blended result back to `std::uint8_t`
-deliberately.
+signed is compiler-dependent; `std::uint8_t` pins both down. 
 
 Related fixed-width aliases, all from `<cstdint>`, all just renamings of
 built-in types:
@@ -2453,12 +2448,7 @@ Why not just `int`? An `int` is signed and, on Windows/MSVC, only
 72 million bytes and a 4-byte-per-pixel buffer index blows past
 `int`'s ~2.1-billion limit. `std::size_t` has the same reach as the
 memory it is indexing, and matches the vector's own API so you get no
-signed/unsigned comparison warnings. This is exactly why `set_pixel`
-computes its index as `std::size_t` (see the pixel model below).
-
-You will still learn and use `short`, `int`, `long long`, `unsigned`,
-`char` directly - these aliases are the same types wearing a name that
-states their size and signedness at the point of use.
+signed/unsigned comparison warnings. 
 
 ### The pixel model: mapping 2D `(x, y)` onto a 1D vector
 
