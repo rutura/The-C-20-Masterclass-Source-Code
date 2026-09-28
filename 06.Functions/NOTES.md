@@ -2853,10 +2853,14 @@ target_include_directories(rooster SYSTEM PRIVATE
 
 ### C. Fetched by CMake (`6.19ProjectFetchContent`)
 
-The C++ code is **identical to B** - `image.h`, `image.cpp`,
-`stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no
-longer committed here. CMake pulls it **at configure time** with
-**`FetchContent`**.
+In this lecture, we are going to see that we can relegate the job to get the library
+for us to CMake. CMake will automatically download the library the first time
+we configure our project.
+
+The C++ code is **identical to what we did in the last lecture** - `image.h`, `image.cpp`,
+`stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no longer actively maintained
+ in the `vendor` folder by us. CMake pulls it **at configure time** with
+**`FetchContent`**. It will store it in some sub-folder inside the build folder.
 
 ```cmake
 include(FetchContent)
@@ -2896,28 +2900,9 @@ What happens when you press *Configure*:
   would mean "whatever that branch points at the day you build" - the
   build stops being reproducible. Pin it.
 - stb is header-only, so `MakeAvailable` has **no build step** - it just
-  puts the files on disk. It is still **compiled from source in our
-  build**, so the no-ABI-mismatch guarantee from B still holds.
+  puts the files on disk. It is still **compiled from source in our build**. 
 - The download happens **once**, into `build/_deps/`. Later configures
   reuse it. Deleting `build/` forces a fresh fetch.
-- Trade-off vs. B: version C needs network access and `git` the first
-  time it configures; version B builds offline forever. Real projects
-  usually accept that trade for not carrying copies of their
-  dependencies in their own repo.
-
-### The three side by side
-
-```
-                      A: hand-rolled     B: vendored        C: FetchContent
-   ─────────────────  ───────────────    ───────────────    ────────────────
-   output             PPM                PNG                PNG
-   library code       none               in vendor/,        not in our repo;
-                                         committed          cloned to build/
-   gets the library   —                  git add            CMake, at configure
-   offline build      yes                yes                first build needs net
-   reproducible       yes                yes (file frozen)  yes (commit pinned)
-   compiled here?     yes                yes                yes  → no ABI risk
-```
 
 ---
 
