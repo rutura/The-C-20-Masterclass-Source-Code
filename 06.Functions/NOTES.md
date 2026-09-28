@@ -2341,10 +2341,13 @@ past and look up later.
 
 ## 6.17 Project: writing an image
 
-Everything in this chapter comes together in one small program that
-**draws a picture and saves it to a file**. The picture is deliberately
-plain - a left-to-right colour gradient with a solid frame - so the
-focus stays on *how the program is put together*, not on graphics.
+Now is the time to do a fun project. We'll write a program that
+**draws a picture and saves it to a file**. The picture will have
+the following features: 
+- A width of 400 and a height of 300
+- A color gradient gradually going from one color to an other on the x axis
+- A 8-px frame or border
+- We'll write it in memory and save it to a file.
 
 ```
    ┌───────────────────────────────────┐   width  = 400
