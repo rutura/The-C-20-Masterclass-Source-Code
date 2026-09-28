@@ -2640,26 +2640,6 @@ reads it:
 
 #### How the gradient is computed
 
-```cpp
-void draw_gradient(std::vector<std::uint8_t>& pixels, int width, int height,
-                   std::uint8_t left_r,  std::uint8_t left_g,  std::uint8_t left_b,
-                   std::uint8_t right_r, std::uint8_t right_g, std::uint8_t right_b) {
-    for (int x{0}; x < width; ++x) {
-        // t goes 0.0 at the left edge to 1.0 at the right edge.
-        const double t{width > 1 ? static_cast<double>(x) / (width - 1) : 0.0};
-        const auto mix = [t](std::uint8_t a, std::uint8_t c) {
-            return static_cast<std::uint8_t>(a + t * (c - a));
-        };
-        const std::uint8_t r{mix(left_r, right_r)};
-        const std::uint8_t g{mix(left_g, right_g)};
-        const std::uint8_t b{mix(left_b, right_b)};
-        for (int y{0}; y < height; ++y) {
-            set_pixel(pixels, width, height, x, y, r, g, b);
-        }
-    }
-}
-```
-
 For every column `x`, the function does three things: 
 - work out **how far across** the image we are (`t`), 
 - **blend** the two colours by that amount, then 
@@ -2694,43 +2674,6 @@ For red, `a = 20` and `c = 240`, so the distance is `220`:
    ●──── 1/3 of 220 = 73.3 ────►                            x = 133 :  20 + 73.3  =  93.3  →  93
    ●──────────── 2/3 of 220 = 146.7 ─────────►              x = 266 :  20 + 146.7 = 166.7  →  166
 ```
-
-The `static_cast<std::uint8_t>` at the end drops the fraction, like
-`static_cast<int>(9.7)` giving `9`. Plot red for every column and you
-get a straight line from 20 up to 240, which is why this is called a
-**linear** blend:
-
-```
-   red
-   240 ┤                                   ●  x = 399
-       │                             ╱
-   166 ┤                       ●  x = 266
-       │                 ╱
-    93 ┤           ●  x = 133
-       │     ╱
-    20 ●  x = 0
-       └───────────┴───────────┴───────────┴──► x
-       0          133         266         399
-```
-
-Green and blue get the same treatment with their own endpoints. Blue
-**goes down** (90 to 40), so `c - a` is negative (`-50`) and each step
-subtracts. That works because the `std::uint8_t` values are promoted to
-`int` before the subtraction, so `-50` is not a problem:
-
-```
-            x = 0     x = 133    x = 266    x = 399
-            t = 0     t = 1/3    t = 2/3    t = 1
-   red        20         93        166        240     (20 + t * 220)
-   green      30         66        103        140     (30 + t * 110)
-   blue       90         73         56         40     (90 + t * -50)
-            ──────────────────────────────────────
-            deep blue  ◄──────────────────►  warm orange
-```
-
-The lambda captures `t` by value (`[t]`, from 6.14), so `mix` always
-uses the current column's `t`.
-
 **Step 3: paint the column.** The colour depends only on `x`, never on
 `y`, so we compute `r`, `g`, `b` once per column and the inner loop
 paints every row of that column with it:
