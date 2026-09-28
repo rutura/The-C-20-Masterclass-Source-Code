@@ -2585,7 +2585,7 @@ draw_gradient(pixels, 400, 300,  20, 30, 90,         // left  colour: deep blue
 draw_border(pixels, 400, 300, 8, 255, 255, 255);     // 8-px white frame
 ```
 
-### A. No dependency at all (`6.17ProjectImageWriter`)
+### A. Writing PPM by hand: No dependency (`6.17ProjectImageWriter`)
 
 #### What PPM is, and how it compares
 
@@ -2603,10 +2603,8 @@ bytes**, with no compression and no metadata:
 That is the *entire* specification we need. There is no table of
 contents, no checksum, no colour profile - the pixels are stored
 exactly as they sit in our `std::vector`, in the same row-major order.
-That is why `write_ppm` is six lines: build the header string, dump the
-buffer.
 
-How it stacks up against formats you have heard of:
+How it compares to formats you have heard of:
 
 ```
    format   compression        what it's for                        write it by hand?
@@ -2619,14 +2617,7 @@ How it stacks up against formats you have heard of:
    TIFF     optional            scanning, print, archival            no - complex container
 ```
 
-The trade is stark. Our 400x300 image is **360 KB as PPM** and would be
-perhaps **15-40 KB as PNG** - PPM pays for its simplicity in file size,
-every time, because it never compresses. In exchange, *you can write the
-encoder yourself in an afternoon*, which is the entire point of this
-first version. PNG and JPEG buy small files and wide compatibility at
-the cost of a real dependency - that is versions B and C.
-
-PPM is also a genuinely useful **interchange format**: many
+PPM is also a good **interchange format**: many
 command-line image tools read and write it precisely because parsing it
 is trivial, so it shows up as the "plumbing" between programs in image
 pipelines.
@@ -2647,15 +2638,19 @@ reads it:
 - Most code editors with an image preview (VS Code with an extension,
   for instance) will not show PPM - don't be surprised by that.
 
-If in doubt, convert once with ImageMagick and view the PNG.
-
 #### The code and the build
 
 ```cpp
-bool write_ppm(std::string_view name, int w, int h, const buf& pixels) {
-    std::ofstream out{std::string{name}, std::ios::binary};
-    out << "P6\n" << w << ' ' << h << "\n255\n";
-    out.write(reinterpret_cast<const char*>(pixels.data()), pixels.size());
+bool write_ppm(std::string_view filename, int width, int height,
+               const std::vector<std::uint8_t>& pixels) {
+    std::ofstream out{std::string{filename}, std::ios::binary};
+    if (!out) {
+        return false;
+    }
+    // Header: "P6\n<width> <height>\n255\n", then width*height*3 raw bytes.
+    out << "P6\n" << width << ' ' << height << "\n255\n";
+    out.write(reinterpret_cast<const char*>(pixels.data()),
+              static_cast<std::streamsize>(pixels.size()));
     return out.good();
 }
 ```
