@@ -2857,10 +2857,17 @@ In this lecture, we are going to see that we can relegate the job to get the lib
 for us to CMake. CMake will automatically download the library the first time
 we configure our project.
 
-The C++ code is **identical to what we did in the last lecture** - `image.h`, `image.cpp`,
-`stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is no longer actively maintained
- in the `vendor` folder by us. CMake pulls it **at configure time** with
-**`FetchContent`**. It will store it in some sub-folder inside the build folder.
+This a pattern you can use for any CMake powered project stored in some Git repository 
+on the internet. You usually read the documentation for the library on how it works with 
+CMake. For example, by digging into the docs I was able to find out that once the project
+is downloaded, it sets up a cmake variable `${stb_SOURCE_DIR}` that I can use as an include
+directory in my code, allowing me to include the library header from anywhere in the project.
+
+Besides the CMake thing, the C++ code is **identical to what we did in the last lecture**.
+`image.h`, `image.cpp`, `stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is 
+no longer actively maintained in the `vendor` folder by us. CMake pulls it 
+**at configure time** with **`FetchContent`**. It will store it in some sub-folder 
+inside the build folder.
 
 ```cmake
 include(FetchContent)
@@ -2896,9 +2903,10 @@ What happens when you press *Configure*:
    bodies, exactly as in version B.
 ```
 
-- **`GIT_TAG` is pinned to a commit hash, not a branch.** A branch name
-  would mean "whatever that branch points at the day you build" - the
-  build stops being reproducible. Pin it.
+- **`GIT_TAG` is pinned to a commit hash** You will see some people out there
+  also pin to Git tags. A commit works fine for our purposes here. This means
+  that our project will work with whatever version of the header file is in that
+  git commit. 
 - stb is header-only, so `MakeAvailable` has **no build step** - it just
   puts the files on disk. It is still **compiled from source in our build**. 
 - The download happens **once**, into `build/_deps/`. Later configures
