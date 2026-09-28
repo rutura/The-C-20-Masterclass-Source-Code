@@ -2394,16 +2394,18 @@ Three things this settles, all at once:
   it is one region, deliberately placed at the *high* end, with the
   program's code and global data at the *low* end.
 - **The heap and the stack grow toward each other, from opposite ends**
-  - the heap climbing to higher addresses as the program allocates more
-    dynamic memory, the stack descending to lower addresses as function
-    calls nest deeper. This is why they are placed at opposite ends
-    instead of next to each other: each one needs room to grow *without
-    a neighbor immediately in the way*.
+  - the heap growing DOWN the page, toward higher addresses, as the
+    program allocates more dynamic memory; the stack growing UP the
+    page, toward lower addresses, as function calls nest deeper. This
+    is why they are placed at opposite ends instead of next to each
+    other: each one needs room to grow *without a neighbor immediately
+    in the way*.
 - **The large gap in the middle is the room the stack (and the heap)
   grow into** - and on 64-bit it is enormous, with shared libraries and
   other mappings living in it too. A tiny program's stack might only
-  use a sliver of addresses near the very top; a program with deep
-  recursion or many nested calls uses more, descending further. But
+  use a sliver of addresses near the very bottom of the diagram (the
+  highest addresses); a program with deep recursion or many nested
+  calls uses more, climbing further up the page into the gap. But
   the stack never gets the whole gap: its maximum size is fixed up
   front (1 MiB by default on Windows/MSVC, typically 8 MiB on Linux),
   with a guard page at the end. Grow past that limit and you get a
@@ -2432,8 +2434,6 @@ where its job first matters in this lecture.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-One more thing about registers, worth knowing before names like `eax`
-and `rax` both start showing up for what looks like "the same" register:
 **every general-purpose register is 8 bytes wide, but has multiple
 names, one per size**, because not every value needs all 8 bytes. An
 `int` (4 bytes) does not need the full width; a memory *address* (8
@@ -2441,8 +2441,7 @@ bytes, on this CPU) does. Rather than waste a name, x86-64 lets you
 address the *same physical register* at four different widths:
 
 ```
-   one physical register, eight bytes wide - four names, each one
-   naming a different amount of it, starting from the same low end
+   We can access parts of a register
 
    byte:    7    6    5    4    3    2    1    0
           ┌────┬────┬────┬────┬────┬────┬────┬────┐
@@ -2453,9 +2452,7 @@ address the *same physical register* at four different widths:
                                         └─────────┘  ax   - low 2 bytes
                                              └────┘  al   - low 1 byte
 
-   writing to eax also changes what rax holds (its low 4 bytes) -
-   these are not separate storage, just different "how much of it
-   am I using" views onto the exact same physical register
+   writing to eax also changes what rax holds (its low 4 bytes) 
 ```
 
 The naming pattern is consistent across every general-purpose register,
@@ -2463,7 +2460,7 @@ not just this one: an `r` prefix means the full 8 bytes (`rax`, `rdi`,
 `rbp`, `rsp`...), an `e` prefix means the low 4 bytes (`eax`, `edi`,
 `ebp`...), and there are narrower 2-byte and 1-byte names too, for when
 even 4 bytes is more than a value needs. You will see this exact
-pattern later, live: the same argument shows up as `edi` when a function
+pattern later: the same argument shows up as `edi` when a function
 takes a plain `int`, and as `rdi` when it takes something that needs a
 full address, like a reference.
 
@@ -2492,7 +2489,7 @@ you do between the CPU and Memory.
    └───────────────────────────────┘         └──────────────────────┘
 ```
 
-Every single instruction you will meet in this lecture does one of 
+Every instruction you will meet in this lecture does one of 
 exactly three things:
 
 - **move** a value between a register and memory (or another register)
@@ -2522,10 +2519,7 @@ shows the resulting assembly on the right, updating live as you type:
 **Try it now, before reading any further**: open godbolt.org, delete
 whatever is in the left pane, and type exactly the `square` function
 above (no `#include`, no `main` needed - a lone function is enough).
-Watch the right pane fill in as you type the closing `}`. That
-live-updating link between a line of your C++ and the instructions it
-produced - hover a line on either side and the matching one highlights
-- is most of what makes this tool worth using.
+Watch the right pane fill in as you type the closing `}`. 
 
 Two settings matter, both on the assembly pane's toolbar:
 
@@ -2546,11 +2540,10 @@ Two settings matter, both on the assembly pane's toolbar:
 
 ### Assembly belongs to one specific CPU
 
-One more thing before the first real example: assembly is **not portable** 
-the way C++ is. It is written directly in one CPU family's
-own private vocabulary of instruction names and register names, so the
-exact same C++ function produces completely different-looking assembly
-depending on which CPU it was compiled for.
+Assembly is **not portable**  the way C++ is. It is written directly in 
+one CPU family's own private vocabulary of instruction names and register 
+names, so the exact same C++ function produces completely different-looking 
+assembly depending on which CPU it was compiled for.
 
 ```
    the SAME square(int) function, compiled for two different CPUs
@@ -2567,21 +2560,16 @@ depending on which CPU it was compiled for.
                                                 ret
 ```
 
-That ARM64 column is real, verified output - not a guess - for the same
-`square` function you just typed into Compiler Explorer, compiled for a
-different chip. Different instruction names (`str`/`ldr` instead of
+Different instruction names (`str`/`ldr` instead of
 `mov`), a `mul` that takes three registers instead of `imul`'s two,
 different register names (`w0`, `w8`, `w9`).
 
-**This whole lecture, every example from here on, targets x86-64**
-(also written `x86_64` or `amd64`) - the instruction set used inside
-essentially every Windows and Linux desktop or laptop, and older
-Intel-based Macs. If your own machine is an Apple Silicon Mac (M1/M2/M3/M4), 
-its *native* code is actually the ARM64 shown above - Compiler Explorer will 
-still compile to x86-64 (in the browser) for you regardless.
-
-Two different things are being taught in this lecture, and telling them
-apart matters more than anything else in it:
+**This lecture targets x86-64** (also written `x86_64` or `amd64`) - 
+the instruction set used inside essentially every Windows and Linux 
+desktop or laptop, and older Intel-based Macs. If your own machine is 
+an Apple Silicon Mac (M1/M2/M3/M4), its *native* code is actually the 
+ARM64 shown above - Compiler Explorer will still compile to x86-64 
+(in the browser) for you regardless.
 
 One of the main points we are trying to make in the lecture here is that the
 C++ you write is portable and can be compiled for any CPU, but the compiled
@@ -2597,157 +2585,211 @@ version of the code (assembly), is specific to a given CPU.
    a loop is a jump backwards
 ```
 
-If you switched Compiler Explorer to an ARM64 compiler, every
-instruction on the right would change. Every idea on the left would
-still be exactly, word-for-word, true. C++ allows us to write our ideas
-out in a portable format, and the compiler takes on the heavy lifting of compiling
-for the CPU architecture (think instruction set (mov, mul,...)) we are targeting.
-
 ### Before Step 1: the stack, before `main` even starts
 
-**One piece of context the source code never shows you**: your program
+**There are things that happen before `main` runs**: your program
 does not start itself, and `main` is not the very first code that runs.
 The operating system loads the compiled program into memory and jumps
 to a fixed entry point - conventionally named **`_start`** - which is
 not part of your code at all, but a small amount of startup code the
 compiler links in automatically (part of the C runtime, "CRT"). `_start`
-sets a few things up and only then calls `main` - the exact same kind
-of function call `main` will later use to call your own functions. By
-the time that happens, the stack already exists and is already partway
-in use, handed to your program already set up.
-
-Picture that hand-off as a snapshot, right before `main` is called - a
-zoomed-in view of just the STACK region from the full address-space
-layout above, the small strip near the very top of that earlier
-diagram, at its own scale. Stack addresses on a real 64-bit machine are
-long, ugly hex numbers (something like `0x00007ffd74aa7500`), so to
-keep this readable, the diagrams below use a shortened, made-up but
-realistic-shaped stand-in: **`0x7000`** as the address `rsp` happens to
-be sitting at, right this moment, before your program has run a single
-instruction:
+sets a few things up and only then calls `main`. By the time that happens, 
+the stack already exists and is already partway in use, handed to your program 
+already set up.
 
 ```
-   the stack, drawn growing DOWNWARD on the page - meaning toward
-   LOWER memory addresses, exactly like the full layout diagram
-   above. This is the same direction, just zoomed in.
+   the bottom end of the full layout diagram above, zoomed in: low
+   addresses at the TOP, high addresses at the BOTTOM, and the stack
+   growing UP the page (toward lower addresses) - same orientation,
+   same direction, just a closer look.
 
-   address 0x6FE0:  ┌───────────────────────────────┐   ← further into
-                    │                               │      the big gap
-                    │      (unused address space -   │      from the full
-                    │       part of the same large    │      layout above:
-                    │       gap shown in the full     │      room this
-                    │       layout diagram above -    │      stack has
-                    │       room for the stack to     │      not needed
-                    │       grow further into, if     │      yet, but
-                    │       deeper calls need it)     │      COULD grow
-                    │                               │      into
+   address 0x6FE0:  ┌───────────────────────────────┐   ▲ toward the big
+                    │                               │   │ gap from the full
+                    │    (free - not yet claimed;   │     layout above:
+                    │     part of the same large    │     room this stack
+                    │     gap shown in the full     │     has not needed
+                    │     layout diagram above -    │     yet, but COULD
+                    │     room for the stack to     │     grow UP into
+                    │     grow up into, if deeper   │
+                    │     calls need it)            │
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
                     │                               │      (the boundary
-                    │      (free - already claimed   │       IS 0x7000:
-                    │       stack space, not yet      │       claimed
-                    │       written to)               │       above, still
-                    │                               │      unwritten
-   address 0x7020:  └───────────────────────────────┘       below)
+                    │     (already claimed - in     │       IS 0x7000:
+                    │     use by the code that      │       free above,
+                    │     runs before main)         │       claimed
+                    │                               │      below)
+   address 0x7020:  └───────────────────────────────┘
 ```
 
-Every address label in these diagrams sits on a **horizontal line**, never
-inside a box's text - because an address names a *boundary*, the exact
-edge where one byte ends and the next begins, not a labeled "room." The
-line at `address 0x7000:` above is not "roughly where `rsp` is" - it
-*is* `0x7000`, the precise dividing line `rsp` points at.
+The stack's real size limit (about 1 MiB by default on MSVC) is
+far above the top of this picture. The addresses here are kept small
+so they are easy to read; real ones are much larger (see the full
+layout diagram).
 
-**Two directions are at play here, and they are opposites - this is
-worth being completely explicit about.** Reading the diagram top to
-bottom, addresses climb: `0x6FE0` is lower than `0x7000`, which is
-lower than `0x7020`. But the **stack itself grows upward on this page**
-- toward `0x6FE0`, the lower numbers - as more gets pushed onto it. So
-"the stack grows" and "addresses increase" point in **opposite**
-directions from each other. Concretely: pushing something onto the
-stack does not add to `rsp`, it **subtracts** from it - `rsp` moving
-from `0x7000` to `0x6FF8` (coming up in the very next diagram) is a
-subtraction of 8, and that subtraction *is* the stack growing by 8
-bytes. "Stack grows toward lower addresses" and "pushing subtracts from
-rsp" are two phrasings of the exact same fact.
+```
+   every byte has its own address - counting from the top edge of
+   this picture down to rsp, in hex:
+
+   0x6FE0   ← top edge of the picture
+   0x6FE1
+   0x6FE2
+   0x6FE3
+   0x6FE4
+   0x6FE5
+   0x6FE6
+   0x6FE7
+   0x6FE8
+   0x6FE9   (next comes 0x6FEA, not 0x6FF0 - hex digits run 0-9, then A-F)
+     ...
+   0x6FF7
+   0x6FF8   ← the next diagram's return address starts here
+   0x6FF9
+   0x6FFA
+   0x6FFB
+   0x6FFC
+   0x6FFD
+   0x6FFE
+   0x6FFF   ← last byte before rsp - one more rolls every F over:
+   0x7000   ← rsp: the boundary
+
+   0x7000 - 0x6FE0 = 0x20 = 32 bytes of free space in this picture
+```
 
 There is a register called **`rsp`**, and it holds an actual address -
 `0x7000` in this diagram - marking the boundary between "stack space
-already claimed" (above it in this drawing, at the lower addresses) and
-"stack space not yet claimed" (below it, at the higher addresses, all
-the way down into that large gap from the full layout diagram).
+already claimed" (below it in this drawing, at the higher addresses)
+and "stack space not yet claimed" (above it, at the lower addresses).
 
-**`rsp`** stands for "stack pointer." Its one job, for the entire time
-your program runs, is to always **hold the address** of the current top
-of the stack - whatever the next free address is. Nothing else is
-special about it; it is simply the register every instruction that
-touches the stack keeps in sync, the same way any other register can
-hold any other address.
+**`rsp`** stands for "stack pointer." Its one job is to always 
+**hold the address** of the current top of the stack. 
+
+Here is the program we are about to trace - the smallest `main`
+possible - with its C++ source on the left and the assembly gcc turns
+it into at `-O0` on the right:
+
+```
+   C++ source                 gcc -O0 assembly
+   ────────────────           ─────────────────────────────
+   int main() {        ──►    main:
+                                      push    rbp        
+                                      mov     rbp, rsp   
+       return 0;       ──►            mov     eax, 0     
+   }                   ──►            pop     rbp        
+                                      ret                
+```
+
+Before any of these five lines runs, `_start` has already called
+`main`. The next two diagrams show that call, and then these first two
+lines.
 
 Now watch what happens the instant the OS calls `main`, with the
 addresses tracked at every step. A return address on this CPU is
-**8 bytes**, so pushing one onto the stack always moves `rsp` down by exactly
-8:
+**8 bytes**, so pushing one onto the stack always subtracts exactly 8
+from `rsp` - moving it 8 bytes UP the page:
 
 ```
-   the OS calls main() - "call" is covered properly in Step 6; for now,
-   just watch what it does to the stack, address by address
+   the OS calls main() 
 
    BEFORE the call - same as the diagram just above, rsp still at 0x7000:
 
-   address 0x6FE0:  ┌───────────────────────────────┐  ← "_start" - the C
-                    │        the C runtime's        │     runtime's own
-                    │    startup frame ("_start")   │     startup code,
-                    │                               │     NOT the OS and
-                    │                               │     NOT main - the
-                    │                               │     thing that
-                    │                               │     actually calls
-                    │                               │     main. Below it:
-                    │                               │     the big gap.
+   address 0x6FE0:  ┌───────────────────────────────┐   ▲ toward the
+                    │                               │   │ big gap
+                    │             (free)            │
+                    │                               │
    address 0x7000:  ├───────────────────────────────┤ ◄── rsp = 0x7000
-                    │                               │      (the boundary
-                    │             (free)            │       IS 0x7000)
-   address 0x7020:  └───────────────────────────────┘
+                    │        the C runtime's        │      (the boundary
+                    │    startup frame ("_start")   │       IS 0x7000)
+                    │                               │   ← "_start" - the C
+                    │                               │     runtime's own
+   address 0x7020:  └───────────────────────────────┘     startup code,
+                                                          NOT the OS and
+                                                          NOT main - the
+                                                          thing that
+                                                          actually calls
+                                                          main.
 
-   THE INSTANT main starts running - "call" wrote 8 bytes right at the
-   0x7000 boundary above, and pushed rsp down past them to a NEW boundary:
+   THE INSTANT main starts running -  the system claimed the 8 bytes just
+   above the 0x7000 boundary, wrote into them, and moved rsp UP the page
+   to a NEW boundary:
 
    address 0x6FE0:  ┌───────────────────────────────┐
+                    │             (free)            │
+   address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
+                    │  return address: "come back   │      (moved UP by 8:
+                    │   here when main ends"        │       0x7000 - 8)
+   address 0x7000:  ├───────────────────────────────┤
                     │        the C runtime's        │
                     │    startup frame ("_start")   │
-   address 0x6FF8:  ├───────────────────────────────┤ ◄── rsp = 0x6FF8
-                    │  return address: "come back   │      (moved down
-                    │   here when main ends"        │       by 8, from
-   address 0x7000:  ├───────────────────────────────┤       0x7000)
-                    │             (free)            │
    address 0x7020:  └───────────────────────────────┘
 ```
 
 Calling a function does not just "jump" to it - it first **writes**
-that 8-byte return address into the next free spot (which was `0x7000`,
-where `rsp` was already pointing), then moves `rsp` DOWN by exactly 8,
-from `0x7000` to `0x6FF8`, so `rsp` again points at wherever the *new*
-top of the stack is. That written-down address is how `main` - or any
-function - eventually finds its way back to whoever called it. (The
-instruction that does this writing-down is `call`, covered properly
-once you have a second function to call in Step 6. For now, the point
-is only: by the time `main`'s own first instruction runs, an address
-has already been written to memory at `0x6FF8`, and `rsp` has already
-moved down by 8, from `0x7000` to `0x6FF8`, to reflect it.)
+that 8-byte return address into the 8 bytes just above `rsp` on the
+page (`0x6FF8` up to `0x7000`), and moves `rsp` to that new boundary -
+subtracting 8, from `0x7000` to `0x6FF8` - so `rsp` again marks
+wherever the *new* top of the stack is. That written-down address is
+how `main` - or any function - eventually finds its way back to
+whoever called it. (The instruction that does this writing-down is
+`call`, covered properly once you have a second function to call later
+on in the lecture. For now, the point is only: by the time `main`'s own first
+instruction runs, an address has already been written to memory at
+`0x6FF8`, and `rsp` has already moved up the page by 8, from `0x7000`
+to `0x6FF8`, to reflect it.)
 
 `main` is about to want a private workspace of its own - somewhere to
-keep its own bookkeeping, separate from `_start`'s. That is what its
-very first two instructions set up, and this needs one more register,
-**`rbp`** ("base pointer"), which does not hold anything meaningful yet
-at the moment shown above - `main` is about to give it a purpose. Watch
-`rsp` move down by another 8 bytes as this happens:
+keep its own bookkeeping, separate from `_start`'s. 
+
+That is what the statements
+
+```
+push rbp
+mov rbp, rsp
+```
+
+do. **`rbp`** is the **base pointer**, and the easiest way to picture
+it is as a pin stuck into the stack at the spot where a function's
+workspace begins.
+
+`rsp` can't do that job, because it moves every time something is
+pushed or popped. If a function tried to find its own variables by
+counting from `rsp`, the count would keep changing as the function
+ran - "my variable is 4 bytes from `rsp`" would be true one moment and
+wrong the next. So each function plants `rbp` once, right at its
+start, and leaves it there. From then on every local variable has a
+permanent, easy address: "4 bytes from the pin", "8 bytes from the
+pin", no matter how much `rsp` moves around in the meantime.
+
+In short: **`rsp` marks where the stack ends right now; `rbp` marks
+where *this function's* part of the stack begins.** Each function needs
+a base pointer to work with, including the starter code that calls our 
+main function. so before we give control to our own main function, we 
+push the base pointers of the caller of main to the stack, and after that, 
+we store the current stack pointer as the base pointer of our main function.
+
+The  diagram below shows the state after the two statements, reproduced
+below for convenience, run:
+
+```
+push rbp          ; save rbp's current value on the stack
+mov rbp, rsp      ; copy rsp INTO rbp   (rbp ◄── rsp)
+```
+
+**`mov` copies from right to left.** The first name after `mov` is the
+**destination** - where the value ends up - and the second is the
+**source** - where it comes from. So `mov rbp, rsp` means "copy the
+value in `rsp` into `rbp`"; `rsp` itself is left unchanged. It reads
+exactly like assignment in C++: `rbp = rsp;` - the thing on the left
+receives, the thing on the right is read. Every `mov` in this lecture
+follows that same rule - `mov eax, 0` in the listing above, for
+example, puts `0` into `eax`.
 
 ```
    right after main's first two instructions run - "push rbp" wrote
-   another 8 bytes right at the 0x6FF8 boundary, and pushed rsp down
+   another 8 bytes just above the 0x6FF8 boundary, and moved rsp UP
    to a new boundary, 0x6FF0, which rbp then copies for itself:
 
    address 0x6FE0:  ┌─────────────────────────────────┐
-                    │         the C runtime's         │
-                    │     startup frame ("_start")    │
+                    │              (free)             │
    address 0x6FF0:  ├─────────────────────────────────┤ ◄── rsp = 0x6FF0
                     │     main's saved copy of the    │ ◄── rbp = 0x6FF0
                     │         CALLER's old rbp        │      (both agree,
@@ -2755,25 +2797,26 @@ at the moment shown above - `main` is about to give it a purpose. Watch
                     │    return address (unchanged,   │
                     │    written earlier by "call")   │
    address 0x7000:  ├─────────────────────────────────┤
-                    │              (free)             │
+                    │         the C runtime's         │
+                    │     startup frame ("_start")    │
    address 0x7020:  └─────────────────────────────────┘
 ```
 
-`rsp` moved AGAIN here - from `0x6FF8` down to `0x6FF0` - because
+`rsp` moved AGAIN here - up the page from `0x6FF8` to `0x6FF0` - because
 `push rbp` just wrote another 8 bytes (the value `rbp` held a moment
 ago) onto the stack, at the new top. `rbp` then **copies** that same
 address, `0x6FF0`, via `mov rbp, rsp` - so `rsp` and `rbp` now briefly
 agree, both holding `0x6FF0`.
 
 From here on, though, they behave differently: `rsp` will keep moving to
-lower addresses as `main` uses more stack space, but `rbp` will **not**
-change again for the rest of `main`'s run. `rbp` becomes a fixed anchor:
-the moment `main` declares a local variable, its address will be
-described as "so many bytes below `rbp`" - e.g. `0x6FF0 - 4 = 0x6FEC` -
-and that arithmetic stays correct all the way through `main`, precisely
-because `rbp` itself never changes.
+lower addresses (further up the page) as `main` uses more stack space,
+but `rbp` will **not** change again for the rest of `main`'s run. `rbp`
+becomes a fixed anchor: the moment `main` declares a local variable,
+its address will be described as "so many bytes lower than `rbp`" -
+e.g. `0x6FF0 - 4 = 0x6FEC`, and that arithmetic stays correct all the way 
+through `main`, precisely because `rbp` itself never changes.
 
-That fixed anchor is worth having, but setting it up spends `rbp` -
+Again, that fixed anchor is worth having, but setting it up spends `rbp` -
 overwrites whatever it held before, which belonged to `_start`'s own
 code, not main's. Throwing that away would be a problem the instant
 `main` finishes and control needs to go back to code that still expects
@@ -2790,7 +2833,7 @@ before returning, is **put that old value back**:
    ...the function's own body runs here, measured from rbp...
 
    pop     rbp         restore the CALLER's rbp value, exactly as found
-   ret                 (Step 6) jump back to the address "call" saved
+   ret                 jump back to the address "call" saved
 ```
 
 This four-line shape - **push rbp, mov rbp/rsp, ..., pop rbp** - opens
@@ -2803,13 +2846,14 @@ Two more instructions, met just now and worth naming plainly before
 moving on:
 
 ```
-   push   <register>   write that register's value into the next free
-                        stack spot, then move rsp past it (rsp goes DOWN)
+   push   <register>   claim the next 8 free bytes just above rsp and
+                        write that register's value into them (rsp
+                        DECREASES by 8 - the stack grows UP the page)
 
-   pop    <register>   the exact reverse: read a value back off the top
-                        of the stack into that register, then move rsp
-                        back to point at it as free space again (rsp
-                        goes back UP)
+   pop    <register>   the exact reverse: read the value at the top of
+                        the stack into that register, then hand those
+                        8 bytes back as free space (rsp INCREASES by 8 -
+                        the stack shrinks back DOWN the page)
 ```
 
 ### Step 1 - the smallest possible program
@@ -2839,19 +2883,14 @@ there. That leaves exactly one line in the middle that is new, plus
 
 ```
    mov     eax, 0    copy the literal value 0 into a register called
-                     eax. eax has a fixed, special job on this ABI
-                     (the calling convention chapter 2's containers and
-                     Compiler Explorer both use): it is always where a
+                     eax. eax has a fixed, special job : it is always where a
                      function leaves its return value for whoever
                      called it to find. "return 0;" in your source
                      becomes, quite literally, "put 0 in eax."
 
    ret               "return." Jump back to wherever this function was
                      CALLED from - for main, that is the operating
-                     system's own startup code from a moment ago. (How
-                     "wherever it was called from" is actually
-                     remembered is Step 6's `call`/`ret` pair - main
-                     here is simply on the receiving end of one.)
+                     system's own startup code from a moment ago. 
 ```
 
 So the whole five-line function reads, once you have both halves: save
@@ -2890,13 +2929,12 @@ rectangle_area():
 
 The prologue and epilogue are the same two lines as Step 1 - skip past
 those, you already know what they are doing. What is new is the body,
-and one piece of new notation: **`DWORD PTR [rbp-4]`**. Read it in
-pieces:
+is this piece of new notation: **`DWORD PTR [rbp-4]`**. Read it in chunks:
 
 ```
-   [rbp-4]        "the memory address that is 4 bytes below wherever
-                  rbp is pointing" - an address, computed from the
-                  frame's own anchor point.
+   [rbp-4]        "the memory address that is 4 bytes lower than
+                  wherever rbp is pointing" - an address, computed from
+                  the frame's own anchor point. 
 
    DWORD PTR      "treat whatever is at that address as a 4-byte value"
                   (DWORD = "double word" = 4 bytes, the size of an int
@@ -2905,7 +2943,7 @@ pieces:
 ```
 
 So `mov DWORD PTR [rbp-4], 4` reads as: "write the 4-byte value 4 into
-memory, at the address 4 bytes below rbp." **That address is `width`.**
+memory, at the address 4 bytes lower than rbp." **That address is `width`.**
 Not a name the CPU knows about - the name `width` existed only in your
 source code, for you to read. To the compiled program, `width` simply
 *is* a particular address, and every place your C++ used the name
@@ -2915,24 +2953,35 @@ Three variables, three addresses, spaced 4 bytes apart because each is
 a 4-byte `int`:
 
 ```
-   this function's stack frame:
+   this function's stack frame: 
 
-        rbp  ──────────────────────►  ┌─────────────────────────┐
-                                       │  (rbp's saved old value) │
-             rbp - 4    width         ├─────────────────────────┤
-                                       │           4              │
-             rbp - 8    height        ├─────────────────────────┤
-                                       │           3              │
-             rbp - 12   area          ├─────────────────────────┤
-                                       │          12               │
-                                       └─────────────────────────┘
+   address rbp - 12:  ┌─────────────────────────┐
+                      │  area    = 12           │
+   address rbp - 8:   ├─────────────────────────┤
+                      │  height  = 3            │
+   address rbp - 4:   ├─────────────────────────┤
+                      │  width   = 4            │
+   address rbp:       ├─────────────────────────┤ ◄── rbp
+                      │  caller's saved rbp     │
+   address rbp + 8:   ├─────────────────────────┤
+                      │  return address         │
+   address rbp + 16:  └─────────────────────────┘
 ```
+
+Each local sits at a *lower* address than the one declared before it,
+so each new variable is drawn one row further UP the page.
 
 And `int area{width * height};` itself is not one step to the CPU - it
 is three: **load** `width` from its address into the register `eax`,
 **multiply** `eax` by whatever is at `height`'s address, **store** the
 result at `area`'s address. C++ lets you write the whole idea as one
 line; the CPU only ever does one small thing at a time.
+
+```
+        mov     eax, DWORD PTR [rbp-4]   ← read width into eax
+        imul    eax, DWORD PTR [rbp-8]   ← eax = eax * height
+        mov     DWORD PTR [rbp-12], eax  ← area
+```
 
 **Try it**: paste this exact function into Compiler Explorer. Then
 change `int height{3};` to `int height{9};` and watch only the `3` in
@@ -2968,15 +3017,13 @@ pass_or_fail(int):
         ret
 ```
 
-That very first body line introduces a new register: `edi`. `score` is
-a **parameter** here, not a local variable the function invented for
-itself - it is a value the *caller* has to hand over. Registers are the
-fastest way to hand a value from one function to another, so this ABI
-(the same convention Step 6 covers properly) reserves `edi` as a fixed,
-agreed-on slot: **"the first whole-number argument always arrives in
-`edi`."** Every compiler targeting this platform honours that agreement,
-which is exactly how a function compiled by gcc can call one compiled
-by clang and both land on the same page about where the argument is.
+In this code snippet, we introduce  a new register:`edi`. 
+`score` is a **parameter** here, not a local variable the function 
+invented for itself - it is a value the *caller* has to hand over. 
+Registers are the fastest way to hand a value from one function to another, 
+so this ABI reserves `edi` as a fixed, agreed-on slot: 
+**"the first whole-number argument always arrives in `edi`."** Every 
+compiler targeting this platform honours that agreement.
 `mov DWORD PTR [rbp-4], edi` is simply this function's very first move:
 copy whatever the caller left in `edi` into `score`'s own stack slot, so
 the rest of the function can treat `score` the same way Step 2 treated
@@ -3021,29 +3068,27 @@ Trace it as a flowchart, which is really all this is:
            .L2:  mov eax, 0         │
                   │                 │
                   └────────┬────────┘
-                            ▼
+                           ▼
                       .L3: pop rbp ; ret
 ```
 
 There is no dedicated "if" instruction anywhere on this CPU. `if`/`else`
 in your source compiles down to exactly this: one `cmp`, one
 conditional jump, two runs of plain instructions, and labels for the
-jumps to land on. Every relational operator from 5.4 (`<`, `<=`, `>`,
-`>=`, `==`, `!=`) has its own matching conditional jump - `jl`, `jle`,
-`jg`, `jge`, `je`, `jne`.
+jumps to land on. Every relational operator we have seen before in C++ 
+(`<`, `<=`, `>`, `>=`, `==`, `!=`) has its own matching conditional 
+jump - `jl`, `jle`, `jg`, `jge`, `je`, `jne`.
 
-One thing worth pointing out so it does not look like a mistake: the
-condition got **flipped**. Your source says `score >= 60`; the assembly
-tests `score <= 59` and jumps to the *else* branch on true. That is a
-compiler doing the exact same job a different, equally correct way -
-"jump away from the if-branch when the condition is false" reaches the
-same outcome as "jump into the if-branch when the condition is true."
-Compilers do this kind of restructuring constantly; it is not something
-to chase in your own code.
+One thing worth pointing out: the condition got **flipped**. 
+Your source says `score >= 60`; the assembly tests `score <= 59` and 
+jumps to the *else* branch on true. That is a compiler doing the exact 
+same job a different, equally correct way - "jump away from the if-branch 
+when the condition is false" reaches the same outcome as "jump into the 
+if-branch when the condition is true." Compilers choose whatever instructions
+make the job easier. You don't have control over this. For example, depending
+on the hardware configuration in CPU, that instruction may be more beneficial.
 
-**Try it**: change `>= 60` to `> 60` and watch `jle .L2` become `jg`
-followed by different logic, or just `jle .L2` change its comparison
-value.
+**Try it**: change `>= 60` to `> 60` and try to make sense of the generated assembly. 
 
 ### Step 4 - a loop is a jump backwards
 
@@ -3079,95 +3124,36 @@ sum_below_five():
 Notice this uses **exactly** the same two instructions as Step 3 - one
 `cmp`, one `jle` - nothing new. The only structural difference from an
 `if` is *where the label being jumped to sits*: `.L3` (the loop body)
-is written **above** `.L2` (the check) in the instruction list, so
-jumping to it means jumping **backward**, re-running instructions the
-CPU already ran once.
+is written **above** `.L2` (the check), so jumping to it means 
+jumping **backward**, re-running instructions the CPU already ran once.
 
 ```
-   .L2:  cmp i, 4  ──true──►  .L3:  run the body  ──┐
-          │                                          │  (jumps back up)
-        false                                        │
-          │                                           │
-          ▼                                           │
-   fall through, return total  ◄─────────────────────┘
-                                   (this arrow is the "backward jump")
-```
+   the loop, in the order its instructions sit in the listing
+   (the numbers on the right are the order things HAPPEN):
 
-Also notice the very first instruction after `i`'s initialization is
-`jmp .L2` - an **unconditional** jump (no `cmp` needed first, it always
-happens) straight down to the check, *before* the body has run even
-once. That is `for`'s "check the condition before the first iteration"
-rule (5.9), made literal: the very first thing that happens is the
-check, not the body.
+          jmp  .L2  ────────────────┐   1. skip straight to the check
+                                    │
+   ┌───►  .L3:  total += i          │   3. run the body...
+   │            ++i                 │      ...then fall down into the check
+   │                                │
+   │      .L2:  cmp  i, 4  ◄────────┘   2. is i <= 4 ?
+   └──────────  jle  .L3                4. yes: jump BACK UP to .L3
+                                           - THIS is the backward jump
+                mov  eax, total         5. no: fall through, return total
+```
 
 Every loop shape you know - `while`, `for`, `do...while` - compiles
 down to some arrangement of *label*, *body*, *check*, *jump backward*.
 The one structural difference you can usually spot for `do...while` is
-that it skips the initial `jmp` straight to the check - it falls
-straight into the body first, exactly matching "run the body once
-before checking" from 5.10.
+that it skips the initial `jmp` straight to the check.
 
 **Try it**: change the `for` loop above to an equivalent `while` loop
 and compare - the assembly should end up nearly identical, because
-`for` and `while` are the same loop, just spelled differently in
-source.
+`for` and `while` are the same loop, just spelled differently in C++ source.
 
-### Step 5 - `unsigned` wraparound: the CPU never saw a bug
+### Step 5 - calling a function: `call` and `ret`
 
-This is 4.3 and 4.4's wraparound bug, with nothing left to take on
-faith.
-
-```cpp
-unsigned int mistaken_refund() {
-    unsigned int points{350u};
-    points = points - 400u;   // "should" be -50
-    return points;
-}
-```
-
-```
-mistaken_refund():
-        push    rbp
-        mov     rbp, rsp
-        mov     DWORD PTR [rbp-4], 350
-        sub     DWORD PTR [rbp-4], 400
-        mov     eax, DWORD PTR [rbp-4]
-        pop     rbp
-        ret
-```
-
-That `sub DWORD PTR [rbp-4], 400` is the entire subtraction - one
-instruction, no branch, no check. Now compare it to what you get if
-`points` were declared `int` (signed) instead of `unsigned int`, same
-numbers:
-
-```
-   unsigned int version                 int version
-   ─────────────────────                ─────────────────────
-   sub   DWORD PTR [rbp-4], 400          sub   DWORD PTR [rbp-4], 400
-
-   IDENTICAL. Same instruction, same operands, either way.
-```
-
-**This is the entire point of the example.** `sub` does not know, and
-does not care, whether the 4 bytes it is subtracting from are meant to
-represent a signed or an unsigned number - it just flips bits according
-to one fixed binary rule, every time. `350 - 400` under that rule
-produces the bit pattern that `int` would read back as `-50`, and that
-the exact same bits, read back as `unsigned int`, become
-`4'294'967'246`. **The value in memory is identical either way; only the
-meaning your C++ type assigns to those bits differs.** There is no
-"unsigned subtract" instruction standing by to catch this and no flag
-raised - which is exactly why 4.4 called this bug *silent*: nothing at
-the machine level was ever positioned to notice.
-
-**Try it**: change `unsigned int` to `int` in this function on Compiler
-Explorer and confirm the assembly does not change at all - proving the
-CPU genuinely cannot tell the difference at this step.
-
-### Step 6 - calling a function: `call` and `ret`, made concrete
-
-Back to 3.3's own example, `add_numbers`, called from `main`:
+We have a `add_numbers` function, called from `main`:
 
 ```cpp
 int add_numbers(int first, int second) {
@@ -3214,6 +3200,25 @@ comes from. The second whole-number argument gets its own fixed slot
 too, by that same convention - `esi`. Same idea as `edi`, just the
 agreed-on spot for argument number two.
 
+C++ lets a function take as many parameters as you like, but the CPU
+only has a handful of registers, so the convention hands out registers
+for the first few arguments and puts the **rest on the stack**:
+
+```
+   argument:    1st    2nd    3rd    4th    5th    6th    7th and beyond
+   ────────     ────   ────   ────   ────   ────   ────   ──────────────
+   gcc/clang    rdi    rsi    rdx    rcx    r8     r9     on the stack
+   (Linux/Mac)
+
+   MSVC         rcx    rdx    r8     r9     on the stack ─────────────►
+   (Windows)
+```
+
+(These are the full 8-byte names; an `int` argument uses the 4-byte
+`e` form, like the `edi`/`esi` above. `double`/`float` arguments use a
+separate set of registers, `xmm0`, `xmm1`, ...) So the two platforms
+agree on the idea but not on the register names. 
+
 Now the two instructions that actually make a function call happen:
 
 ```
@@ -3224,16 +3229,13 @@ Now the two instructions that actually make a function call happen:
            finishes.
 
    ret     pop that saved address back off the stack, and jump to it.
-           This is how a function knows where to return TO - it is not
-           magic, the address was written there by "call" itself, the
-           moment this function was entered.
+           This is how a function knows where to return TO, the address 
+           was written there by "call" itself, the moment this function was entered.
 ```
 
-Put the two together and every function call you have seen `ret` end
-with so far makes sense: `ret` always jumps back to whatever `call`
-most recently pushed - which, for every function *except* `main`, was
-written by another one of your own functions; for `main`, by the
-operating system's own startup code (Step 1).
+`ret` always jumps back to whatever `call` most recently pushed - which, for every 
+function *except* `main`, was written by another one of your own functions; for `main`, 
+by the operating system's own startup code.
 
 Walk through the whole call as one sequence:
 
@@ -3256,23 +3258,13 @@ Walk through the whole call as one sequence:
    └────────────────────────────────┘
 ```
 
-This is 6.2's stack-frame diagram, now with an actual instruction
-(`call`) behind every arrow in it. It is also *why* 6.2 said a function
-call is "not free": steps 1 through 7 above are all real instructions
-that run on **every single call**, on top of whatever work happens
-inside `add_numbers` itself. For a large, complex function that
-overhead is negligible; for a one-line function called millions of
-times in a loop, it can matter - which is exactly the problem `inline`
-(Step 8, below) exists to address.
-
 **Try it**: paste both functions into Compiler Explorer together and
-find, in `main`'s assembly, the exact moment control transfers into
-`add_numbers` - the `call` line - and the exact moment it comes back -
-right after it.
+make sense of what is going on. Modify the C++ code by adding a third 
+parameter and make sense of the generated assembly. You can do it!
 
-### Step 7 - a reference is a hidden address
+### Step 6 - a reference is a hidden address
 
-6.8's pass-by-value vs. pass-by-reference, made completely literal.
+Let's see how references are actually handled by assembly.
 
 ```cpp
 void add_one_by_value(int n) {
@@ -3313,11 +3305,9 @@ First, `QWORD PTR` instead of `DWORD PTR` for `add_one_by_ref`'s `n`:
 address itself is 8 bytes long - `add_one_by_ref`'s `n` is not holding a
 4-byte `int` at all, it is holding the *address of* one.
 
-Second, `edi` (4 bytes, from Step 3) became `rdi` (8 bytes) - the exact
-same register, just its full 64-bit width instead of its 4-byte one,
-because an address needs all 8 bytes to store. The same relationship as
-`eax` and `rax`: one physical register, two names, depending how many of
-its bytes an instruction is using.
+Second, `edi` became `rdi` (8 bytes) - the  same register, just its full 
+64-bit width instead of its 4-byte one, because an address needs all 8 bytes 
+to store. 
 
 Third, one new register and one new instruction on the `lea` line:
 `edx` is simply another general-purpose register, playing the same role
@@ -3353,7 +3343,7 @@ never lets you ask for the address it is secretly built from.
 in each body - `add_one_by_ref` needs noticeably more, purely to keep
 following that address.
 
-### Step 8 - `inline`: watching the call disappear
+### Step 7 - `inline`: watching the call disappear
 
 ```cpp
 inline int cube(int num) {
@@ -3403,7 +3393,7 @@ across all three.
 **Try it**: flip the compiler options box between `-O0` and `-O2` on
 this exact example and watch `cube(int)` appear and disappear.
 
-### Step 9 - `constexpr`: computed before the program even runs
+### Step 8 - `constexpr`: computed before the program even runs
 
 ```cpp
 constexpr int square_ce(int num) {
@@ -3435,7 +3425,7 @@ the user, say), and the assembly falls back to an ordinary `call` - a
 *allows* it when the inputs make that possible.
 
 One detail worth being precise about: this needs no `-O2`. Unlike
-`inline` in Step 8, folding away a genuinely compile-time-computable
+`inline` in Step 7, folding away a genuinely compile-time-computable
 `constexpr` call is not an optimisation being applied to generated
 code - there was never any runtime code generated for it to begin with,
 even at `-O0`.
@@ -3444,7 +3434,7 @@ even at `-O0`.
 `square_ce(3)`) and once with a variable whose value the compiler
 cannot know ahead of time - compare the two call sites' assembly.
 
-### Step 10 - recursion: a function calling itself, literally
+### Step 9 - recursion: a function calling itself, literally
 
 6.15's `sum_to`, in its own assembly.
 
@@ -3458,7 +3448,7 @@ long sum_to(int n) {
 Two small new pieces show up here, worth naming before the full listing:
 `rbx` is just another general-purpose register, being borrowed here as
 extra scratch space; and `leave` is a one-instruction shorthand for the
-`mov rbp, rsp` / `pop rbp` pair you have already seen close out every
+`mov rsp, rbp` / `pop rbp` pair you have already seen close out every
 other function in this lecture - same epilogue, spelled more briefly.
 
 ```
@@ -3489,7 +3479,7 @@ sum_to(int):
 ```
 
 There is no separate "recursive call" instruction - `call sum_to(int)`
-is the **exact same `call`** you saw in Step 6, it just happens to
+is the **exact same `call`** you saw in Step 5, it just happens to
 target the very function that is currently running. What makes
 recursion work is something you already know from Step 1: every `call`
 gets **its own fresh stack frame**, stacked on top of whichever frame
@@ -3511,7 +3501,6 @@ out what the function computes.
 ```
    variable             →  a named address in memory, read/written by mov
    if / loop             →  cmp + a conditional jump (jle, jg, je, ...) + labels
-   unsigned wraparound    →  the same sub/add as signed - no hardware check exists
    function call           →  call / ret; arguments in fixed registers, answer in eax
    reference parameter      →  an address passed in a register, followed on every use
    inline (-O2)              →  the call disappears, body pasted into the caller
