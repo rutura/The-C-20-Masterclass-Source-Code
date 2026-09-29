@@ -2857,18 +2857,16 @@ In this lecture, we are going to see that we can relegate the job to get the lib
 for us to CMake. CMake will automatically download the library the first time
 we configure our project.
 
-This a pattern you can use for any CMake powered project stored in some Git repository 
-on the internet. You usually read the documentation for the library on how it works with 
-CMake. Once the project is downloaded, we get a cmake variable `${stb_SOURCE_DIR}` that we
-can use as an include directory in our code, allowing us to include the library header from
-anywhere in the project. That variable is not something stb provides. It comes from
-`FetchContent` itself (more on that below the code).
+CMake provides a `FetchContent` command we can use to tell it to download  code from 
+remote Git repositories, just like we manually downloaded the header from the last lecture.
+If the project(from GitHub) has CMake support baked in, the project will give you things 
+(targets) you can reference and link against, but if that's not the case (stb falls here), 
+it will just download the content and give you basic variables you can use to do further
+of your own processing.
 
-Besides the CMake thing, the C++ code is **identical to what we did in the last lecture**.
-`image.h`, `image.cpp`, `stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is 
-no longer actively maintained in the `vendor` folder by us. CMake pulls it 
-**at configure time** with **`FetchContent`**. It will store it in some sub-folder 
-inside the build folder.
+Here is what we are abou to do: 
+- Stop manually maintaining the png writting header ourselves ( we delete it)
+- Rely on cmake to download and put it somewhere in our build folder when we configure the project
 
 ```cmake
 include(FetchContent)
