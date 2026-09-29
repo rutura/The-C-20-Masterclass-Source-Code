@@ -2751,7 +2751,7 @@ The parts that matter:
   of the function, so a failure at that point is not caught here.
 
 
-### B. A vendored single-header library (`6.18ProjectVendoredHeader`)
+### B. A single header third party library (`6.18ProjectVendoredHeader`)
 
 In this lecture, we will improve on our Image Writer project and get it
 to write actual PNG files that you can open in any mainstream image viewer app.
