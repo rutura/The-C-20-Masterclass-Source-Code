@@ -2859,9 +2859,10 @@ we configure our project.
 
 This a pattern you can use for any CMake powered project stored in some Git repository 
 on the internet. You usually read the documentation for the library on how it works with 
-CMake. For example, by digging into the docs I was able to find out that once the project
-is downloaded, it sets up a cmake variable `${stb_SOURCE_DIR}` that I can use as an include
-directory in my code, allowing me to include the library header from anywhere in the project.
+CMake. Once the project is downloaded, we get a cmake variable `${stb_SOURCE_DIR}` that we
+can use as an include directory in our code, allowing us to include the library header from
+anywhere in the project. That variable is not something stb provides. It comes from
+`FetchContent` itself (more on that below the code).
 
 Besides the CMake thing, the C++ code is **identical to what we did in the last lecture**.
 `image.h`, `image.cpp`, `stb_impl.cpp`, `main.cpp` unchanged. What changes is that stb is 
@@ -2880,6 +2881,22 @@ FetchContent_MakeAvailable(stb)                               # → ${stb_SOURCE
 
 target_include_directories(rooster SYSTEM PRIVATE ${stb_SOURCE_DIR})
 ```
+
+**Where does `stb_SOURCE_DIR` come from?** From `FetchContent` itself, not from stb.
+The [CMake docs](https://cmake.org/cmake/help/latest/module/FetchContent.html) say
+`FetchContent_MakeAvailable` sets these variables in the caller's scope for **every**
+dependency:
+
+| Variable | Meaning |
+|---|---|
+| `<lowercaseName>_SOURCE_DIR` | where the downloaded content lives |
+| `<lowercaseName>_BINARY_DIR` | its build directory |
+| `<lowercaseName>_POPULATED` | set to `TRUE` |
+
+`<lowercaseName>` is the first argument we gave to `FetchContent_Declare`, converted to
+lowercase. So the variable `${stb_SOURCE_DIR}` will resolve to the location where the files
+of the repo are downloaded on the local system, which is where the actual header we are interested
+in lives.
 
 What happens when you press *Configure*:
 
