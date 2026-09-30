@@ -81,6 +81,140 @@ int next_roll() {
     return die(engine);
 }
 //----------------------------------------------------------------
+//Exercise 6
+// Exercise 6a - digit_sum(): recursive
+//
+// Base case: n < 10 returns n. Step: last digit plus digit_sum of the
+// rest. [[nodiscard]] because throwing the result away is always a bug.
+//
+// Sample output:
+//     digit_sum(42)    = 6
+//     digit_sum(12345) = 15
+//     digit_sum(365)   = 14
+//
+// Walking digit_sum(365) step by step, since that's one of the sample
+// cases. The rule: digit_sum(n) = (n % 10) + digit_sum(n / 10), until
+// n < 10, then just return n. Each call peels off the LAST digit
+// (n % 10) and recurses on the rest (n / 10).
+//
+// 1. The calls going "down" (winding up)
+//
+//     digit_sum(365)
+//        n % 10 = 5   <- last digit peeled off
+//        n / 10 = 36  -> recurse
+//        |
+//        +-- digit_sum(36)
+//               n % 10 = 6   <- last digit peeled off
+//               n / 10 = 3   -> recurse
+//               |
+//               +-- digit_sum(3)
+//                      3 < 10  -> BASE CASE, just return 3
+//
+//     Each level strips one digit off the right end:
+//
+//     365  ->  36  ->  3
+//       \        \      \
+//        5        6      (base case: return 3)
+//
+// 2. The returns going "up" (unwinding)
+//
+//     Nothing is added until the base case hits bottom - then each
+//     pending "+ digit_sum(...)" gets resolved on the way back up:
+//
+//     digit_sum(3)   returns 3                         (base case)
+//     digit_sum(36)  returns 6 + digit_sum(3)  = 6 + 3  = 9
+//     digit_sum(365) returns 5 + digit_sum(36) = 5 + 9  = 14
+//
+// 3. As a call stack (what's actually sitting in memory mid-recursion)
+//
+//     push digit_sum(365)   waiting on digit_sum(36), holds "5 + ?"
+//          |
+//          v
+//     push digit_sum(36)    waiting on digit_sum(3), holds "6 + ?"
+//          |
+//          v
+//     push digit_sum(3)  -----> returns 3     (bottom of recursion)
+//          |
+//          v pop, resolve digit_sum(36)  = 6 + 3 = 9
+//          |
+//          v pop, resolve digit_sum(365) = 5 + 9 = 14
+//          |
+//          v pop, caller receives 14
+//
+// 4. The same shape for digit_sum(42) (the simplest sample), expanded
+//
+//     digit_sum(42)
+//      = 2 + digit_sum(4)      42 % 10 = 2,  42 / 10 = 4
+//      = 2 + 4                 4 < 10 -> base case, returns 4
+//      = 6
+//
+//     digit_sum(42) --calls--> digit_sum(4)
+//          ^                        |
+//          |                        v (base case)
+//          +---- 2 + 4 = 6 <------  returns 4
+//
+// The pattern: the base case (n < 10) is the only place that doesn't
+// call itself - without it this recurses forever (stack overflow).
+// Every recursive call shrinks the problem (n / 10) so it eventually
+// reaches that base case. Nothing is actually added until the deepest
+// call returns; the additions happen while the stack unwinds.
+
+//----------------------------------------------------------------
+[[nodiscard]] long digit_sum(long n) {
+    //Base case
+    if (n < 10) {
+        return n;
+    }
+    //Recursive step
+    return (n % 10) + digit_sum(n / 10);
+}
+
+// ---------------------------------------------------------------------
+// Exercise 6b - digit_sum_iterative(): the same result as a loop
+//
+// One stack frame, an explicit accumulator - the iterative counterpart
+// of the recursion above.
+//
+// Walking digit_sum_iterative(365) - same digit-peeling as the
+// recursive version (n % 10 grabs a digit, n /= 10 drops it), but
+// instead of stacking up calls, `total` accumulates as we go, and the
+// loop condition (n > 0) replaces the base case:
+//
+//     n = 365, total = 0
+//
+//     iteration 1:  total += 365 % 10 = 5   -> total = 5
+//                   n = 365 / 10 = 36
+//
+//     iteration 2:  total += 36 % 10 = 6    -> total = 11
+//                   n = 36 / 10 = 3
+//
+//     iteration 3:  total += 3 % 10 = 3     -> total = 14
+//                   n = 3 / 10 = 0
+//
+//     n == 0 -> loop ends, return total = 14
+//
+// As a table:
+//
+//     n (before)  |  n % 10  |  total (after)  |  n (after, n /= 10)
+//     ------------+----------+-----------------+---------------------
+//         365     |    5     |        5        |         36
+//          36     |    6     |       11        |          3
+//           3     |    3     |       14        |          0   -> stop
+//
+// No call stack here - just one frame and a variable that grows with
+// each pass, which is why this uses O(1) stack space where the
+// recursive version uses O(digits) stack frames. Same answer either
+// way; this is the trade-off recursion vs. iteration usually comes
+// down to.
+[[nodiscard]] long digit_sum_iterative(long n) {
+    long total{};
+    while (n > 0) {
+        total += n % 10;
+        n /= 10;
+    }
+    return total;
+}
+
 
 int main() {
 
@@ -268,12 +402,13 @@ int main() {
     std::println("\n--- Exercise 5: next_roll (static local RNG) ---");
     // TODO
     {
+        /*
         std::print("rolls:");
         for (int i{}; i < 8; ++i) {
             std::print(" {}", next_roll());
         }
         std::println("");
-
+        */
     }
 
 
@@ -299,6 +434,22 @@ int main() {
     */
     std::println("\n--- Exercise 6: digit_sum ---");
     // TODO
+    {
+        //Sum up the numnbers in samples
+        long samples_total{};
+        for (int i{}; i < samples.size(); ++i) {
+            samples_total += samples[i];
+        }
+        
+        std::println("digit_sum({}) = {} (iterative: {})", 
+            42L, digit_sum(42L), digit_sum_iterative(42L));
+        std::println("digit_sum({}) = {} (iterative: {})", 
+            12345L, digit_sum(12345L), digit_sum_iterative(12345L));
+        std::println("digit_sum({}) = {} (iterative: {})", 
+            samples_total, digit_sum(samples_total), digit_sum_iterative(samples_total));
+
+
+    }
 
 
     /*
