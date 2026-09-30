@@ -31,6 +31,19 @@ void stats(const std::vector<int>& data,
 void bar(int value, int width = 40, char fill = '*');
 
 //----------------------------------------------------------------
+//Exercise 3
+template <typename T>
+T clamp_to(T value, T lo, T hi) {
+    if (value < lo) {
+        return lo;
+    }
+    if (value > hi) {
+        return hi;
+    }
+    return value;
+}
+
+//----------------------------------------------------------------
 
 int main() {
 
@@ -110,13 +123,13 @@ int main() {
     std::println("\n--- Exercise 2: bar ---");
     // TODO
     {
-
+        /*
         for (int i{}; i < samples.size(); ++i) {
             bar(samples[i] / 2);
         }
         bar(1000);
         bar(20, 20, '=');
-
+        */
     }
 
 
@@ -144,6 +157,11 @@ int main() {
     */
     std::println("\n--- Exercise 3: clamp_to<T> ---");
     // TODO
+    {
+        std::println("clamp_to(120, 0, 100)      ={} ", clamp_to(120, 0, 100));
+        std::println("clamp_to(-2.5, 0.0, 1.0)  = {}", clamp_to(-2.5, 0.0, 1.0));
+        std::println("std::clamp(120, 0, 100)   = {}", std::clamp(120, 0, 100));
+    }
 
 
     /*
