@@ -4,9 +4,10 @@
 #include <print>
 #include <random>
 #include <string_view>
+#include <algorithm>
 #include <vector>
 
-#include "image.h"
+//#include "image.h"
 
 /*
     Chapter 6 assignment - Functions
@@ -17,6 +18,12 @@
       - Qualify everything with std:: - no `using namespace std;`.
       - In sample runs, text after a ">" is what the user typed.
 */
+
+//----------------------------------------------------------------
+//Exercise 1
+void stats(const std::vector<int>& data,
+            int& low, int& high, double& mean); // Declaration
+//----------------------------------------------------------------
 
 int main() {
 
@@ -45,6 +52,13 @@ int main() {
     */
     std::println("--- Exercise 1: stats ---");
     // TODO
+    {
+        int low{};
+        int high{};
+        double mean{};
+        stats(samples, low, high, mean);
+        std::println("low = {}, high = {}, mean = {}", low, high, mean);
+    }
 
 
     /*
@@ -330,3 +344,24 @@ int main() {
 
     return 0;
 }
+
+
+//----------------------------------------------------------------
+//Exercise 1
+void stats(const std::vector<int>& data,
+    int& low, int& high, double& mean) {
+
+    long sum{ 0 };
+    low = data[0];
+    high = data[0];
+
+    for (int i{ 0 }; i < data.size(); ++i) {
+
+        low = std::min(low, data[i]);
+        high = std::max(high, data[i]);
+        sum += data[i];
+    }
+
+    mean = static_cast<double>(sum) / static_cast<double>(data.size());
+}
+//----------------------------------------------------------------
