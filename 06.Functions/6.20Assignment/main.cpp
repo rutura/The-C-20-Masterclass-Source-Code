@@ -25,6 +25,13 @@ void stats(const std::vector<int>& data,
             int& low, int& high, double& mean); // Declaration
 //----------------------------------------------------------------
 
+
+//----------------------------------------------------------------
+//Exercise 2
+void bar(int value, int width = 40, char fill = '*');
+
+//----------------------------------------------------------------
+
 int main() {
 
     // A fixed dataset we will be working on
@@ -53,11 +60,13 @@ int main() {
     std::println("--- Exercise 1: stats ---");
     // TODO
     {
+        /*
         int low{};
         int high{};
         double mean{};
         stats(samples, low, high, mean);
         std::println("low = {}, high = {}, mean = {}", low, high, mean);
+        */
     }
 
 
@@ -100,6 +109,15 @@ int main() {
     */
     std::println("\n--- Exercise 2: bar ---");
     // TODO
+    {
+
+        for (int i{}; i < samples.size(); ++i) {
+            bar(samples[i] / 2);
+        }
+        bar(1000);
+        bar(20, 20, '=');
+
+    }
 
 
     /*
@@ -364,4 +382,11 @@ void stats(const std::vector<int>& data,
 
     mean = static_cast<double>(sum) / static_cast<double>(data.size());
 }
+//----------------------------------------------------------------
+//Exercise 2
+void bar(int value, int width , char fill ) {
+    const int length{ std::clamp(value, 0, width) };
+    std::println("{}", std::string(static_cast<std::size_t>(length), fill));
+}
+
 //----------------------------------------------------------------
