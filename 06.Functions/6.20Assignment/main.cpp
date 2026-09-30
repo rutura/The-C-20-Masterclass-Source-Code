@@ -74,6 +74,13 @@ void describe(std::string_view s) {
         s, s.size(), vowel ? "yes" : "no");
 }
 //----------------------------------------------------------------
+//Exercise 5
+int next_roll() {
+    static std::default_random_engine engine{ std::random_device{}() };
+    static std::uniform_int_distribution<int> die{ 1,6 };
+    return die(engine);
+}
+//----------------------------------------------------------------
 
 int main() {
 
@@ -229,11 +236,13 @@ int main() {
     std::println("\n--- Exercise 4: describe (overloading) ---");
     // TODO
     {
+        /*
         describe(88);
         describe(3.5);
         describe(4.0);
         describe("apple");
         describe("banana");
+        */
     }
 
 
@@ -258,6 +267,14 @@ int main() {
     */
     std::println("\n--- Exercise 5: next_roll (static local RNG) ---");
     // TODO
+    {
+        std::print("rolls:");
+        for (int i{}; i < 8; ++i) {
+            std::print(" {}", next_roll());
+        }
+        std::println("");
+
+    }
 
 
     /*
