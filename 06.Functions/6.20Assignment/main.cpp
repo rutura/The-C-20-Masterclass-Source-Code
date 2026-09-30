@@ -6,6 +6,7 @@
 #include <string_view>
 #include <algorithm>
 #include <vector>
+#include "image.h"
 
 //#include "image.h"
 
@@ -435,6 +436,7 @@ int main() {
     std::println("\n--- Exercise 6: digit_sum ---");
     // TODO
     {
+        /*
         //Sum up the numnbers in samples
         long samples_total{};
         for (int i{}; i < samples.size(); ++i) {
@@ -447,66 +449,13 @@ int main() {
             12345L, digit_sum(12345L), digit_sum_iterative(12345L));
         std::println("digit_sum({}) = {} (iterative: {})", 
             samples_total, digit_sum(samples_total), digit_sum_iterative(samples_total));
-
-
+        */
     }
 
 
     /*
-        Exercise 7 - checksum() with [[nodiscard]] and a lambda
-
-        A checksum is a single number squeezed out of a whole collection
-        of data, used to catch corruption or mistakes: if you compute the
-        checksum before sending a file and again after receiving it, and
-        the two numbers don't match, something changed along the way -
-        even if you never look at the data itself. You don't need to
-        know exactly how the number was produced to use it this way; you
-        only need it to reliably change whenever the input does, and to
-        reproduce the exact same number for the exact same input.
-
-        Write:
-
-            [[nodiscard]] int checksum(const std::vector<int>& data);
-
-        It folds every element into one int, one at a time, using this
-        rule, starting from acc = 0:
-
-            acc = acc * 31 + element
-
-        Worked example for {1, 2, 3}:
-
-            acc = 0
-            acc = 0 * 31 + 1  = 1      (after folding in 1)
-            acc = 1 * 31 + 2  = 33     (after folding in 2)
-            acc = 33 * 31 + 3 = 1026   (after folding in 3)   <- final checksum
-
-        Change any one element - say {1, 2, 4} instead of {1, 2, 3} -
-        and the final number comes out completely different, which is
-        exactly the point: the result is sensitive to every value that
-        went in.
-
-        Do the folding with a lambda captured by reference ([&acc]) that
-        you call once per element in a range-for loop, instead of writing
-        the "acc = acc * 31 + element" line directly in the loop body.
-
-        Because checksum is [[nodiscard]], calling it and ignoring the
-        result may( depending on the warning level) produce a compiler 
-        warning - the compiler is telling you "why did you even call 
-        this function if you're not going to look at what it gives back?". 
-        Try to use it and see if your compiler throws a warning: print
-        checksum(samples). Then add a commented-out line
-        `// checksum(samples);` with a note that it would warn.
-
-        Sample output:
-            checksum(samples) = <some int>       (deterministic - same every run)
-    */
-    std::println("\n--- Exercise 7: checksum ---");
-    // TODO
-
-
-    /*
-        Exercise 8 - bringing in the image project from 6.19, and adding
-        a new shape to it
+        Exercise 7 - Bringing in the image writing features from the project
+        that used FetchContent.
 
         This one is different from the rest: instead of writing a
         function from scratch, you are going to pull in a small existing
@@ -514,7 +463,7 @@ int main() {
         "using a library" looks like in real code.
 
         1) Copy image.h and image.cpp from
-           06.Functions/6.19ProjectFetchContent into this folder. Those
+           06.Functions/xx.xxProjectFetchContent into this folder. Those
            two files already know how to build an image in memory (a
            canvas of pixels), draw a color gradient, draw a border around
            the edge, and save the result as a PNG file. You are not
@@ -581,8 +530,29 @@ int main() {
         Sample output:
             wrote image.png (400 x 300) - gray background with a bordered rectangle
     */
-    std::println("\n--- Exercise 8: image project (background + rectangle) ---");
+    std::println("\n--- Exercise 7: image project (background + rectangle) ---");
     // TODO
+    {
+        const int width{ 400 };
+        const int height{ 300 };
+
+        auto pixels = make_canvas(width, height);
+
+
+        // This is where we will draw
+        draw_background(pixels, width, height, 200, 200, 200);
+        draw_rectangle(pixels, width, height, 100, 100, 120, 80,8, 255, 0, 0);
+
+        if (write_png("image.png", width, height, pixels)) {
+            std::println("wrote image.png ({} x {}) - gray background with a bordered rectangle",
+                width, height);
+        }
+        else {
+            std::println("could not write image.png");
+            return 1;
+        }
+
+    }
 
     return 0;
 }
