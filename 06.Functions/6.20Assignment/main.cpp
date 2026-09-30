@@ -44,6 +44,36 @@ T clamp_to(T value, T lo, T hi) {
 }
 
 //----------------------------------------------------------------
+//Exercise 4
+//
+// Same name, three different signatures. The compiler picks the match
+// from the argument's type. describe(4.0) needs the .0 or it calls the
+// int overload.
+//
+// Sample output:
+//     int 88, even
+//     double 3.5, fractional
+//     double 4, whole
+//     text "apple", 5 chars, starts with a vowel: yes
+//     text "banana", 6 chars, starts with a vowel: no
+void describe(int n) {
+    std::println("int {}, {}", n, (n % 2) == 0 ? "even" : "odd");
+}
+
+void describe(double x) {
+    const bool whole{ std::floor(x) == x };
+    std::println("double {}, {}", x, whole ? "whole" : "fractional");
+}
+void describe(std::string_view s) {
+    // starts_with (C++20) tests a prefix; check the five vowels against
+    // the front of the string.
+    const bool vowel{ s.starts_with('a') || s.starts_with('e') ||
+                     s.starts_with('i') || s.starts_with('o') ||
+                     s.starts_with('u') };
+    std::println("text \"{}\", {} chars, starts with vowel: {}",
+        s, s.size(), vowel ? "yes" : "no");
+}
+//----------------------------------------------------------------
 
 int main() {
 
@@ -158,9 +188,11 @@ int main() {
     std::println("\n--- Exercise 3: clamp_to<T> ---");
     // TODO
     {
+        /*
         std::println("clamp_to(120, 0, 100)      ={} ", clamp_to(120, 0, 100));
         std::println("clamp_to(-2.5, 0.0, 1.0)  = {}", clamp_to(-2.5, 0.0, 1.0));
         std::println("std::clamp(120, 0, 100)   = {}", std::clamp(120, 0, 100));
+        */
     }
 
 
@@ -179,8 +211,7 @@ int main() {
                             (whole when std::floor(x) == x)
         - describe(std::string_view): prints
                             "text \"<s>\", <N> chars, starts with a vowel: <yes|no>"
-                            using s.size() and s.starts_with(...) or
-                            s.contains(...) from <string_view>.
+                            using s.size() and s.starts_with(...)
 
         Call all three: describe(88), describe(3.5), describe(4.0),
         describe("apple"), describe("banana").
@@ -197,6 +228,13 @@ int main() {
     */
     std::println("\n--- Exercise 4: describe (overloading) ---");
     // TODO
+    {
+        describe(88);
+        describe(3.5);
+        describe(4.0);
+        describe("apple");
+        describe("banana");
+    }
 
 
     /*
