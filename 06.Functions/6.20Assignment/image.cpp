@@ -1,81 +1,50 @@
 #include "image.h"
-#include <fstream>
 
-#include "stb_image_write.h"
+#include <string>
 
+#include "stb_image_write.h"   // declarations only - the bodies are
+                               // compiled in stb_impl.cpp
 
-// Make a black canvas: width*height pixels, all bytes 0.
 std::vector<std::uint8_t> make_canvas(int width, int height) {
-	return std::vector<std::uint8_t>(static_cast<std::size_t>(width) * height * 3, 0);
+    return std::vector<std::uint8_t>(static_cast<std::size_t>(width) * height * 3, 0);
 }
 
-
-// Set one pixel. Out-of-range (x, y) is ignored so callers need not
-// bounds-check every time.
 void set_pixel(std::vector<std::uint8_t>& pixels, int width, int height,
-    int x, int y,
-    std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-
-    //Get if not in range
+               int x, int y,
+               std::uint8_t r, std::uint8_t g, std::uint8_t b) {
     if (x < 0 || x >= width || y < 0 || y >= height) {
         return;
     }
-
-    const std::size_t i{ (static_cast<std::size_t>(y) * width + x) * 3 };
+    const std::size_t i{(static_cast<std::size_t>(y) * width + x) * 3};
     pixels[i + 0] = r;
     pixels[i + 1] = g;
     pixels[i + 2] = b;
 }
 
-// Draw the background
-void draw_background(std::vector<std::uint8_t>& pixels,
-    int width, int height,
-    std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-    for (int y{}; y < height; ++y) {
-        for (int x{}; x < width; ++x) {
-            set_pixel(pixels, width, height, x, y, r, g, b);
-        }
-    }
-}
-
-
-// Fill the whole canvas with a left-to-right gradient: colour `left` at
-// x = 0 blending to `right` at x = width - 1.
 void draw_gradient(std::vector<std::uint8_t>& pixels, int width, int height,
-    std::uint8_t left_r, std::uint8_t left_g, std::uint8_t left_b,
-    std::uint8_t right_r, std::uint8_t right_g, std::uint8_t right_b) {
-
-    for (int x{ 0 }; x < width; ++x) {
-        // t goes 0.0 at the left edge to 1.0 at the right edge.
-        const double t{ width > 1 ? static_cast<double>(x) / (width - 1) : 0.0 };
-
+                   std::uint8_t left_r,  std::uint8_t left_g,  std::uint8_t left_b,
+                   std::uint8_t right_r, std::uint8_t right_g, std::uint8_t right_b) {
+    for (int x{0}; x < width; ++x) {
+        const double t{width > 1 ? static_cast<double>(x) / (width - 1) : 0.0};
         const auto mix = [t](std::uint8_t a, std::uint8_t c) {
             return static_cast<std::uint8_t>(a + t * (c - a));
-          };
-
-        const std::uint8_t r{ mix(left_r, right_r) };
-        const std::uint8_t g{ mix(left_g, right_g) };
-        const std::uint8_t b{ mix(left_b, right_b) };
-
-        for (int y{ 0 }; y < height; ++y) {
+        };
+        const std::uint8_t r{mix(left_r, right_r)};
+        const std::uint8_t g{mix(left_g, right_g)};
+        const std::uint8_t b{mix(left_b, right_b)};
+        for (int y{0}; y < height; ++y) {
             set_pixel(pixels, width, height, x, y, r, g, b);
         }
     }
 }
 
-
-// Draw a solid frame `thickness` pixels wide around the edge.
 void draw_border(std::vector<std::uint8_t>& pixels, int width, int height,
-    int thickness,
-    std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-
-    for (int y{ 0 }; y < height; ++y) {
-
-        for (int x{ 0 }; x < width; ++x) {
-
-            const bool on_edge{ x < thickness || x >= width - thickness ||
-                   y < thickness || y >= height - thickness };
-
+                 int thickness,
+                 std::uint8_t r, std::uint8_t g, std::uint8_t b) {
+    for (int y{0}; y < height; ++y) {
+        for (int x{0}; x < width; ++x) {
+            const bool on_edge{x < thickness || x >= width - thickness ||
+                               y < thickness || y >= height - thickness};
             if (on_edge) {
                 set_pixel(pixels, width, height, x, y, r, g, b);
             }
@@ -83,59 +52,13 @@ void draw_border(std::vector<std::uint8_t>& pixels, int width, int height,
     }
 }
 
-// Draw a rectangle with the top left corner at (x,y)
-void draw_rectangle(std::vector<std::uint8_t>& pixels,
-    int width, int height,
-    int x, int y,
-    int rect_width, int rect_height,
-    int thickness,
-    std::uint8_t r, std::uint8_t g, std::uint8_t b) {
-
-    for (int row{ 0 }; row < rect_height; ++row) {
-        for (int col{ 0 }; col < rect_width; ++col) {
-            // Same "on the outline band" test as draw_border, just measured
-            // from the rectangle's own edges instead of the canvas's.
-            const bool on_edge{ col < thickness || col >= rect_width - thickness ||
-                               row < thickness || row >= rect_height - thickness };
-            if (on_edge) {
-                set_pixel(pixels, width, height, x + col, y + row, r, g, b);
-            }
-        }
-    }
-
-}
-
-// Write the pixels to a binary PPM (.ppm) file. PPM is the simplest
-// image format there is - a short text header, then the raw RGB bytes.
-// Returns true on success.
-bool write_ppm(std::string_view filename, int width, int height,
-    const std::vector<std::uint8_t>& pixels) {
-
-    std::ofstream out{ std::string{filename}, std::ios::binary };
-    if (!out) {
-        return false;
-    }
-    // Header: "P6\n<width> <height>\n255\n", then width*height*3 raw bytes.
-    out << "P6\n" << width << ' ' << height << "\n255\n";
-    out.write(reinterpret_cast<const char*>(pixels.data()),
-        static_cast<std::streamsize>(pixels.size()));
-    return out.good();
-
-}
-
-
-// The only difference from version A: instead of hand-writing a PPM, we
-// hand the buffer to the vendored stb_image_write library and get a
-// real PNG. Returns true on success.
 bool write_png(std::string_view filename, int width, int height,
-    const std::vector<std::uint8_t>& pixels) {
-
+               const std::vector<std::uint8_t>& pixels) {
     // stbi_write_png(path, w, h, channels, data, stride_in_bytes)
     // channels = 3 (RGB); stride = one row = width * 3 bytes.
     // It returns non-zero on success.
-    const int ok{ stbi_write_png(std::string{filename}.c_str(),
+    const int ok{stbi_write_png(std::string{filename}.c_str(),
                                 width, height, 3,
-                                pixels.data(), width * 3) };
-
+                                pixels.data(), width * 3)};
     return ok != 0;
 }
