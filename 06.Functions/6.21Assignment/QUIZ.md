@@ -182,14 +182,43 @@ D. `3` — `n` is a copy; the caller's `x` is untouched
 
 **Answer: D** — pass by value copies the argument. `n *= n` changes the copy; the new value is only visible through the return.
 
-### 18. `void stats(const std::vector<int>& data, int& low, int& high, double& mean)` (Exercise 1) uses `int&` / `double&` parameters in order to...
+### 18. In this program, why does `stats` take `low`, `high`, and `mean` as `int&` / `double&` parameters?
 
-A. return more than one result — the function writes `low`, `high`, and `mean` back through the references, into the caller's own variables
-B. avoid copying the large vector
-C. make the arguments optional
-D. force the caller to pass literals
+```cpp
+#include <algorithm>
+#include <print>
+#include <vector>
 
-**Answer: A** — a reference parameter is an alias for the caller's variable, so writing to it updates the original. That is how one call fills three outputs. (The separate `const std::vector<int>&` is the "avoid the copy, don't modify it" use of references.)
+void stats(const std::vector<int>& data, int& low, int& high, double& mean) {
+    long sum{0};
+    low = data.front();
+    high = data.front();
+    for (int value : data) {
+        low = std::min(low, value);
+        high = std::max(high, value);
+        sum += value;
+    }
+    mean = static_cast<double>(sum) / static_cast<double>(data.size());
+}
+
+int main() {
+    std::vector<int> samples{4, 8, 15, 16, 23, 42};
+    int low{};
+    int high{};
+    double mean{};
+    stats(samples, low, high, mean);
+    std::println("low = {}, high = {}, mean = {}", low, high, mean);
+}
+```
+
+Output: `low = 4, high = 42, mean = 18`
+
+A. To return more than one result — `stats` writes `low`, `high`, and `mean` back through the references, into the variables declared in `main`
+B. To avoid copying the vector
+C. To make the arguments optional
+D. To force the caller to pass literals
+
+**Answer: A** — a reference parameter is an alias for the caller's variable, so writing to it updates the original. That is how one call fills three outputs: `main`'s `low`, `high`, and `mean` hold `4`, `42`, and `18` after the call. (The separate `const std::vector<int>&` is the "avoid the copy, don't modify it" use of references, which is not what `int&` and `double&` are for here.)
 
 ### 19. What does the compiler do with `template <typename T> T clamp_to(T v, T lo, T hi)` when you call `clamp_to(120, 0, 100)` and later `clamp_to(-2.5, 0.0, 1.0)`?
 
