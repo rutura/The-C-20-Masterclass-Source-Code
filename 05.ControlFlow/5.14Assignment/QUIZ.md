@@ -141,14 +141,24 @@ D. It is a compile error
 
 **Answer: B** — `while` tests first. `5 < 5` is `false`, so the body is skipped entirely and the loop runs zero times.
 
-### 15. In sentinel-controlled iteration (loop until the user enters `-1`), why is there a "priming read" before the `while` and another read at the bottom of the body?
+### 15. This loop reads scores until the user enters `-1`. Why does `std::cin >> score` appear twice, once before the `while` and once at the bottom of the body?
+
+```cpp
+int score{};
+std::cin >> score;
+
+while (score != -1) {
+    // ... tally the score ...
+    std::cin >> score;
+}
+```
 
 A. To make the loop run at least once
-B. So the condition has a value to test on the very first check, and each later pass reads the next value before the condition is re-tested
+B. So `score` has a value for the very first condition check, and each later pass reads the next value before the condition is re-tested
 C. Because `std::cin` can only be called from inside a loop
 D. To skip the first value the user types
 
-**Answer: B** — the condition tests `score`, so `score` must be read once *before* the loop (the priming read). The read at the end of the body supplies the next value for the following re-test.
+**Answer: B** — the condition tests `score`, so `score` must be read once *before* the loop (the priming read). The read at the end of the body supplies the next value for the following re-test. Remove the first read and the condition tests a value the user never entered; remove the second and the loop never sees a new value, so it never ends.
 
 ### 16. Which statement about the `for` loop `for (int page{1}; page <= 10; ++page)` is correct?
 
