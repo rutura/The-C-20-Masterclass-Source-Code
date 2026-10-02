@@ -155,14 +155,23 @@ D. It resets `engine` to its seed on every call
 
 **Answer: C** — a `static` local is initialized the first time control passes its declaration and keeps its state between calls. Without `static`, every call would construct a new engine and ask `std::random_device` for a new seed, which is wasteful. If the seed were a fixed number instead, every call would restart the sequence and return the same roll each time.
 
-### 16. A local variable named `count` hides a global also named `count`. How do you name the global inside that scope?
+### 16. `show()` should print the global `count`, so the output is `10`. Without renaming either variable, what replaces `/* ??? */`?
 
-A. You cannot — the global is permanently shadowed
-B. `::count` — the unary scope-resolution operator skips local declarations
-C. Rename the local
-D. `global::count`
+```cpp
+int count{10};
 
-**Answer: B** — `::count` refers to the global. A bare `count` in that scope still means the local.
+void show() {
+    int count{3};
+    std::println("{}", /* ??? */);
+}
+```
+
+A. `count` — the compiler picks the global because it was declared first
+B. `::count` — the unary scope-resolution operator skips the local declaration
+C. `global::count`
+D. Nothing works — the global is permanently shadowed, so the output can only be `3`
+
+**Answer: B** — `::count` refers to the global. A bare `count` inside `show()` finds the local first and prints `3`.
 
 ### 17. After `int by_value(int n) { n *= n; return n; }` is called as `by_value(x)` with `x == 3`, what is `x`?
 
