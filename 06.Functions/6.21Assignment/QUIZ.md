@@ -138,14 +138,22 @@ D. You cannot — engines are always deterministic
 
 **Answer: A** — `std::random_device` yields a nondeterministic value to seed with, giving a different sequence every run. A fixed integer seed instead gives reproducibility. Exercise 5 seeds a `static` local engine this way, once.
 
-### 15. In Exercise 5, `next_roll()` declares its engine and distribution as `static` locals. What does that achieve?
+### 15. In this function, what does declaring `engine` and `die` as `static` locals achieve?
+
+```cpp
+int next_roll() {
+    static std::default_random_engine engine{std::random_device{}()};
+    static std::uniform_int_distribution<int> die{1, 6};
+    return die(engine);
+}
+```
 
 A. Nothing — `static` on a local has no effect
-B. It makes the engine visible to other functions in the file
+B. It makes `engine` and `die` visible to other functions in the file
 C. They are constructed once, on the first call, and reused on every later call, so the engine is seeded a single time and the sequence continues across calls
-D. It resets the engine to its seed on every call
+D. It resets `engine` to its seed on every call
 
-**Answer: C** — a `static` local is initialized the first time control passes its declaration and keeps its state between calls. Without `static`, each call would build and reseed a new engine and you would get the same first roll every time.
+**Answer: C** — a `static` local is initialized the first time control passes its declaration and keeps its state between calls. Without `static`, every call would construct a new engine and ask `std::random_device` for a new seed, which is wasteful. If the seed were a fixed number instead, every call would restart the sequence and return the same roll each time.
 
 ### 16. A local variable named `count` hides a global also named `count`. How do you name the global inside that scope?
 
