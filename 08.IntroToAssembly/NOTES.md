@@ -381,6 +381,139 @@ exactly three things:
 Assembly is just a very long, very literal to-do list built entirely
 out of those three things.
 
+### `reinterpret_cast`: the same bits, viewed as a different type
+
+`8.2MemoryAndTheCPU/main.cpp` does this to get a printable address:
+
+```cpp
+int width{4};
+auto width_address{reinterpret_cast<std::uintptr_t>(&width)};
+```
+
+`&width` is a value of type `int*` - a pointer. `std::uintptr_t` (from
+`<cstdint>`) is an **integer** type - on a typical 64-bit Linux system,
+literally `unsigned long`; on 64-bit Windows/MSVC, `unsigned __int64`.
+That can look like a contradiction: is the result an address, or just
+some number? It is both, because - and this is the entire point of
+this lecture - **an address already is just a number**. `int*` is a
+*C++-level* abstraction built on top of that number: it remembers "this
+points at an `int`," lets you dereference it, and restricts what
+arithmetic you're allowed to do on it. `reinterpret_cast` does not
+convert the value into something new - it takes the *exact same bits*
+and relabels them with a different type, dropping the pointer-specific
+rules and exposing the plain number that was underneath all along:
+
+```
+   the SAME 8 bytes in memory, looked at through two different types
+
+   ┌─────────────────────────────────┐
+   │   7f  fc  6a  f4  23  7c  00 00  │   <- the actual bits never change
+   └─────────────────────────────────┘
+       as int*                            as std::uintptr_t
+       ───────                            ──────────────────
+       "points at an int"                 "is the number 0x7ffc6af4237c"
+       can be dereferenced (*ptr)          can be added, subtracted,
+       arithmetic moves by sizeof(int)     formatted with {:x}, etc.
+       can't be printed with {:x}          can't be dereferenced
+```
+
+This particular cast - pointer to `std::uintptr_t` - is one of the few
+places the C++ standard explicitly guarantees `reinterpret_cast` works
+exactly as expected: convert any pointer to `std::uintptr_t` and back to
+the same pointer type, and you get the original pointer back, unchanged.
+That guarantee is *why* `uintptr_t` exists at all, and it is also why
+this is the **only** integer type to reach for here - not `int`, not
+`unsigned`, not whatever happens to compile.
+
+**Three things worth being careful about any time `reinterpret_cast` is
+involved** - this is a tool for "trust me, compiler," so the usual
+compiler safety net (type checking) is exactly what you are opting out
+of:
+
+**1. Size mismatch would truncate the address - both gcc and clang
+refuse outright.** `std::uintptr_t` is guaranteed wide enough for a
+pointer; a plain `unsigned int` is not, on a 64-bit system:
+
+```cpp
+auto truncated{reinterpret_cast<unsigned int>(&width)};  // error on both gcc and clang
+```
+
+```
+   what this would do, IF it compiled - the same 8-byte address,
+   forced into a 4-byte box:
+
+   ┌─────────────────────────────────┐
+   │   7f  fc  6a  f4  23  7c  00 00  │   the real, 8-byte address
+   └─────────────────────────────────┘
+                       ┌───────────────┐
+                       │ 23  7c  00 00 │   all that fits in an unsigned int -
+                       └───────────────┘   the top half is just gone
+```
+
+Both compilers consider the information loss serious enough to reject
+this by default - `cast from pointer to smaller type 'unsigned int'
+loses information` on clang, `loses precision [-fpermissive]` on gcc
+(the `[-fpermissive]` name is a hint: gcc *will* compile it if you
+explicitly pass `-fpermissive`, downgrading the error to a warning -
+which is not a reason to do it, just an explanation of the flag name).
+This is one of the rarer cases where the compiler itself enforces a
+`reinterpret_cast` safety rule for you, rather than silently compiling
+something that only breaks at runtime.
+
+The rule to take away: only cast a pointer to an integer type you
+*know* is at least as wide as a pointer on every platform you care
+about - which is precisely the one guarantee `std::uintptr_t` gives
+you, and `unsigned int` does not.
+
+**2. Reinterpreting one pointer type as another is usually undefined
+behaviour ("strict aliasing"), even when the sizes match.** The compiler
+is allowed to assume a `float*` and an `int*` never point at the same
+memory (there are narrow exceptions - `char*`, `unsigned char*`, and
+`std::byte*` - none of which apply here), and it optimises on that
+assumption:
+
+```cpp
+float value{3.14f};
+int* fooled{reinterpret_cast<int*>(&value)};
+int bits{*fooled};   // undefined behaviour - NOT a safe way to inspect a float's bits
+```
+
+This is the genuinely dangerous case, because at `-O0` it will often
+print a plausible-looking number and seem to work - then silently break
+when you turn optimisations on, because the optimiser takes the
+no-aliasing promise at face value and reorders or discards code that
+depends on it. If what you actually want is "look at this value's raw
+bits, as a different type, safely," **C++20's `std::bit_cast`** (from
+`<bit>`) is the modern replacement for exactly this case - same idea,
+but the compiler *checks* that both types are the same size, and the
+result is well-defined instead of undefined:
+
+```cpp
+#include <bit>
+
+float value{3.14f};
+auto bits{std::bit_cast<std::uint32_t>(value)};  // well-defined, sizes checked at compile time
+```
+
+**3. `reinterpret_cast` does not fix up alignment.** Some types must
+start at addresses that are multiples of their size (a common CPU
+requirement). Reinterpreting a pointer as a type with a stricter
+alignment requirement than the original object actually has, and then
+dereferencing it, is undefined behaviour - even when the byte sizes
+match exactly and no aliasing rule is broken.
+
+A quick summary to keep nearby:
+
+```
+   reinterpret_cast<std::uintptr_t>(ptr)   fine - the one standard-guaranteed round trip
+   reinterpret_cast<void*>(int_ptr)        unnecessary - int* -> void* already converts
+                                            implicitly, no cast needed at all
+   reinterpret_cast<int*>(a float*)        risky - strict-aliasing UB if dereferenced
+   reinterpret_cast<unsigned int>(ptr)     risky - truncates the address on 64-bit systems
+   std::bit_cast<To>(from)      (C++20)    prefer this for same-size reinterpretation -
+                                            compiler-checked sizes, defined behaviour
+```
+
 **Code for this lecture**: `8.2MemoryAndTheCPU/main.cpp` prints two real
 variables' own addresses on your machine, plus how wide an address is
 here - run it a few times and watch what stays the same between runs
