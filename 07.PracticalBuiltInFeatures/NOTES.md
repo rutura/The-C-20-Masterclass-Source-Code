@@ -1081,10 +1081,6 @@ of a second). For `n = 1,000,000`:
 | `std::ranges::sort`                                             | `O(n log n)`   |
 | a loop inside a loop over the same data                         | `O(n^2)`       |
 
-\* Now and then a `vector` runs out of room and has to move to a bigger
-block of memory. Spread over many `push_back` calls, that cost averages
-out to constant.
-
 The "copying is `O(n)`" row is the real reason the earlier rule of thumb
 says to pass collections by `const&`: a by-value parameter copies all `n`
 elements on **every call**, while a reference is `O(1)`.
