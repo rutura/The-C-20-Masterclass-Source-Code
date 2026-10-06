@@ -664,12 +664,13 @@ obvious way is to look at the elements one at a time, from the front,
 until we find it or run out. That is what a loop does:
 
 ```
+   index:    0        1       2      3       4
    fruits:   apple    date    fig    kiwi    mango
 
-   look 1:   apple?   no
-   look 2:   date?    no
-   look 3:   fig?     no
-   look 4:   kiwi?    YES, found it after 4 looks
+   look 1:   index 0: apple?   no
+   look 2:   index 1: date?    no
+   look 3:   index 2: fig?     no
+   look 4:   index 3: kiwi?    YES, found it after 4 looks
 ```
 
 With 5 fruits, that is nothing. With a million fruits, the unlucky case
@@ -686,22 +687,102 @@ start at page 1 and read every word. Instead:
 3. Open the remaining half in its middle and repeat.
 
 Every look throws away **half** of what is left. That is all
-**binary search** is ("binary" meaning "two halves"). Here it is on our
-fruits, with the part still in play shown as words and the part thrown
-away shown as dots:
+**binary search** is ("binary" meaning "two halves"). Now let's do the
+same on our fruits.
+
+#### Keeping track of what is left: `low`, `high` and `mid`
+
+Every element in `fruits` has an **index**, its position counting from 0.
+To remember which part is still in play, we keep two indexes:
+
+- `low`: the index of the **first** element still in play
+- `high`: the index of the **last** element still in play
+
+At the start, everything is in play:
 
 ```
-   sorted fruits:   apple    date    fig    kiwi    mango
-   looking for:     "kiwi"
-
-   look 1:          apple    date   [fig]   kiwi    mango      5 left. Middle is "fig".
-                                                               "kiwi" comes AFTER "fig",
-                                                               so throw away "fig" and
-                                                               everything left of it.
-
-   look 2:          .....    ....    ...    kiwi    mango      2 left. Middle is "kiwi".
-                                            [kiwi]             MATCH. Found!
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+                ▲                               ▲
+                low                             high
 ```
+
+So `low` is `0` and `high` is `4`. The middle is the index halfway
+between them:
+
+```
+   mid = (low + high) / 2
+```
+
+This is **integer division**, so any fraction is dropped: `7 / 2` is `3`,
+not `3.5`. Each look compares the value we want against `fruits[mid]`,
+and there are only three outcomes:
+
+| The value we want is...        | What we do                                                    |
+|--------------------------------|---------------------------------------------------------------|
+| equal to `fruits[mid]`         | Found it. Stop.                                               |
+| **after** `fruits[mid]`        | Throw away `mid` and everything left of it: `low = mid + 1`   |
+| **before** `fruits[mid]`       | Throw away `mid` and everything right of it: `high = mid - 1` |
+
+If `low` ever ends up bigger than `high`, nothing is left in play, so
+the value is not there.
+
+#### Walkthrough 1: searching for `"kiwi"` (it is there)
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+   looking for: "kiwi"
+
+   look 1:      low                             high
+                                mid
+```
+
+- `low = 0`, `high = 4`, so `mid = (0 + 4) / 2 = 2`.
+- `fruits[2]` is `"fig"`. `"kiwi"` comes **after** `"fig"`, so throw away
+  indexes 0 to 2: `low = mid + 1 = 3`.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `low = 3`, `high = 4`, so `mid = (3 + 4) / 2 = 7 / 2 = 3`.
+- `fruits[3]` is `"kiwi"`. **Match. Found!** (2 looks, instead of 4.)
+
+#### Walkthrough 2: searching for `"guava"` (it is not there)
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+   looking for: "guava"
+
+   look 1:      low                             high
+                                mid
+```
+
+- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"fig"`. `"guava"` comes
+  **after** `"fig"`, so `low = mid + 1 = 3`.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `mid = (3 + 4) / 2 = 3`. `fruits[3]` is `"kiwi"`. `"guava"` comes
+  **before** `"kiwi"`, so `high = mid - 1 = 2`.
+
+```
+   look 3:                      high    low
+```
+
+- Now `low` (3) is bigger than `high` (2). Nothing is left in play, so
+  `"guava"` is **not** in the collection.
+
+(The standard library's own implementation is organized a little
+differently inside, but it follows the same halving idea and gives the
+same answers. The `low`/`high`/`mid` version is simply the easiest to
+follow by hand.)
 
 #### Why bother? The work barely grows
 
@@ -730,8 +811,8 @@ The gap only widens as the collection grows:
                 1,000,000                      1,000,000                       20
             1,000,000,000                  1,000,000,000                       30
 ```
-
-A billion elements, and about 30 looks. That is the whole appeal.
+For a billion elements, a linear scan might take a billion looks in the worst case.
+But a binary search would take only about 30 looks.
 
 #### The one rule: the data must be sorted
 
@@ -772,18 +853,28 @@ comparator. That is sorted, but not by the rule `binary_search` assumes
 as it was, looking for `"fig"`, which really is in there:
 
 ```
-   fruits (sorted by LENGTH, longest first):   mango    apple    kiwi    date    fig
-   looking for:                                "fig"
+   index:       0       1       2       3       4
+   fruits:      mango   apple   kiwi    date    fig
+   looking for: "fig"
 
-   look 1:   mango    apple   [kiwi]   date    fig       Middle is "kiwi".
-                                                         "fig" comes BEFORE "kiwi"
-                                                         alphabetically, so throw away
-                                                         "kiwi" and everything to its right.
-
-   now:      mango    apple   .....    ....    ...       "fig" was in the half we just
-                                                         threw away. The search can never
-                                                         find it, and answers false.
+   look 1:      low                             high
+                                mid
 ```
+
+- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"kiwi"`. `"fig"` comes
+  **before** `"kiwi"` alphabetically, so the search throws away indexes
+  2 to 4: `high = mid - 1 = 1`. But `"fig"` is at index 4, in the half
+  that was just thrown away.
+
+```
+   look 2:      low     high
+                mid
+```
+
+- `mid = (0 + 1) / 2 = 0`. `fruits[0]` is `"mango"`. `"fig"` comes
+  **before** `"mango"`, so `high = mid - 1 = -1`.
+- Now `low` (0) is bigger than `high` (-1). Nothing is left in play, so
+  the search answers `false`, even though `"fig"` is right there.
 
 The search followed its rule faithfully. The data just did not follow
 the rule the search relies on.
