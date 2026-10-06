@@ -517,7 +517,7 @@ for (const int& item : quantities) {   // HOW: loop, add, repeat
 }
 ```
 
-That works, but  there is another paradicm we can use to do the same things. 
+That works, but  there is another paradigm we can use to do the same things. 
 It is called **Functional Programming**. Sometimes also refered to 
 as **Declarative Programming**. This lecture and the next introduce tools that subscribe to that 
 paradigm - `accumulate`,`filter`, `transform` - where you instead state *what* you 
@@ -537,29 +537,34 @@ want and let the library supply the *how*:
 Under the hood, each declarative tool still hides a loop somewhere -
 this is called **internal iteration**, because the loop runs *inside*
 the library function instead of in code you wrote and can see. What
-changes is who supplies the small per-element decision: a **higher-order
-function** is a function that takes another function as an argument (or
-returns one), and `accumulate`, `filter`, and `transform` are all
-higher-order functions - you hand each one a small function (often a
-lambda) saying what to do with one element, and it owns the looping.
+changes is who supplies the small per-element decision: a **higher-order function** is a 
+function that takes another function as an argument (or returns one), and `accumulate`, 
+`filter`, and `transform` are all higher-order functions - you hand each one a small 
+function (often a lambda) saying what to do with one element, and it owns the looping.
 
 ```
    WHAT you state                       WHO supplies the loop
    ───────────────                      ─────────────────────
    accumulate(..., combine)             accumulate's internal iteration
-   filter(keep_if)                      the view's internal iteration (7.6)
-   transform(map_to)                    the view's internal iteration (7.6)
+   filter(keep_if)                      the view's internal iteration (We'll see this shortly)
+   transform(map_to)                    the view's internal iteration (We'll see this shortly)
 ```
 
 This is C++'s **functional-style** programming: not a different
-language, just a different default - reach for a declarative pipeline
-first, and drop back down to a hand-written loop only when a pipeline
-cannot say what you mean. The rest of this lecture and the next show
-what that looks like in practice, starting with sorting and searching.
+language, just a different way to think about your code. What to do? 
+
+- reach for a declarative pipeline first. This involves reading the docs and 
+  understanding what the library already provides, and how to express your
+  intent in terms of it. 
+- drop back down to hand-written loop only when a pipeline cannot say what you mean. 
+
+NOTE: Don't overthink this. You will pick up the best practices as you go.
 
 ### Sorting with `std::ranges::sort`
 
 ```cpp
+using namespace std::string_literals;
+
 std::array fruits{"mango"s, "kiwi"s, "fig"s, "date"s, "apple"s};
 std::ranges::sort(fruits);   // ascending, in place
 ```
