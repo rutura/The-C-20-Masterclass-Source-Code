@@ -915,37 +915,74 @@ Instead we **count steps** (looks, comparisons, additions)
 and ask how that count **grows** as the amount of data grows. 
 We call the amount of data **`n`**: for `fruits`, `n` is 5.
 
-Here are our two searches again, with `n` growing from 1 to 32. The
-vertical axis is the number of looks in the worst case:
+Here are our two searches again. The horizontal axis is `n`, the number
+of elements, growing from 1 to 32. The vertical axis is the number of
+looks needed in the worst case. Each `*` is the one-at-a-time search at
+that `n`, and each `.` is the halving search at that `n`:
 
 ```
  steps
-   32 |                                                               N
-      |                                                           N N
-      |                                                       N N
-      |                                                   N N
-   24 |                                               N N
-      |                                           N N
-      |                                       N N
-      |                                   N N
-   16 |                               N N
-      |                           N N
-      |                       N N
-      |                   N N
-    8 |               N N
-      |           N N
-      |       N N                     L L L L L L L L L L L L L L L L L
-      |   N N L L L L L L L L L L L L
-    0 | L L L
-      +----------------------------------------------------------------
-        1     4       8      12      16      20      24      28      32   n
+  32 |                                                               *  n = 32: linear needs 32 looks
+     |                                                             *
+     |                                                           *
+     |                                                         *
+  28 |                                                       *
+     |                                                     *
+     |                                                   *
+     |                                                 *
+  24 |                                               *
+     |                                             *
+     |                                           *
+     |                                         *
+  20 |                                       *
+     |                                     *
+     |                                   *
+     |                                 *
+  16 |                               *
+     |                             *
+     |                           *
+     |                         *
+  12 |                       *
+     |                     *
+     |                   *
+     |                 *
+   8 |               *
+     |             *
+     |           *
+     |         *                                   . . . . . . . . . .  n = 32: halving needs about 5 looks
+   4 |       *               . . . . . . . . . . .
+     |     *     . . . . . .
+     |   * . . .
+     | * .
+   0 | .
+     +-----------------------------------------------------------------
+       1     4       8      12      16      20      24      28      32    n
 
-   N = one at a time (steps grow in a straight line with n)
-   L = halving       (steps barely grow at all)
+   *  one at a time (a loop)
+   .  halving (binary search)
 ```
 
-The straight line keeps climbing. The halving curve flattens out: doubling
-the data adds just **one** more look.
+#### How to read the graph
+
+- **Pick a spot on the bottom axis and read straight up.** At `n = 8`,
+  the `*` sits at 8 looks and the `.` sits at about 3. At `n = 32`, the
+  `*` is at 32 and the `.` is at about 5.
+- **The `*` rises in a straight line.** Every extra element adds one more
+  look. Double the data and the work doubles too.
+- **The `.` flattens out.** It climbs quickly at first, then crawls along
+  nearly level. Double the data and the work grows by just **one** look.
+
+Here are those readings from the graph in a table, so you can watch what
+happens each time `n` doubles:
+
+```
+   n          4     8     16    32
+   *  linear  4     8     16    32     (+4, +8, +16: the gap itself keeps growing)
+   .  halving 2     3     4     5      (+1, +1, +1:  one extra look every time)
+```
+
+The further right you go, the wider the gap between the two. That gap is
+exactly what Big O is about to give us a name for.
 
 #### Big O: the name for the shape of that curve
 
@@ -1014,18 +1051,6 @@ of a second). For `n = 1,000,000`:
    O(n)          1 millisecond            (blink of an eye)
    O(n log n)    20 milliseconds          (still instant)
    O(n^2)        1,000 seconds            (about 17 MINUTES)
-```
-
-And here is the same comparison for just 16 elements, one `█` for every 4
-steps. Even at this tiny size, the quadratic bar is already off to the
-races:
-
-```
-   O(1)         │█ 1
-   O(log n)     │█ 4
-   O(n)         │████ 16
-   O(n log n)   │████████████████ 64
-   O(n^2)       │████████████████████████████████████████████████████████████████ 256
 ```
 
 #### Three rules for reading Big O
