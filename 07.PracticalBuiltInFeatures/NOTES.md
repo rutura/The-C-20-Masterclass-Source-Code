@@ -27,21 +27,13 @@ with regular expressions.
 
 ## 7.2 `std::array` and range-based for loops
 
-This lecture covers two things together: **`std::array`**, the
-fixed-size container, and **range-based `for`**, the loop shape you will
-reach for most often to walk one. They are introduced side by side
-because a container is only as useful as the loops that read it.
+In this lecture, we are zooming in on **`std::array`**, the fixed-size container, 
+and taking the chance to introduce **range-based `for`** loops. These allow you to iterate over the elements of a collection without needing to manage an index variable explicitly.
 
 **`std::array<T, N>`** is a **fixed-size** sequence of `N` values of type
 `T`, stored **inline** - the elements sit directly inside the `array`
-object, back to back, no separate heap allocation (we will come back to
-what that means once heap allocation itself is on the table). `N` is
-part of the type: `std::array<int, 5>` and `std::array<int, 10>` are
-different types, the same way `int` and `double` are different types.
-
-The running example: tallying six-sided **dice rolls**. `roll_tally`
-counts how many times each face came up - index `i` holds the count for
-face `i + 1`:
+object, back to back. `N` is part of the type: `std::array<int, 5>` and `std::array<int, 10>` are different types, the same way `int` and `double` 
+are different types.
 
 ```cpp
 std::array<int, 6> roll_tally{};   // {} zero-initializes every element
@@ -53,8 +45,8 @@ std::array<int, 6> roll_tally{};   // {} zero-initializes every element
    index:      0     1     2     3     4     5
              ┌─────┬─────┬─────┬─────┬─────┬─────┐
    roll_tally│  0  │  0  │  0  │  0  │  0  │  0  │   one block, 6 ints,
-             └─────┴─────┴─────┴─────┴─────┴─────┘   sitting right here
-                ▲                                 ▲
+             └─────┴─────┴─────┴─────┴─────┴─────┘ 
+                ▲                             ▲
          roll_tally[0]                     roll_tally[5]
           (count of 1s)                     (count of 6s)
                       size() == 6, fixed forever
@@ -62,10 +54,10 @@ std::array<int, 6> roll_tally{};   // {} zero-initializes every element
 
 ### Filling it in from real data
 
-A fixed sequence of ten rolls stands in for "a die that was already
-rolled and someone wrote the results down":
+Assume someone rolled a die ten times and wrote down the results. We want to count how many times each face showed up.
 
 ```cpp
+// 10 die rolls, each face 1..6
 constexpr std::array<int, 10> rolls{3, 3, 1, 6, 3, 2, 3, 5, 4, 3};
 
 for (std::size_t i{0}; i < rolls.size(); ++i) {
@@ -131,8 +123,9 @@ the compiler can often **figure both of those out by itself**, just by
 looking at what you put in the braces - so you get to skip typing them.
 
 `std::array` is a **class template** - a blueprint that needs some
-**arguments** filled in (`T` and `N`) before it becomes a real type. CTAD
-is the compiler's ability to **deduce** those arguments on its own,
+**arguments** filled in (`T` and `N`) before it becomes a real 
+type (The same concepsts we saw for function templates extended to custom types). 
+CTAD is the compiler's ability to **deduce** those arguments on its own,
 instead of requiring you to write them by hand every time.
 
 ```cpp
@@ -155,20 +148,8 @@ for (int number : lucky_numbers)  { /* read-only */ }
 for (int& number : lucky_numbers) { number += 100; }   // modifies in place
 ```
 
-A reference is not free - it exists to do one of two jobs. Neither job
-applies to a loop that only *reads* an `int`, so the first loop takes
-`number` **by value**, not by reference:
-
-```
-   WHY A REFERENCE, NORMALLY                 WHY NOT HERE
-   ──────────────────────────                ────────────
-   1. avoid copying a LARGE element          int is tiny - a few bytes.
-      (a std::string, a struct, ...)         Copying it costs nothing a
-                                              reference would save.
-
-   2. WRITE back into the array              This loop only reads number -
-      through the loop variable              never assigns to it.
-```
+Stating `int number` means "give me a **copy** of each element, one by one, and 
+I will use it in the loop body." Stating `int& number` means "give me a **writable alias** to each element, one by one, and I will use it in the loop body."
 
 ```
    int number : lucky_numbers              int& number : lucky_numbers
@@ -190,9 +171,7 @@ The rule of thumb: **default to reading by value for small types like
 `int`, `char`, `double`; reach for a reference only when you need to
 write back, or when the element is large enough that copying it costs
 something** (a `std::string`, a `std::vector`, a struct with several
-members). `const T&` is the habit that pays off once `T` stops being tiny
-- it shows up again from chapter 7.7 onward, once the elements are
-`std::string`s instead of `int`s.
+members). `const T&` is the habit that pays off once `T` stops being tiny.
 
 ### The C++20 `for (init; cond; range)` form
 
