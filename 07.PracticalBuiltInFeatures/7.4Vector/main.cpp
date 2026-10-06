@@ -62,7 +62,7 @@ int main() {
         std::println("\nAttempting storefront_stock.at(20)");
         std::println("{}", storefront_stock.at(20));
     }
-    catch (const std::out_of_range& ex) {
+    catch (const std::exception& ex) {
         std::println("An exception occurred: {}", ex.what());
     }
 

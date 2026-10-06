@@ -487,7 +487,7 @@ garbage:
 try {
     storefront_stock.at(20);   // out of range - storefront_stock only has 8 elements
 }
-catch (const std::out_of_range& ex) {
+catch (const std::exception& ex) {
     std::println("An exception occurred: {}", ex.what());
 }
 ```
