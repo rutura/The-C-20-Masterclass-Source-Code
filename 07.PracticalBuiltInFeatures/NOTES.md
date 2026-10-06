@@ -1110,10 +1110,12 @@ to take away:
 
 ### Folding a range into one value with `std::accumulate`
 
-`std::accumulate(first, last, init)` is the declarative tool from the
-opening of this lecture, applied to "reduce a range to one value": state
-*what* you want (start from `init`, combine every element) and let the
-library own the loop.
+The `std::accumulate` function takes a range of values and reduces it to 
+a single value by combining them with a binary operation. The most common use 
+is to sum a range of numbers, but it can be used for other binary operations as well.
+
+The syntax: `std::accumulate(first, last, init, combine)`
+*What* you want to do: start from `init`, combine every element in the range `[first, last)` using the `combine` function.
 
 ```cpp
 std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting from 0
