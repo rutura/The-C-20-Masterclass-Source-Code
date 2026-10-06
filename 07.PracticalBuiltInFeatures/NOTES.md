@@ -326,9 +326,10 @@ function needs an independent copy to work with (Very rare).
 
 **`std::vector<T>`** is the growable counterpart to `std::array`: its
 elements live on the **heap**, and it can grow or shrink at run time.
-Where `std::array`'s size is baked into its type, `std::vector` is the
-default choice whenever you do not know the count up front, or need to
-add to it later.
+
+- `std::array`'s size is baked into its type
+- `std::vector` is the default choice whenever you do not know the count 
+   up front, or need to add to it later.
 
 ```
    std::array<int, 5>                    std::vector<int>
@@ -341,8 +342,7 @@ add to it later.
 
 ### Growing from nothing: `push_back`
 
-The running example: a **warehouse** that starts with no stock and
-receives deliveries one at a time.
+You can create an empty vector and add elements one at a time with `push_back`:
 
 ```cpp
 std::vector<int> warehouse_stock;   // starts empty, size() == 0
@@ -369,14 +369,12 @@ warehouse_stock.push_back(60);
                      └────┴────┴────┘
 ```
 
-This is the one thing `std::array` fundamentally cannot do - its size is
-fixed at compile time, while `push_back` grows a `vector` on demand.
+`std::array` can't do this. Its size is fixed at compile time, 
+while `push_back` grows a `vector` on demand, at run time.
 
-### `(N)` vs. `{N}` - a common first mistake
+### `(N)` vs. `{N}` - Don't fall for this!
 
-A vector can also be built at a fixed starting size instead of growing
-one element at a time - `storefront_stock(5)` and `backroom_stock(8)`
-each start pre-filled with zeros:
+I don't know why they have to make it so confusing!
 
 ```cpp
 std::vector<int> storefront_stock(5);   // 5 elements, each value-initialized to 0
@@ -393,9 +391,7 @@ std::vector<int> other{5};              // ONE element, valued 5
                             └───┘                     {5} is the element list
 ```
 
-Parentheses `()` size the vector; braces `{}` list its elements. The two
-look almost identical and mean very different things - worth a second
-look every time.
+Parentheses `()` size the vector; braces `{}` list its elements. 
 
 ### Comparing, copying, assigning
 
