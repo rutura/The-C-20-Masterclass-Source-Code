@@ -175,8 +175,8 @@ members). `const T&` is the habit that pays off once `T` stops being tiny.
 
 ### The C++20 `for (init; element : range)` form
 
-Since C++20, a range-based for can start with an optional **init
-statement**, followed by the usual `element : range` part. There is no
+Since C++20, a range-based for can start with an optional **init statement**, 
+followed by the usual `element : range` part. There is no
 condition: the loop simply ends when the range runs out of elements.
 
 ```
