@@ -840,9 +840,8 @@ std::ranges::binary_search(fruits, "guava"s);  // false
 `"kiwi"` is in `fruits`, so the first call gives `true`. `"guava"` is not,
 so the second gives `false`.
 
-That is the trade a sort buys you: about `log n` looks (written
-`O(log n)`) instead of scanning every element, as long as the data is
-sorted the way the search expects.
+So **binary search** does the work faster than a linear scan, 
+but it has a **precondition**: the data must be sorted in the order the search expects.
 
 #### What goes wrong if the data is not sorted the right way
 
@@ -886,8 +885,204 @@ even accidentally succeed. Nothing warns you that the assumption was
 violated. A bug that only shows up for *some* searches on *some* data is
 much harder to catch in testing than an obvious crash. Sorting back to
 alphabetical ascending right before the search, as the code above does,
-avoids it. A good habit: `binary_search`'s "sorted" always means "sorted
-by the same rule `binary_search` itself is using", not sorted any old way.
+avoids it. 
+
+NOTE: Before do binary search, always sort the data in the order the search expects.
+
+NOTE: Before you use an algorithm, make sure to carefully read the **preconditions** in the documentation. If you violate them, the algorithm may misbehave in ways that are hard to detect.
+
+### How much work is an algorithm? A first look at complexity
+
+You now know two ways to answer "is `"kiwi"` in this collection?":
+
+```
+   one at a time (a loop)         halving (binary_search)
+   ──────────────────────         ───────────────────────
+   works on any data              needs sorted data
+   about n looks, worst case      about log n looks, worst case
+```
+
+Which one is "better"? That depends on a question programmers ask all
+the time: **when the data gets bigger, how much more work does this need?** 
+The tools for answering it are called **algorithm complexity**, and the notation 
+is called **Big O**. 
+
+#### Count steps, not seconds
+
+We could time each search with a stopwatch, but seconds depend on the computer, 
+the compiler and whatever else is running. 
+Instead we **count steps** (looks, comparisons, additions) 
+and ask how that count **grows** as the amount of data grows. 
+We call the amount of data **`n`**: for `fruits`, `n` is 5.
+
+Here are our two searches again, with `n` growing from 1 to 32. The
+vertical axis is the number of looks in the worst case:
+
+```
+ steps
+   32 |                                                               N
+      |                                                           N N
+      |                                                       N N
+      |                                                   N N
+   24 |                                               N N
+      |                                           N N
+      |                                       N N
+      |                                   N N
+   16 |                               N N
+      |                           N N
+      |                       N N
+      |                   N N
+    8 |               N N
+      |           N N
+      |       N N                     L L L L L L L L L L L L L L L L L
+      |   N N L L L L L L L L L L L L
+    0 | L L L
+      +----------------------------------------------------------------
+        1     4       8      12      16      20      24      28      32   n
+
+   N = one at a time (steps grow in a straight line with n)
+   L = halving       (steps barely grow at all)
+```
+
+The straight line keeps climbing. The halving curve flattens out: doubling
+the data adds just **one** more look.
+
+#### Big O: the name for the shape of that curve
+
+Big O writes down the **shape** of the growth, using `n` for the amount
+of data. We say "O of n" or "order n":
+
+| Big O          | Say it as          | What it means                               | If the data **doubles**          |
+|----------------|--------------------|---------------------------------------------|----------------------------------|
+| `O(1)`         | constant           | same work, no matter how big the data is    | no change                        |
+| `O(log n)`     | logarithmic        | halving the pile each step                  | **one** extra step               |
+| `O(n)`         | linear             | touch every element once                    | twice the work                   |
+| `O(n log n)`   | "n log n"          | a halving trick repeated for every element  | a bit more than twice the work   |
+| `O(n^2)`       | quadratic          | for every element, touch every element again | **four** times the work         |
+
+#### The same ideas as code
+
+```cpp
+// O(1): one step, whatever the size of quantities
+int first{quantities[0]};
+
+// O(n): one step per element
+int total{0};
+for (const int& item : quantities) {
+    total += item;
+}
+
+// O(n^2): for EVERY element, walk over EVERY element again
+for (const int& a : quantities) {
+    for (const int& b : quantities) {
+        std::println("pair: {} and {}", a, b);
+    }
+}
+```
+
+For `quantities = {10, 20, 30, 40}`, so `n = 4`, the nested loop prints
+every cell of a 4 x 4 grid, which is 4 x 4 = **16** steps:
+
+```
+                 b = 10      b = 20      b = 30      b = 40
+   a = 10       (10, 10)    (10, 20)    (10, 30)    (10, 40)
+   a = 20       (20, 10)    (20, 20)    (20, 30)    (20, 40)
+   a = 30       (30, 10)    (30, 20)    (30, 30)    (30, 40)
+   a = 40       (40, 10)    (40, 20)    (40, 30)    (40, 40)
+
+   n = 4   →   4 x 4   =  16 steps
+   n = 8   →   8 x 8   =  64 steps      (twice the data, FOUR times the work)
+```
+
+#### How fast do these grow? Real numbers
+
+Number of steps for each shape (rounded):
+
+| `n`           | `O(1)` | `O(log n)` | `O(n)`      | `O(n log n)`        | `O(n^2)`                |
+|---------------|--------|------------|-------------|---------------------|-------------------------|
+| 10            | 1      | 3          | 10          | 33                  | 100                     |
+| 100           | 1      | 7          | 100         | 664                 | 10,000                  |
+| 1,000         | 1      | 10         | 1,000       | 10,000              | 1,000,000               |
+| 1,000,000     | 1      | 20         | 1,000,000   | 20,000,000          | 1,000,000,000,000       |
+
+To feel those numbers, pretend each step takes one nanosecond (a billionth
+of a second). For `n = 1,000,000`:
+
+```
+   O(1)          1 nanosecond
+   O(log n)      20 nanoseconds
+   O(n)          1 millisecond            (blink of an eye)
+   O(n log n)    20 milliseconds          (still instant)
+   O(n^2)        1,000 seconds            (about 17 MINUTES)
+```
+
+And here is the same comparison for just 16 elements, one `█` for every 4
+steps. Even at this tiny size, the quadratic bar is already off to the
+races:
+
+```
+   O(1)         │█ 1
+   O(log n)     │█ 4
+   O(n)         │████ 16
+   O(n log n)   │████████████████ 64
+   O(n^2)       │████████████████████████████████████████████████████████████████ 256
+```
+
+#### Three rules for reading Big O
+
+1. **Ignore the small stuff.** Big O describes the *shape*, so constants
+   and small extras are dropped. Looping over the data twice takes `2n`
+   steps, and a loop plus 10 extra steps takes `n + 10`. Both are just
+   `O(n)`, because at large `n` the leftover pieces do not change the
+   shape of the curve.
+2. **It usually describes the unlucky case.** Linear search can get
+   lucky and find the value at the very first element (1 look), but the
+   unlucky case, the value is last or missing, takes `n` looks. We quote
+   the unlucky case because it is the promise we can always keep.
+3. **It is about growth, not a stopwatch.** With 5 fruits, any method is
+   instant. Big O starts to matter when `n` gets large, or when the code
+   runs over and over. Do not reach for a clever algorithm to save
+   microseconds on a tiny array.
+
+#### Where you have already met these
+
+| What you have used                                              | Big O          |
+|-----------------------------------------------------------------|----------------|
+| `array[i]`, `vector[i]`, `.at(i)`, `.size()`                    | `O(1)`         |
+| `vector.push_back(x)` (on average*)                             | `O(1)`         |
+| `std::ranges::binary_search` (sorted data)                      | `O(log n)`     |
+| a loop over every element, `std::accumulate`, a linear search   | `O(n)`         |
+| copying a vector, passing a collection **by value**             | `O(n)`         |
+| `std::ranges::sort`                                             | `O(n log n)`   |
+| a loop inside a loop over the same data                         | `O(n^2)`       |
+
+\* Now and then a `vector` runs out of room and has to move to a bigger
+block of memory. Spread over many `push_back` calls, that cost averages
+out to constant.
+
+The "copying is `O(n)`" row is the real reason the earlier rule of thumb
+says to pass collections by `const&`: a by-value parameter copies all `n`
+elements on **every call**, while a reference is `O(1)`.
+
+#### Putting it to work: is sorting first worth it?
+
+`binary_search` needs sorted data, and sorting is not free: `O(n log n)`.
+So should you sort and then binary search, or just loop? Take `n = 1,000,000`:
+
+| Plan                                      | 1 search                   | 1,000 searches                        |
+|-------------------------------------------|----------------------------|---------------------------------------|
+| loop every time, `O(n)` each              | about 1,000,000 steps      | about 1,000,000,000 steps             |
+| sort once, then `O(log n)` each           | about 20,000,000 steps     | 20,000,000 + 1,000 x 20 = about 20,020,000 steps |
+
+For a **single** search, just loop: sorting costs more than it saves. For
+**many** searches, sort once and the savings are enormous, here about 50
+times fewer steps. Roughly speaking, the sort pays for itself after about
+`log n` searches (around 20 here). Without Big O, that is a guess. With it,
+it is arithmetic.
+
+NOTE: Don't overthink this. You do not need to memorise the table. What
+to take away: **loops over the data grow in a line, halving grows
+barely at all, and loops inside loops grow explosively.**
 
 ### Folding a range into one value with `std::accumulate`
 
