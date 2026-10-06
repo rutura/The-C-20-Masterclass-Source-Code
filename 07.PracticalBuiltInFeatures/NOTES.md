@@ -216,7 +216,8 @@ As usual, a parameter can be passed:
 - by reference (the function gets an alias to the caller's own data)
 - by const reference (the function gets an alias, but cannot write through it).
 
-We how all this applies to the case when the parameter is a **collection** instead of a single `int` or `double`.
+We explore how all this applies to the case when the parameter is a **collection** 
+instead of a single `int` or `double`.
 
 ### By value: the whole array gets copied
 

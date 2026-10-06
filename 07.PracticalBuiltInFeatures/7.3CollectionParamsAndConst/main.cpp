@@ -2,7 +2,7 @@
 #include <array>
 
 // --- by value: the whole array gets COPIED --------------------------------
-// 6.10 showed that const on a by-value int parameter only protects a copy
+// A previous lecture showed that const on a by-value int parameter only protects a copy
 // the function already owns - the caller was never at risk either way.
 // The same is true for a std::array, but the COST is no longer nothing:
 // copying five ints is cheap; copying a much larger array would not be.
@@ -27,10 +27,8 @@ void reset_readings(std::array<int, 5>& readings) {
 
 // --- by const reference: an alias, but a read-only one ---------------------
 // No copy, and the compiler enforces that this function cannot write
-// through readings - the promise a reference parameter actually needs
-// const for (6.10). This is the shape a "just report what's there"
-// function should have: cheap, and provably unable to disturb the data
-// it is reporting on.
+// through readings. This is the shape a "just report what's there"
+// function should have: cheap, and unable to disturb the data it is reporting on.
 void report_by_const_ref(const std::array<int, 5>& readings) {
     std::print("readings: ");
     for (int reading : readings) {
