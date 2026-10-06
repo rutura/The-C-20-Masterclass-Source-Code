@@ -1106,8 +1106,11 @@ times fewer steps. Roughly speaking, the sort pays for itself after about
 it is arithmetic.
 
 NOTE: Don't overthink this. You do not need to memorise the table. What
-to take away: **loops over the data grow in a line, halving grows
-barely at all, and loops inside loops grow explosively.**
+to take away: 
+
+- **loops over the data** grow in a line, 
+- **halving grows** barely at all, and 
+- **loops inside loops** grow explosively.
 
 ### Folding a range into one value with `std::accumulate`
 
