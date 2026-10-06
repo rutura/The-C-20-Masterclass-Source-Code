@@ -581,18 +581,15 @@ std::ranges::sort(fruits);   // ascending, in place
 
 #### "Ascending" is a default comparator, not magic
 
-`sort` with no second argument is shorthand, the same way `accumulate`
-with no fourth argument was (earlier in this lecture). The comparator it
-defaults to is `std::ranges::less` - pass it explicitly and nothing
-changes:
+`sort` with no second argument is shorthand. The comparator it
+defaults to is `std::ranges::less`. If  you pass it explicitly,
+nothing changes:
 
 ```cpp
 std::ranges::sort(fruits, std::ranges::less{});   // identical order to sort(fruits)
 ```
 
-Swap in `std::ranges::greater` instead, and the exact same algorithm
-sorts **descending** - `sort`'s job never changes, only the rule it uses
-to compare two elements does:
+If you pass in `std::ranges::greater`, we will now sort **descending** instead of ascending:
 
 ```cpp
 std::ranges::sort(fruits, std::ranges::greater{});
@@ -621,16 +618,12 @@ std::ranges::sort(fruits, [](const std::string& a,
          const std::string& b) { return a > b; });   // == std::ranges::greater{}
 ```
 
-Both produce byte-for-byte the same order as the `less{}`/`greater{}`
-calls above - proof that `less`/`greater` are not a separate mechanism
-from a lambda comparator, just a ready-made one for the everyday case.
+These produce the same order as the `less{}`/`greater{}` calls above.
 
 #### A lambda can express a rule `less`/`greater` cannot
 
-`std::ranges::less`/`greater` only ever compare two elements *as
-themselves*. A lambda comparator can compare anything derived from
-them - here, each string's `.size()` instead of the strings
-alphabetically:
+Lambdas give us the flexibility to sort by any rule we can express in code. 
+For example, we can sort by the length of the fruit names instead of alphabetically:
 
 ```cpp
 std::ranges::sort(fruits,
@@ -660,7 +653,7 @@ std::ranges::sort(fruits,
 This is the real payoff of a lambda comparator: alphabetical order is
 only one possible rule, and `sort` does not care which rule you give it
 - it just needs something that can say, for any two elements, which one
-belongs first.
+should come first.
 
 ### Searching sorted data with `std::ranges::binary_search`
 
