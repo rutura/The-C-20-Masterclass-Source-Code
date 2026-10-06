@@ -657,18 +657,94 @@ should come first.
 
 ### Searching sorted data with `std::ranges::binary_search`
 
-`binary_search` repeatedly **halves** the search range - which only gives
-a correct answer when the data is already sorted **in the order the
-search assumes** - ascending, by default.
+#### The problem: is this value in the collection?
+
+Say we want to know whether `"kiwi"` is somewhere in `fruits`. The
+obvious way is to look at the elements one at a time, from the front,
+until we find it or run out. That is what a loop does:
 
 ```
-   searching sorted {apple, date, fig, kiwi, mango} for "kiwi"
+   fruits:   apple    date    fig    kiwi    mango
 
-   step 1:  apple  date  [fig]  kiwi  mango     middle = fig, "kiwi" > "fig" → search right half
-   step 2:  ......  kiwi  mango                 middle = kiwi, MATCH → true
-
-   only 2 comparisons instead of checking all 5, one by one
+   look 1:   apple?   no
+   look 2:   date?    no
+   look 3:   fig?     no
+   look 4:   kiwi?    YES, found it after 4 looks
 ```
+
+With 5 fruits, that is nothing. With a million fruits, the unlucky case
+is a million looks. There is a much smarter way, and you already know it.
+
+#### The dictionary trick
+
+You want to look up the word "kiwi" in a paper dictionary. You do **not**
+start at page 1 and read every word. Instead:
+
+1. Open the dictionary roughly in the **middle**. Say you land on "fig".
+2. "kiwi" comes **after** "fig" in the alphabet, so everything from the
+   front of the book up to this page is useless. **Throw that half away.**
+3. Open the remaining half in its middle and repeat.
+
+Every look throws away **half** of what is left. That is all
+**binary search** is ("binary" meaning "two halves"). Here it is on our
+fruits, with the part still in play shown as words and the part thrown
+away shown as dots:
+
+```
+   sorted fruits:   apple    date    fig    kiwi    mango
+   looking for:     "kiwi"
+
+   look 1:          apple    date   [fig]   kiwi    mango      5 left. Middle is "fig".
+                                                               "kiwi" comes AFTER "fig",
+                                                               so throw away "fig" and
+                                                               everything left of it.
+
+   look 2:          .....    ....    ...    kiwi    mango      2 left. Middle is "kiwi".
+                                            [kiwi]             MATCH. Found!
+```
+
+#### Why bother? The work barely grows
+
+Each look cuts the leftover pile in half, so even a huge collection
+shrinks to nothing after a handful of looks. Here is a collection of 64
+elements shrinking:
+
+```
+   64 left  →  32  →  16  →  8  →  4  →  2  →  1        about 6 looks
+```
+
+And here is the worst case for 64 elements, one bar character per look:
+
+```
+   one at a time  │████████████████████████████████████████████████████████████████  64 looks
+   halving        │██████                                                              about 6 looks
+```
+
+The gap only widens as the collection grows:
+
+```
+   elements in collection     one at a time (worst case)     halving (worst case)
+   ──────────────────────     ──────────────────────────     ────────────────────
+                        8                              8                        3
+                    1,000                          1,000                       10
+                1,000,000                      1,000,000                       20
+            1,000,000,000                  1,000,000,000                       30
+```
+
+A billion elements, and about 30 looks. That is the whole appeal.
+
+#### The one rule: the data must be sorted
+
+Go back to the dictionary. Throwing away half of the book only makes
+sense because you **know** the words are in alphabetical order. If the
+words were in random order, "kiwi comes after fig" would tell you
+nothing about which half to discard.
+
+So `binary_search` has one requirement: the data must already be sorted,
+**in the order the search assumes**. By default that order is ascending
+(`std::ranges::less`), the same default `sort` used.
+
+The code below does exactly this. Sort first, then search:
 
 ```cpp
 std::ranges::sort(fruits);   // back to alphabetical ascending - fruits was
@@ -680,20 +756,47 @@ std::ranges::binary_search(fruits, "kiwi"s);   // true
 std::ranges::binary_search(fruits, "guava"s);  // false
 ```
 
-That halving is the trade a sort buys you: `O(log n)` lookups instead of
-scanning every element - but only correct when the data's actual order
-matches what `binary_search` assumes. The dangerous part is that this
-failure is **not reliable**: search `fruits` while it is still sorted by
-length instead of alphabetically, and the result depends entirely on
-where the halving happens to land - it might report "not found" for a
-value that is there, might find the wrong thing, or might even
-accidentally succeed, all without any warning that the assumption was
-violated. That is worse than an obvious crash - a bug that only shows up
-for *some* searches on *some* data is much harder to catch in testing.
-Sorting back to alphabetical ascending immediately before the search, as
-the code above does, is what avoids it - a reminder that
-`binary_search`'s "sorted" always means "sorted by the same rule
-`binary_search` itself is using," not sorted any old way.
+`"kiwi"` is in `fruits`, so the first call gives `true`. `"guava"` is not,
+so the second gives `false`.
+
+That is the trade a sort buys you: about `log n` looks (written
+`O(log n)`) instead of scanning every element, as long as the data is
+sorted the way the search expects.
+
+#### What goes wrong if the data is not sorted the right way
+
+Notice the comment in the code above: right before this point, `fruits`
+was left sorted by **length**, longest first, by the last lambda
+comparator. That is sorted, but not by the rule `binary_search` assumes
+(alphabetical, ascending). Here is what would happen if we searched it
+as it was, looking for `"fig"`, which really is in there:
+
+```
+   fruits (sorted by LENGTH, longest first):   mango    apple    kiwi    date    fig
+   looking for:                                "fig"
+
+   look 1:   mango    apple   [kiwi]   date    fig       Middle is "kiwi".
+                                                         "fig" comes BEFORE "kiwi"
+                                                         alphabetically, so throw away
+                                                         "kiwi" and everything to its right.
+
+   now:      mango    apple   .....    ....    ...       "fig" was in the half we just
+                                                         threw away. The search can never
+                                                         find it, and answers false.
+```
+
+The search followed its rule faithfully. The data just did not follow
+the rule the search relies on.
+
+The nasty part is that this failure is **not reliable**. Depending on
+where the halving happens to land, a wrong ordering might report "not
+found" for a value that is there, might find the wrong thing, or might
+even accidentally succeed. Nothing warns you that the assumption was
+violated. A bug that only shows up for *some* searches on *some* data is
+much harder to catch in testing than an obvious crash. Sorting back to
+alphabetical ascending right before the search, as the code above does,
+avoids it. A good habit: `binary_search`'s "sorted" always means "sorted
+by the same rule `binary_search` itself is using", not sorted any old way.
 
 ### Folding a range into one value with `std::accumulate`
 
