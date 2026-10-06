@@ -68,7 +68,7 @@ int main() {
     std::println("");
 
     // A running total, computed with a range-based for that also declares
-    // its own accumulator - the "for (init; cond; range)" form from C++20.
+    // its own accumulator - the "for (init; element : range)" form from C++20.
     std::println("\nrunning total:");
     for (int total{0}; int number : lucky_numbers) {
         total += number;

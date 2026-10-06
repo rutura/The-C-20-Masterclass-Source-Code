@@ -173,10 +173,21 @@ write back, or when the element is large enough that copying it costs
 something** (a `std::string`, a `std::vector`, a struct with several
 members). `const T&` is the habit that pays off once `T` stops being tiny.
 
-### The C++20 `for (init; cond; range)` form
+### The C++20 `for (init; element : range)` form
 
-A plain range-based for only hands you each **value** - no index. That
-is fine here, since summing does not need one, and `number` is still
+Since C++20, a range-based for can start with an optional **init
+statement**, followed by the usual `element : range` part. There is no
+condition: the loop simply ends when the range runs out of elements.
+
+```
+   for ( int total{0};   int number : lucky_numbers )
+         └────┬──────┘   └──────────┬─────────────┘
+         init statement,           the usual range-based
+         runs once, before         part: one element per
+         the first iteration       iteration
+```
+
+Here the init statement declares an accumulator, and `number` is still
 read-only, so it stays a by-value `int`:
 
 ```cpp
