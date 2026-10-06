@@ -374,7 +374,7 @@ while `push_back` grows a `vector` on demand, at run time.
 
 ### `(N)` vs. `{N}` - Don't fall for this!
 
-I don't know why they have to make it so confusing!
+This can be confusing. Watch out!
 
 ```cpp
 std::vector<int> storefront_stock(5);   // 5 elements, each value-initialized to 0
@@ -395,23 +395,81 @@ Parentheses `()` size the vector; braces `{}` list its elements.
 
 ### Comparing, copying, assigning
 
+Vectors can be compared, copied, and assigned.
+
 ```cpp
-storefront_stock != backroom_stock;              // element-by-element comparison
-std::vector overflow_stock{backroom_stock};      // copy constructor - overflow_stock
-                                                  // owns its own copy of the data
-storefront_stock = backroom_stock;               // assignment - storefront_stock's
-                                                  // old contents are replaced
+std::vector<int> storefront_stock(5);   // 5 elements, each 0 
+std::vector<int> backroom_stock(8);     // 8 elements, each 0 
 ```
 
 ```
-   std::vector overflow_stock{backroom_stock};
+   storefront_stock: ┌───┬───┬───┬───┬───┐
+                     │ 0 │ 0 │ 0 │ 0 │ 0 │                       5 elements
+                     └───┴───┴───┴───┴───┘
 
-   backroom_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐   overflow_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐
-                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │
-                   └───┴───┴───┴───┴───┴───┴───┴───┘                   └───┴───┴───┴───┴───┴───┴───┴───┘
-                     own block of memory                                 a SEPARATE block - overflow_stock's own copy
-                     changing backroom_stock later does NOT touch overflow_stock, and vice versa
+   backroom_stock:   ┌───┬───┬───┬───┬───┬───┬───┬───┐
+                     │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │           8 elements
+                     └───┴───┴───┴───┴───┴───┴───┴───┘
 ```
+
+### Comparing: `==` and `!=`
+
+Two vectors are equal only if they have the same size **and** the same
+value at every position. Here every value is `0`, but the sizes differ
+(5 vs. 8), so they are not equal:
+
+```cpp
+if (storefront_stock != backroom_stock) {
+    std::println("storefront_stock and backroom_stock are not equal");
+}
+```
+
+### Copying: the copy constructor
+
+To create a **new** vector that starts out as a copy of an existing one,
+pass the existing vector when you declare the new one:
+
+```cpp
+std::vector overflow_stock{backroom_stock};   // a new vector<int>, copied from backroom_stock
+```
+
+The element type (`int`) is deduced from `backroom_stock`. Braces usually
+list elements, but when the only thing inside is another vector of the
+same type, you get a **copy** of it, not a vector that contains a vector.
+
+```
+   backroom_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐
+                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │     the original, its own block of memory
+                   └───┴───┴───┴───┴───┴───┴───┴───┘
+
+   overflow_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐
+                   │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │     a SEPARATE block, overflow_stock's own copy
+                   └───┴───┴───┴───┴───┴───┴───┴───┘
+
+   changing backroom_stock later does NOT touch overflow_stock, and vice versa
+```
+
+### Assigning: `=`
+
+Assignment works on a vector that **already exists**. Its old contents
+are thrown away and replaced by a copy of the right-hand side, **including the size**:
+
+```cpp
+storefront_stock = backroom_stock;   // storefront_stock now holds a copy of backroom_stock
+```
+
+```
+   BEFORE:  storefront_stock: ┌───┬───┬───┬───┬───┐
+                              │ 0 │ 0 │ 0 │ 0 │ 0 │                     5 elements
+                              └───┴───┴───┴───┴───┘
+
+   AFTER:   storefront_stock: ┌───┬───┬───┬───┬───┬───┬───┬───┐
+                              │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │ 0 │         8 elements, a copy
+                              └───┴───┴───┴───┴───┴───┴───┴───┘         of backroom_stock
+```
+
+`storefront_stock == backroom_stock` is now `true`. From this point on,
+`storefront_stock` has **8** elements.
 
 ### `.at()` as an lvalue: bounds-checked writes, and reading it out of bounds
 
