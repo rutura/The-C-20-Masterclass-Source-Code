@@ -1402,6 +1402,20 @@ log.find_first_not_of("noon is "); // first character NOT in this set
    log.rfind("is")    →  23    (last "is": "...midnight [is] not")
 ```
 
+`find_first_not_of` works from the front, skipping every character that is
+in the set you give it, and stops at the first one that is not:
+
+```
+   log.find_first_not_of("noon is ")      the set: n, o, i, s and the space
+
+   idx:           0  1  2  3  4  5  6  7  8
+   char:          n  o  o  n  ␣  i  s  ␣  1          (␣ = a space)
+   in the set?    ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✗
+                                          ▲
+                  skipped, skipped, ...   first character NOT in the set
+                                          → returns 8
+```
+
 Every `find`-family function returns **`std::string::npos`** when nothing
 matches:
 
@@ -1420,7 +1434,6 @@ std::string sentence{"The quick brown fox jumps over the lazy dog"};
 std::size_t position{sentence.find(' ')};    // 3: the first space
 
 sentence.erase(19);                          // drop everything from index 19 on
-sentence.replace(position, 1, "_");          // 1 char at position -> "_"
 ```
 
 ```
@@ -1434,6 +1447,11 @@ sentence.replace(position, 1, "_");          // 1 char at position -> "_"
                 │
                 ▼
    sentence:  The quick brown fox        (everything from index 19 on: GONE)
+```
+
+```cpp
+std::string sentence{"The quick brown fox jumps over the lazy dog"};
+sentence.replace(position, 1, "_");          // 1 char at position -> "_"
 ```
 
 Looping a `find` + `replace` together is the everyday pattern for
@@ -1538,11 +1556,10 @@ record >> item >> quantity >> price;
 
 ### Raw string literals: when backslashes are getting out of hand
 
-An ordinary string literal treats `\` as the start of an **escape
-sequence** - `\n` for a newline, `\t` for a tab, and so on. That means
-a literal backslash has to be escaped too, by doubling it, `\\`. A
-Windows-style file path is a good example of this getting out of hand
-fast:
+An ordinary string literal treats `\` as the start of an **escape sequence**:  
+`\n` for a newline, `\t` for a tab, and so on. That means a literal backslash 
+has to be escaped too, by doubling it, `\\`. A Windows-style file path is a good 
+example of this getting out of hand fast:
 
 ```cpp
 std::string path{"C:\\Users\\Ada\\Documents\\notes.txt"};   // every \ doubled
@@ -1568,10 +1585,9 @@ std::string raw_path{R"(C:\Users\Ada\Documents\notes.txt)"};   // no doubling ne
 
 Both lines above produce the **exact same string** - `R"(...)"` doesn't
 change what's stored, only how much escaping you have to type to get
-there. It earns its keep anywhere backslashes pile up: file paths,
-Windows registry keys, and - as the next lecture will lean on heavily -
-regular expression patterns, which use backslashes constantly (`\d`,
-`\w`, `\s`, ...).
+there. Raw string literals show their value anywhere backslashes pile up: file paths,
+Windows registry keys, and regular expression patterns (We'll learn about these in a 
+few lectures ahead), which use backslashes constantly (`\d`,`\w`, `\s`, ...).
 
 ---
 
