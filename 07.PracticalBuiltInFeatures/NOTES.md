@@ -1969,8 +1969,8 @@ need to keep it around - it avoids a copy the caller never asked for:
 
 ## 7.10 Date and Time Utilities
 
-Time shows up everywhere in real programs - how long an operation took,
-what the timestamp on a log line should read, what today's date is.
+In this lecture, we explore the `<chrono>` library, which provides a comprehensive set of tools for handling time in C++. Time is a fundamental aspect of programming, appearing in various contexts such as measuring operation durations, logging timestamps, and managing dates.
+
 **`<chrono>`** is the standard library's time toolkit, and this lecture
 covers the three pieces of it you're actually likely to reach for:
 
