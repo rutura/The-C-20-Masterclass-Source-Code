@@ -1719,10 +1719,10 @@ std::println("[{:*^10}]", 42);   // "[****42****]"  '*' as fill, centered
 ```
    {:*^10}   on 42
 
-   field:  [ *  *  *  *  4  2  *  *  *  * ]
-             └───┬───┘  └┬┘  └────┬──────┘
-              fill pad  value   fill pad
-                        (centered inside a 10-wide field)
+   field:  [ *   *   *   *   4   2   *   *   *   * ]
+             └─────┬─────┘   └─┬─┘   └─────┬─────┘
+               fill pad      value     fill pad
+             (centered inside a 10-wide field)
 ```
 
 ### Precision:
