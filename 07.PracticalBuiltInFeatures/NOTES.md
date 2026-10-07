@@ -1675,18 +1675,19 @@ int main() {
 
 ## 7.8 String formatting with `std::format`
 
-`std::print`/`std::println` already cover the everyday case - build a
+`std::print`/`std::println` already cover the everyday case. You build a
 formatted result and send it straight to the console. **`std::format`**
 does the same formatting work, but **returns a `std::string`** instead
-of printing, for when the text is not going straight to the screen: a
-log line, part of a file, a label built up piece by piece.
+of printing. This is useful when text is not going straight to the screen,
+and intended to land in log files, part of a larger string, or a label built 
+up piece by piece.
 
-```
-   std::println("Hello, {}!", name);     WRITES to stdout, returns nothing
+```cpp
+   std::println("Hello, {}!", name);     // WRITES to stdout, returns nothing
 
    std::string s{std::format("Hello, {}!", name)};
-                                          BUILDS a std::string, prints nothing
-                                          - you decide what happens to it next
+                                          // BUILDS a std::string, prints nothing
+                                          // - you decide what happens to it next
 ```
 
 ### The format-spec grammar
