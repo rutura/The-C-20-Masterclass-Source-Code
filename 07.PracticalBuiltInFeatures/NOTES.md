@@ -2160,7 +2160,6 @@ first, exactly as every example above does.
 (`10^-24`) to `yotta` (`10^24`):
 
 ```cpp
-// (11)-(12)
 std::println("milli = {}/{}", std::milli::num, std::milli::den);   // "milli = 1/1000"
 std::println("kilo  = {}/{}", std::kilo::num, std::kilo::den);     // "kilo  = 1000/1"
 ```
