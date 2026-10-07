@@ -1233,8 +1233,7 @@ by mistake.
 
 In this lecture, we are expxloring C++20's **ranges library**
 two more declarative building features: **filter** (keep only what matches)
- and **transform** (map each value to a new one) - that chain together instead
-of nesting loops inside loops.
+and **transform** (map each value to a new one). 
 
 ```
    the procedural way: nested loops, one running vector per step
@@ -1278,15 +1277,14 @@ auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
 
 ### Piping views together
 
-`std::views::filter` and `std::views::transform` wrap a range the same
-way, and chain together with `|`, read left to right like a pipeline.
-Like `accumulate`'s fourth argument, each one is a **higher-order
-function**: `filter` takes a lambda that decides *keep or drop*,
-`transform` takes a lambda that decides *old value or new value* - you
+`std::views::filter` and `std::views::transform` wrap a range the same way, and chain 
+together with `|`, read left to right like a pipeline. Like `accumulate`'s fourth argument, 
+each one is a **higher-order function**: `filter` takes a lambda that decides *keep or drop*,
+`transform` takes a lambda that decides *how the old value turns into the new value* - you
 supply the small decision, the view supplies the iteration.
 
 ```cpp
-auto evenSquares{
+auto even_squares{
     counted | std::views::filter([](int x) { return x % 2 == 0; })
             | std::views::transform([](int x) { return x * x; })};
 ```
@@ -1310,7 +1308,7 @@ Hence the name **lazy evaluation**.
 ### Laziness: nothing runs until you actually iterate
 
 ```
-   auto evenSquares{ counted | filter(...) | transform(...) };
+   auto even_squares{ counted | filter(...) | transform(...) };
         │
         └─  at THIS line: nothing has been filtered, nothing squared -
             evenSquares is just a recipe wrapping counted
@@ -1321,10 +1319,10 @@ Hence the name **lazy evaluation**.
             value: pull from counted → test filter → apply transform
 ```
 
-`evenSquares` is only ever iterated by something that asks for values -
-a range-based for, `std::accumulate`, or copying it into a
-`std::vector`. The same pipeline works over a real container, not just a
-generated sequence like `iota`:
+`even_squares` is only ever iterated by something that asks for values -
+a range-based for, `std::accumulate`, or copying it into a `std::vector`. 
+The same pipeline works over a real container, not just a generated sequence like `iota`.
+Below is a use of this machinery on a `std::vector<int>` called `numbers`:
 
 ```cpp
 numbers | std::views::filter(...) | std::views::transform(...)
