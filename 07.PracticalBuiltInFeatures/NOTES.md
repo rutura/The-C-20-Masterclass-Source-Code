@@ -1589,6 +1589,88 @@ there. Raw string literals show their value anywhere backslashes pile up: file p
 Windows registry keys, and regular expression patterns (We'll learn about these in a 
 few lectures ahead), which use backslashes constantly (`\d`,`\w`, `\s`, ...).
 
+### Raw string literal vs. `std::string` literal: two different questions
+
+These two names sound alike, and students often mix them up. They answer
+**different questions** about a piece of text in your code:
+
+- **Raw string literal or ordinary literal?** This is about the **spelling**: how backslashes
+  are treated. `"..."` is ordinary (`\` starts an escape sequence).
+  `R"(...)"` is raw (`\` is just a character).
+
+- **`std::string` or not?** This is about the **type** you get. A plain
+  literal like `"cat"` is **not** a `std::string`. It is a C-style array
+  of characters, `const char[4]` (`c`, `a`, `t` and a hidden end marker).
+  Add the `s` suffix, `"cat"s`, and the literal itself becomes a
+  `std::string`.
+
+Here are all four combinations in one complete program. They all print
+the same characters, because the spelling decides how you type the
+backslashes, not what ends up stored:
+
+```cpp
+#include <print>
+#include <string>
+
+int main() {
+    using namespace std::string_literals;   // makes the "s" suffix available
+
+    // C-style literals: the type is const char[N], so we keep them in a const char*
+    const char* ordinary{"C:\\Users\\Ada\\notes.txt"};
+    const char* raw{R"(C:\Users\Ada\notes.txt)"};
+
+    // std::string literals: the "s" suffix makes the literal itself a std::string
+    std::string ordinary_s{"C:\\Users\\Ada\\notes.txt"s};
+    std::string raw_s{R"(C:\Users\Ada\notes.txt)"s};
+
+    std::println("{}", ordinary);     // C:\Users\Ada\notes.txt
+    std::println("{}", raw);          // C:\Users\Ada\notes.txt
+    std::println("{}", ordinary_s);   // C:\Users\Ada\notes.txt
+    std::println("{}", raw_s);        // C:\Users\Ada\notes.txt
+
+    return 0;
+}
+```
+
+The earlier examples, `std::string path{"C:\\Users..."}` and
+`std::string raw_path{R"(C:\Users...)"}`, did not need the `s`. A
+`std::string` can be built from a C-style literal, so we got a
+`std::string` either way.
+
+#### When does the `s` suffix actually matter?
+
+When there is no `std::string` on the left to do the converting for you.
+You saw it in 7.5, with `"mango"s` inside `std::array`. Here are the two
+everyday cases, `auto` and `+`:
+
+```cpp
+#include <string>
+
+int main() {
+    using namespace std::string_literals;
+
+    auto plain{"cat"};     // const char*  - NOT a std::string!
+    auto proper{"cat"s};   // std::string
+
+    // auto bad{"cat" + "acomb"};   // error: cannot add two C-style literals
+    auto joined{"cat"s + "acomb"};  // OK: std::string + literal gives "catacomb"
+
+    return 0;
+}
+```
+
+```
+   "cat"    →  const char[4]   c  a  t  \0       just characters in memory:
+                                                  no .size(), no .find(), no +
+
+   "cat"s   →  std::string     "cat"             the full string type:
+                                                  .size(), .find(), .append(), +, ...
+```
+
+**Rule of thumb**: 
+- pick raw or ordinary by how many backslashes you would have to double. 
+- Add `s` when you need a real `std::string` right at that spot** (with `auto`, or before a `+`). 
+
 ---
 
 ## 7.8 String formatting with `std::format`
