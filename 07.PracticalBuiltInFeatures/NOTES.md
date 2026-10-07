@@ -1340,7 +1340,7 @@ into a new one, and all three let you state *what* instead of *how*.
 In this lecture, we explore more on `std::string` and its built-in features.
 In previous chapters and lectures, we had a chance to look at things like
 `length()`/`size()`, `empty()`, `==`/`!=`, `+`, and `starts_with`/`ends_with`. 
-We'll now look at some of the other built-in features that `std::string` provides.
+Let's look as some more!
 
 ### Assignment, concatenation, swap
 
