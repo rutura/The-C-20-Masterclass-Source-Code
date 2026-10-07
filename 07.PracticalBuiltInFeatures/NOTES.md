@@ -2232,6 +2232,23 @@ reachable via `std::literals::chrono_literals`), and are additionally
 re-exported directly into `std::chrono` - so `using namespace
 std::chrono;` alone is enough to use them.
 
+
+```cpp
+#include <chrono>
+#include <print>
+
+int main() {
+    using namespace std::chrono; // This works too.
+
+    auto race_duration{90min + 32s};     // literals work
+    minutes warmup{15};                  // no std::chrono:: needed
+    std::println("{}", race_duration);   // 5432s
+    std::println("{}", warmup);          // 15min
+
+    return 0;
+}
+```
+
 So far, every duration you've reached for already existed in the library.
 That covers the vast majority of real code - but what if you needed a unit
 `chrono` doesn't predefine, like "ticks of 60 seconds" or "an amount of
@@ -2258,10 +2275,11 @@ std::println("{}", std::ratio_equal<std::ratio<60>, std::ratio<60, 1>>::value);
 
 With that settled: `minutes` ticks in units of `ratio<60>` (60 seconds per
 tick); `milliseconds` ticks in units of `std::milli` (1/1000 of a second
-per tick). Once you know that, you can build your own:
+per tick). A second is the baselin ehere. Once you know that, you can build your own:
 
 ```cpp
-template <class Rep, class Period = std::ratio<1>>
+template <class Rep, class Period = std::ratio<1>>       // If you don't specify the ratio, 
+                                                         // it defaults to 1, meaning one tick = one second
 class duration { /* ... */ };
 ```
 
@@ -2330,6 +2348,7 @@ on plain numbers** - rounding `250ms` down/up/nearest to a whole number of
 seconds:
 
 ```cpp
+std::chrono::duration<long, std::ratio<1, 1000>> d1_ms{250};
 std::println("{} {} {}",
     std::chrono::floor<std::chrono::seconds>(d1_ms),   // 0s
     std::chrono::ceil<std::chrono::seconds>(d1_ms),    // 1s
