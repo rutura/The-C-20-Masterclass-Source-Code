@@ -1879,7 +1879,7 @@ copy.
 
 ```cpp
 std::string color{"red"};
-std::string_view colorView{color};   // "sees" color's own characters
+std::string_view color_view{color};   // "sees" color's own characters
 ```
 
 ```
@@ -1890,9 +1890,9 @@ std::string_view colorView{color};   // "sees" color's own characters
           └───┴───┴───┘
             ▲
             │
-   std::string_view colorView{color};
+   std::string_view color_view{color};
 
-   colorView:  { pointer ──────────────┘ , length: 3 }
+   color_view:  { pointer , length: 3 }
                (no characters of its own - just POINTS at color's)
 ```
 
@@ -1911,9 +1911,9 @@ color.at(0) = 'R';
           └───┴───┴───┘
             ▲
             │
-   colorView still points HERE  →  colorView now reads "Red"
+   color_view still points HERE  →  color_view now reads "Red"
 
-   compare with std::string colorCopy{color}; (a REAL copy, made earlier):
+   compare with std::string color_copy{color}; (a REAL copy, made earlier):
    colorCopy has its OWN buffer - color.at(0) = 'R' does not touch it
 ```
 
@@ -1937,7 +1937,7 @@ colorView.remove_suffix(1);
                                ▲  ▲
                              start end       (window shrinks from the back)
 
-   "Red" itself is never touched - only colorView's own (pointer, length)
+   "Red" itself is never touched - only color_view's own (pointer, length)
    moved, in O(1), no characters copied or erased
 ```
 
