@@ -2422,12 +2422,6 @@ std::chrono::duration<long, std::ratio<60>> d9{10};   // 10 minutes
 std::chrono::duration<long> d10{d9};                   // 600 seconds - implicit, exact
 ```
 
-`std::chrono::duration<long>` here leans on `Period`'s default of
-`std::ratio<1>` - it's shorthand for `std::chrono::duration<long,
-std::ratio<1>>`, i.e. "ticks in seconds" - the same default-argument
-mechanic as
-`std::ratio<Num, Den = 1>` from earlier.
-
 **One extra rule applies specifically to the predefined durations** you
 started this section with. The standard mandates that types like `minutes`
 and `seconds` use **integral** Reps - so, just like the `long`-based
