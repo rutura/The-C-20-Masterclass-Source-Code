@@ -1345,6 +1345,11 @@ Let's look as some more!
 ### Assignment, concatenation, swap
 
 ```cpp
+std::string title{"cat"};
+std::string subtitle;             // empty string
+std::string first{"one"};
+std::string second{"two"};
+
 subtitle.assign(title);     // same effect as: subtitle = title;
 title.append("acomb");      // "cat" -> "catacomb"
 first.swap(second);         // exchange contents, no copy of the data
@@ -1363,6 +1368,8 @@ first.swap(second);         // exchange contents, no copy of the data
 ### `substr`: pull out a piece
 
 ```cpp
+const std::string filename{"report_final.pdf"};
+
 filename.substr(0, 6);   // "report_final.pdf" -> "report"
 ```
 
@@ -1380,6 +1387,8 @@ filename.substr(0, 6);   // "report_final.pdf" -> "report"
 ### The `find` family: locate things inside a string
 
 ```cpp
+const std::string log{"noon is 12pm; midnight is not"};
+
 log.find("is");                    // first occurrence, from the front
 log.rfind("is");                   // last occurrence
 log.find_first_not_of("noon is "); // first character NOT in this set
@@ -1407,6 +1416,9 @@ matches:
 ### `erase` / `replace`: edit in place
 
 ```cpp
+std::string sentence{"The quick brown fox jumps over the lazy dog"};
+std::size_t position{sentence.find(' ')};    // 3: the first space
+
 sentence.erase(19);                          // drop everything from index 19 on
 sentence.replace(position, 1, "_");          // 1 char at position -> "_"
 ```
@@ -1428,6 +1440,7 @@ Looping a `find` + `replace` together is the everyday pattern for
 "replace every occurrence of X":
 
 ```cpp
+std::string sentence{"The quick brown fox"};
 std::size_t pos{sentence.find(' ')};
 while (pos != std::string::npos) {
     sentence.replace(pos, 1, "_");
@@ -1450,6 +1463,8 @@ while (pos != std::string::npos) {
 ### `insert`: splice text into the middle
 
 ```cpp
+std::string greeting{"Hello, !"};
+
 greeting.insert(7, "World");   // "Hello, !" -> "Hello, World!"
 ```
 
@@ -1503,6 +1518,10 @@ a string the same way `std::cin` pulls them from the keyboard:
 
 ```cpp
 std::istringstream record{"Ada 3 19.99"};
+std::string item;
+int quantity{};
+double price{};
+
 record >> item >> quantity >> price;
 ```
 
