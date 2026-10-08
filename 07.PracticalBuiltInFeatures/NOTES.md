@@ -2941,7 +2941,7 @@ one.
              ┌───────────┬────────────┬─────────────┬╌╌╌╌╌╌╌╌╌╌╌╌┐
    names     │   "Ada"   │  "Grace"   │ "Katherine" ┊    (none)  ┊
              └───────────┴────────────┴─────────────┴╌╌╌╌╌╌╌╌╌╌╌╌┘
-                    ▲                                       ▲
+                    ▲                                                ▲
               names.begin()                            names.end()
               (points AT the                      (one past the last real
                first element)                       element - a sentinel,
@@ -2969,11 +2969,9 @@ for (auto it = names.begin(); it != names.end(); ++it) {
                                         (it != names.end() becomes false, loop ends)
 ```
 
-This begin/`!=`/`++`/`*` pattern is exactly what a range-based `for`
-loop has been doing for you invisibly the whole time - and it's exactly
-what `std::sregex_iterator` reuses, except instead of walking the
-elements of a `vector`, it walks the **matches** of a regex against a
-range of text.
+This begin/`!=`/`++`/`*` machinery is done for us internally if we use 
+a range-based `for` loop. This is the same mechanism that `std::sregex_iterator` 
+uses to walk the matches of a regex against a string as we are about to see.
 
 `std::sregex_iterator` only really has two constructors worth knowing:
 
