@@ -25,6 +25,7 @@ int main() {
 
     // smatch receives the results of the match: [0] is the whole match,
     // [1], [2], [3] are the three capture groups, in the order they open.
+    // Notice an if with an initializer here.
     if (std::smatch m; std::regex_match(input, m, ship_date)) {
         int year{std::stoi(m[1])};
         int month{std::stoi(m[2])};

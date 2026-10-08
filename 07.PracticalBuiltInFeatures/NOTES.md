@@ -2818,7 +2818,7 @@ std::regex_match("K", city_name);         // false - no lowercase letters follow
              letter
 
    "Nairobi" N  a  i  r  o  b  i
-             ▲  └────┬────┘
+             ▲  └────┬─────────┘
           [A-Z]  [a-z]+ (6 lowercase letters, "one or more" satisfied)
                                                     → MATCH, true
 
@@ -2828,7 +2828,7 @@ std::regex_match("K", city_name);         // false - no lowercase letters follow
           (it needs AT LEAST one)                 → NO MATCH, false
 ```
 
-```
+```cpp
    std::regex invoice_code{R"(\d{5})"};   // exactly 5 digits
    std::regex_match("48213",   invoice_code)   → true   (exactly 5 digits, nothing more)
    std::regex_match("48213-1", invoice_code)   → false  (the "-1" is unaccounted for -
