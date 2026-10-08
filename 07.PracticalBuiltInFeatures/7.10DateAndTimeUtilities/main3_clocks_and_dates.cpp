@@ -38,6 +38,9 @@ int main() {
     try {
         std::locale::global(std::locale{""});
     } catch (const std::runtime_error&) {
+        // "C" is the bare-bones default locale inherited from the C language:
+        // English names ("Thu", "Mar") and no local conventions, so a German
+        // user's "Do", "Mär" or 1.000.000 would appear as "Thu", "Mar", 1000000.
         std::println("(no OS locale available here - falling back to \"C\")");
     }
     std::println("Local, locale-formatted: {:L%c}", now_local);
