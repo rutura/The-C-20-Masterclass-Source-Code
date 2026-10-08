@@ -2512,7 +2512,8 @@ std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
 > **A note on the Docker student environments.** As of Clang 21, libc++
 > does not yet implement the IANA time zone database, so `current_zone()`
 > will fail to compile there. This works on MSVC and on GCC's libstdc++,
-> which is what we build with.
+> which is what we build with. You can try compiler explorer with a compiler
+> that supports it.
 
 **Locale** is a separate thing compared to time zone: it changes how a time is
 written, not which instant or zone is being shown. Setting a locale

@@ -27,6 +27,8 @@ int main() {
     // does not yet implement the IANA time zone database, so current_zone()
     // will fail to compile there. This works on MSVC and on GCC's
     // libstdc++, which is what we build with.
+    // You can use compiler explorer to try this on a compiler with support like 
+    // msvc
     auto now_local{std::chrono::current_zone()->to_local(now_utc)};
     std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
 
@@ -76,9 +78,6 @@ int main() {
     //                 └──────────────────  diff = end - start ─────────┘
     //                                       (a DURATION, not a time_point)
     auto diff{end - start};
-
-    // Use the result, otherwise an aggressive compiler might optimize the
-    // entire loop away since d is never observed!
     std::println("d = {}", d);
 
     // Convert the difference into fractional milliseconds and print it.
