@@ -2475,8 +2475,11 @@ std::println("{}h {}m {}s", split.hours().count(),
 
 ### `main3_clocks_and_dates.cpp` - Clocks: a source of "now"
 
-There are two different questions you ask about time in everyday
-life: "what time is it right now?" and "how long did that just take?".
+There are two different questions you ask about time in everyday life: 
+
+- "what time is it right now?" and 
+- "how long did that just take?".
+
 Those are two different jobs - one wants a wall-clock reading you'd
 show a person, the other wants an elapsed amount of time you'd measure with
 a stopwatch. C++ gives you a different **clock** for each job.
@@ -2484,7 +2487,7 @@ a stopwatch. C++ gives you a different **clock** for each job.
 **Asking "what time is it right now?"** - `std::chrono::system_clock` is
 that clock. Its `now()` returns the current `time_point`, and
 `std::println`/`std::format` understand a `time_point` directly, using the
-same `{:...}` spec grammar from 7.8 - `%` codes replace a type letter like
+same `{:...}` spec grammar from earlier - `%` codes replace a type letter like
 `f` or `d`:
 
 ```cpp
@@ -2492,11 +2495,12 @@ auto now_utc{std::chrono::system_clock::now()};
 std::println("UTC: {:%Y-%m-%d %H:%M:%S}", now_utc);
 ```
 
-**A gotcha worth knowing up front: `system_clock::now()` is always UTC,
-never your local time.** Printing it directly, no matter how you format
+**Note:**`system_clock::now()` is always UTC, never your local time. 
+Printing it directly, no matter how you format
 it, still shows the UTC hour - a student in Nairobi (UTC+3) or New York
-(UTC-5) will not see their own wall-clock time from this alone. To get
-that, convert the UTC `time_point` to a specific **time zone**:
+(UTC-5) will not see their own wall-clock time from this alone. 
+
+To get that, convert the UTC `time_point` to a specific **time zone**:
 `current_zone()` asks the OS which zone it's configured for, and
 `to_local()` converts a UTC `time_point` to that zone's wall-clock time:
 
@@ -2505,20 +2509,13 @@ auto now_local{std::chrono::current_zone()->to_local(now_utc)};
 std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
 ```
 
-```
-   system_clock::now()  is ALWAYS UTC, regardless of formatting
-              │
-              └──► current_zone()->to_local(...)  ──►  the machine's own
-                                                        wall-clock time
-```
-
 > **A note on the Docker student environments.** As of Clang 21, libc++
 > does not yet implement the IANA time zone database, so `current_zone()`
 > will fail to compile there. This works on MSVC and on GCC's libstdc++,
 > which is what we build with.
 
-**Locale is a separate axis from time zone - it changes how a time is
-written, not which instant or zone is being shown.** Setting a locale
+**Locale** is a separate thing compared to time zone: it changes how a time is
+written, not which instant or zone is being shown. Setting a locale
 makes formatted output follow the user's own conventions (date order,
 month names, ...), and the `L` specifier formats according to whatever 
 locale is currently set:
@@ -2534,7 +2531,7 @@ std::println("{:L%c}", now_local);       // %c = locale's own "preferred" format
      │ └── %c: the locale's own preferred date+time layout
      └──── L:  use the currently configured GLOBAL locale to format it
 
-   TIME ZONE  answers "which instant, shown in whose wall clock?"
+   TIME ZONE  answers "in which time zone should I show the time for?"
    LOCALE     answers "written in what style?" - independent questions
 ```
 

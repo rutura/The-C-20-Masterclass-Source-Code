@@ -34,8 +34,7 @@ int main() {
     // own conventions (date order, month names, ...) - a SEPARATE axis from
     // the time zone conversion above. Locale changes how a time is WRITTEN;
     // it does not change WHICH instant or WHICH zone is being shown. The L
-    // specifier formats according to the currently configured locale. See
-    // chapter 21 for a full discussion of locales.
+    // specifier formats according to the currently configured locale. 
     try {
         std::locale::global(std::locale{""});
     } catch (const std::runtime_error&) {
