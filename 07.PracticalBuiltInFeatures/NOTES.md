@@ -2670,10 +2670,11 @@ user lives up to a set of security rules like:
 - contains at least one number
 - contains at least 23 special characters like `!@#$%^&*()_+-=[]{}|;':",./<>?`
 
-The last one is brutal on purpose! But notice the shape of every rule
-above: none of them name a specific password - they all describe a
-*pattern* the text must fit. That's exactly what a **regular expression**
-describes - the *shape* of text, not literal characters. 
+The last one is brutal on purpose!  Please note that none of the rules above 
+don't name a specific password. They describe a *pattern* the text must aggree with.
+That's exactly what a **regular expression** is. A set of rules that the text mush **agree with**. 
+To the letter! The C++ Standard Library ships a `<regex>` header that implements most of 
+what we need in that regard.
 
 `<regex>` gives you four things to do with a pattern:
 
@@ -2685,7 +2686,8 @@ describes - the *shape* of text, not literal characters.
    REPLACE   rewrite every match in a copy of the string   regex_replace
 ```
 
-We will explore all these bit by bit. But before we start, let's look at the basic building blocks of a regex pattern. The table below shows some of the most common pieces:
+We will explore all these bit by bit. But before we start, let's look at the basic 
+building blocks of a regex pattern. The table below shows some of the most common pieces:
 
 | Pattern piece | Means                          |
 |----------------|--------------------------------|
@@ -2709,7 +2711,8 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 Every backslash piece in the table above (`\d`, `\w`, `\s`) is a
 **metacharacter** - the *regex engine's own* shorthand for a whole
 category of characters. `\d` doesn't mean "a digit" the way a letter
-means itself; it's special syntax the regex engine interprets.
+means itself; it's special syntax the regex engine interprets. How are
+these different from escape sequences like `\t`, `\n`, and `\r`? 
 
 A `\t`, `\n`, or `\r` appearing in a pattern is a completely different
 thing: an ordinary **C++ string escape**, resolved by the compiler
@@ -2732,33 +2735,6 @@ std::regex{"\t"}      // C++ escape - the regex engine never sees a
                        // backslash at all, just one literal tab byte
                        // (same \t you've used in std::println strings)
 ```
-
-```
-   std::regex{R"(\d)"}
-                 │
-                 ▼
-        regex engine receives:  \  d     (two characters, backslash intact -
-                                            raw string literal passed it through)
-                 │
-                 ▼
-        regex engine's OWN rule: "\d" means "match any digit"
-
-   std::regex{"\t"}
-             │
-             ▼
-   C++ COMPILER resolves the escape FIRST, before regex ever runs:
-             │
-             ▼
-        regex engine receives:  [tab]   (one real tab character, no backslash)
-             │
-             ▼
-        regex engine's rule: "match this exact character" - nothing special
-```
-
-This is exactly why raw string literals matter for the metacharacter
-row and not the escape-sequence row: `R"(\d)"` protects the backslash so
-the *regex engine* gets to interpret it, while `"\t"` deliberately lets
-*C++* consume the backslash first.
 
 Let's put these to test with a few examples, all using `std::regex_match`.
 This function checks whether the *entire* string fits the pattern, returning `true` or `false`.
