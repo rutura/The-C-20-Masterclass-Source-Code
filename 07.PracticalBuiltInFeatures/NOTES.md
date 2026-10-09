@@ -3124,27 +3124,18 @@ whole pattern instead of one exact word.
    find-and-replace in a text editor:      find EXACT text  →  swap in new text
 
    regex_replace:                          find a SHAPE     →  swap in new text
-                                            (any tab, any date, any word, ...)
 ```
 
-Three things end up mattering once you actually use it, and the rest of
-this section walks them in order:
-
-- Does it touch the **original** string?
-- Can the replacement text **reuse** pieces of what it just matched?
-- What happens to the parts that **didn't** match?
-
 `regex_replace` rewrites every match in a **copy** of the string, leaving
-the original untouched - question one, answered:
+the original untouched. 
 
 ```cpp
 std::string data{"apple|3|0.99"};
 std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};   // pipes -> commas
 ```
 
-Note the pattern escapes the pipe as `\|` - unlike the tab above, `|`
-is a regex metacharacter (alternation), so matching a *literal* pipe
-character requires escaping it.
+Note the pattern escapes the pipe as `\|`, `|` is a regex metacharacter (alternation), 
+so matching a *literal* pipe character requires escaping it.
 
 ```
    data (before the call):  "apple|3|0.99"
