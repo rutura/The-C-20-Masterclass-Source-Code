@@ -628,27 +628,41 @@ For example, we can sort by the length of the fruit names instead of alphabetica
 ```cpp
 std::ranges::sort(fruits,
                    [](const std::string& a, const std::string& b) {
-                       return a.size() < b.size();   // shorter name first
+                       if (a.size() != b.size()) {
+                           return a.size() < b.size();   // shorter name first
+                       }
+                       return a < b;                     // same length: alphabetical
                    });
 
 std::ranges::sort(fruits,
                    [](const std::string& a, const std::string& b) {
-                       return a.size() > b.size();   // longer name first
+                       if (a.size() != b.size()) {
+                           return a.size() > b.size();   // longer name first
+                       }
+                       return a < b;                     // same length: alphabetical
                    });
 ```
 
 ```
    fruits = {mango, kiwi, fig, date, apple}   (lengths: 5, 4, 3, 4, 5)
 
-   sort by .size(), ascending:    fig  kiwi  date  mango  apple
+   sort by .size(), ascending:    fig  date  kiwi  apple  mango
                                     3    4     4      5      5
-                                              (kiwi/date and mango/apple
-                                               keep their original relative
-                                               order - ties are not reordered)
 
-   sort by .size(), descending:   mango  apple  kiwi  date  fig
+   sort by .size(), descending:   apple  mango  date  kiwi  fig
                                      5      5     4     4     3
 ```
+
+Why the extra `return a < b;` line? Some elements are **tied**: `kiwi` and
+`date` both have length 4, so on length alone neither belongs before the
+other. `std::ranges::sort` makes **no promise** about the order it leaves
+tied elements in. On a tiny collection like this one it may happen to keep
+their original order, but on bigger data it will shuffle them, and the
+result can differ from one compiler to the next. A **tie-break** fixes
+that: when the lengths are equal, fall back to a second rule (here,
+alphabetical), so the comparator gives a definite answer for every pair
+and the final order is always the same. Whenever the order of equal
+elements matters to you, put that rule inside the comparator.
 
 This is the real payoff of a lambda comparator: alphabetical order is
 only one possible rule, and `sort` does not care which rule you give it
@@ -853,26 +867,33 @@ as it was, looking for `"fig"`, which really is in there:
 
 ```
    index:       0       1       2       3       4
-   fruits:      mango   apple   kiwi    date    fig
+   fruits:      apple   mango   date    kiwi    fig
    looking for: "fig"
 
    look 1:      low                             high
                                 mid
 ```
 
-- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"kiwi"`. `"fig"` comes
+- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"date"`. `"fig"` comes
+  **after** `"date"` alphabetically, so the search throws away indexes
+  0 to 2: `low = mid + 1 = 3`. So far so good: `"fig"` is at index 4,
+  in the half that stays.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `mid = (3 + 4) / 2 = 3`. `fruits[3]` is `"kiwi"`. `"fig"` comes
   **before** `"kiwi"` alphabetically, so the search throws away indexes
-  2 to 4: `high = mid - 1 = 1`. But `"fig"` is at index 4, in the half
+  3 to 4: `high = mid - 1 = 2`. But `"fig"` is at index 4, in the half
   that was just thrown away.
 
 ```
-   look 2:      low     high
-                mid
+   look 3:                      high    low
 ```
 
-- `mid = (0 + 1) / 2 = 0`. `fruits[0]` is `"mango"`. `"fig"` comes
-  **before** `"mango"`, so `high = mid - 1 = -1`.
-- Now `low` (0) is bigger than `high` (-1). Nothing is left in play, so
+- Now `low` (3) is bigger than `high` (2). Nothing is left in play, so
   the search answers `false`, even though `"fig"` is right there.
 
 The search followed its rule faithfully. The data just did not follow

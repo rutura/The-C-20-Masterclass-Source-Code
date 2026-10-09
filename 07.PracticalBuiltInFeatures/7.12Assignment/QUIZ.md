@@ -1,173 +1,189 @@
 # Chapter 7 Quiz - Practical Built-In Features
 
-18 multiple-choice questions covering **Chapter 7 (Practical Built-In
-Features)**: `std::array` vs `std::vector`, sorting/searching/`accumulate`,
-ranges and views, strings beyond the basics (`find`/`erase`/`replace`/
-`insert`, string streams), the `std::format` spec grammar, `std::string_view`,
-`std::chrono` (durations, clocks, C++20 calendar dates), and `<regex>`. Each
-question is followed immediately by its correct answer and a short
-explanation.
+20 multiple-choice questions covering **Chapter 7 (Practical Built-In
+Features)**: bounds checking and collection parameters, `std::vector`,
+sorting, searching and `accumulate`, ranges and views, strings,
+`std::format`, `std::string_view`, `<chrono>` and `<regex>`. Each question is
+followed immediately by its correct answer and a short explanation.
 
 ---
 
-### 1. What is the key difference between `std::array<int, 5>` and `std::vector<int>`?
+### 1. How do `roll_tally[face]` and `roll_tally.at(face)` differ on a `std::array`?
 
-A. `array` lives on the heap, `vector` does not
-B. `array`'s size is fixed and part of its type; `vector` can grow and shrink at run time
-C. `vector` cannot be looped over with range-based for
-D. There is no difference - they are aliases for the same type
+A. `[]` does not check the index (undefined behavior if it is out of range), `.at()` is bounds-checked and throws `std::out_of_range`
+B. `[]` throws on a bad index, `.at()` silently reads garbage
+C. They are identical
+D. `.at()` only works on `const` arrays
 
-**Answer: B** - `std::array<T, N>` stores its `N` elements inline with no heap allocation, and `N` is baked into the type. `std::vector<T>` allocates on the heap and can `push_back` to grow.
+**Answer: A** - `[]` is fast but trusts you. `.at()` checks the index first, which costs a little and turns a silent mistake into a visible exception. The same is true for `std::vector`.
 
-### 2. What does `.at(i)` do differently from `[i]` on both `array` and `vector`?
+### 2. What is the default choice for a function parameter that holds a collection the function only reads?
 
-A. Nothing - they are identical
-B. `.at(i)` is bounds-checked and throws `std::out_of_range` on a bad index; `[i]` does not check
-C. `[i]` is bounds-checked; `.at(i)` is not
-D. `.at(i)` only works on `const` containers
+A. By value
+B. A `const` reference, `const T&`
+C. A plain reference, `T&`
+D. A pointer
 
-**Answer: B** - `.at(i)` checks the index and throws if it is out of range. `[i]` skips the check for speed, so an out-of-range `[i]` is undefined behavior.
+**Answer: B** - no copy is made (a by-value parameter copies all `n` elements on every call, which is `O(n)`), and the compiler guarantees the function cannot modify the caller's data. Reach for a plain `&` only when the function's job is to mutate the caller's data.
 
-### 3. Why must data be sorted before calling `std::ranges::binary_search` on it?
+### 3. What are the sizes of `std::vector<int> a(5);` and `std::vector<int> b{5};`?
 
-A. It does not need to be - `binary_search` sorts internally
-B. `binary_search` works by repeatedly halving the search range, which only gives a correct answer when the data is already in order
-C. Sorting is only required for `std::string` elements
-D. `binary_search` only accepts `std::array`, never `std::vector`
+A. Both have 5 elements
+B. `a` has 1 element, `b` has 5
+C. `a` has 5 elements (all 0), `b` has 1 element (the value 5)
+D. Both have 1 element
 
-**Answer: B** - binary search assumes order to decide which half to discard at each step. Run it on unsorted data and it can miss an element that is actually present.
+**Answer: C** - parentheses size the vector, braces list its elements. `{5}` is a list with one element, the value `5`.
 
-### 4. `std::accumulate(v.begin(), v.end(), 1, multiply)` where `multiply(x, y)` returns `x * y`...
+### 4. What is a higher-order function?
 
-A. Sums the elements of `v`, ignoring `multiply`
-B. Folds the elements together using `multiply` instead of `+`, starting from `1` - i.e. their product
-C. Is a compile error - `accumulate` only supports addition
-D. Multiplies every element by `1` and returns a new vector
+A. A function with more than three parameters
+B. A function declared at the top of the file
+C. A function that returns a `double`
+D. A function that takes another function as an argument (or returns one)
 
-**Answer: B** - `accumulate`'s optional fourth argument replaces `+` with whatever binary operation you pass - a named function or a lambda both work.
+**Answer: D** - `std::accumulate`, `std::views::filter` and `std::views::transform` all take a small function, often a lambda, that decides what to do with one element. You supply that decision, the library supplies the loop.
 
-### 5. What makes `std::views::filter` and `std::views::transform` *lazy*?
+### 5. Why does a length-sorting comparator end with an extra `return a < b;` for names of the same length?
+
+A. Without it the code does not compile
+B. `std::ranges::sort` does not promise an order for tied elements, so the tie-break makes the final order definite
+C. It makes the sort run in `O(1)`
+D. It removes the duplicates
+
+**Answer: B** - `kiwi` and `date` are tied on length. A second rule inside the comparator decides between them, so the result is always the same, whatever the compiler.
+
+### 6. What does `std::ranges::binary_search` require of the data?
+
+A. At least one million elements
+B. All elements must be distinct
+C. The data must already be sorted in the order the search expects (ascending by default)
+D. The elements must be `int`
+
+**Answer: C** - discarding half the data at each look only makes sense if the order tells you which half to discard. It then needs only about 20 looks for 1,000,000 elements.
+
+### 7. `fruits` is `{apple, mango, date, kiwi, fig}`, sorted by length and not alphabetically. What can `std::ranges::binary_search(fruits, "fig"s)` do?
+
+A. It is guaranteed to return `true`, `"fig"` is in the vector
+B. It does not compile
+C. It sorts the vector first
+D. It can return `false` even though `"fig"` is there, because the data is not in the order the search assumes
+
+**Answer: D** - the search halves the data faithfully, but the halving rule is wrong for this order. The failure is not reliable, which is what makes it dangerous. Sort in the order the search expects right before you search.
+
+### 8. A nested loop visits every pair of elements of the same collection. If the data doubles from 4 to 8 elements, how does the number of steps change?
+
+A. It quadruples, from 16 to 64
+B. It doubles, from 16 to 32
+C. It stays the same
+D. It grows by one
+
+**Answer: A** - `n x n` steps: 4 x 4 = 16 and 8 x 8 = 64. That is `O(n^2)`: twice the data, four times the work. Compare that with `O(n)`, which doubles, and `O(log n)`, which grows by one step.
+
+### 9. What does `std::accumulate(factors.begin(), factors.end(), 0, multiply)` return for `{1, 2, 3, 4, 5}`, where `multiply(x, y)` returns `x * y`?
+
+A. 120
+B. 15
+C. 0
+D. 1
+
+**Answer: C** - `accumulate` starts from the starting value you give it, and `0 * anything` is `0`. For a product the starting value must be `1`, which gives 1, 2, 6, 24, 120.
+
+### 10. What does it mean that `std::views::filter` and `std::views::transform` are lazy?
 
 A. They run on a background thread
-B. They do not build a new container up front - each wraps the underlying range and produces values on demand as it is iterated
-C. They only work with `std::array`, never generated ranges
-D. "Lazy" just means they are slower than a hand-written loop
+B. They are slower than a hand-written loop
+C. They only work on `std::array`
+D. They build nothing up front: values are produced on demand when something iterates the view
 
-**Answer: B** - a view is a thin wrapper, not a copy. Nothing is computed until something actually iterates the view (a range-based for, `accumulate`, converting it to a `std::vector`, etc.).
+**Answer: D** - a view is a thin wrapper around a range, not a copy. Nothing is filtered or transformed until a range-based `for`, `accumulate` or similar asks for values.
 
-### 6. Piping views with `|`, as in `numbers | std::views::filter(...) | std::views::transform(...)`, reads as...
+### 11. What does `log.find("xyz")` return when `"xyz"` is not in the string `log`?
 
-A. A bitwise OR of the two operations
-B. A pipeline: take `numbers`, keep what the filter accepts, then transform what was kept - left to right
-C. Two independent, unrelated operations on `numbers`
-D. A syntax error before C++23
+A. `std::string::npos`
+B. `-1`
+C. `0`
+D. An empty string
 
-**Answer: B** - `|` chains views left to right, the same idea as a shell pipeline. Each stage wraps the one before it.
+**Answer: A** - every `find`-family function returns the `npos` sentinel for "not found". Compare against it before using the result as an index. It is also how the "replace every space" loop knows to stop.
 
-### 7. `s.find("is")` returns `std::string::npos`. What does that mean?
+### 12. Why does `auto bad{"cat" + "acomb"};` fail to compile, while `"cat"s + "acomb"` works?
 
-A. `"is"` was found at index 0
-B. `"is"` was not found anywhere in `s`
-C. `s` is empty
-D. `npos` is a compile error
+A. `auto` cannot deduce strings
+B. A plain literal is a `const char[N]` array, and you cannot add two C-style literals, while the `s` suffix makes the left side a real `std::string`
+C. The result would be too long
+D. The `+` operator does not exist in C++
 
-**Answer: B** - `npos` is the sentinel "no such position" value every `find`-family function returns when the search fails. Always compare against it before using the result as an index.
+**Answer: B** - the `s` suffix matters exactly when there is no `std::string` on the left to do the converting for you, for example with `auto` or before a `+`.
 
-### 8. In `s.replace(position, 1, "_")`, what do the three arguments mean?
+### 13. How does `std::format` differ from `std::print`/`std::println`?
 
-A. Replace the whole string with `"_"`, ignoring `position` and `1`
-B. Starting at `position`, replace `1` character with the string `"_"`
-C. Insert `"_"` at `position`, `1` time
-D. `replace` only takes two arguments - this is invalid
+A. They are identical, `format` is an older name for `print`
+B. `format` can only format numbers
+C. `print` returns a `std::string`
+D. `format` returns a `std::string` and prints nothing, `print`/`println` write the result straight to the console
 
-**Answer: B** - `replace(pos, count, new_text)` removes `count` characters starting at `pos` and puts `new_text` in their place. Looping this with `find` is how you replace every occurrence of something.
+**Answer: D** - use `format` when the text is going somewhere other than the screen: a log file, part of a larger string, a label built piece by piece.
 
-### 9. What is the purpose of an `std::ostringstream`?
+### 14. What does `{:>8.2f}` mean in a format spec?
 
-A. It reads formatted values out of a string
-B. It accumulates pieces of different types (strings, numbers, ...) into one string using `<<`, the same operator `std::cout` uses
-C. It can only hold a single `int` at a time
-D. It writes directly to a file on disk
+A. Right-aligned in a field 8 characters wide, with exactly 2 digits after the decimal point
+B. Left-aligned, 8 digits before the point, 2 after
+C. Centered, width 2, precision 8
+D. Right-aligned, 8 digits after the decimal point
 
-**Answer: B** - `ostringstream` behaves like `std::cout`, except the destination is an in-memory string, retrieved with `.str()`, instead of the console.
+**Answer: A** - the grammar is `{:fill align width.precision type}`: `>` right-aligns, `8` is the minimum width, `.2` the number of digits after the point, and `f` fixed-point. `std::format("{:>8.2f}", 4.5)` gives `"    4.50"`.
 
-### 10. What does a `std::string_view` actually store?
+### 15. `std::string color{"red"}; std::string_view color_view{color};` then `color.at(0) = 'R';`. What does `color_view` show?
 
-A. A full copy of the characters it displays
-B. A pointer to characters owned by someone else, plus a length - no ownership, no copy
-C. A `std::vector<char>`
-D. Nothing - it is purely a compile-time construct with no run-time representation
+A. `"red"`, views are snapshots
+B. `"Red"`, because a `string_view` is just a pointer and a length into `color`'s own characters
+C. Nothing, it is now empty
+D. The program crashes
 
-**Answer: B** - a `string_view` is a non-owning (pointer, length) pair. It is cheap to pass around, but it is only valid as long as the data it points at (a `std::string`, a literal) is still alive.
+**Answer: B** - the view owns no characters, so it sees every later change. That also means it is only valid while the text it points at is alive.
 
-### 11. If `std::string original{"red"}; std::string_view view{original};` and then `original.at(0) = 'R';`, what does `view` show afterward?
+### 16. Which conversion compiles implicitly?
 
-A. Still `"red"` - views take a snapshot at construction
-B. `"Red"` - the view sees the change, because it points at `original`'s own characters
-C. A crash - modifying `original` invalidates `view` immediately
-D. `view` becomes empty
+A. `std::chrono::seconds s{60}; std::chrono::minutes m{s};`
+B. `std::chrono::duration<long> d{30}; std::chrono::minutes m{d};`
+C. `std::chrono::minutes m{2}; std::chrono::seconds s{m};`
+D. None of them
 
-**Answer: B** - a `string_view` has no data of its own; it is watching `original`'s characters directly, so any change to `original` is visible through the view.
+**Answer: C** - minutes to seconds multiplies by an integer, so it never loses information. The other conversions could produce a fraction, so the compiler refuses them based on the types alone, even when the value divides evenly. `std::chrono::duration_cast` is the explicit override, and it truncates.
 
-### 12. `std::regex_match("Wally", std::regex{"[A-Z][a-z]+"})` returns `true` because...
+### 17. Which clock should you use to measure how long a block of code takes, and why?
 
-A. `regex_match` only checks the first character
-B. The whole string fits the pattern: one capital letter, followed by one or more lowercase letters, with nothing left over
-C. `regex_match` ignores case entirely by default
-D. The pattern matches any word of any length
+A. `system_clock`, because it has the best precision
+B. Either one, they behave identically
+C. `system_clock`, because it is synchronized with the network
+D. `steady_clock`, because it never goes backward even if the system clock is adjusted
 
-**Answer: B** - `regex_match` requires the *entire* string to satisfy the pattern, start to end. `"Wally99"` would fail the same pattern because of the trailing digits.
+**Answer: D** - `system_clock` is wall-clock time and can jump when the system time is corrected. `steady_clock` is guaranteed to be monotonic, so `end - start` (a duration) can never come out negative.
 
-### 13. How does `std::regex_search` differ from `std::regex_match`?
+### 18. How does `std::regex_search` differ from `std::regex_match`?
 
-A. They are exactly the same function under two names
-B. `regex_search` looks for a match *anywhere* inside the string; `regex_match` requires the *whole* string to match
-C. `regex_search` only works on file streams
-D. `regex_match` is deprecated in C++20
+A. `regex_search` looks for a match anywhere inside the string, `regex_match` requires the whole string to match
+B. They are the same function under two names
+C. `regex_search` requires the whole string to match, `regex_match` finds a match anywhere
+D. `regex_search` only works on file streams
 
-**Answer: B** - `regex_search("Programming is fun", std::regex{"fun"})` finds `"fun"` even though it is only part of the string; `regex_match` with the same pattern would fail because `"Programming is fun"` as a whole does not equal `"fun"`.
+**Answer: A** - `regex_search("Debugging is fun", std::regex{"fun"})` is `true`, while `regex_match` with the same pattern is `false` because the whole string is not just `"fun"`.
 
-### 14. How does `std::format` differ from `std::print`/`std::println`?
+### 19. After a successful `regex_match` into a `std::smatch m` with the pattern `(\d{4})/(\d{1,2})/(\d{1,2})` on `"2025/3/9"`, what are `m[0]` and `m[1]`?
 
-A. They are identical - `format` is just an older, deprecated name for `print`
-B. `std::format` returns a `std::string` built from the spec; `std::print`/`std::println` write formatted output straight to the console
-C. `std::format` can only format numbers, never strings
-D. `std::print` returns a `std::string`; `std::format` writes to the console
+A. `"2025"` and `"3"`
+B. `"2025/3/9"` (the entire match) and `"2025"` (what the first `()` group captured)
+C. `"2025/3/9"` for both
+D. `"3"` and `"9"`
 
-**Answer: B** - `format` hands back a `std::string` for you to store, log, or build further; `print`/`println` skip that step and write the result straight to stdout.
+**Answer: B** - `m[0]` is always the entire match, and `m[1]`, `m[2]`, `m[3]` are the capture groups in order. `std::stoi(m[1])` then turns the captured text into a number.
 
-### 15. In the format spec `{:*^10}`, what does each part mean?
+### 20. What does `std::regex_replace("cat-7, dog-42, bird", std::regex{R"((\w+)-(\d+))"}, "$2:$1")` return?
 
-A. `*` is the value being formatted, `^10` is ignored
-B. `*` is the fill character, `^` centers the value, `10` is the minimum field width
-C. `*10` means "repeat the value 10 times", `^` is a typo
-D. This spec is invalid - fill characters are not allowed with `^`
+A. `"cat-7, dog-42, bird"`
+B. `"7:cat42:dog"`
+C. `"7:cat, 42:dog, bird"`
+D. `"$2:$1, $2:$1, bird"`
 
-**Answer: B** - the format-spec grammar is `{:fill align width.precision type}`. Here the fill character is `*`, `^` requests centered alignment, and `10` is the field's minimum width - so a short value gets padded with `*` on both sides until the field is 10 characters wide.
-
-### 16. Why does `steady_clock`, not `system_clock`, get used to measure how long a block of code takes?
-
-A. `steady_clock` has nanosecond precision and `system_clock` does not
-B. `steady_clock` never goes backward - it is unaffected by the system clock being adjusted (NTP sync, a user changing the time), so an elapsed-time measurement can never come out negative
-C. `system_clock` cannot be subtracted from itself
-D. There is no difference - either clock works identically for benchmarking
-
-**Answer: B** - `system_clock` tracks wall-clock time and can jump forward or backward if the system clock is corrected. `steady_clock` is guaranteed monotonic, which is exactly what a correct elapsed-time measurement needs.
-
-### 17. What does `std::chrono::duration_cast<std::chrono::seconds>(race_duration)` do if `race_duration` is `90min + 32s`?
-
-A. Nothing - `duration_cast` only works on `system_clock` values
-B. Converts the duration to a count of whole seconds - `5432` in this case
-C. Rounds `race_duration` to the nearest minute
-D. Throws an exception, since minutes cannot convert to seconds
-
-**Answer: B** - `duration_cast<T>` explicitly converts between duration types, the same spirit as `static_cast`. `90min + 32s` is `5400 + 32 = 5432` seconds total, so `.count()` on the cast result gives `5432`.
-
-### 18. Why does converting a `system_clock::time_point` to a `std::chrono::year_month_day` require `floor<days>(...)` first?
-
-A. `floor` is required to silence a compiler warning, nothing more
-B. A `time_point` carries sub-day precision (hours, minutes, seconds, ...); `year_month_day` represents a calendar DAY, so the time_point must be truncated down to midnight of that day before it can convert
-C. `year_month_day` cannot be constructed from a `time_point` under any circumstances
-D. `floor` rounds the year up to the nearest decade
-
-**Answer: B** - a raw `time_point` has no notion of "which calendar day" until it is rounded to day granularity. `floor<days>(now)` truncates to midnight, giving a value that can convert to `year_month_day` (via `sys_days`).
+**Answer: C** - `$1` and `$2` are filled from each match's own groups, and the unmatched text (`", "` and `", bird"`) is copied through. The original string is never modified, so you must catch the returned `std::string`. With `std::regex_constants::format_no_copy` the unmatched text would be dropped, giving `"7:cat42:dog"`.
