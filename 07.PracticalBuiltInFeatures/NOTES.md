@@ -2700,6 +2700,7 @@ building blocks of a regex pattern. The table below shows some of the most commo
 | `.`            | the **wildcard** - any single character except a newline |
 | `^` / `$`      | anchors - "start of string" / "end of string" |
 | `()`           | a **capture group** - remembers what matched inside it |
+| `\|`            | **alternation** - "or": matches what's on its left *or* what's on its right (`cat\|dog`). To match a literal pipe, put a backslash in front of it (see `regex_replace` below) |
 | `+`            | one or more of the preceding piece |
 | `*`            | zero or more of the preceding piece |
 | `{n}`          | exactly `n` occurrences        |
@@ -3134,8 +3135,9 @@ std::string data{"apple|3|0.99"};
 std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};   // pipes -> commas
 ```
 
-Note the pattern escapes the pipe as `\|`, `|` is a regex metacharacter (alternation), 
-so matching a *literal* pipe character requires escaping it.
+Note the pattern escapes the pipe as `\|`. Recall from the table at the start of this
+lecture that `|` is a regex metacharacter (alternation), so matching a *literal* pipe
+character requires escaping it.
 
 ```
    data (before the call):  "apple|3|0.99"
@@ -3150,6 +3152,7 @@ and so on. Question three, for now: the *default* mode still copies
 through everything that did **not** match, alongside the replaced text:
 
 ```cpp
+std::string article{"<article><title>Launch Day</title><summary>It shipped</summary></article>"};
 std::regex markup{"<title>(.*)</title><summary>(.*)</summary>"};
 std::regex_replace(article, markup, "TITLE=$1 and SUMMARY=$2");
 ```
