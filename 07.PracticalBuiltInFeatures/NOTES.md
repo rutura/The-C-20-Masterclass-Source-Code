@@ -3111,102 +3111,193 @@ std::vector<std::string> tokens{
      token 1            token 2           token 3
 ```
 
-### `main4_replacing.cpp` - `regex_replace`: rewrite every match in a copy
+### `main4_replacing.cpp` - `regex_replace`: build a new string from an old one
 
-Every tool so far has answered a yes/no or "where/what" question: does
-this fit the pattern (`regex_match`), is the pattern in there somewhere
-(`regex_search`), what are all the places it shows up (the iterators).
-`regex_replace` is the first tool that actually **edits text** - "find
-this shape, and swap it out for something else," the same everyday task
-as a find-and-replace in a text editor, except the "find" part is a
-whole pattern instead of one exact word.
+The tools so far only *read* text: does it fit (`regex_match`), is the
+pattern in there (`regex_search`), where are all the matches (the
+iterators). `regex_replace` is the first one that produces **different
+text** out of the text you already have: reformat a record, strip markup,
+reshape a sentence. A text editor's find-and-replace does this for one
+exact word. `regex_replace` does it for a whole *shape*.
+
+Every call has the same anatomy: text goes in, a **new** string comes out.
 
 ```
-   find-and-replace in a text editor:      find EXACT text  →  swap in new text
+   regex_replace( input_text,  pattern,  replacement )
+                       │          │           │
+                       │          │           └─ what to write in place of each match
+                       │          └─ which parts of the input to rewrite
+                       │
+                       └─ only read, never modified
 
-   regex_replace:                          find a SHAPE     →  swap in new text
+                       │
+                       ▼
+                 returns a NEW std::string
 ```
 
-`regex_replace` rewrites every match in a **copy** of the string, leaving
-the original untouched. 
+The rest of this section is four outcomes you can get out of that one
+function.
+
+#### Outcome 1: swap a separator (pipes to commas)
+
+You start with a record that uses `|` between fields, and you want the
+same record as comma-separated values.
 
 ```cpp
 std::string data{"apple|3|0.99"};
-std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};   // pipes -> commas
+std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};
+```
+
+```
+   START                 data      "apple|3|0.99"
+
+   regex_replace(data, \|, ",")    every "|" becomes ","
+
+   END                   csv_line  "apple,3,0.99"      <- the returned string
+                         data      "apple|3|0.99"      <- still exactly as it was
+```
+
+Two things to take away:
+
+- **What is returned**: the rewritten text, as a brand new `std::string`.
+  If you don't store it, it is gone. Calling `regex_replace(data, ...)` on
+  its own line changes nothing you can see.
+- **What is changed**: nothing you passed in. `data` is read-only input,
+  so it is safe to keep using the original afterwards. 
+
+```
+   WRONG - the result is thrown away, data is untouched, nothing happened:
+
+       std::regex_replace(data, std::regex{R"(\|)"}, ",");
+
+   RIGHT - catch the returned string:
+
+       std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};
 ```
 
 Note the pattern escapes the pipe as `\|`. Recall from the table at the start of this
 lecture that `|` is a regex metacharacter (alternation), so matching a *literal* pipe
 character requires escaping it.
 
-```
-   data (before the call):  "apple|3|0.99"
-   regex_replace RETURNS a brand new string - it has to be caught, or it's lost:
-   csv_line:                "apple,3,0.99"     (caught in its own variable, above)
-   data (after the call):   "apple|3|0.99"     (printed again - still unchanged)
-```
+#### Outcome 2: rearrange pieces of the match (capture groups in the replacement)
 
-Question two: can the replacement reuse pieces of what it just matched?
-Yes - the replacement text can reference capture groups with `$1`, `$2`,
-and so on. Question three, for now: the *default* mode still copies
-through everything that did **not** match, alongside the replaced text:
+Now the goal is bigger than swapping one character. You start with a
+snippet of markup and want to pull the title and summary text out of it
+and present them in your own format.
+
+The capture groups `(...)` from earlier lectures don't only *report* what
+they matched. The replacement text can *use* them: `$1` is whatever group
+1 captured, `$2` is group 2, and so on.
 
 ```cpp
 std::string article{"<article><title>Launch Day</title><summary>It shipped</summary></article>"};
 std::regex markup{"<title>(.*)</title><summary>(.*)</summary>"};
-std::regex_replace(article, markup, "TITLE=$1 and SUMMARY=$2");
+std::string replacement{"TITLE=$1 and SUMMARY=$2"};
+
+std::string default_result{std::regex_replace(article, markup, replacement)};
 ```
 
 ```
-   article: "<article><title>Launch Day</title><summary>It shipped</summary></article>"
-                       └──────┬──────┘        └───────┬───────┘
-                          $1=Launch Day           $2=It shipped
+   START   article:
+           <article><title>Launch Day</title><summary>It shipped</summary></article>
+           └───┬───┘└──────────────────────────┬─────────────────────────┘└───┬────┘
+            no match            the whole match (pattern markup)           no match
+                                              │
+                              ┌───────────────┴────────────────┐
+                              ▼                                ▼
+                        $1 = "Launch Day"              $2 = "It shipped"
 
-   default replace: "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
-                      └───┬───┘                                      └───┬────┘
-                   copied through untouched                  copied through untouched
+   The matched part is replaced by "TITLE=$1 and SUMMARY=$2", with the
+   groups filled in:
+
+   END     default_result:
+           <article>TITLE=Launch Day and SUMMARY=It shipped</article>
+           └───┬───┘└───────────────────┬──────────────────┘└───┬────┘
+          copied as-is          the replacement            copied as-is
 ```
 
-Revisiting question three: `regex_constants::format_no_copy` flips that
-default - it drops everything that did **not** match instead of copying
-it through, so only the replaced text survives:
+By default everything that did **not** match is carried over into the
+result untouched. That is why `<article>` and `</article>` are still
+there: the rewrite only touched the part the pattern matched, and the
+rest of the string came along for the ride.
+
+#### Outcome 3: keep only what the replacement produced
+
+Sometimes the surrounding text is exactly what you want to get rid of.
+Passing `std::regex_constants::format_no_copy` as a fourth argument
+changes the rule for the unmatched parts: **drop** them instead of
+copying them.
 
 ```cpp
-std::regex_replace(article, markup, replacement, std::regex_constants::format_no_copy);
+std::string no_copy_result{std::regex_replace(article, markup, replacement,
+    std::regex_constants::format_no_copy)};
 ```
 
 ```
-   default:         "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
-   format_no_copy:            "TITLE=Launch Day and SUMMARY=It shipped"
-                      ▲                                                ▲
-                 "<article>" and "</article>" are GONE - format_no_copy
-                 only keeps what the replacement text produced
+   article:         <article><title>Launch Day</title><summary>It shipped</summary></article>
+
+   default:         <article>TITLE=Launch Day and SUMMARY=It shipped</article>
+                    └───┬───┘                                       └───┬────┘
+                      kept                                            kept
+
+   format_no_copy:           TITLE=Launch Day and SUMMARY=It shipped
+                    └───┬───┘                                       └───┬────┘
+                     dropped                                        dropped
 ```
 
-Combining a capture group with `format_no_copy` turns replace into a
-reflow tool: every word becomes "the word, followed by a newline," and
-the untouched whitespace between words is dropped instead of being
-copied through:
+Same input, same pattern, same replacement. The only difference is what
+happens to the text that matched nothing:
+
+```
+   (no flag)         result = unmatched text  +  replacement(s)
+   format_no_copy    result =                    replacement(s)
+```
+
+#### Outcome 4: reflow text, one word per line
+
+Put the two ideas together (a capture group inside the replacement, plus
+`format_no_copy`) and you get a small text-reshaping tool. You start with
+a sentence on one line and end with one word per line.
 
 ```cpp
+std::string headline{"Regex makes text processing easy"};
 std::regex one_word{R"(([\w]+))"};
-std::regex_replace(headline, one_word, "$1\n", std::regex_constants::format_no_copy);
+std::string one_per_line{std::regex_replace(headline, one_word, "$1\n",
+    std::regex_constants::format_no_copy)};
 ```
 
 ```
-   headline: "Regex makes text processing easy"
+   START   headline:   Regex makes text processing easy
+                       └─┬─┘ └─┬─┘ └─┬┘ └───┬────┘ └┬─┘
+                         │     │     │      │       │
+                       each run of word characters is one match,
+                       and the word itself is captured as $1
 
-   default    would keep the original spacing between replaced words
-   format_no_copy keeps ONLY "$1\n" for each word - the spaces that
-                  matched nothing are thrown away, so the words land
-                  one per line:
+   Each match is replaced by "$1\n": the word, then a newline.
+   The spaces between words match nothing, so format_no_copy drops them.
 
-                  Regex
-                  makes
-                  text
-                  processing
-                  easy
+   END     one_per_line:
+                       Regex
+                       makes
+                       text
+                       processing
+                       easy
 ```
+
+Without `format_no_copy` the spaces would be copied through, and every
+line after the first would start with a stray space. Dropping the
+unmatched text is what makes this come out clean.
+
+#### Recap: what you give it, what you get back
+
+| You want to...                              | Replacement and flag               | Unmatched text | Original string |
+|---------------------------------------------|------------------------------------|----------------|-----------------|
+| Swap every match for fixed text             | `","`                              | kept           | unchanged       |
+| Rebuild the match from its captured pieces  | `"TITLE=$1 and SUMMARY=$2"`        | kept           | unchanged       |
+| Keep **only** what the replacement produced | any replacement + `format_no_copy` | dropped        | unchanged       |
+
+In every row the result comes back as a new string, and the string you
+passed in is never modified.
 
 ---
 
