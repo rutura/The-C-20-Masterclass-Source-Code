@@ -3115,10 +3115,12 @@ std::vector<std::string> tokens{
 
 The tools so far only *read* text: does it fit (`regex_match`), is the
 pattern in there (`regex_search`), where are all the matches (the
-iterators). `regex_replace` is the first one that produces **different
-text** out of the text you already have: reformat a record, strip markup,
-reshape a sentence. A text editor's find-and-replace does this for one
-exact word. `regex_replace` does it for a whole *shape*.
+iterators). 
+
+`regex_replace` is the first one that produces **different text** out of the 
+text you already have: reformat a record, strip markup, reshape a sentence. 
+A text editor's find-and-replace does this for one exact word. `regex_replace` 
+does it for a whole *shape*.
 
 Every call has the same anatomy: text goes in, a **new** string comes out.
 
@@ -3135,8 +3137,92 @@ Every call has the same anatomy: text goes in, a **new** string comes out.
                  returns a NEW std::string
 ```
 
-The rest of this section is four outcomes you can get out of that one
-function.
+#### The baseline: how `regex_replace` builds its new string
+
+Every outcome in this section runs the **same procedure**. Learn it once
+on a small example, and each outcome below becomes "the same procedure
+with one detail changed".
+
+```cpp
+std::string input{"cat-7, dog-42, bird"};
+std::regex  re{R"((\w+)-(\d+))"};                          // word, dash, number (two capture groups)
+std::string result{std::regex_replace(input, re, "$2:$1")};  // swap the two groups
+```
+
+**Step 1: find the matches.** The engine scans the input and cuts it into
+*matched* pieces and *unmatched* pieces:
+
+```
+   input:    c a t - 7 ,   d o g - 4 2 ,   b i r d
+             └───┬───┘     └────┬────┘
+              match 1        match 2
+
+   match 1:  $1 = "cat"    $2 = "7"
+   match 2:  $1 = "dog"    $2 = "42"
+
+   Cut into pieces:
+
+   [ match 1 ][ ", " ][ match 2 ][ ", bird" ]
+                  ▲                   ▲
+              unmatched           unmatched
+              (in between)        (the tail)
+```
+
+**Step 2: build the result, left to right.** For every match, two things
+happen in order: the unmatched text in front of it is **copied**, then the
+**replacement** is written, with `$1`, `$2`, ... filled in from *that*
+match's groups. After the last match, the remaining tail is copied.
+
+```
+   for each match, scanning left to right:
+       1. copy the unmatched text between the previous match and this one
+       2. write the replacement, with $1, $2, ... filled in after the last match:
+       3. copy the remaining tail
+```
+
+Here it is on the example, with the replacement `"$2:$1"`:
+
+```
+   input:     [cat-7]  ", "  [dog-42]  ", bird"
+                 │       │       │         │
+                 ▼       ▼       ▼         ▼
+             step 2    step 1  step 2    step 3
+             replace   copy    replace   copy
+                 │       │       │         │
+                 ▼       ▼       ▼         ▼
+   result:    [7:cat]  ", "  [42:dog]  ", bird"
+
+   result = "7:cat, 42:dog, bird"
+```
+
+```
+   input   still "cat-7, dog-42, bird"     <- never modified
+   result  "7:cat, 42:dog, bird"            <- the new string that is returned
+```
+
+That is the whole machine. Only **two inputs** can change what it
+produces:
+
+```
+   1. the REPLACEMENT STRING     does it contain $1, $2, ... ?
+
+          ","            no $   same literal text written for every match
+          "$2:$1"        $n     each match gets its OWN captured pieces
+                                  match 1 -> 7:cat
+                                  match 2 -> 42:dog
+
+   2. the optional 4th ARGUMENT  (a flag; leaving it out = the default)
+
+          (nothing)           copy steps 1 and 3 run      unmatched text is kept
+          format_no_copy      copy steps 1 and 3 SKIPPED  unmatched text is dropped
+
+                 default:         7:cat, 42:dog, bird
+                 format_no_copy:  7:cat42:dog
+```
+
+There are no hidden modes. Each outcome below is this same procedure,
+with a different pattern, replacement string, or flag. Keep the picture
+above in mind and compare each one against it.
 
 #### Outcome 1: swap a separator (pipes to commas)
 
