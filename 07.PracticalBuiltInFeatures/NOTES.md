@@ -3466,9 +3466,7 @@ one of the original MS-DOS executable format's authors; the signature
 has stuck around through DOS, Windows PE executables, and every modern
 `.obj`/`.exe`/`.dll` since.)
 
-**Try it**: this is exactly the hex-editor trick 6.18 used to look
-inside a `.ppm` file - the same technique applies here, you are just
-looking at a different kind of file.
+**Try it**: On Windows, compile your app and open the `.exe` in a hex editor - the first two bytes are `4D 5A`. On Linux, compile and open the `.o` in a hex editor - the first four bytes are `7F 45 4C 46`. 
 
 ### Hands-on: look at your own compiler's output
 
