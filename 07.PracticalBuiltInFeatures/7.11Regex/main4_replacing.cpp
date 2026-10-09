@@ -4,6 +4,13 @@
 
 int main() {
 
+    std::string input{ "cat-7, dog-42, bird" };
+    std::regex  re{ R"((\w+)-(\d+))" };                          // word, dash, number (two capture groups)
+    std::string result{ std::regex_replace(input, re, "SQUARED") };  // swap the two groups
+    std::println("Result: {}", result);
+
+
+    /*
     // regex_replace rewrites every match in a copy of the string - the
     // original is untouched.
     std::string data{"apple|3|0.99"};
@@ -40,6 +47,7 @@ int main() {
         std::regex_constants::format_no_copy)};
 
     std::println("\nreflowed one word per line:\n{}", one_per_line);
+    */
 
     return 0;
 }

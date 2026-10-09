@@ -3113,16 +3113,17 @@ std::vector<std::string> tokens{
 
 ### `main4_replacing.cpp` - `regex_replace`: build a new string from an old one
 
-The tools so far only *read* text: does it fit (`regex_match`), is the
-pattern in there (`regex_search`), where are all the matches (the
-iterators). 
+The tools so far only *read* text: does it match? (`regex_match`), is the
+pattern in there (`regex_search`), where are all the matches (theiterators). 
 
 `regex_replace` is the first one that produces **different text** out of the 
-text you already have: reformat a record, strip markup, reshape a sentence. 
-A text editor's find-and-replace does this for one exact word. `regex_replace` 
-does it for a whole *shape*.
+text you already have. As the name implies, it replaces a text **pattern** with some 
+other text, and returns the transformed string. You can use it to reformat a record, 
+strip markup from text, or reshape a sentence. 
 
-Every call has the same anatomy: text goes in, a **new** string comes out.
+WHAT IT DOES: it takes text in and returns a **new** string.
+
+Here is how a typical call looks:
 
 ```
    regex_replace( input_text,  pattern,  replacement )
@@ -3137,7 +3138,22 @@ Every call has the same anatomy: text goes in, a **new** string comes out.
                  returns a NEW std::string
 ```
 
-#### The baseline: how `regex_replace` builds its new string
+#### The general idea
+
+Assuming a call like:
+
+```cpp
+   regex_replace( input_text,  pattern,  replacement )
+```
+
+Here is the general flow of what happens:
+
+```
+   for each match, scanning left to right:
+       1. copy the unmatched text between the previous match and this one
+       2. write the replacement, with $1, $2, ... filled in after the last match:
+       3. copy the remaining tail
+```
 
 Every outcome in this section runs the **same procedure**. Learn it once
 on a small example, and each outcome below becomes "the same procedure
@@ -3146,7 +3162,9 @@ with one detail changed".
 ```cpp
 std::string input{"cat-7, dog-42, bird"};
 std::regex  re{R"((\w+)-(\d+))"};                          // word, dash, number (two capture groups)
-std::string result{std::regex_replace(input, re, "$2:$1")};  // swap the two groups
+std::string result{std::regex_replace(input, re, "DOG")};  // Replace the whole match with the literal text "DOG"
+std::string result{std::regex_replace(input, re, "$2:$1")};  // Fiddle with the capture groups: $1 = "cat", $2 = "7"
+                                                             // for the first match, etc.
 ```
 
 **Step 1: find the matches.** The engine scans the input and cuts it into
@@ -3172,13 +3190,6 @@ std::string result{std::regex_replace(input, re, "$2:$1")};  // swap the two gro
 happen in order: the unmatched text in front of it is **copied**, then the
 **replacement** is written, with `$1`, `$2`, ... filled in from *that*
 match's groups. After the last match, the remaining tail is copied.
-
-```
-   for each match, scanning left to right:
-       1. copy the unmatched text between the previous match and this one
-       2. write the replacement, with $1, $2, ... filled in after the last match:
-       3. copy the remaining tail
-```
 
 Here it is on the example, with the replacement `"$2:$1"`:
 
@@ -3220,11 +3231,8 @@ produces:
                  format_no_copy:  7:cat42:dog
 ```
 
-There are no hidden modes. Each outcome below is this same procedure,
-with a different pattern, replacement string, or flag. Keep the picture
-above in mind and compare each one against it.
 
-#### Outcome 1: swap a separator (pipes to commas)
+#### Example 1: swap a separator (pipes to commas)
 
 You start with a record that uses `|` between fields, and you want the
 same record as comma-separated values.
@@ -3243,13 +3251,7 @@ std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};
                          data      "apple|3|0.99"      <- still exactly as it was
 ```
 
-Two things to take away:
-
-- **What is returned**: the rewritten text, as a brand new `std::string`.
-  If you don't store it, it is gone. Calling `regex_replace(data, ...)` on
-  its own line changes nothing you can see.
-- **What is changed**: nothing you passed in. `data` is read-only input,
-  so it is safe to keep using the original afterwards. 
+NOTE: If you don't grab the returned string, nothing happens to the original data:
 
 ```
    WRONG - the result is thrown away, data is untouched, nothing happened:
@@ -3265,7 +3267,7 @@ Note the pattern escapes the pipe as `\|`. Recall from the table at the start of
 lecture that `|` is a regex metacharacter (alternation), so matching a *literal* pipe
 character requires escaping it.
 
-#### Outcome 2: rearrange pieces of the match (capture groups in the replacement)
+#### Example 2: rearrange pieces of the match (capture groups in the replacement)
 
 Now the goal is bigger than swapping one character. You start with a
 snippet of markup and want to pull the title and summary text out of it
@@ -3307,7 +3309,7 @@ result untouched. That is why `<article>` and `</article>` are still
 there: the rewrite only touched the part the pattern matched, and the
 rest of the string came along for the ride.
 
-#### Outcome 3: keep only what the replacement produced
+#### Example 3: keep only what the replacement produced
 
 Sometimes the surrounding text is exactly what you want to get rid of.
 Passing `std::regex_constants::format_no_copy` as a fourth argument
@@ -3331,19 +3333,16 @@ std::string no_copy_result{std::regex_replace(article, markup, replacement,
                      dropped                                        dropped
 ```
 
-Same input, same pattern, same replacement. The only difference is what
-happens to the text that matched nothing:
+Here is what it all boils down to: 
 
 ```
    (no flag)         result = unmatched text  +  replacement(s)
    format_no_copy    result =                    replacement(s)
 ```
 
-#### Outcome 4: reflow text, one word per line
+#### Example 4: reflow text, one word per line
 
-Put the two ideas together (a capture group inside the replacement, plus
-`format_no_copy`) and you get a small text-reshaping tool. You start with
-a sentence on one line and end with one word per line.
+In this example, we take a sentence and reformat it so that each word is on its own line.
 
 ```cpp
 std::string headline{"Regex makes text processing easy"};
@@ -3373,17 +3372,6 @@ std::string one_per_line{std::regex_replace(headline, one_word, "$1\n",
 Without `format_no_copy` the spaces would be copied through, and every
 line after the first would start with a stray space. Dropping the
 unmatched text is what makes this come out clean.
-
-#### Recap: what you give it, what you get back
-
-| You want to...                              | Replacement and flag               | Unmatched text | Original string |
-|---------------------------------------------|------------------------------------|----------------|-----------------|
-| Swap every match for fixed text             | `","`                              | kept           | unchanged       |
-| Rebuild the match from its captured pieces  | `"TITLE=$1 and SUMMARY=$2"`        | kept           | unchanged       |
-| Keep **only** what the replacement produced | any replacement + `format_no_copy` | dropped        | unchanged       |
-
-In every row the result comes back as a new string, and the string you
-passed in is never modified.
 
 ---
 
