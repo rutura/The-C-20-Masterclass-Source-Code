@@ -3377,33 +3377,48 @@ unmatched text is what makes this come out clean.
 
 ## 7.12 Project: what your compiler actually hands the linker
 
-Every lecture so far has treated "compile it" as a black box that turns
-`.cpp` into a working program. This project opens that box: what a
-compiler actually hands the linker, why a library is nothing more than
-a bundle of those same artifacts, and why a library built by one
-compiler sometimes links happily into another - and sometimes cannot
-even get close.
+Our project is split across three files as shown below:
 
-### Recap: the pipeline you already know
-
-6.11 already drew this, for a program split into plain `.cpp` files:
 
 ```
-   geometry.cpp ──compile──► geometry.o ─┐
-   money.cpp    ──compile──► money.o   ──┼──link──► rooster (executable)
-   main.cpp     ──compile──► main.o    ──┘
-                              │            ▲
-                    main.o needs           │
-                    circle_area, add_tax  linker finds them
-                    (unresolved)          in geometry.o / money.o
+   Project/
+   ├── average.h       DECLARES   double average(const std::vector<double>&)
+   │                              "a function like this exists somewhere"
+   │
+   ├── average.cpp     DEFINES    double average(const std::vector<double>&)
+   │                              the actual code: sum the readings,
+   │                              divide by how many there are
+   │
+   └── main.cpp        main()     calls average(sensor_readings)
+                                  but does NOT define it
 ```
 
-and the reason `main.o` is even allowed to reach into `geometry.o`:
+Each `.cpp` file is compiled **on its own**, into an object file. When the
+compiler works on `main.cpp`, all it has seen of `average` is the
+declaration from `average.h`. It has no idea what the function does, so
+it emits a call and leaves a note for later: "I need something called
+`average`; someone else will supply it."
+
+```
+   average.cpp ──compile──► average.o ─┐
+   main.cpp    ──compile──► main.o    ─┴──link──► rooster (executable)
+                              │                      ▲
+                    main.o calls average()           │
+                    but does not contain it    the linker finds it
+                    (unresolved)  ───────────► inside average.o
+```
+
+The **linker** reads that note in `main.o`, finds a matching definition in
+`average.o`, and connects the two.
+
+Why is `main.o` even allowed to reach into `average.o`? Because of the
+function's **linkage**:
 
 ```
    external linkage   name is visible to the LINKER, across .cpp files
                       → ordinary functions and globals. This is the
-                        default, and what makes multi-file programs work.
+                        default, and it is what average() has: that is
+                        why main.o can find it in average.o.
 
    internal linkage   name is private to its own .cpp - other files
                       cannot link to it even if they declare it
@@ -3411,21 +3426,33 @@ and the reason `main.o` is even allowed to reach into `geometry.o`:
                         unnamed namespace
 
    no linkage         local variables - not a linker concept at all
+                      → `total` inside average() is one of these
 ```
 
-Everything in this lecture is still exactly that picture. What changes
-is that `geometry.o` is about to come from somewhere else entirely - a
-library, possibly one you did not build yourself, possibly built by a
-different compiler - and the linker's job does not change at all. What
-*does* start to matter is what `geometry.o` actually looks like on
-disk, because the linker has to be able to read it.
+You can see the difference by changing one word in `average.cpp`:
+
+```cpp
+static double average(const std::vector<double>& readings) {   // internal linkage
+    ...
+}
+```
+
+`average.cpp` still compiles, but `average.o` no longer offers `average`
+to anyone outside itself, so linking `main.o` fails with an "unresolved
+external symbol" (MSVC) or "undefined reference" (gcc/clang) error for
+`average`.
+
+Now, we are going to extend this idea to a library, and look at how to bring 
+that library for use into our own `main.cpp`.  The library may not be one 
+you built yourself, and may have been built by a different compiler.  The linker 
+will still be able to find the function `average` in the library, as long as the 
+library is in a format that the linker can read.
 
 ### Every compiled file starts with a magic number that names its own format
 
 An object file (or executable) is not a generic blob of machine code -
-its very first bytes are a signature that says which **container
-format** the rest of the file follows, before a single CPU instruction
-is even considered:
+its very first bytes are a signature that says which **container format** the 
+rest of the file follows, before a single CPU instruction is even considered:
 
 ```
    ELF    (Linux - both gcc and clang)     PE / COFF   (Windows - MSVC)
