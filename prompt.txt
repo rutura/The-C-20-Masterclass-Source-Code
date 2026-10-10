@@ -14,10 +14,11 @@ What I have so far:
 
 
 What I need: 
-    * Help me flush out and set up what is left in chapter 07 and 08 as stated above. After all is done, each should contain a notes with lectures, notes (similoar to chapter 06) and a Project in front of the assignments lecture (renumber what needs renumbering after inserting the project).
+    * Help me flush out and set up what is left in chapter 07 and 08 as stated above. After all is done, each should contain a notes with lectures, notes (similoar to chapter 06) and a Project in front of the assignments lecture (renumber what needs renumbering after inserting the project). See info about possible
+    projects below..
 
     * Design, plan and set up NOTES.md files and source code for each lecture in notes, 
-        design project  and  assignments for each of the chapters below: 
+        chapter project (You will choose from one of the proposed projects appropriate, or help me come up with one (you have the autonomy to do that)) and  assignments for each of the chapters below: 
 
         * 09.PointersAndArrays
         * 10. Classes
@@ -73,7 +74,7 @@ What I need:
      I got them to do the image writer thing. I also want the same for chapter 07, chapter 08 and the rest of the chapters that you will design from scratch. Here is a pool of ideas I have: 
 
 
-        * Project : Compiling on the command line by directly calling the compiler and 
+        * Project 1 : Compiling on the command line by directly calling the compiler and 
             not through cmake.
             * Environments: 
                 . Windows with gcc in C:\mingw64\bin
@@ -97,3 +98,85 @@ What I need:
                 and a binary. The student shoudl have clear detailed command listed that they can 
                 try on their system. this project doesn't touch static libraries and beyond. That's 
                 another project 
+
+
+        * Project 2 : Exploring static libararies 
+
+            * Environments: 
+                . CMake in the path
+                . Windows with gcc in C:\mingw64\bin
+                . Windows with clang in C:\mingw64\bin
+                . Windows with cl.exe on the system (see above tools on the system)
+                . Linux with gcc (docker: see above)
+                . Linux with clang (docker: see above)
+
+            * Tasks in each enviroment: 
+                * Compiling a pair of .h and .cpp into a static library. Showing the student 
+                    the object files and library archive, and explaining these concepts. How is 
+                    an archive different from an object files. Then linking the archive into a
+                    main.cpp file. 
+
+        * Project 3 : Exploring dynmamic libraries 
+
+            * Environments: 
+                . CMake in the path
+                . Windows with gcc in C:\mingw64\bin
+                . Windows with clang in C:\mingw64\bin
+                . Windows with cl.exe on the system (see above tools on the system)
+                . Linux with gcc (docker: see above)
+                . Linux with clang (docker: see above)
+
+            * Tasks in each enviroment: 
+                * Compiling a pair of .h and .cpp into a dymaic library. Showing the student 
+                    the object files and library files (.so, dll,...), and explaining these concepts. How is 
+                    an dynamic library different from  different from a static files. Then linking 
+                    the dynamic lib into a main.cpp file. 
+
+        * Project 4 : Compiling on the command line by directly calling cmake 
+
+            * Environments: 
+                . CMake in the path
+                . Windows with gcc in C:\mingw64\bin
+                . Windows with clang in C:\mingw64\bin
+                . Windows with cl.exe on the system (see above tools on the system)
+                . Linux with gcc (docker: see above)
+                . Linux with clang (docker: see above)
+
+            * Tasks in each enviroment: 
+                * Compiling a multifile (main.cpp, a few .h and .cpp pairs) program, and manually   
+                    stitch multiple object files together to generate a binary that can be ran. 
+                    Inspecting a few object files and the binary and make sure the student understands
+                    the format and ABI issies (show how the used compiler mangles the names)
+
+        * Project 5 : Intro to dependencies with Vcpkg 
+
+            * Environments: 
+                . Whatever the student is using: 
+                    . Windows: Visual Studio 
+                    . Linux gcc (docker)
+                    . Linux clang (docker)
+
+            * Tasks in each environment: 
+                * Installing vcpkg ( use own installed on Windows). The docker environments 
+                    already have it, but show the steps to be followed to install own.
+
+                * manually managing dependences (through vcpkg cli) and shwing where they end up 
+                    and consuming them through cmake. show basic operaional commands
+
+                * Managing everything through cmake and vcpkg root.  
+
+                * Setting up and using ftxui through vcpkg and cmake 
+
+        * Project 6 : Testing with C++ 
+
+            * Environments (vcpkg): 
+                . Whatever the student is using: 
+                    . Windows: Visual Studio 
+                    . Linux gcc (docker)
+                    . Linux clang (docker)
+
+            * Tasks in each environment: 
+                *   INtro to testing   
+                *   Using google test 
+                * using catch2
+        
