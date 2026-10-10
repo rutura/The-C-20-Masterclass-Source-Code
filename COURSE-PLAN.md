@@ -22,6 +22,8 @@ Working document. Edit freely: when you sign off, chapters are built one at a ti
 - Chapter 06: removed the duplicate `6.17IntroToAssembly` (chapter 08 covers it, more deeply) and renumbered. Now `6.17ProjectImageWriter`, `6.18ProjectVendoredHeader`, `6.19ProjectFetchContent`, `6.20Assignment`. All four build and run with MSVC.
 - Chapter 08: removed the committed `exit_code` ELF from `8.11WritingAssemblyYourself` and ignored it there.
 - Chapter 07 (awaiting your review): added `7.12ProjectManualCompile`, `7.13ProjectStaticLibrary`, `7.14ProjectDynamicLibrary`, `7.15ProjectCMakeCommandLine`, renamed the assignment to `7.16Assignment`, and added the five matching sections to `NOTES.md`. Every environment script was run on MSVC, MinGW GCC, MinGW Clang, Linux GCC and Linux Clang. A `.gitattributes` keeps the `.sh` scripts LF.
+- Chapter 08 (awaiting your review): renamed `8.11WritingAssemblyYourself` to `8.11SeeingAssemblyLocally` (its NASM half moved into the project), added `8.12ProjectAssemblyLab` (Linux containers, nasm, gdb) and `8.13Assignment` (five assembly functions, one read-the-assembly exercise, a gdb exercise, 20-question quiz), with matching `NOTES.md` sections. Run in both the GCC and Clang containers and on MSVC for 8.11. Not tested on Apple Silicon.
+- Chapter 09 (awaiting your review): new `09.PointersAndArrays` with ten lectures (9.2 to 9.11), `9.12ProjectMemoryDetective` (seven planted memory bugs and the sanitizers that catch them) and `9.13Assignment` (eight exercises, solutions, 20-question quiz), plus a 1,480-line `NOTES.md`. Built with MSVC, and the lectures, project and assignment also run on GCC 16 and Clang 21 in the containers, with sanitizers.
 
 ## Chapter 07: add the build-tools projects (Projects 1 to 4)
 

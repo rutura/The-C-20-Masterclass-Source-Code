@@ -4,9 +4,9 @@ Everything so far in this course has been "here is C++ code, here is
 what it does when it runs." This chapter opens up the step in between:
 **what does the computer actually do, physically, to run it?**
 
-You will not write any assembly yourself, except briefly at the very
-end of the chapter, which shows you how, if you want to go further. The
-main job here is to *read* a little of it - on real examples pulled
+You will write very little assembly yourself: the project at the very
+end of the chapter has you write a few small functions and call them from
+C++. The main job here is to *read* a little of it - on real examples pulled
 from chapters and lectures you already know - so that ideas which have
 so far just been words ("a variable," "calling a function," "a loop")
 turn into something you can point at and watch happen, instruction by
@@ -1563,8 +1563,8 @@ computes.
    recursion                   →  call targeting the same function, a fresh frame each time
 ```
 
-You will not be asked to write assembly, and most day-to-day C++ never
-needs it. What this gives you, even glanced at occasionally, is a way
+Beyond the small project at the end of the chapter, you will not be asked
+to write assembly, and most day-to-day C++ never needs it. What this gives you, even glanced at occasionally, is a way
 to settle "wait, what does this actually do?" with certainty instead of
 a guess - and a first, concrete look at what "the compiler optimised it
 away" means in practice, a phrase you will hear constantly from here
@@ -1572,15 +1572,15 @@ on.
 
 ---
 
-## 8.11 Going further: assembly on your own machine
+## 8.11 Seeing assembly on your own machine
 
 Compiler Explorer has been the right tool for this entire chapter, and
 for day-to-day "what does this actually compile to" questions it stays
 the right tool - it is free, needs no setup, and lets you flip compilers
-and flags in seconds. This closing lecture is purely optional "going
-further" material: two different ways to leave the website behind, one
-for *reading* assembly your own compiler produces, one for *writing* a
-little of your own by hand.
+and flags in seconds. This lecture is about leaving the website behind:
+your own compiler can produce the exact same assembly for you, offline,
+as a plain text file. The next lecture, the project, goes one step
+further and has you *write* some assembly yourself.
 
 ### Seeing assembly locally, without a website
 
@@ -1630,50 +1630,438 @@ MSVC equivalent) on it and open the resulting `.s`/`.asm` file - you
 should recognise `square`'s body immediately, it is exactly the
 8.3 listing.
 
-### Writing your own assembly by hand, cross-platform
+**Code for this lecture**: `8.11SeeingAssemblyLocally/main.cpp` (a
+normal, buildable C++ file to try the local `-S`/`/FAs` commands on).
 
-If you want to go one step further than *reading* assembly and
-actually *write* a little yourself, the most genuinely cross-platform
-way to do that is **NASM** (the Netwide Assembler, free, at
-`nasm.us`) - the same tool, with the same syntax, installs on Windows,
-Linux, and macOS alike.
+---
 
-The important caveat: "cross-platform tool" does not mean "write one
-file, run it unchanged everywhere." The *syntax* NASM accepts is
-identical on all three platforms, but what an assembly program
-actually has to *do* to exit, print something, or ask the operating
-system for anything at all is **not** - each OS has its own entry-point
-convention and its own way of making that request (Linux: a raw
-`syscall` instruction with a syscall number in `rax`, as below; Windows:
-a call into `kernel32.dll`; macOS: Apple's own syscall convention,
-layered under extra restrictions on recent versions). So a hand-written
-`.asm` file is portable in *tooling*, not in *content* - the file
-itself is still written for one specific OS.
+## 8.12 Project: an assembly lab
 
-`exit_code.asm`, alongside this file, is a complete, working example
-for Linux (the platform this course's own containers, from chapter 2,
-actually run) - three instructions, no linked libraries, that exit with
-status code 42:
+All chapter you have **read** assembly that a compiler wrote. In this project you **write** some, and call it from C++.
+
+It is a lab in the literal sense: small experiments, each one short, each one showing a different layer. By the end you will have written a program with no C++ at all, a program with no C library at all, and C++ code calling functions that exist only as hand-written machine instructions.
 
 ```
+   step 1   exit_code.asm   ──► the smallest program there is
+   step 2   hello.asm       ──► print a line, no library, just the kernel
+   step 3   ops.asm + main.cpp ──► C++ calls functions written in assembly
+   step 4   look at the names (7.12 again)
+   step 5   compare with what the compiler writes for the same job
+   step 6   step through your code in the debugger
+   step 7   let CMake do the build
+```
+
+The code is in `8.12ProjectAssemblyLab`.
+
+### Why this runs in the Linux containers
+
+Compiler Explorer works the same on every computer. A **program** you assemble yourself does not: *what the instructions do* is the same on every x86-64 machine (`mov`, `add`, `cmp`, `jmp` mean the same everywhere), but asking the **operating system** for something, such as printing or exiting, is different on Windows, Linux and macOS. A hand-written exit-and-print program is therefore written for **one** operating system.
+
+So we pick one, and give everyone the same machine: the **Linux containers from chapter 2**. The steps are identical whether your computer runs Windows, Linux or an Intel Mac, and you learn the real Linux conventions, the same ones the listings in this chapter used.
+
+Set up once:
+
+```powershell
+# From the repository root, in PowerShell (see chapter 2 for the Linux and macOS spelling)
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc
+```
+
+```sh
+cd 08.IntroToAssembly/8.12ProjectAssemblyLab
+apt-get update && apt-get install -y nasm
+nasm -v
+```
+
+The container has the compilers, `gdb`, `objdump` and `nm`, but not **NASM**, the assembler. That `apt-get install` command adds it. With `--rm` the container is thrown away when you leave, so you will have to install it again next time. (If you made a named container in chapter 2, it keeps what you install.) Every step below works the same in the Clang container, `cpp-masterclass-clang`, if you replace `g++` with `clang++`.
+
+> **Apple Silicon Macs.** The images you build there are ARM Linux images by default, and our instructions are x86-64. Build the image and run the container with `--platform linux/amd64` (an extra option on both `docker build` and `docker run`) to get an x86-64 container, which runs under emulation. Steps 1 to 5 should work there. A debugger sometimes refuses to work under emulation, so if `gdb` gives you trouble in step 6, skip that step: nothing else depends on it. We have not tested the lab on Apple Silicon.
+
+The tools:
+
+| Tool | Job |
+|---|---|
+| `nasm` | the **assembler**: turns a `.asm` text file into an object file |
+| `ld` | the **linker**, on its own, for programs with no C++ in them |
+| `g++` / `clang++` | the C++ compiler, and the linker driver when C++ is involved |
+| `nm`, `objdump -d` | look inside object files (7.12) |
+| `gdb` | the debugger: stop a program and look at registers and instructions |
+
+### Step 1: the smallest program
+
+Open `exit_code.asm`. It is three instructions.
+
+```nasm
+section .text
+    global _start
+
+_start:
+    mov rax, 60      ; system call number for "exit" on Linux x86-64
+    mov rdi, 42      ; the exit code reported back to the shell
+    syscall
+```
+
+Read it a line at a time:
+
+- `section .text` says "the following is **code**". (Data goes in `.data`, which we will meet in step 2.)
+- `global _start` makes the name `_start` visible to the linker. Remember `_start` from 8.4: it is where the operating system begins running a program. **Here there is no startup code and no `main`: our three instructions are the whole program.**
+- `mov rax, 60` and `mov rdi, 42` put numbers in registers. The operating system's services are numbered, and **60 means "exit"**. The first argument of a system call goes in `rdi`, so `42` is the exit status.
+- `syscall` is the instruction that hands control to the kernel.
+
+Assemble it, link it and run it. This is the build pipeline from 7.12, with a different first stage.
+
+```
+   exit_code.asm ──► nasm ──► exit_code.o ──► ld ──► exit_code
+```
+
+```sh
 nasm -f elf64 exit_code.asm -o exit_code.o
 ld exit_code.o -o exit_code
-./exit_code ; echo $?        # prints 42
+./exit_code ; echo $?
 ```
 
-**Try it**: run those three commands, confirm you see `42`, then open
-`exit_code.asm` and change `mov rdi, 42` to a different number - no
-reassembling theory required, just re-run the same two build commands
-and watch the new number come back.
+```
+42
+```
 
-If you are on Windows or macOS and want to take this further on your
-own machine rather than through this course's Linux containers, search
-for "NASM Windows x64 hello world" or "NASM macOS hello world" - the
-instruction-by-instruction ideas from this chapter (registers, `mov`,
-jumps, `call`/`ret`) carry over completely unchanged; only the handful
-of lines that talk to the operating system need to be swapped out.
+`-f elf64` says which **object file format** to produce: **ELF**, the Linux one, in its 64-bit flavour. The shell variable `$?` holds the exit status of the last program, so `echo $?` prints the `42` your program returned. `file exit_code` says `ELF 64-bit LSB executable ... statically linked`: a complete program, only a few kilobytes in size, of which three instructions are yours and the rest is the file's own headers.
 
-**Code for this lecture**: `8.11WritingAssemblyYourself/main.cpp` (a
-normal, buildable C++ file to try the local `-S`/`/FAs` commands on)
-and `8.11WritingAssemblyYourself/exit_code.asm` (the standalone NASM
-example above).
+**Try it**: change `42` to another number between 0 and 255, assemble and link again, run again. You have just written a program in the language the CPU speaks.
+
+### Step 2: print a line
+
+Open `hello.asm`. Two jobs, both system calls: **write** a message, then **exit**.
+
+```nasm
+section .data
+message: db "Hello from assembly", 10      ; 10 is the newline character
+length:  equ $ - message                   ; the assembler counts the bytes for us
+
+section .text
+global _start
+
+_start:
+    mov rax, 1              ; system call 1 = write(fd, buffer, count)
+    mov rdi, 1              ; fd 1 = standard output
+    mov rsi, message        ; address of the first byte
+    mov rdx, length         ; how many bytes
+    syscall
+
+    mov rax, 60             ; system call 60 = exit(status)
+    xor rdi, rdi            ; status 0
+    syscall
+```
+
+```sh
+nasm -f elf64 hello.asm -o hello.o
+ld hello.o -o hello
+./hello
+```
+
+```
+Hello from assembly
+```
+
+Three new things:
+
+- `section .data` holds **data** that exists before the program runs. `db` means "define bytes": the text, and a final `10`. The label `message` is the **address** of the first byte, exactly the "a name is an address" idea from 8.5.
+- `$` means "the address here". `$ - message` is the distance from the start of the text to here, which is the length of the message. The assembler computes it, so you never count characters by hand.
+- A system call takes its **number in `rax`** and its **arguments in `rdi`, `rsi`, `rdx`, in that order**.
+
+```
+   write(1, message, length)
+         │   │        └──► rdx
+         │   └───────────► rsi
+         └───────────────► rdi        (and the number, 1, goes in rax)
+```
+
+Everything `std::println` does, down at the bottom, is a version of this, preceded by a lot of formatting. There is no C library here at all.
+
+### Step 3: C++ calls your assembly
+
+Now the useful part: assembly **inside** a C++ program. Open `ops.asm`. It defines two functions.
+
+```nasm
+; int add_i32(int a, int b)
+add_i32:
+    mov eax, edi            ; a arrives in edi, the low half of rdi
+    add eax, esi            ; b arrives in esi
+    ret
+```
+
+This is the reverse of the listings you read in 8.7. There the compiler's `main` put arguments into `edi` and `esi`, `call`ed, and read the answer from `eax`. Here **we are the called function**, so we read `edi` and `esi` and leave the answer in `eax`. The rules that make this work are the **calling convention**, which on Linux x86-64 is called System V:
+
+| | |
+|---|---|
+| Integer arguments | `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`, in that order |
+| Integer result | `rax` (`eax` for a 32-bit `int`) |
+| Free to overwrite | `rax`, `rcx`, `rdx`, `rsi`, `rdi`, `r8` to `r11` |
+| Must come back unchanged | `rbx`, `rbp`, `r12` to `r15` (save them with `push`, restore with `pop`) |
+
+The second function adds up an array, which is the loop from 8.6 written by hand:
+
+```nasm
+; std::int64_t sum_array(const int* data, std::size_t count)
+sum_array:
+    xor eax, eax            ; total = 0. Writing eax also clears the top half of rax
+    xor ecx, ecx            ; i = 0
+.next:
+    cmp rcx, rsi            ; compare i with count
+    jae .done               ; "above or equal" is the UNSIGNED test: i is a size_t
+    movsxd rdx, dword [rdi + rcx*4]   ; data[i]: address = data + i * 4 bytes, widened to 64 bits
+    add rax, rdx            ; total += data[i]
+    inc rcx                 ; ++i
+    jmp .next
+.done:
+    ret
+```
+
+Read it as the loop from 8.6: a test at the top with a **forward jump out**, the body, then a **jump back**. A few details:
+
+- `xor eax, eax` is the traditional way to write zero into a register: it is short, and fast. Any write to a 32-bit register such as `eax` also **clears the upper half** of the 64-bit `rax`, so the whole register is zero.
+- `[rdi + rcx*4]` is an **address calculation**: take the pointer in `rdi`, add `rcx` times 4 (an `int` is 4 bytes). It is `data[i]` spelled the way the CPU spells it. Think back to 8.5, where a variable was an address.
+- `movsxd` loads a 32-bit value and **sign-extends** it to 64 bits, so negative readings stay negative when they join the 64-bit total.
+- `jae` ("jump if above or equal") is the jump for **unsigned** comparisons. `count` is a `std::size_t`, which is unsigned. Signed numbers get `jge`, `jl` and friends, as in 8.6.
+- A label starting with a dot, like `.next`, belongs to the function above it. Another function can have its own `.next`.
+- The last line of the file, `section .note.GNU-stack ...`, tells the linker our code does not need an executable stack. Without it, the linker prints a warning.
+
+Now the C++ side, `main.cpp`:
+
+```cpp
+extern "C" {
+    int add_i32(int a, int b);
+    std::int64_t sum_array(const int* data, std::size_t count);
+}
+
+int main() {
+    const std::vector<int> readings{68, 72, 59, 81, 90, 55, 77, 64};
+
+    std::println("add_i32(20, 22)      asm: {}   c++: {}",
+                 add_i32(20, 22), add_i32_cpp(20, 22));
+    ...
+}
+```
+
+The compiler never sees the bodies of these two functions. It sees two **declarations** and trusts them, as it did for `to_celsius` in 7.12, and the linker joins the objects.
+
+**`extern "C"`** is the important line. Remember name mangling from 7.12: a C++ compiler writes the parameter types into the name it hands the linker. Our object file, made by an assembler, contains the **plain** names `add_i32` and `sum_array`. `extern "C"` tells the C++ compiler "use the plain name here, as C does". Build and run:
+
+```sh
+nasm -f elf64 -g -F dwarf ops.asm -o ops.o
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+g++ -std=c++23 -Wall -Wextra -c reference.cpp -o reference.o
+g++ main.o reference.o ops.o -o ops_demo
+./ops_demo
+```
+
+```
+add_i32(20, 22)      asm: 42   c++: 42
+sum_array(readings)  asm: 566  c++: 566
+```
+
+(`-g -F dwarf` stores line information in the object, so the debugger in step 6 can show our `.asm` lines. `reference.cpp` holds the same two functions in C++, to compare against.)
+
+**Break it on purpose.** In `main.cpp`, delete the line `extern "C" {` and its closing `}`, and keep the two declarations. Compile and link again:
+
+```
+undefined reference to `add_i32(int, int)'
+undefined reference to `sum_array(int const*, unsigned long)'
+```
+
+It compiles, and the **link** fails: the compiler asked for the mangled names (`_Z7add_i32ii`), which the assembler's object does not contain. The same thing is why a C++ library meant for other languages exposes `extern "C"` functions.
+
+### Step 4: look at the names
+
+Use `nm` as in 7.12, on the object made by the assembler and on the object made by the compiler:
+
+```sh
+nm ops.o | grep -E 'add_i32|sum_array'
+nm reference.o | grep -E 'add_i32|sum_array'
+```
+
+```
+0000000000000000 T add_i32
+0000000000000005 T sum_array
+000000000000001a t sum_array.done
+0000000000000009 t sum_array.next
+0000000000000000 T _Z11add_i32_cppii
+0000000000000014 T _Z13sum_array_cppPKim
+```
+
+The first four lines are **ours**: plain names, no mangling. A capital `T` is a symbol the linker can see, a small `t` is a **local** one: our `.next` and `.done` labels. The last two are the C++ twins, with their parameter types hidden inside the names (`ii` for two ints, `PKim` for "pointer to const int, unsigned long").
+
+Now look at the machine code itself:
+
+```sh
+objdump -d -M intel ops.o
+```
+
+```
+0000000000000000 <add_i32>:
+   0:	89 f8                	mov    eax,edi
+   2:	01 f0                	add    eax,esi
+   4:	c3                   	ret
+```
+
+The middle column is the real thing: the instruction `mov eax, edi` is the **two bytes** `89 f8`, `add eax, esi` is `01 f0`, and `ret` is the single byte `c3`. The whole function is **five bytes**. That is what the assembler produced from your text, and what the CPU runs.
+
+### Step 5: what would the compiler have written?
+
+Ask the compiler for its version of the same two jobs, at two optimisation levels (8.9 showed what `-O2` does):
+
+```sh
+g++ -std=c++23 -S -O0 -masm=intel reference.cpp -o reference_O0.s
+g++ -std=c++23 -S -O2 -masm=intel reference.cpp -o reference_O2.s
+```
+
+Open the two `.s` files, and find the functions called `add_i32_cpp` and `sum_array_cpp`. For `a + b`, GCC gives:
+
+```
+add_i32_cpp at -O0:                       add_i32_cpp at -O2:
+    push rbp                                  lea eax, [rdi+rsi]
+    mov  rbp, rsp                             ret
+    mov  DWORD PTR [rbp-4], edi
+    mov  DWORD PTR [rbp-8], esi
+    mov  edx, DWORD PTR [rbp-4]
+    mov  eax, DWORD PTR [rbp-8]
+    add  eax, edx
+    pop  rbp
+    ret
+```
+
+The `-O0` version is the 8.7 listing again: arguments stored into the stack frame, then read back. Your hand-written `add_i32` is **shorter than that**, three instructions, because you never stored anything. At `-O2` the compiler found a trick: `lea` ("load effective address") computes `rdi + rsi` without touching the flags, so the whole function is **two instructions**.
+
+For the loop, GCC at `-O2` writes this:
+
+```
+sum_array_cpp at -O2 (GCC):
+    test rsi, rsi
+    je   .L6                         ; count is 0: return 0
+    lea  rcx, [rdi+rsi*4]            ; rcx = the address just PAST the last element
+    xor  eax, eax
+.L5:
+    movsxd rdx, DWORD PTR [rdi]      ; read the current element
+    add  rdi, 4                      ; move the pointer, not an index
+    add  rax, rdx
+    cmp  rdi, rcx                    ; reached the end?
+    jne  .L5
+    ret
+.L6:
+    xor  eax, eax
+    ret
+```
+
+It is **our loop with one improvement**: instead of counting an index `i` and multiplying by 4 every time, it walks the pointer itself up to a precomputed end address. And Clang at `-O2` goes much further and writes a loop that reads **several ints at once** using the `xmm` registers (SIMD instructions) with a clean-up loop for the leftovers. It is much longer, and it is faster on big arrays.
+
+This is the realistic lesson. Hand-written assembly beats the compiler's `-O0` easily, and it **loses to its `-O2`**, because the compiler knows tricks you have not learned yet. Nobody writes assembly to beat the optimiser on ordinary code. You write it (rarely) for things C++ cannot say, and you read it (often) to settle "what is this really doing?".
+
+### Step 6: watch your code run
+
+Run the program under the debugger, **stop at the first instruction of your function**, and watch the registers.
+
+```sh
+gdb ./ops_demo
+```
+
+```
+(gdb) set disassembly-flavor intel
+(gdb) break add_i32
+(gdb) run
+(gdb) info registers rdi rsi
+(gdb) x/3i $pc
+(gdb) stepi
+(gdb) stepi
+(gdb) info registers eax
+```
+
+```
+Breakpoint 1, add_i32 () at ops.asm:17
+17	    mov eax, edi            ; a arrives in edi, the low half of rdi
+rdi            0x14                20
+rsi            0x16                22
+=> 0x41c750 <add_i32>:	mov    eax,edi
+   0x41c752 <add_i32+2>:	add    eax,esi
+   0x41c754 <add_i32+4>:	ret
+18	    add eax, esi            ; b arrives in esi
+19	    ret
+eax            0x2a                42
+```
+
+What each command does:
+
+- `set disassembly-flavor intel` shows instructions in the `mov dest, src` order used in this chapter. gdb's default is the other order.
+- `break add_i32` stops the program when it reaches the **label** `add_i32`.
+- `info registers rdi rsi` shows the two registers: `20` and `22`, in hex and decimal. **These are the arguments `main` passed**, exactly where the calling convention said they would be.
+- `x/3i $pc` ("examine 3 instructions at the program counter") lists the next three instructions. The `=>` marks the one about to run.
+- `stepi` runs **one instruction**. After the second, `eax` holds `0x2a`, which is `42`.
+
+The addresses on the `=>` lines are from the GCC container. Yours may differ, and the Clang container prints much larger ones, because it builds position-independent programs (8.2 explained why addresses move). `gdb` may print a warning that it cannot disable address space randomization, and a few lines about "auto-load safe-path". Both come from running inside a container and are harmless. If you prefer a split screen with the source and the instructions, type `layout asm` in `gdb` and use the arrow keys.
+
+### Step 7: let CMake build it
+
+You have run five tools by hand. CMake can run them all. This is the `CMakeLists.txt` of the lab:
+
+```cmake
+project(rooster LANGUAGES CXX ASM_NASM)
+...
+add_executable(rooster main.cpp reference.cpp reference.h ops.asm)
+```
+
+The only new thing is `ASM_NASM` in the list of languages: it tells CMake that some sources are for NASM, and to find it. CMake runs `nasm` on `ops.asm` by itself, which you can see with `--verbose` (7.15):
+
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
+cmake --build build --verbose
+./build/rooster
+```
+
+```
+[1/4] /usr/bin/nasm -MD ... -f elf64 -o CMakeFiles/rooster.dir/ops.asm.o /tmp/lab/ops.asm
+```
+
+That is the command from step 3, with the dependency tracking options CMake adds. Mixed C++ and assembly projects look like this in real life: a handful of `.asm` files next to the C++.
+
+### What to take away
+
+```
+   assembler (nasm)   .asm text  ──►  object file          (like the compiler, one stage)
+   linker (ld, g++)   object files ──► program              (7.12)
+   system call         number in rax, arguments in rdi, rsi, rdx; "syscall"
+   calling convention  arguments rdi rsi rdx rcx r8 r9; result rax; rbx rbp r12-r15 are the caller's
+   extern "C"          no mangling: how C++ and assembly (or C) find each other
+   -O0 vs -O2          your hand-written loop beats -O0 and loses to -O2
+   gdb                 break, run, stepi, info registers, x/3i $pc
+```
+
+Assembly stays a **reading** skill in this course. What this project gives you is certainty about what the other side of every function call looks like: the registers, the stack, the names, and the tools to check each one.
+
+---
+
+## 8.13 Assignment
+
+Six functions and a debugger session. You write **five functions in assembly**, **one in C++ by reading assembly**, and watch another one run in `gdb`. Everything runs in the Linux container (see 8.12). `main.cpp` is the checker: it calls your functions, compares the answers and prints `ok` or `FAIL` for each. Built as two executables, `rooster` (your starting point, every check fails) and `rooster_solution` (the solved version).
+
+| # | Exercise | Where | Tools |
+|---|----------|-------|-------|
+| 1 | `abs_i32(int)` | `exercises.asm` | `test` or `cmp`, a conditional jump, `neg` |
+| 2 | `max_i32(int, int)` | `exercises.asm` | `cmp`, a conditional jump over one `mov` (the 8.6 `if`) |
+| 3 | `count_above(data, count, threshold)` | `exercises.asm` | the `sum_array` loop with an `if` inside, a memory operand `[rdi + rcx*4]` |
+| 4 | `factorial(n)` | `exercises.asm` | a counting loop, `imul`, 64-bit registers |
+| 5 | `sum_to(n)` | `exercises.asm` | recursion: `call` to itself, `push rbx` / `pop rbx` to keep `n` across the call |
+| 6 | `mystery_cpp(n)` | `mystery.cpp` | read a provided assembly function, then write the same behaviour in C++ |
+| 7 | the debugger | no code | `gdb`, `break`, `stepi`, `info registers`: watch `factorial(5)` build up in `rax` |
+
+Each statement is in the comment above its stub, with examples. Build and run from the assignment folder in the container:
+
+```sh
+apt-get update && apt-get install -y nasm      # once per container
+cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=g++
+cmake --build build
+./build/rooster                 # your answers
+./build/rooster_solution        # the solved version
+```
+
+Every stub starts as `xor eax, eax` / `ret`, so `rooster` begins with a screen full of `FAIL`. Replace one stub, rebuild, and watch its lines turn to `ok`. The solutions are in `exercises_solution.asm` and `mystery_solution.cpp`: try before you look.
+
+The quiz (`QUIZ.md`) is 20 multiple-choice questions across the whole chapter: memory and virtual addresses, the stack, what a variable, an `if`, a loop, a call, a reference, `inline`, `constexpr` and recursion look like, the tools, and the lab.
+
+After this chapter the student can read the assembly a compiler produces for everyday C++ and explain what it is doing, has written and debugged a few functions of their own at that level, and is ready for pointers, which are the addresses from this chapter given a name in the language.
