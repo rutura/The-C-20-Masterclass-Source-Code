@@ -1,1 +1,99 @@
-I want you to continue and plan this course 
+I want you to continue and plan this course for me.
+
+What I have so far: 
+* Chapter 1 through 6 are completely done and should be used as reference about 
+    how I work
+* Chapter 07.Practical Built in featurers is also done, but it lacks a project: 
+    Starting from chapter  6, each chapter has a practical project where I introduce something
+    practical before the students do the assignment. I am thinking of doing the project on getting
+    the students to compile manually on Windows and Linux. More details on this later.
+
+* Chapter 08 Intro to assembly is just the notes (I like them and mostly keep them as they are). They
+    explain the basics mostly using compiler explorer. May be if there was a way that is portable, that I would get the students to write assembly and test their knowledge? I would like to add a project lecture based on that. You will guide me on this, and provide detailed instructions on how this woll work for students on Windows, Linux and Mac
+
+
+
+What I need: 
+    * Help me flush out and set up what is left in chapter 07 and 08 as stated above. After all is done, each should contain a notes with lectures, notes (similoar to chapter 06) and a Project in front of the assignments lecture (renumber what needs renumbering after inserting the project).
+
+    * Design, plan and set up NOTES.md files and source code for each lecture in notes, 
+        design project  and  assignments for each of the chapters below: 
+
+        * 09.PointersAndArrays
+        * 10. Classes
+        * 11. Inheritance and polymorphish 
+        * 12. Operator overloading
+        * 13. Exceptions and a look at contracts
+        * 14. Containers and iterators
+        * 15. Algorithms, ranges and views
+        * 16. Templates, concepts and Metaprogramming
+        * 17. Modules
+        * 18. Coroutines
+        * 19. Parallel Algorithms and Concurrency
+
+        Like chapter 06, at the end, each of these will have a NOTES.md file, and source code 
+        each of the lectures in notes. You will reseach, learn from the references and break down the 
+        lectures for me, just like I did for chapter 06. 
+
+
+* The tools you have access to: 
+    * Windows: GCC and Clang in: C:\mingw64\bin
+        GCC 14.2 and Clang 19.1 in C:\mingw64\bin cannot link std::print/println
+        (undefined std::__open_terminal), so they cannot verify lectures that use
+        <print>. Do not use them to check those lectures. If you have to use them, 
+        for example where you investigate ABI issues, just revert back to std::cout.
+    * Visual Studio ide and msvc:
+        MSVC (cl.exe 19.51, VS 2026 Community) is the reference compiler for this
+        branch. It is not on PATH by default. Shell state does not persist between
+        tool calls, so load the dev shell in the SAME PowerShell invocation as the
+        build command:
+
+            $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -property installationPath
+            & "$vs\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64 -SkipAutomaticLocation
+
+        Then build a lecture folder with CMake (3.30.2, no VS 2026 generator, so
+        pass -G Ninja explicitly) and use an out-of-tree build dir so the lecture
+        folder stays clean:
+
+            cmake -S <lecture-folder> -B <build-dir> -G Ninja
+            cmake --build <build-dir>
+            & <build-dir>\rooster.exe
+
+        Or compile a single file directly. Use /std:c++latest (or
+        /std:c++23preview). Do NOT use /std:c++23: cl ignores it and <print> breaks.
+
+            cl.exe /nologo /std:c++latest /EHsc /W4 main.cpp
+    * The docker containers for images in chapter 2. Check to see  if there are no containers 
+        ready for use. build them if they are not there. Docker is installed on the syste.
+
+
+
+* About projects I wish included in the course: 
+    . Each chapter needs to have one project where students pick up something practica. In chapter 06
+     I got them to do the image writer thing. I also want the same for chapter 07, chapter 08 and the rest of the chapters that you will design from scratch. Here is a pool of ideas I have: 
+
+
+        * Project : Compiling on the command line by directly calling the compiler and 
+            not through cmake.
+            * Environments: 
+                . Windows with gcc in C:\mingw64\bin
+                . Windows with clang in C:\mingw64\bin
+                . Windows with cl.exe on the system (see above tools on the system)
+                . Linux with gcc (docker: see above)
+                . Linux with clang (docker: see above)
+            * Tasks in each enviroment: 
+                * Compiling a single main.cpp file 
+                    * main.cpp -> object file (the student sees the object file) - > executable binary
+                    * main -> straight to the binary
+                * Show the student the flow and tools they can use to insect the binary file and catch
+                    basic and important info about how each os and compile tool packages the object 
+                    files and binary. 
+                * Compiling a multifile (main.cpp, a few .h and .cpp pairs) program, and manually   
+                    stitch multiple object files together to generate a binary that can be ran. 
+                    Inspecting a few object files and the binary and make sure the student understands
+                    the format and ABI issies (show how the used compiler mangles the names)
+            * Big idea: The idea behind this project is for the student to manually get each of the 
+                compiler in our environemtns to compile and generate (one or more object files)
+                and a binary. The student shoudl have clear detailed command listed that they can 
+                try on their system. this project doesn't touch static libraries and beyond. That's 
+                another project 
