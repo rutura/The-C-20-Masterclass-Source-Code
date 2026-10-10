@@ -78,5 +78,6 @@ Makefile
 .AppleDouble
 .LSOverride
 
-# Extensionless ELF produced by "ld exit_code.o -o exit_code" in the notes
-exit_code
+# Outputs of the manual builds
+*.exp
+weather

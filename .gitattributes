@@ -1,0 +1,3 @@
+# Shell scripts run inside the Linux containers, where a CRLF line ending
+# breaks them. Keep them LF even when core.autocrlf is on.
+*.sh text eol=lf

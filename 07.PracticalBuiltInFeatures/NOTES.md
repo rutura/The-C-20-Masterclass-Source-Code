@@ -21,7 +21,9 @@ mutated by accident, sorting and searching, the functional-style
 ranges/views pipeline, strings beyond what we have seen so far. Things
 like the `std::format` spec grammar, non-owning views into text,
 `std::chrono` for durations/clocks/calendar dates, and pattern matching
-with regular expressions.
+with regular expressions. The chapter closes with four hands-on projects
+that take the lid off the build: calling the compiler and linker yourself,
+making static and dynamic libraries, and driving CMake from the command line.
 
 ---
 
@@ -3395,3 +3397,881 @@ line after the first would start with a stray space. Dropping the
 unmatched text is what makes this come out clean.
 
 
+---
+
+## 7.12 Project: building by hand
+
+Up to now you have pressed a Run button, or typed `cmake --build`, and a program appeared. In this project we take the lid off. You will call the **compiler and the linker yourself**, on the command line, and then open the files they produce to see what is really inside.
+
+We do it for a reason. Sooner or later a build fails with a message like `undefined reference to ...` or `unresolved external symbol ...`. Those messages come from the **linker**, not the compiler, and they only make sense once you have seen what the linker is given.
+
+The program is a small **weather station** report, in the same spirit as the chapter assignment. It reads a list of Fahrenheit readings, summarises them, and prints one line in Celsius.
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The code is in `7.12ProjectManualCompile`. It has two forms: `single.cpp` (one file, nothing else) and three files that work together (`main.cpp`, `stats.cpp`, `report.cpp`, with their headers).
+
+### What happens between source and program
+
+```
+   main.cpp ──┐                            ┌── compiler ──► main.o  ──┐
+   stats.cpp ─┼── each .cpp on its own ────┼── compiler ──► stats.o ──┼──► linker ──► weather
+   report.cpp ┘                            └── compiler ──► report.o ─┘
+                                                   (object files)
+```
+
+- The **compiler** turns **one `.cpp` file at a time** into an **object file**: machine code for that file, plus a list of names. Each file is compiled in complete ignorance of the others. That is why a header only *declares* `to_celsius` and the compiler is happy to trust it.
+- The **linker** takes all the object files, matches every "I need `to_celsius`" with the object that defines it, and writes the final program.
+
+Everything in this project is a variation on those two steps.
+
+### The five environments
+
+You can follow along in whichever of these you have. The commands change a little, the ideas do not.
+
+| Environment | Compiler driver | Linker | Object files |
+|---|---|---|---|
+| Windows, MSVC | `cl` | `link` | `.obj` |
+| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` |
+| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
+| Linux, GCC | `g++` | `ld` (called by `g++`) | `.o` |
+| Linux, Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
+
+How to get a shell for each one:
+
+- **MSVC**: open **Developer PowerShell for VS** from the Start menu. That is an ordinary PowerShell with `cl`, `link`, `lib` and `dumpbin` on the PATH. You can also load it by hand from any PowerShell: `& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.
+- **MinGW**: a normal PowerShell with `C:\mingw64\bin` on the PATH. Check with `g++ --version` and `clang++ --version`.
+- **Linux**: the Docker containers from chapter 2. From the repository root, `docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc` (or `cpp-masterclass-clang`), then `cd 07.PracticalBuiltInFeatures/7.12ProjectManualCompile`.
+
+Every folder in this project also has one script per environment (`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`, `build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands below from top to bottom. Type the commands yourself first, and use the scripts to check your work.
+
+### Part 1: one file, two ways
+
+`single.cpp` is small enough to hold in your head: sum a vector, print the average.
+
+```cpp
+const std::vector<double> readings{68.0, 72.5, 59.0, 81.0, 90.5, 55.0, 77.0, 64.5};
+const double total{std::accumulate(readings.begin(), readings.end(), 0.0)};
+std::println("average: {:.1f} F", total / static_cast<double>(readings.size()));
+```
+
+**Way 1: two steps.** Compile to an object file, then link it.
+
+```
+   single.cpp ──► compile ──► single.obj / single.o ──► link ──► single_two_step
+```
+
+#### MSVC
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c single.cpp
+link /nologo single.obj /OUT:single_two_step.exe
+```
+
+- `/c` means **compile only, do not link**. That is what produces `single.obj`.
+- `/std:c++latest` selects the newest language mode. Do **not** write `/std:c++23`: with this compiler `cl` ignores it, and `<print>` breaks.
+- `/EHsc` turns on normal C++ exception handling. `/W4` asks for more warnings.
+- `/MD` picks the **shared C runtime**. We will care about this in 7.13. CMake uses it by default, so we use it too.
+
+#### MinGW GCC
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+g++ single.o -o single_two_step.exe -lstdc++exp
+```
+
+#### MinGW Clang
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+clang++ single.o -o single_two_step.exe -lstdc++exp
+```
+
+#### Linux, GCC
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+g++ single.o -o single_two_step
+```
+
+#### Linux, Clang
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+clang++ single.o -o single_two_step
+```
+
+`-c` is the same idea as `/c`: compile, stop before linking. `-o` names the output file. The second command has no source file at all: the "compiler" is being used as a **front end for the linker**.
+
+> **Gotcha, MinGW only: `-lstdc++exp`.** On the MinGW GCC 14 and Clang 19 we use on Windows, `std::println` needs one extra library. Leave it out and the link fails with:
+>
+> ```
+> undefined reference to `std::__open_terminal(_iobuf*)'
+> undefined reference to `std::__write_to_terminal(void*, std::span<char, ...>)'
+> ```
+>
+> `-lstdc++exp` ("the experimental part of the C++ library") has to come **after** the objects that need it. Newer compilers, like the GCC 16 and Clang 21 in our Linux containers, do not need it. Notice how the message is about **missing names**, not about syntax: your code compiled fine. This is a linker error.
+
+**Way 2: one step.** Hand the source file straight to the driver and let it run both steps.
+
+```powershell
+# MSVC
+cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fe:single_one_step.exe
+
+# MinGW GCC or Clang (Windows)
+g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
+
+# Linux
+g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
+```
+
+Compare the two programs. On our machine both executables had **exactly the same size**. That is the point: `cl`, `g++` and `clang++` are **drivers**. They are not one program that does everything: they run the compiler, then the linker, and pass your options along. The one-step form just skips saving the object file.
+
+> **The size surprise.** On our machine `single.obj` was about 800 KB, bigger than the 310 KB executable built from it (MSVC), and `single.o` was about 700 KB against a 510 KB program (MinGW GCC). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object file keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program actually uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
+
+### Part 2: three files, three objects, one link
+
+Now the real program. Look at how the work is divided:
+
+```
+   stats.h / stats.cpp     summarize(readings) and to_celsius(f)
+   report.h / report.cpp   format_report(sensor, summary), which CALLS to_celsius
+   main.cpp                builds the readings, calls both, prints
+```
+
+`report.cpp` calls `to_celsius`, which lives in `stats.cpp`. When the compiler builds `report.cpp` it only sees the declaration in `stats.h`. It cannot know where the function is, so it leaves a note in the object file that says "**I need `to_celsius`, fill it in later**".
+
+Compile each `.cpp` on its own, then link all three objects together.
+
+#### MSVC
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
+cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp
+link /nologo main.obj stats.obj report.obj /OUT:weather.exe
+.\weather.exe
+```
+
+#### MinGW GCC (swap `g++` for `clang++` to use Clang)
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+g++ main.o stats.o report.o -o weather.exe -lstdc++exp
+.\weather.exe
+```
+
+#### Linux (swap `g++` for `clang++` to use Clang)
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+g++ main.o stats.o report.o -o weather
+./weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The same line comes out on all five environments.
+
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.obj` (or `stats.o`)**:
+
+```
+link /nologo main.obj report.obj /OUT:broken.exe
+```
+
+```
+main.obj : error LNK2019: unresolved external symbol "struct station::Summary __cdecl
+    station::summarize(...)" (?summarize@station@@YA?AUSummary@1@...) referenced in function main
+report.obj : error LNK2019: unresolved external symbol "double __cdecl
+    station::to_celsius(double)" (?to_celsius@station@@YANN@Z) referenced in function ...
+broken.exe : fatal error LNK1120: 2 unresolved externals
+```
+
+With GCC or Clang the same mistake reads:
+
+```
+main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, ...> const&)'
+report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
+```
+
+Read those messages with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. Whenever you see `LNK2019` or `undefined reference`, ask: **did I forget to compile or link the file that defines it?** The odd-looking text in parentheses, `?to_celsius@station@@YANN@Z`, is the next topic.
+
+### Part 3: look inside the object files
+
+An object file is a binary file with a **table of symbols**: names the file *defines* and names it *needs*. There are tools for reading that table, one set per platform.
+
+| I want to... | MSVC | GCC / Clang (Windows and Linux) |
+|---|---|---|
+| see the file format | `dumpbin /headers stats.obj` | `objdump -f stats.o`, or `file stats.o` and `readelf -h stats.o` on Linux |
+| list the symbols | `dumpbin /symbols stats.obj` | `nm stats.o` |
+| turn a mangled name back into C++ | `undname <name>` | `nm -C stats.o`, or `c++filt <name>` |
+
+A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so filter for our own namespace, `station`.
+
+#### On MSVC
+
+```powershell
+dumpbin /headers stats.obj | Select-String 'File Type|machine'
+dumpbin /symbols stats.obj | Select-String station
+dumpbin /symbols report.obj | Select-String to_celsius
+```
+
+```
+File Type: COFF OBJECT
+8664 machine (x64)
+
+External | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
+External | ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z (struct station::Summary ...)
+
+UNDEF    | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))     <- in report.obj
+```
+
+`dumpbin` prints the readable form in brackets next to the mangled one. Two things to see in this output:
+
+- In `stats.obj`, `to_celsius` is **External** and has a section: this object *defines* it.
+- In `report.obj`, the same name is **UNDEF**: "undefined here, the linker must find it". That is the note from Part 2, made visible. The linker's whole job is to **match every UNDEF with exactly one definition**.
+
+#### On MinGW (Windows) and Linux
+
+```powershell
+nm stats.o | Select-String station          # on Linux: nm stats.o | grep station
+nm -C stats.o | Select-String station
+nm report.o | Select-String to_celsius
+```
+
+```
+0000000000000000 T _ZN7station10to_celsiusEd
+0000000000000038 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+0000000000000000 T station::to_celsius(double)
+0000000000000038 T station::summarize(std::vector<double, std::allocator<double> > const&)
+                 U _ZN7station10to_celsiusEd
+```
+
+`nm` marks a symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here. It is the same story as `External` and `UNDEF` above. `-C` ("demangle") prints the C++ name instead of the code.
+
+### Name mangling
+
+Now the odd names. You wrote `to_celsius`. The object file says `?to_celsius@station@@YANN@Z` (MSVC) or `_ZN7station10to_celsiusEd` (GCC and Clang). That is **name mangling**.
+
+C++ allows two functions with the same name and different parameters (overloading, lecture 6.9). A linker only compares **plain names**, so the compiler has to put the **namespace, the name and the parameter types into the one name** it gives the linker.
+
+Here is `to_celsius(double)` taken apart, in both styles.
+
+**GCC and Clang** (the "Itanium" rules): `_ZN7station10to_celsiusEd`
+
+| Piece | Meaning |
+|---|---|
+| `_Z` | "this is a C++ name" |
+| `N` ... `E` | a **qualified** name, `namespace::function`, from `N` to `E` |
+| `7station` | a name that is 7 letters long: `station` |
+| `10to_celsius` | a name that is 10 letters long: `to_celsius` |
+| `d` | the parameter type: `d` means `double` |
+
+**MSVC**: `?to_celsius@station@@YANN@Z`
+
+| Piece | Meaning |
+|---|---|
+| `?` | "this is a C++ name" |
+| `to_celsius@` | the function name |
+| `station@` and then `@` | the enclosing namespace, then the end of the qualification |
+| `YA` | a free function (`Y`) using the `__cdecl` calling convention (`A`) |
+| `N` | the return type: `double` |
+| `N` | the parameter type: `double` |
+| `@` then `Z` | end of the parameter list, end of the name |
+
+Do not try to memorise these. The point is that **the parameter types are inside the name**. Two overloads, `to_celsius(double)` and `to_celsius(int)`, would get two different names and so can coexist in one program.
+
+The two compilers use different rules, and that has a big consequence. Here is the whole picture of our five environments:
+
+| Environment | Object file format | Mangling rules |
+|---|---|---|
+| Windows, MSVC | COFF (`.obj`) | MSVC: `?to_celsius@station@@YANN@Z` |
+| Windows, MinGW GCC / Clang | COFF (`.o`) | Itanium: `_ZN7station10to_celsiusEd` |
+| Linux, GCC / Clang | ELF (`.o`) | Itanium: `_ZN7station10to_celsiusEd` |
+
+Check the format yourself: `objdump -f stats.o` on MinGW says `file format pe-x86-64`, and `file stats.o` on Linux says `ELF 64-bit LSB relocatable`.
+
+Notice that **MSVC and MinGW both use COFF** (the Windows object format) but still cannot share objects: their **mangled names differ**, and so does the layout of `std::vector` and `std::string` inside. Compile `stats.cpp` with MSVC, compile the other two files with MinGW GCC and link them all with `g++`: you get the same `undefined reference to station::to_celsius(double)` as if `stats` were missing, because the names MinGW asks for do not exist in the MSVC object. **A C++ library is tied to the compiler and standard library that built it.** That is the **ABI** (application binary interface): the agreement about names, layouts and calling conventions that two pieces of binary code must share. In 7.14 you will see why it matters for libraries.
+
+Now the cousin who is not mangled. In 8.12 we will write a function in assembly and call it from C++. The assembler will not mangle anything, so we will mark that function **`extern "C"`**, which tells the C++ compiler "use the plain name, as C does".
+
+### Look inside the finished program
+
+An executable is just another binary with a table of what it needs.
+
+```powershell
+dumpbin /headers weather.exe | Select-String 'machine|subsystem'     # MSVC
+dumpbin /dependents weather.exe                                       # which DLLs it loads
+```
+
+```
+8664 machine (x64)
+3 subsystem (Windows CUI)         <- a console program
+MSVCP140.dll  VCRUNTIME140.dll  KERNEL32.dll  api-ms-win-crt-*.dll
+```
+
+On Linux the same questions are `file weather` and `ldd weather`. We will come back to **dependents** in 7.14.
+
+### Gotchas to take away
+
+- `/std:c++latest`, never `/std:c++23`, with `cl`.
+- MinGW needs `-lstdc++exp` for `std::println` and it must come **after** the objects.
+- `LNK2019` / `undefined reference` means the **linker** could not find a definition: check you compiled and linked the file that has it.
+- Objects from different compilers do not mix, even when both are `.obj` or `.o`.
+- Compile every file with the **same standard and the same runtime option** (`/MD` everywhere). Mixing them is how LNK2038 appears, which we meet in 7.13.
+
+---
+
+## 7.13 Project: a static library
+
+In 7.12 you linked three object files by hand. Imagine a program with three hundred. You would not pass three hundred names to the linker every time, and you would not want to hand your teammates a folder of loose `.o` files either. The answer is a **library**: a bundle of compiled code with a name.
+
+There are two kinds. This lecture is the first one, the **static library**. The code is in `7.13ProjectStaticLibrary`. It is the same weather-station program as before, but now `stats.cpp` and `report.cpp` are bundled together and `main.cpp` is built against the bundle.
+
+```
+   stats.cpp  ──► stats.o  ──┐
+                             ├──► archive: libstation.a ──┐
+   report.cpp ──► report.o ──┘     (a bundle of objects)  │
+                                                          ├──► linker ──► weather
+   main.cpp   ──► main.o  ────────────────────────────────┘
+```
+
+### An archive is not an object file
+
+This is the idea to hold on to.
+
+- An **object file** is the compiled code of **one** source file, with its symbol table.
+- A **static library** is an **archive**: a plain container holding **several object files unchanged**, plus an index of the symbols they define. Nothing is rewritten and nothing is merged.
+
+Think of a zip file, but without compression. A static library cannot run, and it cannot be loaded. It exists for **the linker**. When the linker has an unresolved name such as `to_celsius`, it looks in the archive's index, finds which member defines it, pulls out **only that member**, and copies it into the program.
+
+That last sentence has a consequence: once the program is linked, **the library is no longer needed**. The code was *copied into* `weather`. You can delete `libstation.a`, and the program still runs.
+
+### Build the library
+
+Compile the two library files exactly as in 7.12, then use the **archiver** to bundle them. This is where the toolchains differ most.
+
+#### MSVC
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
+
+lib /nologo /OUT:station.lib stats.obj report.obj
+lib /nologo /LIST station.lib
+```
+
+The librarian is `lib`. Its `/LIST` option prints the members of an existing library:
+
+```
+stats.obj
+report.obj
+```
+
+#### MinGW GCC or Clang (Windows)
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+
+ar rcs libstation.a stats.o report.o
+ar t libstation.a
+ar tv libstation.a
+```
+
+#### Linux, GCC or Clang
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+
+ar rcs libstation.a stats.o report.o
+file libstation.a
+ar t libstation.a
+ar tv libstation.a
+```
+
+`ar` is the archiver, and its options come as a bundle of letters: **`r`** puts the files in, **`c`** creates the archive without a warning, **`s`** writes the symbol index that the linker will search. After it, `ar t` lists the members (`t` for table of contents) and `ar tv` adds sizes:
+
+```
+stats.o
+report.o
+rw-r--r-- 0/0  14576 Jan  1 00:00 1970 stats.o
+rw-r--r-- 0/0 475632 Jan  1 00:00 1970 report.o
+```
+
+On Linux, `file libstation.a` answers `current ar archive`.
+
+**Look inside.** The members are the object files you already know. Ask the symbol tools about the archive and you see the same `T` and `U` as before, now grouped by member:
+
+```powershell
+nm -C libstation.a | Select-String to_celsius      # MinGW; on Linux use grep
+```
+
+```
+0000000000000000 T station::to_celsius(double)      <- defined in the stats.o member
+                 U station::to_celsius(double)      <- needed by the report.o member
+```
+
+```powershell
+dumpbin /symbols station.lib | Select-String to_celsius      # MSVC
+```
+
+The library is also **big**, because it holds the whole objects: `station.lib` is about 950 KB here, almost all of it `report`'s template code. Remember that number for 7.14.
+
+### Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead of the object files.
+
+#### MSVC
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp
+link /nologo main.obj station.lib /OUT:weather.exe
+.\weather.exe
+```
+
+#### MinGW (Windows)
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+g++ main.o -L. -lstation -o weather.exe -lstdc++exp
+.\weather.exe
+```
+
+#### Linux
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+g++ main.o -L. -lstation -o weather
+./weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Two shortcuts on the GCC and Clang side deserve an explanation:
+
+- **`-lstation`** means "find a library called `station`". The tool adds the `lib` in front and the `.a` at the end for you, so it looks for `libstation.a`. **That is why the file is called `libstation.a`.** MSVC does not do this: you give it the real file name, `station.lib`.
+- **`-L.`** means "also look in this folder". Without it, `-lstation` searches only the standard system folders and does not find the library sitting next to you.
+
+### Two gotchas
+
+**1. On GCC and Clang, order matters.** The linker reads its inputs **left to right**, and only pulls members out of an archive to satisfy names it **already needs**. Put the library first and nothing needs anything yet, so nothing is pulled out:
+
+```sh
+g++ -L. -lstation main.o -o broken
+```
+
+```
+main.o: in function `main':
+main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, ...> const&)'
+```
+
+Same files, same flags, only the order changed, and the link fails. The rule is simple: **libraries go after the objects that use them.** (This is the same rule that applied to `-lstdc++exp` in 7.12.) MSVC's `link` does not care about the order.
+
+**2. Compile everything with the same settings.** `/MD` means "use the shared C runtime". `/MT` means "copy the C runtime into this program". If the library and the program disagree, MSVC refuses to link:
+
+```
+stats_mt.obj : error LNK2038: mismatch detected for 'RuntimeLibrary':
+    value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease' in main.obj
+```
+
+That is why every command in this project carries `/MD`. The same goes for the language standard, and for debug versus release builds. A static library is only a bundle of compiled code, so it takes on **whatever settings it was compiled with**.
+
+### What a static library is good for
+
+| | |
+|---|---|
+| Good | The finished program is self-contained: one file to ship, nothing to lose or mismatch at run time. |
+| Good | Only the members the program needs are copied in. |
+| Not so good | Every program that uses the library gets its **own copy** of the code. |
+| Not so good | To fix a bug in the library you must **relink every program** that uses it. |
+
+The second kind of library, in 7.14, trades those points the other way round.
+
+---
+
+## 7.14 Project: a dynamic library
+
+A **dynamic library** (also called a **shared library**) is not copied into the program. It stays a separate file, and the program **finds it and loads it when it starts**. On Windows it is a **DLL**, on Linux a **`.so`** (shared object).
+
+```
+   STATIC (7.13)                               DYNAMIC (this lecture)
+
+   weather                                     weather ──────────┐
+   ┌───────────────────────┐                   ┌───────────┐     │ loads at startup
+   │ main code             │                   │ main code │     ▼
+   │ stats code   (copy)   │                   └───────────┘   station.dll   (one file,
+   │ report code  (copy)   │                                    libstation.so   shared by
+   └───────────────────────┘                                    every program that uses it)
+   one file, self-contained                    two files: both are needed
+```
+
+The code is in `7.14ProjectDynamicLibrary`. Same program, same functions. One new file appears, `station_api.h`, and a macro, `STATION_API`, in front of the three public functions.
+
+### Why a macro in front of every function
+
+A **Windows DLL exports nothing by default**. You mark each function you want the outside world to see. The marking is different on each side of the boundary:
+
+- When the DLL itself is being compiled, the function is `__declspec(dllexport)`: "I provide this".
+- When a program that uses the DLL is compiled, the same function is `__declspec(dllimport)`: "this lives in a DLL".
+
+One header can serve both, with a macro, switched by a flag that only the library build passes:
+
+```cpp
+#if defined(_WIN32)
+    #if defined(STATION_BUILD_DLL)
+        #define STATION_API __declspec(dllexport)
+    #else
+        #define STATION_API __declspec(dllimport)
+    #endif
+#else
+    #define STATION_API __attribute__((visibility("default")))
+#endif
+
+STATION_API double to_celsius(double fahrenheit);
+```
+
+On Linux every function is exported by default, which is not always what you want. Compiling with **`-fvisibility=hidden`** reverses that for your own code, so only the functions marked `STATION_API` are visible. That is the same "opt in" rule Windows has. (The standard library's templates stay visible either way, so the symbol list still has hundreds of `std::` names. We filter for `station`.)
+
+### Build the library
+
+#### MSVC
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /DSTATION_BUILD_DLL /LD stats.cpp report.cpp /Fe:station.dll
+```
+
+- `/LD` builds a **DLL** instead of an executable.
+- `/DSTATION_BUILD_DLL` defines the macro, so `STATION_API` means `dllexport`.
+
+Three files come out:
+
+```
+station.dll   the code (about 310 KB)
+station.lib   an IMPORT library (about 3 KB)
+station.exp   a by-product you can ignore
+```
+
+**`station.lib` here is not the static library from 7.13.** It has the same extension and a very different job. Last time `station.lib` was 950 KB because it held all the code. This one is 3 KB because it holds **only a list of names and the DLL they live in**. It is a signpost, and the linker uses it to learn "`to_celsius` is in `station.dll`".
+
+#### MinGW GCC or Clang (Windows)
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o station.dll '-Wl,--out-implib,libstation.dll.a'
+```
+
+`-shared` makes a DLL, and `-Wl,--out-implib,...` hands an option to the linker: also write the import library, `libstation.dll.a` (about 3 KB), the counterpart of MSVC's `station.lib`.
+
+> **PowerShell gotcha.** The quotes around `-Wl,--out-implib,libstation.dll.a` matter. PowerShell reads a comma as "a list of values" and the command fails with *Missing argument in parameter list*. In `cmd` or on Linux you do not need the quotes.
+
+#### Linux, GCC or Clang
+
+```sh
+g++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report.cpp -o libstation.so
+```
+
+- **`-shared`** makes a `.so`.
+- **`-fPIC`** means "position-independent code". The library can be loaded at **any address**, and several programs may load it at different ones, so its code cannot assume where it lives.
+- There is **no import library** on Linux. The `.so` itself serves both as the thing the linker reads and the thing the program loads.
+
+### Look inside
+
+```powershell
+dumpbin /exports station.dll                       # MSVC
+objdump -p station.dll | Select-String station     # MinGW
+```
+
+```sh
+nm -D --defined-only libstation.so | grep station  # Linux
+```
+
+```
+   ordinal hint RVA      name
+         1    0 00001C40 ?format_report@station@@YA?AV?$basic_string@DU?$char_traits@D@std@@...
+         2    1 00001040 ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z
+         3    2 00001010 ?to_celsius@station@@YANN@Z
+```
+
+```
+000000000001b809 T _ZN7station10to_celsiusEd
+000000000001c1b1 T _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
+000000000001b841 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+```
+
+**Three `station` entries**: the three functions we marked. On Windows that is the whole export table, and it is the **public face** of the DLL: the only names a program can reach. (On Linux the list also contains `std::` names, which is why we filtered with `grep station`.)
+
+Look closely at the middle Linux name, `format_reportB5cxx11`. That `B5cxx11` is a **tag meaning "returns the C++11 flavour of `std::string`"**. GCC changed the layout of `std::string` in 2015, and the tag lets old and new code tell each other apart instead of crashing. This is the ABI from 7.12 showing up in a name.
+
+### Link the program, and run it
+
+The program is linked against the **signpost** (the import library on Windows, the `.so` itself on Linux).
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 main.cpp station.lib /Fe:weather.exe            # MSVC
+g++ -std=c++23 -Wall -Wextra main.cpp -L. -lstation -o weather.exe -lstdc++exp          # MinGW
+```
+
+```sh
+g++ -std=c++23 -Wall -Wextra main.cpp -L. -lstation -o weather                          # Linux
+```
+
+Ask the finished program what it needs when it **starts**:
+
+```powershell
+dumpbin /dependents weather.exe | Select-String 'station|MSVCP'        # MSVC
+objdump -p weather.exe | Select-String 'DLL Name: (station|libstdc)'   # MinGW
+```
+
+```sh
+readelf -d weather | grep NEEDED       # Linux
+ldd weather | grep -E 'station|not found'
+```
+
+```
+    station.dll
+    MSVCP140.dll
+```
+
+```
+ 0x0000000000000001 (NEEDED)             Shared library: [libstation.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ ...
+	libstation.so => not found
+```
+
+`station.dll` is now on the program's **list of requirements**. It is not inside the program. This is the big difference from 7.13.
+
+### The program cannot find its library
+
+On **Linux** try running `./weather` straight away. It stops, and says exactly why:
+
+```
+./weather: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+```
+
+The exit code is 127. The linker found `libstation.so` fine, because we passed `-L.`. But **`-L` is a link-time option**. At run time the system's **loader** searches its own list of folders, and the current folder is not on it. There are two common fixes:
+
+```sh
+LD_LIBRARY_PATH=. ./weather                          # tell the loader, for this one run
+```
+
+```sh
+g++ ... main.cpp -L. -lstation -Wl,-rpath,'$ORIGIN' -o weather    # bake it into the program
+```
+
+`LD_LIBRARY_PATH` is a list of extra folders. `-rpath` stores the folder **inside the executable**, and `$ORIGIN` stands for "the folder this program is in". With either of them, the program runs and prints the familiar line. (Quote the `$ORIGIN` so your shell does not eat it.)
+
+On **Windows** the rule is different. The loader looks **in the folder of the `.exe` first**, which is why `weather.exe` just worked when `station.dll` sat next to it. Now try it yourself: **rename `station.dll` to `station.dll.away` and run `.\weather.exe` again.** Windows refuses to start the program and shows an error saying that `station.dll` was not found. (Rename it back afterwards.) Other places Windows searches include the folders on your **PATH**.
+
+### Static or dynamic?
+
+| | Static library (7.13) | Dynamic library (7.14) |
+|---|---|---|
+| File names | `station.lib` / `libstation.a` | `station.dll` + `station.lib` (import) / `libstation.so` |
+| What the program contains | a **copy** of the code | only a **reference** to the library |
+| Needed to run the program | no | **yes**, the DLL / `.so` must be found at start |
+| Several programs using it | each carries its own copy | **share** one file |
+| Fixing a bug in the library | relink every program | replace one file, if the interface is unchanged |
+| Settings must match | at link time | at **run time** too |
+| Needs export markers | no | yes on Windows (`STATION_API`) |
+
+### The ABI warning
+
+The last row of the table needs a word. Look at what our library passes across the boundary: a `std::vector<double>` goes in, a `std::string` comes out. Both are **layouts defined by the standard library**, and different compilers, different versions, and even Debug and Release builds of the same compiler can lay them out differently. Our program works because **the same toolchain and the same options built both sides**.
+
+This is why you will see two styles in the real world:
+
+- Libraries shipped as **source or static libraries**, built by *you* with *your* compiler, so everything matches.
+- Libraries that ship as DLLs / `.so` files for everyone keep their public functions to **simple types** (integers, pointers, plain structs) and mark them **`extern "C"`**, so that the names are not mangled either.
+
+That second style is exactly what makes a library callable from other languages.
+
+---
+
+## 7.15 Project: driving CMake from the command line
+
+You have now typed, by hand, every kind of command a build needs: compile, link, archive, build a DLL. Real projects have hundreds of them, in the right order, with the right flags for the right compiler. **CMake** writes and runs those commands for you.
+
+Until now you have probably used CMake through an IDE. In this project we call it **directly, from the command line**, in all five environments, and we keep checking its work against what we typed in 7.12 to 7.14. The code is in `7.15ProjectCMakeCommandLine`. It is the same weather station, with a `CMakeLists.txt` that builds a library called `station` and a program called `rooster` that uses it.
+
+### Three layers
+
+```
+   CMakeLists.txt  ──►  cmake (configure)  ──►  build files  ──►  Ninja  ──►  cl / g++ / clang++
+   what you want        picks a compiler,       build.ninja       runs the     the commands
+   (targets, files)     checks it works,        (a list of        commands     you typed by hand
+                        writes the plan         commands)         in order
+```
+
+`cmake` itself never compiles anything. It reads your `CMakeLists.txt`, finds out which compiler you have, and writes a plan. A **generator** turns the plan into build files for some build tool. We always use **Ninja**, a small fast build tool, with `-G Ninja`. The tool then runs the compiler.
+
+### The commands, step by step
+
+#### 1. Configure
+
+```powershell
+cmake -S . -B build-msvc -G Ninja
+```
+
+- **`-S .`** the **S**ource folder: where `CMakeLists.txt` is.
+- **`-B build-msvc`** the **B**uild folder: where everything generated goes. It is created for you. Nothing is written next to your source files, which is called an **out-of-source build**, and it is why you can delete the whole folder to start again.
+- **`-G Ninja`** the generator.
+
+That is all CMake needs on MSVC, because the Developer PowerShell has already put `cl` on the PATH, and CMake finds it. On the other compilers you tell CMake which one to use, and you do it with **`-D` options**. A `-D` sets a **cache variable**, a named setting stored in the build folder.
+
+```powershell
+# MinGW GCC (normal PowerShell, NOT the VS Developer one)
+cmake -S . -B build-mingw-gcc -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+
+# MinGW Clang
+cmake -S . -B build-mingw-clang -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+
+```sh
+# Linux, GCC
+cmake -S . -B build-gcc -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+
+# Linux, Clang
+cmake -S . -B build-clang -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+
+> **Gotcha: the compiler belongs to the build folder.** CMake stores the compiler in the build folder's cache. If you re-run `cmake` on an existing `-B` folder with a different `-DCMAKE_CXX_COMPILER`, it warns `You have changed variables that require your cache to be deleted`, throws the cache away and starts again, so whatever you had configured there is lost. Keep **one build folder per compiler**, which is why each command above has its own. And if you open the **Developer** PowerShell and then ask for MinGW, `cl` is first on the PATH, so be explicit with the `-D` options, or use a normal PowerShell.
+
+#### 2. Build, and watch what CMake runs
+
+```powershell
+cmake --build build-msvc --verbose
+.\build-msvc\rooster.exe
+```
+
+`cmake --build <folder>` runs the build tool for you. **`--verbose`** makes it print the **real commands** it runs. Read them. This is the payoff of the previous three lectures. On Linux with GCC, the five steps for our program were:
+
+```
+[1/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -c stats.cpp  -o stats.cpp.o
+[2/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -c report.cpp -o report.cpp.o
+[3/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23                     -c main.cpp   -o main.cpp.o
+[4/5] ar qc libstation.a stats.cpp.o report.cpp.o   &&   ranlib libstation.a
+[5/5] g++ main.cpp.o -o rooster libstation.a
+```
+
+(Trimmed for the page, and the paths are shortened.) Compare with what you typed:
+
+| CMake ran | You typed in |
+|---|---|
+| steps 1 to 3: `g++ ... -c file.cpp -o file.o` | 7.12: one `-c` per source file |
+| step 4: `ar qc libstation.a ...` then `ranlib` | 7.13: `ar rcs libstation.a ...` (`ranlib` is the "write the index" step that `s` did for us) |
+| step 5: `g++ main.o ... libstation.a -o rooster` | 7.12 and 7.13: the link step |
+
+On MSVC, it is the same story with different spellings. Configured with `-DCMAKE_BUILD_TYPE=Release`, the command for step 1 was `cl.exe /nologo /TP -DSTATION_STATIC_DEFINE ... /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD ... -c stats.cpp`, and for step 4 `lib.exe /nologo /machine:x64 /out:station.lib stats.cpp.obj report.cpp.obj`. Notice the flags: `/EHsc`, `-std:c++latest` and `-MD` are the ones you typed by hand. CMake put them there because `CMAKE_CXX_STANDARD 23` and its defaults ask for them.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake build misbehaves, `--verbose` shows you the exact command that went wrong, and you can run it yourself.
+
+#### 3. Build one target
+
+```powershell
+cmake --build build-msvc --target station
+```
+
+A **target** is a thing `CMakeLists.txt` defines: here `station` (the library) and `rooster` (the program). `--target station` builds the library and nothing else, and it is how you ask "does just this part compile?" Without `--target`, CMake builds everything.
+
+#### 4. Same sources, different library kind
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or `SHARED`**. The **command line** decides, with one variable:
+
+```powershell
+cmake -S . -B build-msvc-shared -G Ninja -DBUILD_SHARED_LIBS=ON
+cmake --build build-msvc-shared
+```
+
+On MSVC, `build-msvc-shared` now contains `station.dll` and `station.lib` (the import library from 7.14), and `rooster.exe` finds the DLL because they are in the same folder. On MinGW you get `libstation.dll` and `libstation.dll.a`; on Linux `libstation.so`. One flag, and 7.13 turned into 7.14, with no source changes.
+
+How can that work when 7.14 needed `STATION_API` on every function? That is what these lines of `CMakeLists.txt` are for:
+
+```cmake
+include(GenerateExportHeader)
+generate_export_header(station)
+
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(station PUBLIC STATION_STATIC_DEFINE)
+endif()
+```
+
+`generate_export_header(station)` **writes the header for us**. It creates `station_export.h` in the build folder, which defines `STATION_EXPORT` as `dllexport` while the library is compiled, `dllimport` for the program using it, and visibility on Linux, which is the macro we wrote ourselves in 7.14. For a **static** library there is nothing to import or export, so the `if` tells the header to define `STATION_EXPORT` as nothing. Without that line, a static build on Windows would label the functions `dllimport` and fail to link.
+
+The other lines are worth reading too. `target_link_libraries(rooster PRIVATE station)` says "the program uses the library", and gives you the link step for free. And on MinGW, `if(WIN32 AND NOT MSVC) target_link_libraries(rooster PRIVATE stdc++exp)` is the `-lstdc++exp` from 7.12, written once for everybody.
+
+#### 5. Install
+
+```powershell
+cmake --install build-msvc --prefix install-msvc
+```
+
+`--install` copies the **finished products** to a clean folder, controlled by the `install(...)` lines in `CMakeLists.txt`. `--prefix` names the folder.
+
+```
+install-msvc/bin/rooster.exe
+install-msvc/lib/station.lib
+install-msvc/include/stats.h
+install-msvc/include/report.h
+install-msvc/include/station_export.h
+```
+
+That is the **layout you hand to someone else**: the program in `bin`, the library in `lib`, the headers in `include`. They can use `station` without ever seeing a `.cpp` file.
+
+### Options you will use all the time
+
+| Command or option | What it does |
+|---|---|
+| `-S <dir>` / `-B <dir>` | source folder / build folder |
+| `-G Ninja` | which generator to use |
+| `-D<NAME>=<value>` | set a cache variable |
+| `-DCMAKE_CXX_COMPILER=<c++>` | pick the compiler, once per build folder |
+| `-DCMAKE_BUILD_TYPE=Release` | optimised build (Ninja builds one type per folder) |
+| `-DBUILD_SHARED_LIBS=ON` | `add_library` without a keyword makes `.dll` / `.so` |
+| `cmake --build <dir>` | build everything |
+| `--target <name>` | build one target only |
+| `--verbose` | print the real compiler commands |
+| `cmake --install <dir> --prefix <dir>` | copy the finished products out |
+
+> **Gotcha: the build type.** With Ninja, each build folder is **one** build type, chosen at configure time. If you do not pass `-DCMAKE_BUILD_TYPE`, MSVC builds with its Debug settings (the install output says `Install configuration: "Debug"`). Pass `-DCMAKE_BUILD_TYPE=Release` and `/O2 /DNDEBUG` appear in the verbose output.
+
+### What to take away from the four projects
+
+```
+   source ──► compiler ──► object ──► archiver ──► static library ─┐
+                              │                                      ├──► linker ──► program
+                              └──► linker ──► dynamic library ──────┘     (+ the DLL / .so at run time)
+
+   CMake writes all of these commands. You read them with --verbose.
+```
+
+When something fails to build, you now know which stage it came from: **compiler** errors come with a line of your code, **linker** errors (`undefined reference`, `LNK2019`) are about missing or mismatched names, and **run-time** loading errors (`cannot open shared object file`, a missing DLL) are about where the loader looks.
+
+---
+
+## 7.16 Assignment
+
+Five small jobs for one imaginary weather station: sorting and searching, functional style, formatting a table, dates and durations, and regex. `main.cpp` has the five stubbed exercises, each with its problem statement and, where useful, a sample of the output in a comment; `main_solution.cpp` solves all five. Built as two executables (`rooster`, `rooster_solution`).
+
+| # | Exercise | Tools |
+|---|----------|-------|
+| 1 | Sorting and searching: the sensor registry | `std::ranges::sort` on a copy, `std::ranges::binary_search`, a lambda comparator with a tie-break, a `top_n` helper that never touches its `const` input |
+| 2 | Functional style: views and accumulate | `std::views::filter` and `std::views::transform` in a pipeline, `std::accumulate` over a range |
+| 3 | Strings and formatting: a station table | `std::format` width, alignment and precision, `std::istringstream` parsing, `std::string_view` |
+| 4 | Dates and durations | `std::chrono` calendar dates, `std::chrono::days`, `duration_cast`, `hh_mm_ss` |
+| 5 | Regex | `std::regex_match`, `std::sregex_iterator`, `std::regex_replace` with `format_no_copy` |
+
+The quiz (`QUIZ.md`) is 20 multiple-choice questions across lectures 7.2 to 7.11. The four projects (7.12 to 7.15) are about the toolchain, and the best check for them is to run the commands yourself in each environment you have.
+
+After this chapter the student can hold, sort, search and reshape collections of data, format and parse text, work with dates and durations, and build a program from the command line by hand and with CMake. The next chapter looks at what the machine actually does with all of this.
