@@ -15,11 +15,15 @@ content, not just source files.
 
 ## Status and the plan
 
-- Chapters 01 to 06 are done. Chapter 06 (`06.Functions`) is the style
-  reference for everything that follows.
-- Chapters 07 and 08 exist but still need their projects and assignment
-  sections (chapter 08 also needs its assignment folder).
-- Chapters 09 to 19 are being written from scratch.
+- **`SESSION-HANDOFF.md` at the repo root is where the current state lives**:
+  which chapters are done, what is next, decisions already made, tooling
+  gotchas, open items. Read it at the start of a session. **Keep it up to
+  date**: update it whenever a chapter is finished, a decision is made, a
+  tooling lesson is learned or an open item is resolved. Do this as part of the
+  work, not as an afterthought.
+- Chapter 06 (`06.Functions`) is the style reference for everything that
+  follows. Chapters up to the one named in the handoff are done. The rest are
+  being written from scratch.
 - **`COURSE-PLAN.md` at the repo root is the source of truth** for chapter
   layout, project placement and build order. Follow it. If something in it
   seems wrong or incomplete, ask the user, do not silently change it.
