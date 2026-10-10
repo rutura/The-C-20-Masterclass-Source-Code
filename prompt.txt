@@ -179,4 +179,14 @@ What I need:
                 *   INtro to testing   
                 *   Using google test 
                 * using catch2
+                
+
+References: 
+    Use: "D:\CourseRef"
+
+    . I want to heavily lean on the practical and project based nature of deitel. You can learn from my style in what I did in chapter 06.
+
+    . Use gregoire for more references where the first one is not enough (both pdf and code.)
+
+    . These references are your ingredients. Use my style in chap 06 and search to come up with what I need to finish the entire course.
         
