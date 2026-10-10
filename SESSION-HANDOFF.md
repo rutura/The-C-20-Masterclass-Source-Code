@@ -8,7 +8,7 @@ Suggested prompt for the next session:
 
 ## Status
 
-Branch `udemy-update-cpp-23`. Last commit `8eaf674` (chapters 08 and 09), pushed to `origin`. Chapters 10, 11 and 12, this file and the `CLAUDE.md` update are in the working tree, **not committed**: commit them only if the user asks.
+Branch `udemy-update-cpp-23`. Last commit `b04fe84` (chapters 10 to 12, this file and the `CLAUDE.md` update), pushed to `origin`. Anything newer is in the working tree, **not committed**: commit only if the user asks. (Earlier: `8eaf674` was chapters 08 and 09.) Push with `git -c http.sslBackend=schannel push`.
 
 | Chapter | State |
 |---|---|
