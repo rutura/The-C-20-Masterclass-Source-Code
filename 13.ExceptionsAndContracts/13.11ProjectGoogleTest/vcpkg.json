@@ -1,0 +1,8 @@
+{
+  "name": "matrix-tests-gtest",
+  "version": "0.1.0",
+  "dependencies": [
+    "gtest"
+  ],
+  "builtin-baseline": "30ef65cad98f08e7197c9a1656fbd871bcb72f2d"
+}

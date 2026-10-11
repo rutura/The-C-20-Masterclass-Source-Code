@@ -65,6 +65,14 @@ reference.
 - Check whether another chapter already covers a concept before teaching it
   again (for example vector, sorting and views basics are chapter 07, lambdas
   and function templates are chapter 06).
+- **Use only what has been taught.** Code and notes of a lecture may use only
+  features taught in an earlier lecture of the same chapter or in an earlier
+  chapter. If something new is needed, teach it first, briefly, before its
+  first use, or avoid it. A forward pointer in prose ("chapter 16 explains
+  this") does not make it acceptable in code. Not taught before chapter 16:
+  generic lambdas (`auto` parameters), forwarding references (`T&&`),
+  class template argument deduction (`std::pair{a, b}`), concepts and type
+  traits. Grep the earlier `NOTES.md` files to check.
 - **Reference books are idea sources only.** `D:\CourseRef` holds Deitel
   (C++20 for Programmers) and Gregoire (Professional C++, 6th ed.) plus their
   code. Use them for topic order, pitfalls and the kind of exercise. Write all
