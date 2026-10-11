@@ -4,7 +4,7 @@ Read this first, then `CLAUDE.md` (conventions, build rules) and `COURSE-PLAN.md
 
 Suggested prompt for the next session:
 
-> Read SESSION-HANDOFF.md, CLAUDE.md and COURSE-PLAN.md, then continue with chapter 19 (Parallel Algorithms and Concurrency, with the Parallel Mandelbrot project that renders onto the chapter 10 `Canvas` serially, with `std::execution::par` and with a thread pool, and measures the speedup) following the per-chapter workflow in the handoff. Obey the "only use what has been taught" rule. Obey the "only use what has been taught" rule.
+> Read SESSION-HANDOFF.md, CLAUDE.md and COURSE-PLAN.md. All 19 chapters are written. Ask the user what to do next: apply review feedback to chapters 13 to 19, commit and push (only if asked), or polish. Obey the "only use what has been taught" rule for any new code.
 
 ## Status
 
@@ -26,18 +26,33 @@ Branch `udemy-update-cpp-23`. Last commit `6535d7c` (handoff update after `b04fe
 | 16 Templates, Concepts and Metaprogramming | done, awaiting review. Lectures `16.2` to `16.11` (function templates further, generic lambdas, class templates, value parameters, type traits, using concepts, writing concepts, specialization and if constexpr, variadic/folds/forwarding, constexpr family), `16.12ProjectMatrixTemplate`, `16.13Assignment` |
 | 17 Modules | done, awaiting review. Lectures `17.2` to `17.8` (why headers hurt, first module, modules and the standard library, partitions, `import std;`, fragments/header units/migration, how the build works), `17.9ProjectModularize` (the 11.12 shape renderer as headers, as modules and as modules with `import std;`, with build-time tables for all three compilers), `17.10Assignment` |
 | 18 Coroutines | done, awaiting review. Lectures `18.2` to `18.9` (functions that pause, `std::generator`, frame/promise/handle, writing your own generator, `co_await` and awaiters, a lazy `Task<T>`, lifetime pitfalls, a round-robin scheduler), `18.10ProjectLazyPipeline` (generator pipeline over a log file plus three jobs on the scheduler), `18.11Assignment` |
-| 19 | not started |
+| 19 Parallel Algorithms and Concurrency | done, awaiting review. Lectures `19.2` to `19.12` (parallel algorithms, threads and `jthread`, data races, mutexes and deadlock, atomics, condition variables, `async` and futures, latch/barrier/semaphore, a thread pool, a logger, finding races with ThreadSanitizer), `19.13ProjectParallelMandelbrot`, `19.14Assignment` |
 
 The user reviewed chapters 07 and 08 ("Looks good"), then asked for the commit and push of 08 and 09 and for chapter 10 without further comments, so treat 09 as accepted. The user reviewed chapter 10 ("Looking good") and chapter 11 ("Looking good. Continue"). Chapter 12 has not been reviewed yet.
 
 ## What comes next
 
-Chapter 19 (the last) in order, one at a time, pausing for the user's review after each. The lecture lists, projects and source references for each chapter are in the table in `COURSE-PLAN.md` ("Chapters 09 to 19"). Short version of the reuse chains the plan depends on:
+All chapters are written; what is left is the user's review of 13 to 19, then (if asked) commit and push. Original plan note: chapters were done in order, one at a time, pausing for review after each. The lecture lists, projects and source references for each chapter are in the table in `COURSE-PLAN.md` ("Chapters 09 to 19"). Short version of the reuse chains the plan depends on:
 
 - ch06 image writer -> ch10 `Canvas` -> ch11 Shapes -> ch17 modules -> ch19 parallel Mandelbrot
 - ch12 `Matrix` -> ch13 tests -> ch16 `Matrix<T,R,C>`
 - ch14 log analyzer -> ch15 ranges pipeline -> ch18 lazy pipeline
 - ch12 carries Project 5 (vcpkg + ftxui, three folders), ch13 carries Project 6 (testing: hand-rolled, GoogleTest, Catch2)
+
+## Chapter 19: DONE (record kept for reference; the course is complete)
+
+Folder `19.ParallelAlgorithmsAndConcurrency/` (folder names: `19.2ParallelAlgorithms`, `19.3ThreadsAndJthread`, `19.4DataRaces`, `19.5MutexAndDeadlock`, `19.6Atomics`, `19.7ConditionVariables`, `19.8AsyncAndFutures`, `19.9LatchBarrierSemaphore`, `19.10ThreadPool` (`thread_pool.h`), `19.11ALogger` (`logger.h`), `19.12FindingRacesWithThreadSanitizer` (TSan on by default where it exists, `rooster 1..4` runs a buggy case), `19.13ProjectParallelMandelbrot` (copy of the 10.12 Canvas + `thread_pool.h`), `19.14Assignment` (starter, `main_solution.cpp`, `thread_pool.h`, QUIZ), `NOTES.md` about 1,620 lines, LF). Builds with 0 warnings and prints identical output on MSVC 19.51 (`/W4 /EHsc`), GCC 16.2 and Clang 21.1.8 (`-Wall -Wextra`) apart from lines starting `[varies]` (timings and machine size, filtered by the comparison script). The lectures also build and match on MinGW GCC 14.2 (`-lstdc++exp -pthread`). MinGW Clang 19.1 cannot link the thread library (`undefined reference to std::__once_callable`): not used.
+
+Facts worth keeping:
+- Parallel algorithms: MSVC has its own pool. GCC/Clang with libstdc++ need oneTBB (`apt-get install libtbb-dev`, CMake `find_package(TBB)` + `TBB::tbb`). It is NOT in the course images: I installed it into the stopped containers `cppm-gcc` and `cppm-clang` (`apt-get update && apt-get install -y libtbb-dev`, oneTBB 2022.1) so it persists there, but a fresh container from the image will not have it. Without TBB the code still compiles and runs serially and `par` was 3x SLOWER (316 ms vs 112 ms, 20M elements); MinGW shows 1.0x. Small ranges (2,000 x 1,000 doubles) are slower with `par`: 0.1x MSVC, 0.4x GCC/Clang. An exception escaping a function given to a `par` algorithm calls `std::terminate` on all three. `std::ranges` algorithms have no policy overloads.
+- The unprotected 4-thread counter (4 x 1,000,000 `++`): about 1.04M to 1.14M unoptimized on all three; optimized: GCC and Clang `-O2` print exactly 4,000,000 (loop collapsed, race hidden), MSVC `/O2` prints 1,000,000. A `bool` spin flag did NOT hang at `-O2` on GCC/Clang in my test (so the notes do not claim it).
+- Timings of 4M increments (mutex / atomic / relaxed / share nothing): MSVC 122/56/54/1 ms, GCC 380/51/50/2, Clang 225/49/48/2.
+- The 19.5 deadlock demo needs the loser to keep holding its first mutex (`sleep_for(patience * 2)` before returning), otherwise the first thread to give up releases and the other gets through (flaky). Verified stable over several runs on all three.
+- `std::async` discarding the future: all three warn (MSVC C4858); two 100 ms calls took 201 ms discarded vs 100 ms kept. Evaluating `wait_for(...)` and `get()` as two arguments of one call crashed (GCC right-to-left, MSVC too): written as two statements.
+- ThreadSanitizer works in `cppm-gcc` and `cppm-clang` with no ASLR trouble. The 4 buggy cases of 19.12 are all reported by both (exit 66), the fixed run is clean. False alarms: (1) oneTBB internals when `par` is used: suppress with a file containing `race:oneapi/tbb`, `race:tbb::`, `race:__pstl::` and `TSAN_OPTIONS=suppressions=file` (a file with only `race:tbb::` was NOT enough on GCC); (2) GCC 16's `std::println` called from two threads at once gives TSan reports in `<print>` (reads `stdout`'s internal buffer), `fputs` and Clang+libstdc++ 14 give none, `std::osyncstream` gives none. Hence the chapter prints from `main` after joining. Not determined whether it is a library bug or a TSan false positive.
+- Mandelbrot 1600 x 1200, 500 iterations, 20 hardware threads (i7-12700): serial 1123/477/486 ms (MSVC/GCC/Clang); par 15.6x/16.0x/16.1x; one band per thread about 8x; pool job per row 13.5x to 15.8x; MinGW (no TBB): par 1.0x, pool 16.1x. `mandelbrot.png` is byte-identical across MSVC, GCC, Clang and MinGW (MD5 `d4ca91d492696924b498200d053ef0f7`). Clean under ASan/UBSan, and under TSan with the oneTBB suppressions.
+- Taught inside the chapter before first use: `std::ref`/`cref`, `std::stop_token`/`stop_callback`, `[this]` capture (19.7), `std::defer_lock`, `[&, id]`, trailing return type `-> std::future<decltype(job())>`, `std::move_only_function`, `std::osyncstream`.
+- Scratch helpers (not in the repo): `D:\Sandbox\_build\scratch\run19.sh`, `all19.sh`, `msvc19.ps1`, `tsan.sh`, `tsanall.sh`, `tsasg.sh`, `proj19.sh`.
 
 ## Chapter 18: DONE (record kept for reference; chapter 19 is next)
 
