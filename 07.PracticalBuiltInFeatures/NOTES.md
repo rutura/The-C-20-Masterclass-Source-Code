@@ -3401,17 +3401,13 @@ unmatched text is what makes this come out clean.
 
 ## 7.12 Project: building by hand
 
-Up to now you have pressed a Run button, or typed `cmake --build`, and a program appeared. In this project we take the lid off. You will call the **compiler and the linker yourself**, on the command line, and then open the files they produce to see what is really inside.
+Up to now you have gone through your IDE to build your binaries. In this project we take the lid off. You will call the **compiler and the linker yourself**, on the command line, and then open the files they produce to see what is really inside.
 
-We do it for a reason. Sooner or later a build fails with a message like `undefined reference to ...` or `unresolved external symbol ...`. Those messages come from the **linker**, not the compiler, and they only make sense once you have seen what the linker is given.
+We do it for a reason. Sooner or later a build fails with a message like `undefined reference to ...` or `unresolved external symbol ...`. Those messages come from the **linker**, not the compiler, and they only make sense once you have gone down to this level at least once and seen what the compilers are doing under the hood, and attempted to investigate what is in the files that those tools generate.  
 
-The program is a small **weather station** report, in the same spirit as the chapter assignment. It reads a list of Fahrenheit readings, summarises them, and prints one line in Celsius.
+NOTE: This lecture and a few that follow are unconventional in beginner C++ courses out there. But I believe these concepts widen your perspective to what the tools we call do under the hood and they give you the insights that help you even confindently switch to other tools, if later on you decide that **CMake** is no longer meeting your needs.
 
-```
-sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
-```
-
-The code is in `7.12ProjectManualCompile`. It has two forms: `single.cpp` (one file, nothing else) and three files that work together (`main.cpp`, `stats.cpp`, `report.cpp`, with their headers).
+NOTE: We will see many tools and commands. You don't have to memorize them. These notes are yours forever if you ever need to come back to them. The important thing is to understand what is happening.
 
 ### What happens between source and program
 
@@ -3422,8 +3418,8 @@ The code is in `7.12ProjectManualCompile`. It has two forms: `single.cpp` (one f
                                                    (object files)
 ```
 
-- The **compiler** turns **one `.cpp` file at a time** into an **object file**: machine code for that file, plus a list of names. Each file is compiled in complete ignorance of the others. That is why a header only *declares* `to_celsius` and the compiler is happy to trust it.
-- The **linker** takes all the object files, matches every "I need `to_celsius`" with the object that defines it, and writes the final program.
+- The **compiler** turns **one `.cpp` file at a time** into an **object file**: machine code for that file, plus a list of names. Each file is compiled in complete ignorance of the others. 
+- The **linker** takes all the object files, matches every reference to a function with the object that defines it, and writes the final program.
 
 Everything in this project is a variation on those two steps.
 
