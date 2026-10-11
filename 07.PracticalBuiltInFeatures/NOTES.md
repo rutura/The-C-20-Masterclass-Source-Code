@@ -3427,13 +3427,26 @@ Everything in this project is a variation on those two steps.
 
 You can follow along in whichever of these you have. The commands change a little, the ideas do not.
 
-| Environment | Compiler driver | Linker | Object files |
-|---|---|---|---|
-| Windows, MSVC | `cl` | `link` | `.obj` |
-| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` |
-| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
-| Linux, GCC | `g++` | `ld` (called by `g++`) | `.o` |
-| Linux, Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
+- **Windows, MSVC**
+  - Compiler driver: `cl`
+  - Linker: `link`
+  - Object files: `.obj`
+- **Windows, MinGW GCC**
+  - Compiler driver: `g++`
+  - Linker: `ld` (called by `g++`)
+  - Object files: `.o`
+- **Windows, MinGW Clang**
+  - Compiler driver: `clang++`
+  - Linker: `ld` (called by `clang++`)
+  - Object files: `.o`
+- **Linux, GCC**
+  - Compiler driver: `g++`
+  - Linker: `ld` (called by `g++`)
+  - Object files: `.o`
+- **Linux, Clang**
+  - Compiler driver: `clang++`
+  - Linker: `ld` (called by `clang++`)
+  - Object files: `.o`
 
 How to get a shell for each one:
 
