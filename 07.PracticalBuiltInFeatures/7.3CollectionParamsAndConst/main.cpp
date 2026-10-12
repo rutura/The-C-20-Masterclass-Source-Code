@@ -57,7 +57,7 @@ int main(){
 
 	// By reference
 	std::println("\n--- by reference ---");
-	// reset_readings(sensor_readings);
+	reset_readings(sensor_readings);
 
 	std::print("sensor_readings after reset_readings (changed): ");
 	for (int reading : sensor_readings) {
