@@ -2,9 +2,10 @@
 #include <print>
 #include <vector>
 
-// PROJECT, part 1: one source file, nothing to link against. Small enough to
-// compile two ways (source -> object -> executable, or source -> executable)
-// and to open the object file afterwards.
+// PROJECT: the single-file program. The notes build it in two steps (compile
+// to an object file, then link) and in one step (the compiler driver runs
+// both), then compare the two executables. It calls no other source file, so
+// the linker has nothing to match up.
 
 int main() {
 

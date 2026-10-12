@@ -7,8 +7,10 @@
 // PROJECT: build this program by hand, with no CMake and no IDE.
 //
 // Three translation units: main.cpp, stats.cpp and report.cpp. Each one is
-// compiled to its own object file, and the linker joins them. The notes walk
-// through the exact commands for MSVC, MinGW GCC, MinGW Clang and Linux.
+// compiled to its own object file, and the linker joins them. The notes give
+// the exact commands for each of the five environments (MSVC, MinGW GCC,
+// MinGW Clang, Linux GCC, Linux Clang). Leaving stats' object file out of the
+// link is the deliberate mistake the notes use to show what the linker does.
 
 int main() {
 
