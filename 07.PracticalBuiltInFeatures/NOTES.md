@@ -3403,11 +3403,11 @@ unmatched text is what makes this come out clean.
 
 Up to now you have gone through your IDE to build your binaries. In this project we take the lid off. You will call the **compiler and the linker yourself**, on the command line, and then open the files they produce to see what is really inside.
 
-We do it for a reason. Sooner or later a build fails with a message like `undefined reference to ...` or `unresolved external symbol ...`. Those messages come from the **linker**, not the compiler, and they only make sense once you have gone down to this level at least once and seen what the compilers are doing under the hood, and attempted to investigate what is in the files that those tools generate.  
+We do it for a reason. Sooner or later a build fails with a message like `undefined reference to ...` or `unresolved external symbol ...`. Those messages come from the **linker**, not the compiler, and they only make sense once you have gone down to this level at least once, seen what the tools do under the hood and looked at what is inside the files they produce.
 
-NOTE: This lecture and a few that follow are unconventional in beginner C++ courses out there. But I believe these concepts widen your perspective to what the tools we call do under the hood and they give you the insights that help you even confindently switch to other tools, if later on you decide that **CMake** is no longer meeting your needs.
+NOTE: This lecture and the few that follow are unusual in a beginner C++ course. But these ideas widen your view of what the tools do under the hood, and they give you the insight to switch confidently to another build tool if **CMake** ever stops meeting your needs.
 
-NOTE: We will see many tools and commands. You don't have to memorize them. These notes are yours forever if you ever need to come back to them. The important thing is to understand what is happening.
+NOTE: We will meet many tools and commands. You do not have to memorize them. These notes are yours to come back to. The important thing is to understand what is happening.
 
 ### What happens between source and program
 
@@ -3418,143 +3418,213 @@ NOTE: We will see many tools and commands. You don't have to memorize them. Thes
                                                    (object files)
 ```
 
-- The **compiler** turns **one `.cpp` file at a time** into an **object file**: machine code for that file, plus a list of names. Each file is compiled in complete ignorance of the others. 
+- The **compiler** turns **one `.cpp` file at a time** into an **object file**: machine code for that file, plus a table of names. Each file is compiled in complete ignorance of the others.
 - The **linker** takes all the object files, matches every reference to a function with the object that defines it, and writes the final program.
+- What you type is rarely the compiler or the linker itself. `cl`, `g++` and `clang++` are **drivers**: programs that run the compiler, then the linker, and pass your options along. That is why one command can do both jobs, and why the same command can also do only the first job (the `-c` or `/c` flag).
 
 Everything in this project is a variation on those two steps.
 
-### The five environments
+### The files you will build
 
-You can follow along in whichever of these you have. The commands change a little, the ideas do not.
-
-- **Windows, MSVC**
-  - Compiler driver: `cl`
-  - Linker: `link`
-  - Object files: `.obj`
-- **Windows, MinGW GCC**
-  - Compiler driver: `g++`
-  - Linker: `ld` (called by `g++`)
-  - Object files: `.o`
-- **Windows, MinGW Clang**
-  - Compiler driver: `clang++`
-  - Linker: `ld` (called by `clang++`)
-  - Object files: `.o`
-- **Linux, GCC**
-  - Compiler driver: `g++`
-  - Linker: `ld` (called by `g++`)
-  - Object files: `.o`
-- **Linux, Clang**
-  - Compiler driver: `clang++`
-  - Linker: `ld` (called by `clang++`)
-  - Object files: `.o`
-
-How to get a shell for each one:
-
-- **MSVC**: open **Developer PowerShell for VS** from the Start menu. That is an ordinary PowerShell with `cl`, `link`, `lib` and `dumpbin` on the PATH. You can also load it by hand from any PowerShell: `& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.
-- **MinGW**: a normal PowerShell with `C:\mingw64\bin` on the PATH. Check with `g++ --version` and `clang++ --version`.
-- **Linux**: the Docker containers from chapter 2. From the repository root, `docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc` (or `cpp-masterclass-clang`), then `cd 07.PracticalBuiltInFeatures/7.12ProjectManualCompile`.
-
-Every folder in this project also has one script per environment (`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`, `build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands below from top to bottom. Type the commands yourself first, and use the scripts to check your work.
-
-### Part 1: one file, two ways
-
-`single.cpp` is small enough to hold in your head: sum a vector, print the average.
-
-```cpp
-const std::vector<double> readings{68.0, 72.5, 59.0, 81.0, 90.5, 55.0, 77.0, 64.5};
-const double total{std::accumulate(readings.begin(), readings.end(), 0.0)};
-std::println("average: {:.1f} F", total / static_cast<double>(readings.size()));
-```
-
-**Way 1: two steps.** Compile to an object file, then link it.
+All the source files are in `7.12ProjectManualCompile`.
 
 ```
-   single.cpp ──► compile ──► single.obj / single.o ──► link ──► single_two_step
-```
+   single.cpp              sums a vector and prints the average (one file, nothing to link against)
 
-#### MSVC
-
-```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c single.cpp
-link /nologo single.obj /OUT:single_two_step.exe
-```
-
-- `/c` means **compile only, do not link**. That is what produces `single.obj`.
-- `/std:c++latest` selects the newest language mode. Do **not** write `/std:c++23`: with this compiler `cl` ignores it, and `<print>` breaks.
-- `/EHsc` turns on normal C++ exception handling. `/W4` asks for more warnings.
-- `/MD` picks the **shared C runtime**. We will care about this in 7.13. CMake uses it by default, so we use it too.
-
-#### MinGW GCC
-
-```powershell
-g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-g++ single.o -o single_two_step.exe -lstdc++exp
-```
-
-#### MinGW Clang
-
-```powershell
-clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-clang++ single.o -o single_two_step.exe -lstdc++exp
-```
-
-#### Linux, GCC
-
-```sh
-g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-g++ single.o -o single_two_step
-```
-
-#### Linux, Clang
-
-```sh
-clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-clang++ single.o -o single_two_step
-```
-
-`-c` is the same idea as `/c`: compile, stop before linking. `-o` names the output file. The second command has no source file at all: the "compiler" is being used as a **front end for the linker**.
-
-> **Gotcha, MinGW only: `-lstdc++exp`.** On the MinGW GCC 14 and Clang 19 we use on Windows, `std::println` needs one extra library. Leave it out and the link fails with:
->
-> ```
-> undefined reference to `std::__open_terminal(_iobuf*)'
-> undefined reference to `std::__write_to_terminal(void*, std::span<char, ...>)'
-> ```
->
-> `-lstdc++exp` ("the experimental part of the C++ library") has to come **after** the objects that need it. Newer compilers, like the GCC 16 and Clang 21 in our Linux containers, do not need it. Notice how the message is about **missing names**, not about syntax: your code compiled fine. This is a linker error.
-
-**Way 2: one step.** Hand the source file straight to the driver and let it run both steps.
-
-```powershell
-# MSVC
-cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fe:single_one_step.exe
-
-# MinGW GCC or Clang (Windows)
-g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
-
-# Linux
-g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
-```
-
-Compare the two programs. On our machine both executables had **exactly the same size**. That is the point: `cl`, `g++` and `clang++` are **drivers**. They are not one program that does everything: they run the compiler, then the linker, and pass your options along. The one-step form just skips saving the object file.
-
-> **The size surprise.** On our machine `single.obj` was about 800 KB, bigger than the 310 KB executable built from it (MSVC), and `single.o` was about 700 KB against a 510 KB program (MinGW GCC). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object file keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program actually uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
-
-### Part 2: three files, three objects, one link
-
-Now the real program. Look at how the work is divided:
-
-```
    stats.h / stats.cpp     summarize(readings) and to_celsius(f)
    report.h / report.cpp   format_report(sensor, summary), which CALLS to_celsius
    main.cpp                builds the readings, calls both, prints
 ```
 
-`report.cpp` calls `to_celsius`, which lives in `stats.cpp`. When the compiler builds `report.cpp` it only sees the declaration in `stats.h`. It cannot know where the function is, so it leaves a note in the object file that says "**I need `to_celsius`, fill it in later**".
+`report.cpp` calls `to_celsius`, which lives in `stats.cpp`. When the compiler builds `report.cpp` it only sees the declaration in `stats.h`. It cannot know where the function is, so it leaves a note in the object file that says "**I need `to_celsius`, fill it in later**". The linker keeps that promise.
 
-Compile each `.cpp` on its own, then link all three objects together.
+### Pick your environment
 
-#### MSVC
+The project has **five environments**. Every one of them is a complete walk-through that you can do without reading any other. Do the one you have, and come back for the others if you are curious. In each one you will do the same four things:
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
+
+| Environment | Compiler driver | Linker | Object files |
+|---|---|---|---|
+| Windows, MSVC | `cl` | `link` | `.obj` |
+| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` |
+| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
+| Linux, GCC (Docker) | `g++` | `ld` (called by `g++`) | `.o` |
+| Linux, Clang (Docker) | `clang++` | `ld` (called by `clang++`) | `.o` |
+
+Every folder in this project also has one script per environment (`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`, `build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of that environment from top to bottom. Type the commands yourself first, and use the scripts to check your work.
+
+---
+
+### Environment 1: Windows, MSVC
+
+MSVC is Microsoft's C++ compiler, the one Visual Studio uses and the reference compiler of this course. Our version is `cl` 19.51 (Visual Studio 2026).
+
+#### Open the shell
+
+Open **Developer PowerShell for VS** from the Start menu. That is an ordinary PowerShell that already knows where the Microsoft tools are. (From any other PowerShell you can load it by hand: `& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.) Then, from the repository root:
+
+```powershell
+cd 07.PracticalBuiltInFeatures\7.12ProjectManualCompile
+cl
+```
+
+`cl` on its own prints a banner. Ours starts with `Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64`. If you see it, the shell is ready.
+
+#### The tools in this environment
+
+- **`cl`**: the compiler driver. You give it `.cpp` files and options. It runs the compiler and, unless you say `/c`, it then runs the linker for you.
+- **`link`**: the linker. It takes `.obj` files, matches every name a file needs with the file that defines it, and writes the `.exe`. We call it ourselves in the two-step build.
+- **`dumpbin`**: Microsoft's "dump a binary" tool. It reads object files, executables and DLLs and prints their headers, their symbol tables and the DLLs they depend on. It only reads: it never changes the file. We need it because an object file is not text, and this is how we look inside.
+- **`undname`**: turns a mangled C++ name back into readable C++. We need it because the names in an object file look like noise (more on that below).
+
+#### 1. Single file, two steps
+
+```
+   single.cpp ──► compile ──► single.obj ──► link ──► single_two_step.exe
+```
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c single.cpp
+link /nologo single.obj /OUT:single_two_step.exe
+.\single_two_step.exe
+```
+
+```
+average: 70.9 F
+```
+
+- `/c` means **compile only, do not link**. That is what produces `single.obj`.
+- `/std:c++latest` selects the newest language mode. Do **not** write `/std:c++23`: `cl` answers `Command line warning D9002 : ignoring unknown option '/std:c++23'`, compiles in an older mode and then fails with `error C2039: 'println': is not a member of 'std'`.
+- `/EHsc` turns on normal C++ exception handling. `/W4` asks for more warnings. `/nologo` hides the banner.
+- `/MD` picks the **shared C runtime**. CMake uses it by default, so we use it too. All your objects must agree on this option, otherwise the link fails (we meet that in 7.13).
+- The second command has no `.cpp` file at all: `link` only joins objects. `/OUT:` names the result.
+
+You now have two new files: `single.obj` (the object) and `single_two_step.exe` (the program).
+
+#### 2. Read the object files and the binary
+
+First, make two more small objects to look at: `stats.obj` (which **defines** `to_celsius`) and `report.obj` (which **uses** it).
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
+```
+
+**What kind of file is it?**
+
+```powershell
+dumpbin /headers stats.obj | Select-String 'File Type|machine'
+```
+
+```
+File Type: COFF OBJECT
+            8664 machine (x64)
+```
+
+**COFF** is the object file format on Windows. `8664 machine (x64)` says the machine code is for 64-bit x86.
+
+**Which names does it define, and which does it need?** A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so we filter for our own namespace, `station`:
+
+```powershell
+dumpbin /symbols stats.obj | Select-String 'External.*station'
+dumpbin /symbols report.obj | Select-String 'UNDEF.*to_celsius'
+```
+
+```
+049 00000000 SECT4  notype ()    External     | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
+04A 00000030 SECT4  notype ()    External     | ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z (struct station::Summary __cdecl station::summarize(class std::vector<double,class std::allocator<double> > const &))
+
+6FD 00000000 UNDEF  notype ()    External     | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
+```
+
+(`dumpbin` wraps long lines at an odd place. We joined them here.) Two things to see:
+
+- In `stats.obj`, `to_celsius` is **External** and has a section (`SECT4`): this object **defines** it.
+- In `report.obj`, the same name is **UNDEF**: "undefined here, the linker must find it". That is the note from the start of the lecture, made visible. The linker's whole job is to **match every UNDEF with exactly one definition**.
+
+**Name mangling.** You wrote `to_celsius`. The object file says `?to_celsius@station@@YANN@Z`. That is **name mangling**. C++ allows several functions with the same name and different parameters (overloading, lecture 6.9), but a linker only compares **plain names**. So the compiler puts the **namespace, the name and the parameter types into the one name** it hands to the linker. `undname` reads it back:
+
+```powershell
+undname '?to_celsius@station@@YANN@Z'
+```
+
+```
+Undecoration of :- "?to_celsius@station@@YANN@Z"
+is :- "double __cdecl station::to_celsius(double)"
+```
+
+(`undname` also prints a copyright banner above that.) Here is the name taken apart:
+
+| Piece | Meaning |
+|---|---|
+| `?` | "this is a C++ name" |
+| `to_celsius@` | the function name |
+| `station@` and then `@` | the enclosing namespace, then the end of the qualification |
+| `YA` | a free function (`Y`) using the `__cdecl` calling convention (`A`) |
+| `N` | the return type: `double` |
+| `N` | the parameter type: `double` |
+| `@` then `Z` | end of the parameter list, end of the name |
+
+Do not try to memorise this. The point is that **the parameter types are inside the name**. We tried an overload `int to_celsius(int)` and MSVC named it `?to_celsius@station@@YAHH@Z`: the return type and the parameter are now `H`, which is `int`. Two different names, so both can live in one program.
+
+**Now the finished program.** An executable is just another binary with a table of what it needs.
+
+```powershell
+dumpbin /headers single_two_step.exe | Select-String 'File Type|machine|subsystem'
+dumpbin /dependents single_two_step.exe
+```
+
+```
+File Type: EXECUTABLE IMAGE
+            8664 machine (x64)
+            6.00 subsystem version
+               3 subsystem (Windows CUI)
+...
+  Image has the following dependencies:
+
+    MSVCP140.dll
+    KERNEL32.dll
+    VCRUNTIME140.dll
+    VCRUNTIME140_1.dll
+    api-ms-win-crt-runtime-l1-1-0.dll
+    ...more api-ms-win-crt-*.dll files...
+```
+
+`subsystem (Windows CUI)` means a **console** program. The **dependencies** are the DLLs Windows loads when the program starts: `MSVCP140.dll` is the C++ standard library and `VCRUNTIME140*.dll` and `api-ms-win-crt-*.dll` are the C runtime. That is what `/MD` ("shared runtime") means. We come back to dependencies in 7.14.
+
+**The ABI.** Notice that MSVC's objects use COFF, as do MinGW's (next environments), but **a MSVC object cannot be linked with a MinGW one**. We tried it: we linked this `stats.obj` with `main.o` and `report.o` built by MinGW GCC. It fails with `undefined reference to station::to_celsius(double)` (and `undefined reference to __security_cookie`, a name MinGW's libraries do not provide). MinGW asks for the name `_ZN7station10to_celsiusEd`, and MSVC's object only has `?to_celsius@station@@YANN@Z`. The C++ libraries behind the two are different too. **A C++ library is tied to the compiler and standard library that built it.** That agreement about names, layouts and calling conventions is the **ABI** (application binary interface). In 7.14 you will see why it matters for libraries.
+
+#### 3. Single file, one step
+
+Hand the source file straight to `cl` and let it run both steps:
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fe:single_one_step.exe
+.\single_one_step.exe
+Get-ChildItem single.obj, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+average: 70.9 F
+
+Name                Length
+----                ------
+single.obj          801210
+single_two_step.exe 311808
+single_one_step.exe 311808
+```
+
+`/Fe:` names the executable. Both programs have **exactly the same size**. That is the point: `cl` is a driver, it runs the compiler and then `link` and passes your options along. The one-step form just does not keep the object file.
+
+Look at the sizes again: the object file (about 800 KB) is **bigger** than the program built from it (about 310 KB). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
+
+#### 4. Multiple files
+
+Compile each `.cpp` on its own, then link all three objects together:
 
 ```powershell
 cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
@@ -3564,7 +3634,205 @@ link /nologo main.obj stats.obj report.obj /OUT:weather.exe
 .\weather.exe
 ```
 
-#### MinGW GCC (swap `g++` for `clang++` to use Clang)
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.obj`**:
+
+```powershell
+link /nologo main.obj report.obj /OUT:broken.exe
+```
+
+```
+main.obj : error LNK2019: unresolved external symbol "struct station::Summary __cdecl station::summarize(class std::vector<double,class std::allocator<double> > const &)" (?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z) referenced in function main
+report.obj : error LNK2019: unresolved external symbol "double __cdecl station::to_celsius(double)" (?to_celsius@station@@YANN@Z) referenced in function ... (long text shortened)
+broken.exe : fatal error LNK1120: 2 unresolved externals
+```
+
+Read that with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. And look: the odd-looking text in parentheses is the mangled name from the table above, the very one that was UNDEF in `report.obj`. Whenever you see `LNK2019`, ask: **did I forget to compile or link the file that defines it?**
+
+That is MSVC done.
+
+---
+
+### Environment 2: Windows, MinGW GCC
+
+**MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The programs it makes are ordinary Windows programs. Ours is a UCRT build by Brecht Sanders: `g++ --version` says `g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.12ProjectManualCompile
+g++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. You give it `.cpp` files and options. It runs the compiler and, unless you say `-c`, then runs the linker for you.
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls it. But the linker errors you get come from `ld.exe`, and you will see its name in them.
+- **`-lstdc++exp`**: not a program but a library option (`-l` means "link this library"). On our MinGW GCC 14, `std::println` needs this extra library ("the experimental part of the C++ library").
+- **`nm`**: lists the **symbol table** of an object file: every name it defines or needs. We need it to see what the linker sees.
+- **`objdump`**: prints information about object files and executables: format, architecture, and (with `-p`) which DLLs a program needs.
+- **`c++filt`**: turns a mangled C++ name back into readable C++.
+
+#### 1. Single file, two steps
+
+```
+   single.cpp ──► compile ──► single.o ──► link ──► single_two_step.exe
+```
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+g++ single.o -o single_two_step.exe -lstdc++exp
+.\single_two_step.exe
+```
+
+```
+average: 70.9 F
+```
+
+- `-c` means **compile only, do not link**. That is what produces `single.o`.
+- `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more warnings.
+- `-o` names the output file.
+- The second command has no `.cpp` file at all: `g++` is being used as a **front end for the linker**.
+
+> **Gotcha, MinGW only: `-lstdc++exp`.** Leave it out and the link fails:
+>
+> ```powershell
+> g++ single.o -o nolib.exe
+> ```
+>
+> ```
+> ...ld.exe: single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
+> ...ld.exe: single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
+> collect2.exe: error: ld returned 1 exit status
+> ```
+>
+> (Long paths and symbol names shortened with `...`.) Notice that the message is about **missing names**, not syntax: your code compiled fine. This is a **linker** error, and it comes from `ld.exe`. The library has to come **after** the objects that need it. Newer compilers, like the GCC 16 in our Linux container, do not need it.
+
+#### 2. Read the object files and the binary
+
+First, make two more small objects to look at: `stats.o` (which **defines** `to_celsius`) and `report.o` (which **uses** it).
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+```
+
+**What kind of file is it?**
+
+```powershell
+objdump -f stats.o
+```
+
+```
+stats.o:     file format pe-x86-64
+architecture: i386:x86-64, flags 0x00000039:
+HAS_RELOC, HAS_DEBUG, HAS_SYMS, HAS_LOCALS
+start address 0x0000000000000000
+```
+
+`pe-x86-64` is the Windows object format (**COFF**, in the PE family) for 64-bit x86.
+
+**Which names does it define, and which does it need?** A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so we filter for our own namespace, `station`:
+
+```powershell
+nm stats.o | Select-String station
+nm -C stats.o | Select-String station
+nm report.o | Select-String to_celsius
+```
+
+```
+0000000000000000 T _ZN7station10to_celsiusEd
+0000000000000038 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+
+0000000000000000 T station::to_celsius(double)
+0000000000000038 T station::summarize(std::vector<double, std::allocator<double> > const&)
+
+                 U _ZN7station10to_celsiusEd
+```
+
+(The blank lines are only here to separate the three commands.) `nm` marks each symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here: the linker must find it. In `stats.o`, `to_celsius` is `T`: this object **defines** it. In `report.o`, the same name is `U`: that is the note from the start of the lecture, made visible. The linker's whole job is to **match every `U` with exactly one `T`**. The `-C` flag ("demangle") prints the C++ name instead of the code.
+
+**Name mangling.** You wrote `to_celsius`. The object file says `_ZN7station10to_celsiusEd`. That is **name mangling**. C++ allows several functions with the same name and different parameters (overloading, lecture 6.9), but a linker only compares **plain names**. So the compiler puts the **namespace, the name and the parameter types into the one name** it hands to the linker. `c++filt` reads it back:
+
+```powershell
+c++filt _ZN7station10to_celsiusEd
+```
+
+```
+station::to_celsius(double)
+```
+
+GCC uses the "Itanium" rules. Here is the name taken apart:
+
+| Piece | Meaning |
+|---|---|
+| `_Z` | "this is a C++ name" |
+| `N` ... `E` | a **qualified** name, `namespace::function`, from `N` to `E` |
+| `7station` | a name that is 7 letters long: `station` |
+| `10to_celsius` | a name that is 10 letters long: `to_celsius` |
+| `d` | the parameter type: `d` means `double` |
+
+Do not try to memorise this. The point is that **the parameter types are inside the name**. We tried an overload `int to_celsius(int)` and GCC named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is `int`. Two different names, so both can live in one program.
+
+**Now the finished program.** An executable is just another binary with a table of what it needs.
+
+```powershell
+objdump -f single_two_step.exe
+objdump -p single_two_step.exe | Select-String 'DLL Name'
+```
+
+```
+single_two_step.exe:     file format pei-x86-64
+architecture: i386:x86-64, flags 0x0000013b:
+HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
+start address 0x0000000140001125
+
+	DLL Name: libgcc_s_seh-1.dll
+	DLL Name: libstdc++-6.dll
+	DLL Name: KERNEL32.dll
+	DLL Name: api-ms-win-crt-environment-l1-1-0.dll
+	...more api-ms-win-crt-*.dll files...
+```
+
+`pei-x86-64` is a finished Windows program (**PE**, with the `i` for "image"). The **DLL Name** lines are the DLLs Windows loads when the program starts. Two of them, `libstdc++-6.dll` and `libgcc_s_seh-1.dll`, live in `C:\mingw64\bin`. That is a real consequence: we ran our `weather.exe` from a window where `C:\mingw64\bin` was **not** on the PATH, and Windows refused to start it (exit code `-1073741515`, which means "a DLL was not found"). We come back to dependencies in 7.14.
+
+**The ABI.** MinGW's objects and MSVC's objects are both COFF, but **they cannot be mixed**. We tried it: we linked `main.o` and `report.o` built here with an `stats.obj` built by MSVC. It failed with `undefined reference to station::to_celsius(double)` and `undefined reference to __security_cookie`. MinGW asks for `_ZN7station10to_celsiusEd`, and the MSVC object only has `?to_celsius@station@@YANN@Z`. The C++ libraries behind the two are different too. **A C++ library is tied to the compiler and standard library that built it.** That agreement about names, layouts and calling conventions is the **ABI** (application binary interface). In 7.14 you will see why it matters for libraries.
+
+#### 3. Single file, one step
+
+Hand the source file straight to `g++` and let it run both steps:
+
+```powershell
+g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
+.\single_one_step.exe
+Get-ChildItem single.o, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+average: 70.9 F
+
+Name                Length
+----                ------
+single.o            706568
+single_two_step.exe 513682
+single_one_step.exe 513682
+```
+
+Both programs have **exactly the same size**. That is the point: `g++` is a driver, it runs the compiler and then the linker and passes your options along. The one-step form just does not keep the object file.
+
+Look at the sizes again: the object file (about 700 KB) is **bigger** than the program built from it (about 510 KB). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
+
+#### 4. Multiple files
+
+Compile each `.cpp` on its own, then link all three objects together:
 
 ```powershell
 g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
@@ -3574,7 +3842,412 @@ g++ main.o stats.o report.o -o weather.exe -lstdc++exp
 .\weather.exe
 ```
 
-#### Linux (swap `g++` for `clang++` to use Clang)
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.o`**:
+
+```powershell
+g++ main.o report.o -o broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
+...ld.exe: report.o:report.cpp:(.text+0x50): undefined reference to `station::to_celsius(double)'
+...ld.exe: report.o:report.cpp:(.text+0x6a): undefined reference to `station::to_celsius(double)'
+collect2.exe: error: ld returned 1 exit status
+```
+
+(The long path in front of each line is shortened to `...`.) Read that with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. One line per place that asked: `report.o` asks for `to_celsius` three times. Whenever you see `undefined reference`, ask: **did I forget to compile or link the file that defines it?** (And did I put `-lstdc++exp` after the objects?)
+
+That is MinGW GCC done.
+
+---
+
+### Environment 3: Windows, MinGW Clang
+
+**MinGW-w64** brings the GNU tool chain to Windows, and its package also contains the **Clang** compiler. The programs it makes are ordinary Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker. Ours is a UCRT build by Brecht Sanders in `C:\mingw64`: `clang++ --version` says `clang version 19.1.1` and `Target: x86_64-w64-windows-gnu`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.12ProjectManualCompile
+clang++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`clang++`**: the Clang compiler driver. You give it `.cpp` files and options. It runs the compiler and, unless you say `-c`, then runs the linker for you.
+- **`ld`**: the GNU linker. You will not usually type it: `clang++` calls it. The linker errors you get come from `ld`, and you will see its name in them.
+- **`-lstdc++exp`**: not a program but a library option (`-l` means "link this library"). On our MinGW Clang 19, `std::println` needs this extra library ("the experimental part of the C++ library").
+- **`nm`**: lists the **symbol table** of an object file: every name it defines or needs. We need it to see what the linker sees.
+- **`objdump`**: prints information about object files and executables: format, architecture, and (with `-p`) which DLLs a program needs.
+- **`c++filt`**: turns a mangled C++ name back into readable C++.
+
+#### 1. Single file, two steps
+
+```
+   single.cpp ──► compile ──► single.o ──► link ──► single_two_step.exe
+```
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+clang++ single.o -o single_two_step.exe -lstdc++exp
+.\single_two_step.exe
+```
+
+```
+average: 70.9 F
+```
+
+- `-c` means **compile only, do not link**. That is what produces `single.o`.
+- `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more warnings.
+- `-o` names the output file.
+- The second command has no `.cpp` file at all: `clang++` is being used as a **front end for the linker**.
+
+> **Gotcha, MinGW only: `-lstdc++exp`.** Leave it out and the link fails:
+>
+> ```powershell
+> clang++ single.o -o nolib.exe
+> ```
+>
+> ```
+> C:/mingw64/bin/ld: single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
+> C:/mingw64/bin/ld: single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
+> clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+> ```
+>
+> (Long symbol names shortened with `...`.) Notice that the message is about **missing names**, not syntax: your code compiled fine. This is a **linker** error, and it comes from `ld`. The library has to come **after** the objects that need it. Newer compilers, like the Clang 21 in our Linux container, do not need it.
+
+#### 2. Read the object files and the binary
+
+First, make two more small objects to look at: `stats.o` (which **defines** `to_celsius`) and `report.o` (which **uses** it).
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+```
+
+**What kind of file is it?**
+
+```powershell
+objdump -f stats.o
+```
+
+```
+stats.o:     file format pe-x86-64
+architecture: i386:x86-64, flags 0x0000003d:
+HAS_RELOC, HAS_LINENO, HAS_DEBUG, HAS_SYMS, HAS_LOCALS
+start address 0x0000000000000000
+```
+
+`pe-x86-64` is the Windows object format (**COFF**, in the PE family) for 64-bit x86.
+
+**Which names does it define, and which does it need?** A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so we filter for our own namespace, `station`:
+
+```powershell
+nm stats.o | Select-String station
+nm -C stats.o | Select-String station
+nm report.o | Select-String to_celsius
+```
+
+```
+0000000000000000 T _ZN7station10to_celsiusEd
+0000000000000040 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+
+0000000000000000 T station::to_celsius(double)
+0000000000000040 T station::summarize(std::vector<double, std::allocator<double> > const&)
+
+                 U _ZN7station10to_celsiusEd
+```
+
+(The blank lines are only here to separate the three commands.) `nm` marks each symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here: the linker must find it. In `stats.o`, `to_celsius` is `T`: this object **defines** it. In `report.o`, the same name is `U`: that is the note from the start of the lecture, made visible. The linker's whole job is to **match every `U` with exactly one `T`**. The `-C` flag ("demangle") prints the C++ name instead of the code.
+
+**Name mangling.** You wrote `to_celsius`. The object file says `_ZN7station10to_celsiusEd`. That is **name mangling**. C++ allows several functions with the same name and different parameters (overloading, lecture 6.9), but a linker only compares **plain names**. So the compiler puts the **namespace, the name and the parameter types into the one name** it hands to the linker. `c++filt` reads it back:
+
+```powershell
+c++filt _ZN7station10to_celsiusEd
+```
+
+```
+station::to_celsius(double)
+```
+
+Clang uses the same "Itanium" rules as GCC, so the names are identical to the GCC ones. Here is the name taken apart:
+
+| Piece | Meaning |
+|---|---|
+| `_Z` | "this is a C++ name" |
+| `N` ... `E` | a **qualified** name, `namespace::function`, from `N` to `E` |
+| `7station` | a name that is 7 letters long: `station` |
+| `10to_celsius` | a name that is 10 letters long: `to_celsius` |
+| `d` | the parameter type: `d` means `double` |
+
+Do not try to memorise this. The point is that **the parameter types are inside the name**. We tried an overload `int to_celsius(int)` and Clang named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is `int`. Two different names, so both can live in one program.
+
+**Now the finished program.** An executable is just another binary with a table of what it needs.
+
+```powershell
+objdump -f single_two_step.exe
+objdump -p single_two_step.exe | Select-String 'DLL Name'
+```
+
+```
+single_two_step.exe:     file format pei-x86-64
+architecture: i386:x86-64, flags 0x0000013b:
+HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
+start address 0x0000000140001125
+
+	DLL Name: libgcc_s_seh-1.dll
+	DLL Name: libstdc++-6.dll
+	DLL Name: KERNEL32.dll
+	DLL Name: api-ms-win-crt-environment-l1-1-0.dll
+	...more api-ms-win-crt-*.dll files...
+```
+
+`pei-x86-64` is a finished Windows program (**PE**, with the `i` for "image"). The **DLL Name** lines are the DLLs Windows loads when the program starts. Two of them, `libstdc++-6.dll` and `libgcc_s_seh-1.dll`, live in `C:\mingw64\bin`. That is a real consequence: we ran our `weather.exe` from a window where `C:\mingw64\bin` was **not** on the PATH, and Windows refused to start it (exit code `-1073741515`, which means "a DLL was not found"). We come back to dependencies in 7.14.
+
+**The ABI.** Objects made by MinGW and objects made by MSVC are both COFF, but **they cannot be mixed**: their mangled names differ (`_ZN7station10to_celsiusEd` here, `?to_celsius@station@@YANN@Z` with MSVC), and so do the C++ libraries behind them. **A C++ library is tied to the compiler and standard library that built it.** That agreement about names, layouts and calling conventions is the **ABI** (application binary interface). In 7.14 you will see why it matters for libraries.
+
+#### 3. Single file, one step
+
+Hand the source file straight to `clang++` and let it run both steps:
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
+.\single_one_step.exe
+Get-ChildItem single.o, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+average: 70.9 F
+
+Name                Length
+----                ------
+single.o            478750
+single_two_step.exe 502064
+single_one_step.exe 502064
+```
+
+Both programs have **exactly the same size**. That is the point: `clang++` is a driver, it runs the compiler and then the linker and passes your options along. The one-step form just does not keep the object file.
+
+Look at the sizes again. Here the object file (about 480 KB) is a little **smaller** than the program built from it (about 500 KB). With other tool chains the object is bigger than the program: what each compiler keeps in an object file differs, and your numbers will differ too. The lesson is that an object file is **not a small program**, it is a half-finished one: the template code that `std::println` and `std::accumulate` bring in is spread over it, together with the bookkeeping the linker needs.
+
+#### 4. Multiple files
+
+Compile each `.cpp` on its own, then link all three objects together:
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+clang++ main.o stats.o report.o -o weather.exe -lstdc++exp
+.\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.o`**:
+
+```powershell
+clang++ main.o report.o -o broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x4a): undefined reference to `station::to_celsius(double)'
+C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x5f): undefined reference to `station::to_celsius(double)'
+C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x74): undefined reference to `station::to_celsius(double)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Read that with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. One line per place that asked: `report.o` asks for `to_celsius` three times. Whenever you see `undefined reference`, ask: **did I forget to compile or link the file that defines it?** (And did I put `-lstdc++exp` after the objects?)
+
+That is MinGW Clang done.
+
+---
+
+### Environment 4: Linux, GCC (Docker)
+
+You get a real Linux with GCC from the Docker container of chapter 2. Our image carries GCC 16.2 and GNU binutils 2.44.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc
+```
+
+You land in `/workspace`, which is the repository. Now, inside the container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.12ProjectManualCompile
+g++ --version
+```
+
+```
+g++ (GCC) 16.2.0
+```
+
+(`--rm` throws the container away when you leave. The files you create stay in your folder on Windows, because of the `-v` mount. They are ignored by git.)
+
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. You give it `.cpp` files and options. It runs the compiler and, unless you say `-c`, then runs the linker for you.
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls it. The linker errors you get come from `/usr/bin/ld`.
+- **`nm`**: lists the **symbol table** of an object file: every name it defines or needs. We need it to see what the linker sees.
+- **`file`**: guesses what a file is from its first bytes. A quick way to learn "is this an object or an executable, for which machine?".
+- **`readelf`**: prints the headers of **ELF** files, the format of objects and programs on Linux.
+- **`ldd`**: lists the **shared libraries** a program needs at start-up.
+- **`c++filt`**: turns a mangled C++ name back into readable C++.
+
+#### 1. Single file, two steps
+
+```
+   single.cpp ──► compile ──► single.o ──► link ──► single_two_step
+```
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+g++ single.o -o single_two_step
+./single_two_step
+```
+
+```
+average: 70.9 F
+```
+
+- `-c` means **compile only, do not link**. That is what produces `single.o`.
+- `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more warnings.
+- `-o` names the output file. On Linux the program has no extension.
+- The second command has no `.cpp` file at all: `g++` is being used as a **front end for the linker**.
+- There is no extra library to add here: GCC 16 has `std::println` built in. (On the older MinGW GCC 14 you need `-lstdc++exp`.)
+
+#### 2. Read the object files and the binary
+
+First, make two more small objects to look at: `stats.o` (which **defines** `to_celsius`) and `report.o` (which **uses** it).
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+```
+
+**What kind of file is it?**
+
+```sh
+file stats.o
+readelf -h stats.o | grep -E 'Class|Type|Machine'
+```
+
+```
+stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (GNU/Linux), not stripped
+  Class:                             ELF64
+  Type:                              REL (Relocatable file)
+  Machine:                           Advanced Micro Devices X86-64
+```
+
+**ELF** is the object format on Linux. `relocatable` is another word for "object file": its code still has holes (addresses) for the linker to fill in.
+
+**Which names does it define, and which does it need?** A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so we filter for our own namespace, `station`:
+
+```sh
+nm stats.o | grep station
+nm -C stats.o | grep station
+nm report.o | grep to_celsius
+```
+
+```
+0000000000000000 T _ZN7station10to_celsiusEd
+0000000000000038 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+
+0000000000000000 T station::to_celsius(double)
+0000000000000038 T station::summarize(std::vector<double, std::allocator<double> > const&)
+
+                 U _ZN7station10to_celsiusEd
+```
+
+(The blank lines are only here to separate the three commands.) `nm` marks each symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here: the linker must find it. In `stats.o`, `to_celsius` is `T`: this object **defines** it. In `report.o`, the same name is `U`: that is the note from the start of the lecture, made visible. The linker's whole job is to **match every `U` with exactly one `T`**. The `-C` flag ("demangle") prints the C++ name instead of the code.
+
+**Name mangling.** You wrote `to_celsius`. The object file says `_ZN7station10to_celsiusEd`. That is **name mangling**. C++ allows several functions with the same name and different parameters (overloading, lecture 6.9), but a linker only compares **plain names**. So the compiler puts the **namespace, the name and the parameter types into the one name** it hands to the linker. `c++filt` reads it back:
+
+```sh
+c++filt _ZN7station10to_celsiusEd
+```
+
+```
+station::to_celsius(double)
+```
+
+GCC uses the "Itanium" rules. Here is the name taken apart:
+
+| Piece | Meaning |
+|---|---|
+| `_Z` | "this is a C++ name" |
+| `N` ... `E` | a **qualified** name, `namespace::function`, from `N` to `E` |
+| `7station` | a name that is 7 letters long: `station` |
+| `10to_celsius` | a name that is 10 letters long: `to_celsius` |
+| `d` | the parameter type: `d` means `double` |
+
+Do not try to memorise this. The point is that **the parameter types are inside the name**. We tried an overload `int to_celsius(int)` and GCC named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is `int`. Two different names, so both can live in one program.
+
+**Now the finished program.** An executable is just another binary with a table of what it needs.
+
+```sh
+file single_two_step
+readelf -h single_two_step | grep -E 'Type|Machine'
+ldd single_two_step
+```
+
+```
+single_two_step: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, not stripped
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+	linux-vdso.so.1 (0x00007ffeba50d000)
+	libstdc++.so.6 => /usr/local/lib64/libstdc++.so.6 (0x00007ff86911d000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ff86902d000)
+	libgcc_s.so.1 => /usr/local/lib64/libgcc_s.so.1 (0x00007ff868fff000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ff868e0b000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007ff8693d6000)
+```
+
+(The addresses in brackets change on every run.) `EXEC` and `executable` say this is a finished program, not a relocatable object. `ldd` lists the **shared libraries** it loads at start-up: `libstdc++.so.6` is the C++ standard library, `libc.so.6` the C library. The first one comes from `/usr/local/lib64`, where this image keeps the libraries of its GCC 16. We come back to dependencies in 7.14.
+
+**The ABI.** A C++ library is tied to the compiler and standard library that built it. That agreement about names, layouts and calling conventions is the **ABI** (application binary interface). You will see a sign of it in the break-it-on-purpose output below, in the tag `[abi:cxx11]`: GCC changed the layout of `std::string` in 2015 and the tag lets old and new code tell each other apart. In 7.14 you will see why it matters for libraries.
+
+#### 3. Single file, one step
+
+Hand the source file straight to `g++` and let it run both steps:
+
+```sh
+g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
+./single_one_step
+ls -l single.o single_two_step single_one_step
+```
+
+```
+average: 70.9 F
+-rw-r--r-- 1 root root 492960 Oct 12 07:36 single.o
+-rwxr-xr-x 1 root root 254640 Oct 12 07:36 single_two_step
+-rwxr-xr-x 1 root root 254640 Oct 12 07:36 single_one_step
+```
+
+Both programs have **exactly the same size**. That is the point: `g++` is a driver, it runs the compiler and then the linker and passes your options along. The one-step form just does not keep the object file.
+
+Look at the sizes again: the object file (about 490 KB) is **bigger** than the program built from it (about 250 KB). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
+
+#### 4. Multiple files
+
+Compile each `.cpp` on its own, then link all three objects together:
 
 ```sh
 g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
@@ -3588,93 +4261,141 @@ g++ main.o stats.o report.o -o weather
 sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 ```
 
-The same line comes out on all five environments.
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.o`**:
 
-**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.obj` (or `stats.o`)**:
-
-```
-link /nologo main.obj report.obj /OUT:broken.exe
+```sh
+g++ main.o report.o -o broken
 ```
 
 ```
-main.obj : error LNK2019: unresolved external symbol "struct station::Summary __cdecl
-    station::summarize(...)" (?summarize@station@@YA?AUSummary@1@...) referenced in function main
-report.obj : error LNK2019: unresolved external symbol "double __cdecl
-    station::to_celsius(double)" (?to_celsius@station@@YANN@Z) referenced in function ...
-broken.exe : fatal error LNK1120: 2 unresolved externals
+/usr/bin/ld: main.o: in function `main':
+main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
+report.cpp:(.text+0x37): undefined reference to `station::to_celsius(double)'
+/usr/bin/ld: report.cpp:(.text+0x52): undefined reference to `station::to_celsius(double)'
+/usr/bin/ld: report.cpp:(.text+0x6c): undefined reference to `station::to_celsius(double)'
+collect2: error: ld returned 1 exit status
 ```
 
-With GCC or Clang the same mistake reads:
+Read that with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. The message even tells you **which function was asking**. Whenever you see `undefined reference`, ask: **did I forget to compile or link the file that defines it?**
 
-```
-main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, ...> const&)'
-report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
-```
+That is Linux GCC done.
 
-Read those messages with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. Whenever you see `LNK2019` or `undefined reference`, ask: **did I forget to compile or link the file that defines it?** The odd-looking text in parentheses, `?to_celsius@station@@YANN@Z`, is the next topic.
+---
 
-### Part 3: look inside the object files
+### Environment 5: Linux, Clang (Docker)
 
-An object file is a binary file with a **table of symbols**: names the file *defines* and names it *needs*. There are tools for reading that table, one set per platform.
+You get a real Linux with Clang from the Docker container of chapter 2. Our image carries Clang 21.1.8 and GNU binutils 2.44, and uses GNU's libstdc++, the C++ library that comes with Linux.
 
-| I want to... | MSVC | GCC / Clang (Windows and Linux) |
-|---|---|---|
-| see the file format | `dumpbin /headers stats.obj` | `objdump -f stats.o`, or `file stats.o` and `readelf -h stats.o` on Linux |
-| list the symbols | `dumpbin /symbols stats.obj` | `nm stats.o` |
-| turn a mangled name back into C++ | `undname <name>` | `nm -C stats.o`, or `c++filt <name>` |
+#### Open the shell
 
-A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so filter for our own namespace, `station`.
-
-#### On MSVC
+From the repository root, in PowerShell:
 
 ```powershell
-dumpbin /headers stats.obj | Select-String 'File Type|machine'
-dumpbin /symbols stats.obj | Select-String station
-dumpbin /symbols report.obj | Select-String to_celsius
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-clang
+```
+
+You land in `/workspace`, which is the repository. Now, inside the container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.12ProjectManualCompile
+clang++ --version | head -1
 ```
 
 ```
-File Type: COFF OBJECT
-8664 machine (x64)
-
-External | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
-External | ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z (struct station::Summary ...)
-
-UNDEF    | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))     <- in report.obj
+Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)
 ```
 
-`dumpbin` prints the readable form in brackets next to the mangled one. Two things to see in this output:
+(`--rm` throws the container away when you leave. The files you create stay in your folder on Windows, because of the `-v` mount. They are ignored by git.)
 
-- In `stats.obj`, `to_celsius` is **External** and has a section: this object *defines* it.
-- In `report.obj`, the same name is **UNDEF**: "undefined here, the linker must find it". That is the note from Part 2, made visible. The linker's whole job is to **match every UNDEF with exactly one definition**.
+#### The tools in this environment
 
-#### On MinGW (Windows) and Linux
+- **`clang++`**: the Clang compiler driver. You give it `.cpp` files and options. It runs the compiler and, unless you say `-c`, then runs the linker for you.
+- **`ld`**: the GNU linker. You will not usually type it: `clang++` calls it. The linker errors you get come from `/usr/bin/ld`.
+- **`nm`**: lists the **symbol table** of an object file: every name it defines or needs. We need it to see what the linker sees.
+- **`file`**: guesses what a file is from its first bytes. A quick way to learn "is this an object or an executable, for which machine?".
+- **`readelf`**: prints the headers of **ELF** files, the format of objects and programs on Linux.
+- **`ldd`**: lists the **shared libraries** a program needs at start-up.
+- **`c++filt`**: turns a mangled C++ name back into readable C++.
 
-```powershell
-nm stats.o | Select-String station          # on Linux: nm stats.o | grep station
-nm -C stats.o | Select-String station
-nm report.o | Select-String to_celsius
+#### 1. Single file, two steps
+
+```
+   single.cpp ──► compile ──► single.o ──► link ──► single_two_step
+```
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
+clang++ single.o -o single_two_step
+./single_two_step
+```
+
+```
+average: 70.9 F
+```
+
+- `-c` means **compile only, do not link**. That is what produces `single.o`.
+- `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more warnings.
+- `-o` names the output file. On Linux the program has no extension.
+- The second command has no `.cpp` file at all: `clang++` is being used as a **front end for the linker**.
+- There is no extra library to add here: the library in this image has `std::println` built in. (On the older MinGW Clang 19 you need `-lstdc++exp`.)
+
+#### 2. Read the object files and the binary
+
+First, make two more small objects to look at: `stats.o` (which **defines** `to_celsius`) and `report.o` (which **uses** it).
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+```
+
+**What kind of file is it?**
+
+```sh
+file stats.o
+readelf -h stats.o | grep -E 'Class|Type|Machine'
+```
+
+```
+stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
+  Class:                             ELF64
+  Type:                              REL (Relocatable file)
+  Machine:                           Advanced Micro Devices X86-64
+```
+
+**ELF** is the object format on Linux. `relocatable` is another word for "object file": its code still has holes (addresses) for the linker to fill in.
+
+**Which names does it define, and which does it need?** A tiny program still contains **hundreds** of symbols from `std::vector`, `std::format` and friends, so we filter for our own namespace, `station`:
+
+```sh
+nm stats.o | grep station
+nm -C stats.o | grep station
+nm report.o | grep to_celsius
 ```
 
 ```
 0000000000000000 T _ZN7station10to_celsiusEd
-0000000000000038 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+0000000000000040 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+
 0000000000000000 T station::to_celsius(double)
-0000000000000038 T station::summarize(std::vector<double, std::allocator<double> > const&)
+0000000000000040 T station::summarize(std::vector<double, std::allocator<double> > const&)
+
                  U _ZN7station10to_celsiusEd
 ```
 
-`nm` marks a symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here. It is the same story as `External` and `UNDEF` above. `-C` ("demangle") prints the C++ name instead of the code.
+(The blank lines are only here to separate the three commands.) `nm` marks each symbol with a letter. **`T`** = defined, in the code ("text") section. **`U`** = undefined here: the linker must find it. In `stats.o`, `to_celsius` is `T`: this object **defines** it. In `report.o`, the same name is `U`: that is the note from the start of the lecture, made visible. The linker's whole job is to **match every `U` with exactly one `T`**. The `-C` flag ("demangle") prints the C++ name instead of the code.
 
-### Name mangling
+**Name mangling.** You wrote `to_celsius`. The object file says `_ZN7station10to_celsiusEd`. That is **name mangling**. C++ allows several functions with the same name and different parameters (overloading, lecture 6.9), but a linker only compares **plain names**. So the compiler puts the **namespace, the name and the parameter types into the one name** it hands to the linker. `c++filt` reads it back:
 
-Now the odd names. You wrote `to_celsius`. The object file says `?to_celsius@station@@YANN@Z` (MSVC) or `_ZN7station10to_celsiusEd` (GCC and Clang). That is **name mangling**.
+```sh
+c++filt _ZN7station10to_celsiusEd
+```
 
-C++ allows two functions with the same name and different parameters (overloading, lecture 6.9). A linker only compares **plain names**, so the compiler has to put the **namespace, the name and the parameter types into the one name** it gives the linker.
+```
+station::to_celsius(double)
+```
 
-Here is `to_celsius(double)` taken apart, in both styles.
-
-**GCC and Clang** (the "Itanium" rules): `_ZN7station10to_celsiusEd`
+Clang uses the same "Itanium" rules as GCC, so the names are identical to the GCC ones. Here is the name taken apart:
 
 | Piece | Meaning |
 |---|---|
@@ -3684,58 +4405,103 @@ Here is `to_celsius(double)` taken apart, in both styles.
 | `10to_celsius` | a name that is 10 letters long: `to_celsius` |
 | `d` | the parameter type: `d` means `double` |
 
-**MSVC**: `?to_celsius@station@@YANN@Z`
+Do not try to memorise this. The point is that **the parameter types are inside the name**. We tried an overload `int to_celsius(int)` and Clang named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is `int`. Two different names, so both can live in one program.
 
-| Piece | Meaning |
-|---|---|
-| `?` | "this is a C++ name" |
-| `to_celsius@` | the function name |
-| `station@` and then `@` | the enclosing namespace, then the end of the qualification |
-| `YA` | a free function (`Y`) using the `__cdecl` calling convention (`A`) |
-| `N` | the return type: `double` |
-| `N` | the parameter type: `double` |
-| `@` then `Z` | end of the parameter list, end of the name |
+**Now the finished program.** An executable is just another binary with a table of what it needs.
 
-Do not try to memorise these. The point is that **the parameter types are inside the name**. Two overloads, `to_celsius(double)` and `to_celsius(int)`, would get two different names and so can coexist in one program.
-
-The two compilers use different rules, and that has a big consequence. Here is the whole picture of our five environments:
-
-| Environment | Object file format | Mangling rules |
-|---|---|---|
-| Windows, MSVC | COFF (`.obj`) | MSVC: `?to_celsius@station@@YANN@Z` |
-| Windows, MinGW GCC / Clang | COFF (`.o`) | Itanium: `_ZN7station10to_celsiusEd` |
-| Linux, GCC / Clang | ELF (`.o`) | Itanium: `_ZN7station10to_celsiusEd` |
-
-Check the format yourself: `objdump -f stats.o` on MinGW says `file format pe-x86-64`, and `file stats.o` on Linux says `ELF 64-bit LSB relocatable`.
-
-Notice that **MSVC and MinGW both use COFF** (the Windows object format) but still cannot share objects: their **mangled names differ**, and so does the layout of `std::vector` and `std::string` inside. Compile `stats.cpp` with MSVC, compile the other two files with MinGW GCC and link them all with `g++`: you get the same `undefined reference to station::to_celsius(double)` as if `stats` were missing, because the names MinGW asks for do not exist in the MSVC object. **A C++ library is tied to the compiler and standard library that built it.** That is the **ABI** (application binary interface): the agreement about names, layouts and calling conventions that two pieces of binary code must share. In 7.14 you will see why it matters for libraries.
-
-Now the cousin who is not mangled. In 8.12 we will write a function in assembly and call it from C++. The assembler will not mangle anything, so we will mark that function **`extern "C"`**, which tells the C++ compiler "use the plain name, as C does".
-
-### Look inside the finished program
-
-An executable is just another binary with a table of what it needs.
-
-```powershell
-dumpbin /headers weather.exe | Select-String 'machine|subsystem'     # MSVC
-dumpbin /dependents weather.exe                                       # which DLLs it loads
+```sh
+file single_two_step
+readelf -h single_two_step | grep -E 'Type|Machine'
+ldd single_two_step
 ```
 
 ```
-8664 machine (x64)
-3 subsystem (Windows CUI)         <- a console program
-MSVCP140.dll  VCRUNTIME140.dll  KERNEL32.dll  api-ms-win-crt-*.dll
+single_two_step: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ea95edc592d2bd6cf3865035ef5f167eba8a2998, for GNU/Linux 3.2.0, not stripped
+  Type:                              DYN (Position-Independent Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+	linux-vdso.so.1 (0x00007ffd739bd000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f695a412000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f695a322000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f695a2f5000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f695a101000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f695a6a4000)
 ```
 
-On Linux the same questions are `file weather` and `ldd weather`. We will come back to **dependents** in 7.14.
+(The addresses in brackets and the `BuildID` change with every build and run.) `pie executable` says this is a finished program ("position-independent": it can be loaded at any address). `ldd` lists the **shared libraries** it loads at start-up: `libstdc++.so.6` is the C++ standard library, `libc.so.6` the C library. We come back to dependencies in 7.14.
+
+**The ABI.** A C++ library is tied to the compiler and standard library that built it. That agreement about names, layouts and calling conventions is the **ABI** (application binary interface). You will see a sign of it in the break-it-on-purpose output below, in the tag `[abi:cxx11]`: the library's `std::string` changed layout in 2015 and the tag lets old and new code tell each other apart. In 7.14 you will see why it matters for libraries.
+
+#### 3. Single file, one step
+
+Hand the source file straight to `clang++` and let it run both steps:
+
+```sh
+clang++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
+./single_one_step
+ls -l single.o single_two_step single_one_step
+```
+
+```
+average: 70.9 F
+-rw-r--r-- 1 root root 416128 Oct 12 07:36 single.o
+-rwxr-xr-x 1 root root 221624 Oct 12 07:36 single_two_step
+-rwxr-xr-x 1 root root 221624 Oct 12 07:36 single_one_step
+```
+
+Both programs have **exactly the same size**. That is the point: `clang++` is a driver, it runs the compiler and then the linker and passes your options along. The one-step form just does not keep the object file.
+
+Look at the sizes again: the object file (about 420 KB) is **bigger** than the program built from it (about 220 KB). Two lines of `std::println` and `std::accumulate` pull in a lot of templates, and the object keeps a copy of every template instantiation the file used, plus the bookkeeping the linker needs. The linker then keeps only what the program uses. Your numbers will differ. The lesson is that an object file is **not a small program**, it is a half-finished one.
+
+#### 4. Multiple files
+
+Compile each `.cpp` on its own, then link all three objects together:
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
+clang++ main.o stats.o report.o -o weather
+./weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+**Break it on purpose.** The best way to understand the linker is to starve it. Link again, this time **leaving out `stats.o`**:
+
+```sh
+clang++ main.o report.o -o broken
+```
+
+```
+/usr/bin/ld: main.o: in function `main':
+main.cpp:(.text+0x91): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
+report.cpp:(.text+0x3f): undefined reference to `station::to_celsius(double)'
+/usr/bin/ld: report.cpp:(.text+0x52): undefined reference to `station::to_celsius(double)'
+/usr/bin/ld: report.cpp:(.text+0x65): undefined reference to `station::to_celsius(double)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Read that with fresh eyes. Every `.cpp` compiled without complaint. The error is that two promises ("someone defines `summarize`", "someone defines `to_celsius`") were never kept. The message even tells you **which function was asking**. Whenever you see `undefined reference`, ask: **did I forget to compile or link the file that defines it?**
+
+That is Linux Clang done.
+
+---
 
 ### Gotchas to take away
 
+A summary of what you met. Each point was shown in the environment where it applies.
+
 - `/std:c++latest`, never `/std:c++23`, with `cl`.
-- MinGW needs `-lstdc++exp` for `std::println` and it must come **after** the objects.
-- `LNK2019` / `undefined reference` means the **linker** could not find a definition: check you compiled and linked the file that has it.
+- MinGW GCC and Clang need `-lstdc++exp` for `std::println`, and it must come **after** the objects. The Linux containers do not need it.
+- `LNK2019` / `undefined reference` means the **linker** could not find a definition: check that you compiled and linked the file that has it.
 - Objects from different compilers do not mix, even when both are `.obj` or `.o`.
-- Compile every file with the **same standard and the same runtime option** (`/MD` everywhere). Mixing them is how LNK2038 appears, which we meet in 7.13.
+- Compile every file with the **same standard and the same runtime option** (`/MD` everywhere with MSVC). Mixing them is how LNK2038 appears, which we meet in 7.13.
+- A MinGW program needs `C:\mingw64\bin` on the PATH to start, because of the DLLs it depends on.
+
+One last teaser. In 8.12 we will write a function in assembly and call it from C++. The assembler does not mangle anything, so we will mark that function **`extern "C"`**, which tells the C++ compiler "use the plain name, as C does".
 
 ---
 
