@@ -473,7 +473,7 @@ for (const int& item : quantities) {   // HOW: loop, add, repeat
 }
 ```
 
-That works, but  there is another paradicm we can use to do the same things. 
+That works, but  there is another paradigm we can use to do the same things. 
 It is called **Functional Programming**. Sometimes also refered to 
 as **Declarative Programming**. This lecture and the next introduce tools that subscribe to that 
 paradigm - `accumulate`,`filter`, `transform` - where you instead state *what* you 
@@ -493,29 +493,34 @@ want and let the library supply the *how*:
 Under the hood, each declarative tool still hides a loop somewhere -
 this is called **internal iteration**, because the loop runs *inside*
 the library function instead of in code you wrote and can see. What
-changes is who supplies the small per-element decision: a **higher-order
-function** is a function that takes another function as an argument (or
-returns one), and `accumulate`, `filter`, and `transform` are all
-higher-order functions - you hand each one a small function (often a
-lambda) saying what to do with one element, and it owns the looping.
+changes is who supplies the small per-element decision: a **higher-order function** is a 
+function that takes another function as an argument (or returns one), and `accumulate`, 
+`filter`, and `transform` are all higher-order functions - you hand each one a small 
+function (often a lambda) saying what to do with one element, and it owns the looping.
 
 ```
    WHAT you state                       WHO supplies the loop
    ───────────────                      ─────────────────────
    accumulate(..., combine)             accumulate's internal iteration
-   filter(keep_if)                      the view's internal iteration (7.6)
-   transform(map_to)                    the view's internal iteration (7.6)
+   filter(keep_if)                      the view's internal iteration (We'll see this shortly)
+   transform(map_to)                    the view's internal iteration (We'll see this shortly)
 ```
 
 This is C++'s **functional-style** programming: not a different
-language, just a different default - reach for a declarative pipeline
-first, and drop back down to a hand-written loop only when a pipeline
-cannot say what you mean. The rest of this lecture and the next show
-what that looks like in practice, starting with sorting and searching.
+language, just a different way to think about your code. What to do? 
+
+- reach for a declarative pipeline first. This involves reading the docs and 
+  understanding what the library already provides, and how to express your
+  intent in terms of it. 
+- drop back down to hand-written loop only when a pipeline cannot say what you mean. 
+
+NOTE: Don't overthink this. You will pick up the best practices as you go.
 
 ### Sorting with `std::ranges::sort`
 
 ```cpp
+using namespace std::string_literals;
+
 std::array fruits{"mango"s, "kiwi"s, "fig"s, "date"s, "apple"s};
 std::ranges::sort(fruits);   // ascending, in place
 ```
@@ -532,18 +537,15 @@ std::ranges::sort(fruits);   // ascending, in place
 
 #### "Ascending" is a default comparator, not magic
 
-`sort` with no second argument is shorthand, the same way `accumulate`
-with no fourth argument was (earlier in this lecture). The comparator it
-defaults to is `std::ranges::less` - pass it explicitly and nothing
-changes:
+`sort` with no second argument is shorthand. The comparator it
+defaults to is `std::ranges::less`. If  you pass it explicitly,
+nothing changes:
 
 ```cpp
 std::ranges::sort(fruits, std::ranges::less{});   // identical order to sort(fruits)
 ```
 
-Swap in `std::ranges::greater` instead, and the exact same algorithm
-sorts **descending** - `sort`'s job never changes, only the rule it uses
-to compare two elements does:
+If you pass in `std::ranges::greater`, we will now sort **descending** instead of ascending:
 
 ```cpp
 std::ranges::sort(fruits, std::ranges::greater{});
@@ -572,61 +574,228 @@ std::ranges::sort(fruits, [](const std::string& a,
          const std::string& b) { return a > b; });   // == std::ranges::greater{}
 ```
 
-Both produce byte-for-byte the same order as the `less{}`/`greater{}`
-calls above - proof that `less`/`greater` are not a separate mechanism
-from a lambda comparator, just a ready-made one for the everyday case.
+These produce the same order as the `less{}`/`greater{}` calls above.
 
 #### A lambda can express a rule `less`/`greater` cannot
 
-`std::ranges::less`/`greater` only ever compare two elements *as
-themselves*. A lambda comparator can compare anything derived from
-them - here, each string's `.size()` instead of the strings
-alphabetically:
+Lambdas give us the flexibility to sort by any rule we can express in code. 
+For example, we can sort by the length of the fruit names instead of alphabetically:
 
 ```cpp
 std::ranges::sort(fruits,
                    [](const std::string& a, const std::string& b) {
-                       return a.size() < b.size();   // shorter name first
+                       if (a.size() != b.size()) {
+                           return a.size() < b.size();   // shorter name first
+                       }
+                       return a < b;                     // same length: alphabetical
                    });
 
 std::ranges::sort(fruits,
                    [](const std::string& a, const std::string& b) {
-                       return a.size() > b.size();   // longer name first
+                       if (a.size() != b.size()) {
+                           return a.size() > b.size();   // longer name first
+                       }
+                       return a < b;                     // same length: alphabetical
                    });
 ```
 
 ```
    fruits = {mango, kiwi, fig, date, apple}   (lengths: 5, 4, 3, 4, 5)
 
-   sort by .size(), ascending:    fig  kiwi  date  mango  apple
+   sort by .size(), ascending:    fig  date  kiwi  apple  mango
                                     3    4     4      5      5
-                                              (kiwi/date and mango/apple
-                                               keep their original relative
-                                               order - ties are not reordered)
 
-   sort by .size(), descending:   mango  apple  kiwi  date  fig
+   sort by .size(), descending:   apple  mango  date  kiwi  fig
                                      5      5     4     4     3
 ```
+
+Why the extra `return a < b;` line? Some elements are **tied**: `kiwi` and
+`date` both have length 4, so on length alone neither belongs before the
+other. `std::ranges::sort` makes **no promise** about the order it leaves
+tied elements in. On a tiny collection like this one it may happen to keep
+their original order, but on bigger data it will shuffle them, and the
+result can differ from one compiler to the next. A **tie-break** fixes
+that: when the lengths are equal, fall back to a second rule (here,
+alphabetical), so the comparator gives a definite answer for every pair
+and the final order is always the same. Whenever the order of equal
+elements matters to you, put that rule inside the comparator.
 
 This is the real payoff of a lambda comparator: alphabetical order is
 only one possible rule, and `sort` does not care which rule you give it
 - it just needs something that can say, for any two elements, which one
-belongs first.
+should come first.
 
 ### Searching sorted data with `std::ranges::binary_search`
 
-`binary_search` repeatedly **halves** the search range - which only gives
-a correct answer when the data is already sorted **in the order the
-search assumes** - ascending, by default.
+#### The problem: is this value in the collection?
+
+Say we want to know whether `"kiwi"` is somewhere in `fruits`. The
+obvious way is to look at the elements one at a time, from the front,
+until we find it or run out. That is what a loop does:
 
 ```
-   searching sorted {apple, date, fig, kiwi, mango} for "kiwi"
+   index:    0        1       2      3       4
+   fruits:   apple    date    fig    kiwi    mango
 
-   step 1:  apple  date  [fig]  kiwi  mango     middle = fig, "kiwi" > "fig" → search right half
-   step 2:  ......  kiwi  mango                 middle = kiwi, MATCH → true
-
-   only 2 comparisons instead of checking all 5, one by one
+   look 1:   index 0: apple?   no
+   look 2:   index 1: date?    no
+   look 3:   index 2: fig?     no
+   look 4:   index 3: kiwi?    YES, found it after 4 looks
 ```
+
+With 5 fruits, that is nothing. With a million fruits, the unlucky case
+is a million looks. There is a much smarter way, and you already know it.
+
+#### The dictionary trick
+
+You want to look up the word "kiwi" in a paper dictionary. You do **not**
+start at page 1 and read every word. Instead:
+
+1. Open the dictionary roughly in the **middle**. Say you land on "fig".
+2. "kiwi" comes **after** "fig" in the alphabet, so everything from the
+   front of the book up to this page is useless. **Throw that half away.**
+3. Open the remaining half in its middle and repeat.
+
+Every look throws away **half** of what is left. That is all
+**binary search** is ("binary" meaning "two halves"). Now let's do the
+same on our fruits.
+
+#### Keeping track of what is left: `low`, `high` and `mid`
+
+Every element in `fruits` has an **index**, its position counting from 0.
+To remember which part is still in play, we keep two indexes:
+
+- `low`: the index of the **first** element still in play
+- `high`: the index of the **last** element still in play
+
+At the start, everything is in play:
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+                ▲                               ▲
+                low                             high
+```
+
+So `low` is `0` and `high` is `4`. The middle is the index halfway
+between them:
+
+```
+   mid = (low + high) / 2
+```
+
+This is **integer division**, so any fraction is dropped: `7 / 2` is `3`,
+not `3.5`. Each look compares the value we want against `fruits[mid]`,
+and there are only three outcomes:
+
+| The value we want is...        | What we do                                                    |
+|--------------------------------|---------------------------------------------------------------|
+| equal to `fruits[mid]`         | Found it. Stop.                                               |
+| **after** `fruits[mid]`        | Throw away `mid` and everything left of it: `low = mid + 1`   |
+| **before** `fruits[mid]`       | Throw away `mid` and everything right of it: `high = mid - 1` |
+
+If `low` ever ends up bigger than `high`, nothing is left in play, so
+the value is not there.
+
+#### Walkthrough 1: searching for `"kiwi"` (it is there)
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+   looking for: "kiwi"
+
+   look 1:      low                             high
+                                mid
+```
+
+- `low = 0`, `high = 4`, so `mid = (0 + 4) / 2 = 2`.
+- `fruits[2]` is `"fig"`. `"kiwi"` comes **after** `"fig"`, so throw away
+  indexes 0 to 2: `low = mid + 1 = 3`.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `low = 3`, `high = 4`, so `mid = (3 + 4) / 2 = 7 / 2 = 3`.
+- `fruits[3]` is `"kiwi"`. **Match. Found!** (2 looks, instead of 4.)
+
+#### Walkthrough 2: searching for `"guava"` (it is not there)
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   date    fig     kiwi    mango
+   looking for: "guava"
+
+   look 1:      low                             high
+                                mid
+```
+
+- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"fig"`. `"guava"` comes
+  **after** `"fig"`, so `low = mid + 1 = 3`.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `mid = (3 + 4) / 2 = 3`. `fruits[3]` is `"kiwi"`. `"guava"` comes
+  **before** `"kiwi"`, so `high = mid - 1 = 2`.
+
+```
+   look 3:                      high    low
+```
+
+- Now `low` (3) is bigger than `high` (2). Nothing is left in play, so
+  `"guava"` is **not** in the collection.
+
+(The standard library's own implementation is organized a little
+differently inside, but it follows the same halving idea and gives the
+same answers. The `low`/`high`/`mid` version is simply the easiest to
+follow by hand.)
+
+#### Why bother? The work barely grows
+
+Each look cuts the leftover pile in half, so even a huge collection
+shrinks to nothing after a handful of looks. Here is a collection of 64
+elements shrinking:
+
+```
+   64 left  →  32  →  16  →  8  →  4  →  2  →  1        about 6 looks
+```
+
+And here is the worst case for 64 elements, one bar character per look:
+
+```
+   one at a time  │████████████████████████████████████████████████████████████████  64 looks
+   halving        │██████                                                              about 6 looks
+```
+
+The gap only widens as the collection grows:
+
+```
+   elements in collection     one at a time (worst case)     halving (worst case)
+   ──────────────────────     ──────────────────────────     ────────────────────
+                        8                              8                        3
+                    1,000                          1,000                       10
+                1,000,000                      1,000,000                       20
+            1,000,000,000                  1,000,000,000                       30
+```
+For a billion elements, a linear scan might take a billion looks in the worst case.
+But a binary search would take only about 30 looks.
+
+#### The one rule: the data must be sorted
+
+Go back to the dictionary. Throwing away half of the book only makes
+sense because you **know** the words are in alphabetical order. If the
+words were in random order, "kiwi comes after fig" would tell you
+nothing about which half to discard.
+
+So `binary_search` has one requirement: the data must already be sorted,
+**in the order the search assumes**. By default that order is ascending
+(`std::ranges::less`), the same default `sort` used.
+
+The code below does exactly this. Sort first, then search:
 
 ```cpp
 std::ranges::sort(fruits);   // back to alphabetical ascending - fruits was
@@ -638,27 +807,292 @@ std::ranges::binary_search(fruits, "kiwi"s);   // true
 std::ranges::binary_search(fruits, "guava"s);  // false
 ```
 
-That halving is the trade a sort buys you: `O(log n)` lookups instead of
-scanning every element - but only correct when the data's actual order
-matches what `binary_search` assumes. The dangerous part is that this
-failure is **not reliable**: search `fruits` while it is still sorted by
-length instead of alphabetically, and the result depends entirely on
-where the halving happens to land - it might report "not found" for a
-value that is there, might find the wrong thing, or might even
-accidentally succeed, all without any warning that the assumption was
-violated. That is worse than an obvious crash - a bug that only shows up
-for *some* searches on *some* data is much harder to catch in testing.
-Sorting back to alphabetical ascending immediately before the search, as
-the code above does, is what avoids it - a reminder that
-`binary_search`'s "sorted" always means "sorted by the same rule
-`binary_search` itself is using," not sorted any old way.
+`"kiwi"` is in `fruits`, so the first call gives `true`. `"guava"` is not,
+so the second gives `false`.
+
+So **binary search** does the work faster than a linear scan, 
+but it has a **precondition**: the data must be sorted in the order the search expects.
+
+#### What goes wrong if the data is not sorted the right way
+
+Notice the comment in the code above: right before this point, `fruits`
+was left sorted by **length**, longest first, by the last lambda
+comparator. That is sorted, but not by the rule `binary_search` assumes
+(alphabetical, ascending). Here is what would happen if we searched it
+as it was, looking for `"fig"`, which really is in there:
+
+```
+   index:       0       1       2       3       4
+   fruits:      apple   mango   date    kiwi    fig
+   looking for: "fig"
+
+   look 1:      low                             high
+                                mid
+```
+
+- `mid = (0 + 4) / 2 = 2`. `fruits[2]` is `"date"`. `"fig"` comes
+  **after** `"date"` alphabetically, so the search throws away indexes
+  0 to 2: `low = mid + 1 = 3`. So far so good: `"fig"` is at index 4,
+  in the half that stays.
+
+```
+   look 2:                              low     high
+                                        mid
+```
+
+- `mid = (3 + 4) / 2 = 3`. `fruits[3]` is `"kiwi"`. `"fig"` comes
+  **before** `"kiwi"` alphabetically, so the search throws away indexes
+  3 to 4: `high = mid - 1 = 2`. But `"fig"` is at index 4, in the half
+  that was just thrown away.
+
+```
+   look 3:                      high    low
+```
+
+- Now `low` (3) is bigger than `high` (2). Nothing is left in play, so
+  the search answers `false`, even though `"fig"` is right there.
+
+The search followed its rule faithfully. The data just did not follow
+the rule the search relies on.
+
+The nasty part is that this failure is **not reliable**. Depending on
+where the halving happens to land, a wrong ordering might report "not
+found" for a value that is there, might find the wrong thing, or might
+even accidentally succeed. Nothing warns you that the assumption was
+violated. A bug that only shows up for *some* searches on *some* data is
+much harder to catch in testing than an obvious crash. Sorting back to
+alphabetical ascending right before the search, as the code above does,
+avoids it. 
+
+NOTE: Before do binary search, always sort the data in the order the search expects.
+
+NOTE: Before you use an algorithm, make sure to carefully read the **preconditions** in the documentation. If you violate them, the algorithm may misbehave in ways that are hard to detect.
+
+### How much work is an algorithm? A first look at complexity
+
+You now know two ways to answer "is `"kiwi"` in this collection?":
+
+```
+   one at a time (a loop)         halving (binary_search)
+   ──────────────────────         ───────────────────────
+   works on any data              needs sorted data
+   about n looks, worst case      about log n looks, worst case
+```
+
+Which one is "better"? That depends on a question programmers ask all
+the time: **when the data gets bigger, how much more work does this need?** 
+The tools for answering it are called **algorithm complexity**, and the notation 
+is called **Big O**. 
+
+#### Count steps, not seconds
+
+We could time each search with a stopwatch, but seconds depend on the computer, 
+the compiler and whatever else is running. 
+Instead we **count steps** (looks, comparisons, additions) 
+and ask how that count **grows** as the amount of data grows. 
+We call the amount of data **`n`**: for `fruits`, `n` is 5.
+
+Here are our two searches again. The horizontal axis is `n`, the number
+of elements, growing from 1 to 32. The vertical axis is the number of
+looks needed in the worst case. Each `*` is the one-at-a-time search at
+that `n`, and each `.` is the halving search at that `n`:
+
+```
+ steps
+  32 |                                                               *  n = 32: linear needs 32 looks
+     |                                                             *
+     |                                                           *
+     |                                                         *
+  28 |                                                       *
+     |                                                     *
+     |                                                   *
+     |                                                 *
+  24 |                                               *
+     |                                             *
+     |                                           *
+     |                                         *
+  20 |                                       *
+     |                                     *
+     |                                   *
+     |                                 *
+  16 |                               *
+     |                             *
+     |                           *
+     |                         *
+  12 |                       *
+     |                     *
+     |                   *
+     |                 *
+   8 |               *
+     |             *
+     |           *
+     |         *                                   . . . . . . . . . .  n = 32: halving needs about 5 looks
+   4 |       *               . . . . . . . . . . .
+     |     *     . . . . . .
+     |   * . . .
+     | * .
+   0 | .
+     +-----------------------------------------------------------------
+       1     4       8      12      16      20      24      28      32    n
+
+   *  one at a time (a loop)
+   .  halving (binary search)
+```
+
+#### How to read the graph
+
+- **Pick a spot on the bottom axis and read straight up.** At `n = 8`,
+  the `*` sits at 8 looks and the `.` sits at about 3. At `n = 32`, the
+  `*` is at 32 and the `.` is at about 5.
+- **The `*` rises in a straight line.** Every extra element adds one more
+  look. Double the data and the work doubles too.
+- **The `.` flattens out.** It climbs quickly at first, then crawls along
+  nearly level. Double the data and the work grows by just **one** look.
+
+Here are those readings from the graph in a table, so you can watch what
+happens each time `n` doubles:
+
+```
+   n          4     8     16    32
+   *  linear  4     8     16    32     (+4, +8, +16: the gap itself keeps growing)
+   .  halving 2     3     4     5      (+1, +1, +1:  one extra look every time)
+```
+
+The further right you go, the wider the gap between the two. That gap is
+exactly what Big O is about to give us a name for.
+
+#### Big O: the name for the shape of that curve
+
+Big O writes down the **shape** of the growth, using `n` for the amount
+of data. We say "O of n" or "order n":
+
+| Big O          | Say it as          | What it means                               | If the data **doubles**          |
+|----------------|--------------------|---------------------------------------------|----------------------------------|
+| `O(1)`         | constant           | same work, no matter how big the data is    | no change                        |
+| `O(log n)`     | logarithmic        | halving the pile each step                  | **one** extra step               |
+| `O(n)`         | linear             | touch every element once                    | twice the work                   |
+| `O(n log n)`   | "n log n"          | a halving trick repeated for every element  | a bit more than twice the work   |
+| `O(n^2)`       | quadratic          | for every element, touch every element again | **four** times the work         |
+
+#### The same ideas as code
+
+```cpp
+// O(1): one step, whatever the size of quantities
+int first{quantities[0]};
+
+// O(n): one step per element
+int total{0};
+for (const int& item : quantities) {
+    total += item;
+}
+
+// O(n^2): for EVERY element, walk over EVERY element again
+for (const int& a : quantities) {
+    for (const int& b : quantities) {
+        std::println("pair: {} and {}", a, b);
+    }
+}
+```
+
+For `quantities = {10, 20, 30, 40}`, so `n = 4`, the nested loop prints
+every cell of a 4 x 4 grid, which is 4 x 4 = **16** steps:
+
+```
+                 b = 10      b = 20      b = 30      b = 40
+   a = 10       (10, 10)    (10, 20)    (10, 30)    (10, 40)
+   a = 20       (20, 10)    (20, 20)    (20, 30)    (20, 40)
+   a = 30       (30, 10)    (30, 20)    (30, 30)    (30, 40)
+   a = 40       (40, 10)    (40, 20)    (40, 30)    (40, 40)
+
+   n = 4   →   4 x 4   =  16 steps
+   n = 8   →   8 x 8   =  64 steps      (twice the data, FOUR times the work)
+```
+
+#### How fast do these grow? Real numbers
+
+Number of steps for each shape (rounded):
+
+| `n`           | `O(1)` | `O(log n)` | `O(n)`      | `O(n log n)`        | `O(n^2)`                |
+|---------------|--------|------------|-------------|---------------------|-------------------------|
+| 10            | 1      | 3          | 10          | 33                  | 100                     |
+| 100           | 1      | 7          | 100         | 664                 | 10,000                  |
+| 1,000         | 1      | 10         | 1,000       | 10,000              | 1,000,000               |
+| 1,000,000     | 1      | 20         | 1,000,000   | 20,000,000          | 1,000,000,000,000       |
+
+To feel those numbers, pretend each step takes one nanosecond (a billionth
+of a second). For `n = 1,000,000`:
+
+```
+   O(1)          1 nanosecond
+   O(log n)      20 nanoseconds
+   O(n)          1 millisecond            (blink of an eye)
+   O(n log n)    20 milliseconds          (still instant)
+   O(n^2)        1,000 seconds            (about 17 MINUTES)
+```
+
+#### Three rules for reading Big O
+
+1. **Ignore the small stuff.** Big O describes the *shape*, so constants
+   and small extras are dropped. Looping over the data twice takes `2n`
+   steps, and a loop plus 10 extra steps takes `n + 10`. Both are just
+   `O(n)`, because at large `n` the leftover pieces do not change the
+   shape of the curve.
+2. **It usually describes the unlucky case.** Linear search can get
+   lucky and find the value at the very first element (1 look), but the
+   unlucky case, the value is last or missing, takes `n` looks. We quote
+   the unlucky case because it is the promise we can always keep.
+3. **It is about growth, not a stopwatch.** With 5 fruits, any method is
+   instant. Big O starts to matter when `n` gets large, or when the code
+   runs over and over. Do not reach for a clever algorithm to save
+   microseconds on a tiny array.
+
+#### Where you have already met these
+
+| What you have used                                              | Big O          |
+|-----------------------------------------------------------------|----------------|
+| `array[i]`, `vector[i]`, `.at(i)`, `.size()`                    | `O(1)`         |
+| `vector.push_back(x)` (on average*)                             | `O(1)`         |
+| `std::ranges::binary_search` (sorted data)                      | `O(log n)`     |
+| a loop over every element, `std::accumulate`, a linear search   | `O(n)`         |
+| copying a vector, passing a collection **by value**             | `O(n)`         |
+| `std::ranges::sort`                                             | `O(n log n)`   |
+| a loop inside a loop over the same data                         | `O(n^2)`       |
+
+The "copying is `O(n)`" row is the real reason the earlier rule of thumb
+says to pass collections by `const&`: a by-value parameter copies all `n`
+elements on **every call**, while a reference is `O(1)`.
+
+#### Putting it to work: is sorting first worth it?
+
+`binary_search` needs sorted data, and sorting is not free: `O(n log n)`.
+So should you sort and then binary search, or just loop? Take `n = 1,000,000`:
+
+| Plan                                      | 1 search                   | 1,000 searches                        |
+|-------------------------------------------|----------------------------|---------------------------------------|
+| loop every time, `O(n)` each              | about 1,000,000 steps      | about 1,000,000,000 steps             |
+| sort once, then `O(log n)` each           | about 20,000,000 steps     | 20,000,000 + 1,000 x 20 = about 20,020,000 steps |
+
+For a **single** search, just loop: sorting costs more than it saves. For
+**many** searches, sort once and the savings are enormous, here about 50
+times fewer steps. Roughly speaking, the sort pays for itself after about
+`log n` searches (around 20 here). Without Big O, that is a guess. With it,
+it is arithmetic.
+
+NOTE: Don't overthink this. You do not need to memorise the table. What
+to take away: 
+
+- **loops over the data** grow in a line, 
+- **halving grows** barely at all, and 
+- **loops inside loops** grow explosively.
 
 ### Folding a range into one value with `std::accumulate`
 
-`std::accumulate(first, last, init)` is the declarative tool from the
-opening of this lecture, applied to "reduce a range to one value": state
-*what* you want (start from `init`, combine every element) and let the
-library own the loop.
+The `std::accumulate` function takes a range of values and reduces it to 
+a single value by combining them with a binary operation. The most common use 
+is to sum a range of numbers, but it can be used for other binary operations as well.
+
+The syntax: `std::accumulate(first, last, init, combine)`
+*What* you want to do: start from `init`, combine every element in the range `[first, last)` using the `combine` function.
 
 ```cpp
 std::accumulate(quantities.begin(), quantities.end(), 0);   // sum, starting from 0
