@@ -6446,19 +6446,24 @@ That is Linux Clang done.
 
 ### What a static library is good for
 
-| | |
-|---|---|
-| Good | The finished program is self-contained: one file to ship, nothing to lose or mismatch at run time. |
-| Good | Only the members the program needs are copied in. |
-| Not so good | Every program that uses the library gets its **own copy** of the code. |
-| Not so good | To fix a bug in the library you must **relink every program** that uses it. |
+The good:
 
-We checked the second row with a three-line program that only calls
-`to_celsius`. The linker took the `stats` member and left the `report`
-member out, on MSVC, GCC and Clang alike. It took `stats` **whole**:
-`summarize` came along although nobody called it. A member is copied in
-completely or not at all, which is one more reason to keep the files of
-a library small and focused.
+- The finished program is self-contained: one file to ship, nothing to
+  lose or mismatch at run time.
+- Only the members the program needs are copied in.
+
+The not so good:
+
+- Every program that uses the library gets its **own copy** of the code.
+- To fix a bug in the library you must **relink every program** that
+  uses it.
+
+We checked the second "good" point with a three-line program that only
+calls `to_celsius`. The linker took the `stats` member and left the
+`report` member out, on MSVC, GCC and Clang alike. It took `stats`
+**whole**: `summarize` came along although nobody called it. A member
+is copied in completely or not at all, which is one more reason to keep
+the files of a library small and focused.
 
 ### Gotchas to take away
 
@@ -6478,9 +6483,6 @@ it applies.
   how `LNK2038` appears.
 - Once the program is linked, the **library is no longer needed** to run
   it.
-
-The second kind of library, in 7.14, trades the points of the table the
-other way round.
 
 ---
 
