@@ -803,7 +803,10 @@ std::ranges::sort(fruits);   // back to alphabetical ascending - fruits was
                               // last lambda comparator above; binary_search
                               // assumes alphabetical ascending order
 
+// These two are equivalent.
 std::ranges::binary_search(fruits, "kiwi"s);   // true
+std::ranges::binary_search(fruits, "kiwi"s, std::ranges::less{}, std::identity{});
+
 std::ranges::binary_search(fruits, "guava"s);  // false
 ```
 
@@ -815,11 +818,8 @@ but it has a **precondition**: the data must be sorted in the order the search e
 
 #### What goes wrong if the data is not sorted the right way
 
-Notice the comment in the code above: right before this point, `fruits`
-was left sorted by **length**, longest first, by the last lambda
-comparator. That is sorted, but not by the rule `binary_search` assumes
-(alphabetical, ascending). Here is what would happen if we searched it
-as it was, looking for `"fig"`, which really is in there:
+Assume we start with data that is **not** sorted in the expected way (alphabetical, ascending). 
+Here is what would happen if we searched it as it was, looking for `"fig"`, which really is in there:
 
 ```
    index:       0       1       2       3       4
