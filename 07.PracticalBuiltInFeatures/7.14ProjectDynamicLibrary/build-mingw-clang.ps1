@@ -1,5 +1,8 @@
-﻿# Answer key for the notes: a DLL with MinGW Clang, no CMake.
+# Answer key for the notes: a DLL with MinGW Clang on Windows, no CMake.
 # Needs C:\mingw64\bin on PATH. Run inside this folder.
+# The steps are in the same order as the notes.
+# Everything the tools produce goes into out-mingw-clang, so deleting that one
+# folder cleans up.
 
 $ErrorActionPreference = 'Stop'
 
@@ -9,27 +12,52 @@ function Step {
     if ($LASTEXITCODE -ne 0) { throw "failed: $args" }
 }
 
-# Same shape as the GCC script.
+# For the "break it on purpose" steps: the command must fail.
+function StepMustFail {
+    Write-Host "> $args"
+    # Windows PowerShell 5.1 turns a native command's stderr into a terminating
+    # error under 'Stop', so relax it here and print the messages as plain text.
+    $ErrorActionPreference = 'Continue'
+    & $args[0] $args[1..($args.Length - 1)] 2>&1 | ForEach-Object { "$_" }
+    if ($LASTEXITCODE -eq 0) { throw "should have failed: $args" }
+    Write-Host "(failed, as expected)"
+}
 
-# 1. Build the library as a DLL plus its import library. In PowerShell the
-#    -Wl,... option must be quoted, because a comma otherwise means "list".
-Step clang++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o station.dll '-Wl,--out-implib,libstation.dll.a'
+# -lstdc++exp: std::println in the program needs this extra library. It goes
+# AFTER the objects that need it. The DLL itself does not use println.
 
-# 2. The import library is small. The code is in the DLL.
-Get-ChildItem station.dll, libstation.dll.a | Select-Object Name, Length
+New-Item -ItemType Directory -Force out-mingw-clang | Out-Null
 
-# 3. Look inside: the exports table of the DLL.
-objdump -p station.dll | Select-String 'station'
+# 1. Build the library. -shared makes a DLL. STATION_BUILD_DLL turns STATION_API
+#    into dllexport. In PowerShell the -Wl,... option must be quoted, because a
+#    comma otherwise means "list of values". --out-implib also writes the import
+#    library, the MinGW counterpart of MSVC's station.lib.
+Step clang++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o out-mingw-clang\station.dll '-Wl,--out-implib,out-mingw-clang\libstation.dll.a'
+Get-ChildItem out-mingw-clang | Format-Table Name, Length -AutoSize
 
-# 4. Build the program against the import library.
-Step clang++ -std=c++23 -Wall -Wextra main.cpp -L. -lstation -o weather.exe -lstdc++exp
+# 2. Look inside the DLL: the exports table.
+objdump -p out-mingw-clang\station.dll | Select-String 'station'
 
-# 5. Which DLLs will the program load at startup?
-objdump -p weather.exe | Select-String 'DLL Name: (station|libstdc)'
+# 3. Link the program against the import library (-L<folder> -lstation finds
+#    libstation.dll.a), then ask what it needs.
+Step clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -lstdc++exp
+objdump -p out-mingw-clang\weather.exe | Select-String 'DLL Name: (station|libstdc)'
 
-# 6. Run it.
-Step .\weather.exe
+# 4. Run it. Windows looks for station.dll next to the .exe first.
+Step .\out-mingw-clang\weather.exe
 
-# 7. Try by hand, it is not in this script because Windows may show a
-#    dialog box and wait for a click: rename station.dll to station.dll.away
-#    and run .\weather.exe again. The program no longer starts.
+# 5. Break it on purpose
+# 5a. The missing DLL is not in this script, because Windows may show a dialog
+#     box and wait for a click. By hand: rename out-mingw-clang\station.dll to
+#     station.dll.away and run .\out-mingw-clang\weather.exe. It does not start.
+# 5b. Leave the library out of the link
+StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -lstdc++exp
+# 5c. Name the library but not the folder
+StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -lstdc++exp
+
+# 6. Replace the library without relinking the program: build a second version
+#    from stats.cpp + report_v2.cpp, copy it over the old DLL, run the SAME exe.
+New-Item -ItemType Directory -Force out-mingw-clang\v2 | Out-Null
+Step clang++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report_v2.cpp -o out-mingw-clang\v2\station.dll '-Wl,--out-implib,out-mingw-clang\v2\libstation.dll.a'
+Copy-Item out-mingw-clang\v2\station.dll out-mingw-clang\station.dll -Force
+Step .\out-mingw-clang\weather.exe

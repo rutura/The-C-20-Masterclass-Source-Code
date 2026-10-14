@@ -5,6 +5,9 @@
 //   Building the library itself  -> "I am providing this function"
 //   Building a program using it  -> "this function lives in a library"
 //
+// The library build passes STATION_BUILD_DLL (/D on MSVC, -D on the others).
+// The program that uses the library does not, so it sees "import".
+//
 // On Windows a DLL exports nothing unless told to. On Linux every function is
 // exported by default, which is why the Linux commands in the notes add
 // -fvisibility=hidden: for your own code, it gives Linux the same "opt in"

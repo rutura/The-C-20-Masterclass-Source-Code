@@ -6488,7 +6488,10 @@ it applies.
 
 ## 7.14 Project: a dynamic library
 
-A **dynamic library** (also called a **shared library**) is not copied into the program. It stays a separate file, and the program **finds it and loads it when it starts**. On Windows it is a **DLL**, on Linux a **`.so`** (shared object).
+A **dynamic library** (also called a **shared library**) is not copied
+into the program. It stays a separate file, and the program **finds it
+and loads it when it starts**. On Windows it is a **DLL**, on Linux a
+**`.so`** (shared object).
 
 ```
    STATIC (7.13)                               DYNAMIC (this lecture)
@@ -6502,16 +6505,33 @@ A **dynamic library** (also called a **shared library**) is not copied into the 
    one file, self-contained                    two files: both are needed
 ```
 
-The code is in `7.14ProjectDynamicLibrary`. Same program, same functions. One new file appears, `station_api.h`, and a macro, `STATION_API`, in front of the three public functions.
+With a static library, the library was needed only **while linking**.
+With a dynamic library it is needed **every time the program runs**.
+That one difference brings in a handful of new ideas, and this project
+walks you through each of them.
 
-### Why a macro in front of every function
+### What is new
 
-A **Windows DLL exports nothing by default**. You mark each function you want the outside world to see. The marking is different on each side of the boundary:
+**The loader.** When you start a program, the operating system has a
+part called the **loader**. Its job is to read the program, find every
+library it needs, load them into memory and only then start `main`. With
+a static library there was nothing to find. With a dynamic library the
+loader has to **locate the file at run time**, and if it cannot, your
+program never starts.
 
-- When the DLL itself is being compiled, the function is `__declspec(dllexport)`: "I provide this".
-- When a program that uses the DLL is compiled, the same function is `__declspec(dllimport)`: "this lives in a DLL".
+**Exporting and importing.** A static library hands over every function
+it has. A DLL is stricter: on Windows it **exports nothing unless you
+ask**. You mark each function you want the outside world to see. The
+marking is different on each side of the boundary:
 
-One header can serve both, with a macro, switched by a flag that only the library build passes:
+- When the DLL itself is being compiled, the function is
+  `__declspec(dllexport)`: "I provide this".
+- When a program that uses the DLL is compiled, the same function is
+  `__declspec(dllimport)`: "this lives in a DLL".
+
+One header can serve both, with a macro that is switched by a flag that
+only the library build passes. That is the new file in this folder,
+`station_api.h`:
 
 ```cpp
 #if defined(_WIN32)
@@ -6527,100 +6547,239 @@ One header can serve both, with a macro, switched by a flag that only the librar
 STATION_API double to_celsius(double fahrenheit);
 ```
 
-On Linux every function is exported by default, which is not always what you want. Compiling with **`-fvisibility=hidden`** reverses that for your own code, so only the functions marked `STATION_API` are visible. That is the same "opt in" rule Windows has. (The standard library's templates stay visible either way, so the symbol list still has hundreds of `std::` names. We filter for `station`.)
+The `STATION_API` in front of the three public functions (`to_celsius`,
+`summarize`, `format_report`) is the only change to the code. On Linux
+every function is exported by default, which is not always what you
+want. Compiling with **`-fvisibility=hidden`** reverses that for your
+own code, so only the functions marked `STATION_API` are visible: the
+same "opt in" rule as Windows.
 
-### Build the library
+**The import library.** On Windows, the linker cannot learn from a DLL
+alone which names it holds. So building a DLL also produces a small
+**import library**. It has the same `.lib` (MSVC) or `.dll.a` (MinGW)
+look as a static library, and a very different job: it holds **only a
+list of names and the DLL they live in**, no code. It is a signpost.
+Linux has no import library: the `.so` file serves both as the thing the
+linker reads and the thing the program loads.
 
-#### MSVC
+**Where the loader looks.** The loader does not search your whole disk.
+It has a short list of places, and on each system the list is different:
+
+- **Windows**: the folder of the `.exe` first, then the folders on your
+  **PATH**.
+- **Linux**: the system's standard library folders, any folders in the
+  **`LD_LIBRARY_PATH`** variable, and a folder that was **baked into the
+  program** when it was linked (the **rpath**).
+
+**Position-independent code.** Several programs may load the same `.so`,
+each at a **different address** in memory. So the library's code must
+not assume where it lives. The compiler flag **`-fPIC`**
+("position-independent code") produces code like that. Windows DLLs
+handle this differently, so you will only see the flag on Linux.
+
+You have in fact seen dynamic libraries already. In 7.12,
+`dumpbin /dependents` and `ldd` listed DLLs and `.so` files such as
+`MSVCP140.dll` and `libstdc++.so.6`: that is the C++ standard library,
+loaded by the loader exactly the way our `station` library will be. And
+`/MD` meant "use the shared (dynamic) C runtime".
+
+### The files you will build
+
+All the source files are in `7.14ProjectDynamicLibrary`. They are the
+same weather-station files as before, plus two new ones:
+
+```
+   stats.h / stats.cpp     summarize(readings) and to_celsius(f)               ─┐ the library
+   report.h / report.cpp   format_report(sensor, summary), which CALLS         ─┘
+                           to_celsius
+   station_api.h           the STATION_API macro (new)
+   main.cpp                builds the readings, calls both, prints             the program
+   report_v2.cpp           a second version of format_report (new, step 6)
+```
+
+### Pick your environment
+
+The project has **five environments**. Every one of them is a complete
+walk-through that you can do without reading any other. Do the one you
+have, and come back for the others if you are curious. In each one you
+will do the same six things:
+
+1. **Build the library**: compile the two library files into one DLL or
+   `.so`.
+2. **Look inside** the library: which names does it export?
+3. **Link the program** against the library, and ask the finished
+   program what it needs at start-up.
+4. **Run it**, and see where the loader looks.
+5. **Break it** on purpose.
+6. **Replace the library** with a second version, **without relinking**
+   the program.
+
+| Environment | Compiler driver | Library file(s) | Output folder |
+|---|---|---|---|
+| Windows, MSVC | `cl` | `station.dll` + `station.lib` (import library) | `out-msvc` |
+| Windows, MinGW GCC | `g++` | `station.dll` + `libstation.dll.a` (import library) | `out-mingw-gcc` |
+| Windows, MinGW Clang | `clang++` | `station.dll` + `libstation.dll.a` (import library) | `out-mingw-clang` |
+| Linux, GCC (Docker) | `g++` | `libstation.so` | `out-linux-gcc` |
+| Linux, Clang (Docker) | `clang++` | `libstation.so` | `out-linux-clang` |
+
+Every environment writes **everything it produces** (libraries,
+programs, even the ones you build to fail) into **its own output
+folder**, the one in the last column, inside
+`7.14ProjectDynamicLibrary`. Your source folder stays clean, and when
+you are done you delete **one folder** to start over or to try another
+environment. Git ignores every `out-*` folder.
+
+Every folder in this project also has one script per environment
+(`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`,
+`build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of
+that environment from top to bottom. Type the commands yourself first,
+and use the scripts to check your work. (A script and your own commands
+fill the same output folder, so delete the folder between the two if you
+want to be sure the script did the work. The Windows scripts leave out
+the step where a DLL goes missing, because Windows may show a dialog box
+and wait for a click.)
+
+---
+
+### Environment 1: Windows, MSVC
+
+MSVC is Microsoft's C++ compiler, the one Visual Studio uses and the
+reference compiler of this course. Our version is `cl` 19.51 (Visual
+Studio 2026).
+
+#### Open the shell
+
+Open **Developer PowerShell for VS** from the Start menu. That is an
+ordinary PowerShell that already knows where the Microsoft tools are.
+(From any other PowerShell you can load it by hand:
+`& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.)
+Then, from the repository root:
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /DSTATION_BUILD_DLL /LD stats.cpp report.cpp /Fe:station.dll
+cd 07.PracticalBuiltInFeatures\7.14ProjectDynamicLibrary
+cl
 ```
 
-- `/LD` builds a **DLL** instead of an executable.
-- `/DSTATION_BUILD_DLL` defines the macro, so `STATION_API` means `dllexport`.
+`cl` on its own prints a banner. Ours starts with
+`Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64`.
+If you see it, the shell is ready.
 
-Three files come out:
+#### The tools in this environment
 
-```
-station.dll   the code (about 310 KB)
-station.lib   an IMPORT library (about 3 KB)
-station.exp   a by-product you can ignore
-```
+- **`cl`**: the compiler driver. This time it does everything in one
+  command: with `/LD` it compiles the sources and then runs the linker
+  to make a **DLL**.
+- **`link`**: the linker. `cl` calls it for us here, and it is the one
+  that writes the DLL and the import library.
+- **`dumpbin`**: Microsoft's "dump a binary" tool. It reads object
+  files, libraries, DLLs and executables and prints what is inside. It
+  only reads: it never changes the file. We use it to list a DLL's
+  **exports** and a program's **dependents**.
 
-**`station.lib` here is not the static library from 7.13.** It has the same extension and a very different job. Last time `station.lib` was 950 KB because it held all the code. This one is 3 KB because it holds **only a list of names and the DLL they live in**. It is a signpost, and the linker uses it to learn "`to_celsius` is in `station.dll`".
+#### A folder for the output
 
-#### MinGW GCC or Clang (Windows)
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o station.dll '-Wl,--out-implib,libstation.dll.a'
+mkdir out-msvc
 ```
 
-`-shared` makes a DLL, and `-Wl,--out-implib,...` hands an option to the linker: also write the import library, `libstation.dll.a` (about 3 KB), the counterpart of MSVC's `station.lib`.
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
 
-> **PowerShell gotcha.** The quotes around `-Wl,--out-implib,libstation.dll.a` matter. PowerShell reads a comma as "a list of values" and the command fails with *Missing argument in parameter list*. In `cmd` or on Linux you do not need the quotes.
+#### 1. Build the library
 
-#### Linux, GCC or Clang
-
-```sh
-g++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report.cpp -o libstation.so
 ```
-
-- **`-shared`** makes a `.so`.
-- **`-fPIC`** means "position-independent code". The library can be loaded at **any address**, and several programs may load it at different ones, so its code cannot assume where it lives.
-- There is **no import library** on Linux. The `.so` itself serves both as the thing the linker reads and the thing the program loads.
-
-### Look inside
+   stats.cpp  ─┐
+               ├──► cl /LD ──► station.dll    the code
+   report.cpp ─┘               station.lib    the import library: names only
+                               station.exp    a by-product you can ignore
+```
 
 ```powershell
-dumpbin /exports station.dll                       # MSVC
-objdump -p station.dll | Select-String station     # MinGW
-```
-
-```sh
-nm -D --defined-only libstation.so | grep station  # Linux
+cl /nologo /std:c++latest /EHsc /MD /W4 /DSTATION_BUILD_DLL /LD stats.cpp report.cpp /Fo:out-msvc\ /Fe:out-msvc\station.dll
+Get-ChildItem out-msvc | Format-Table Name, Length -AutoSize
 ```
 
 ```
-   ordinal hint RVA      name
-         1    0 00001C40 ?format_report@station@@YA?AV?$basic_string@DU?$char_traits@D@std@@...
-         2    1 00001040 ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z
-         3    2 00001010 ?to_celsius@station@@YANN@Z
+stats.cpp
+report.cpp
+Generating Code...
+   Creating library out-msvc\station.lib and object out-msvc\station.exp
+
+Name         Length
+----         ------
+report.obj   746033
+station.dll  309248
+station.exp    1584
+station.lib    3196
+stats.obj     22469
 ```
 
-```
-000000000001b809 T _ZN7station10to_celsiusEd
-000000000001c1b1 T _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
-000000000001b841 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
-```
+- `/LD` builds a **DLL** instead of an executable. (The sizes of the
+  `.obj` and `.exp` files change a little with the folder you build in,
+  so yours will differ slightly.)
+- `/DSTATION_BUILD_DLL` defines the macro for this build only, so
+  `STATION_API` means `dllexport` while the library is compiled.
+- `/Fo:out-msvc\` says which **folder** gets the object files (the
+  trailing backslash is what tells `cl` it is a folder).
+  `/Fe:out-msvc\station.dll` names the output file, and `cl` puts the
+  import library and the `.exp` file next to it.
+- `/std:c++latest` is the newest language mode (never `/std:c++23` with
+  `cl`), `/EHsc` turns on normal exception handling, and `/MD` picks the
+  **shared C runtime**, which is also what CMake uses by default.
 
-**Three `station` entries**: the three functions we marked. On Windows that is the whole export table, and it is the **public face** of the DLL: the only names a program can reach. (On Linux the list also contains `std::` names, which is why we filtered with `grep station`.)
+**`station.lib` here is not a static library.** It has the same
+extension as the static library of 7.13 and a very different job. That
+one held all the code. This one is **3,196 bytes**, because it holds
+**only a list of names and the DLL they live in**. It is the signpost:
+the linker will read it to learn "`to_celsius` lives in `station.dll`".
+The code itself is in `station.dll`.
 
-Look closely at the middle Linux name, `format_reportB5cxx11`. That `B5cxx11` is a **tag meaning "returns the C++11 flavour of `std::string`"**. GCC changed the layout of `std::string` in 2015, and the tag lets old and new code tell each other apart instead of crashing. This is the ABI from 7.12 showing up in a name.
-
-### Link the program, and run it
-
-The program is linked against the **signpost** (the import library on Windows, the `.so` itself on Linux).
+#### 2. Look inside the library
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 main.cpp station.lib /Fe:weather.exe            # MSVC
-g++ -std=c++23 -Wall -Wextra main.cpp -L. -lstation -o weather.exe -lstdc++exp          # MinGW
+dumpbin /exports out-msvc\station.dll
 ```
 
-```sh
-g++ -std=c++23 -Wall -Wextra main.cpp -L. -lstation -o weather                          # Linux
+```
+  Section contains the following exports for station.dll
+
+           1 ordinal base
+           3 number of functions
+           3 number of names
+
+    ordinal hint RVA      name
+
+          1    0 00001C40 ?format_report@station@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@AEBUSummary@1@@Z
+          2    1 00001040 ?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z
+          3    2 00001010 ?to_celsius@station@@YANN@Z
 ```
 
-Ask the finished program what it needs when it **starts**:
+(`dumpbin` prints more: a banner, the file type and a size summary. We
+left those out.) **Three exports**: the three functions we marked with
+`STATION_API`. On Windows that is the whole table, and it is the
+**public face** of the DLL: the only names a program can reach. The
+names are the same mangled names you read in 7.12. (An *ordinal* is just
+a number for each export, and the *RVA* is where its code sits inside
+the DLL. You can ignore both.)
+
+#### 3. Link the program, and ask what it needs
+
+The program is linked against the **signpost**, the import library, not
+against the DLL:
 
 ```powershell
-dumpbin /dependents weather.exe | Select-String 'station|MSVCP'        # MSVC
-objdump -p weather.exe | Select-String 'DLL Name: (station|libstdc)'   # MinGW
+cl /nologo /std:c++latest /EHsc /MD /W4 main.cpp out-msvc\station.lib /Fo:out-msvc\ /Fe:out-msvc\weather.exe
 ```
 
-```sh
-readelf -d weather | grep NEEDED       # Linux
-ldd weather | grep -E 'station|not found'
+Notice that `main.cpp` is compiled **without** `/DSTATION_BUILD_DLL`, so
+there `STATION_API` means `dllimport`: "this function lives in a DLL".
+Now ask the finished program what it needs when it **starts**:
+
+```powershell
+dumpbin /dependents out-msvc\weather.exe | Select-String 'station|MSVCP'
 ```
 
 ```
@@ -6628,59 +6787,1371 @@ ldd weather | grep -E 'station|not found'
     MSVCP140.dll
 ```
 
+`station.dll` is now on the program's **list of requirements**. It is
+not inside the program. This is the big difference from 7.13. The second
+line is the C++ standard library, another DLL, which Windows finds the
+same way.
+
+#### 4. Run it
+
+```powershell
+.\out-msvc\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It works because `station.dll` sits **in the same folder as
+`weather.exe`**, and the Windows loader looks in the **folder of the
+program first**. Here is the second place it looks. Copy the program to
+another folder, where there is no DLL beside it:
+
+```powershell
+New-Item -ItemType Directory out-msvc\elsewhere
+Copy-Item out-msvc\weather.exe out-msvc\elsewhere\
+.\out-msvc\elsewhere\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+Nothing is printed, and the exit code `-1073741515` is Windows' way of
+saying "a DLL was not found". (On your desktop you may also see a dialog
+box naming `station.dll`. Click OK.) Now add the folder that **does**
+have the DLL to the **PATH** of this window and run it again:
+
+```powershell
+$env:Path = "$PWD\out-msvc;$env:Path"
+.\out-msvc\elsewhere\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The loader found `station.dll` through the PATH.
+
+#### 5. Break it on purpose
+
+**a. Take the library away.** Rename the DLL and run the program from
+its own folder:
+
+```powershell
+Rename-Item out-msvc\station.dll station.dll.away
+.\out-msvc\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+The same exit code as before. The program linked fine, because the
+import library was there. It cannot **start**, because the DLL is gone.
+This is the first kind of failure that a static library never had: a
+build that succeeded and a program that does not run. Rename it back
+before you go on:
+
+```powershell
+Rename-Item out-msvc\station.dll.away station.dll
+```
+
+**b. Leave the library out of the link.** Compile `main.cpp` without the
+import library:
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 main.cpp /Fo:out-msvc\ /Fe:out-msvc\broken.exe
+```
+
+```
+main.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) struct station::Summary __cdecl station::summarize(class std::vector<double,class std::allocator<double> > const &)" (__imp_?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "__declspec(dllimport) class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > __cdecl station::format_report(...)" (__imp_?format_report@station@@YA?AV?$basic_string@...@Z) referenced in function main
+out-msvc\broken.exe : fatal error LNK1120: 2 unresolved externals
+```
+
+(The long second name is shortened with `...`.) Read it closely. The
+linker asks for `summarize` and `format_report`, the two functions
+`main.cpp` calls. Two new details: the message says
+**`__declspec(dllimport)`**, the macro doing its job, and the mangled
+name starts with **`__imp_`**, "import": the program expects to reach
+the function **through a DLL**. Only the import library can tell the
+linker where that is.
+
+#### 6. Replace the library without relinking the program
+
+The great strength of a dynamic library: you can fix or change the
+library and **ship one file**. `report_v2.cpp` has a second version of
+`format_report` with the same name, the same parameters and the same
+result type, and a different text. Build a library from `stats.cpp` and
+`report_v2.cpp` into a separate folder, copy the new DLL over the old
+one, and run the **same `weather.exe`**:
+
+```powershell
+New-Item -ItemType Directory out-msvc\v2
+cl /nologo /std:c++latest /EHsc /MD /W4 /DSTATION_BUILD_DLL /LD stats.cpp report_v2.cpp /Fo:out-msvc\v2\ /Fe:out-msvc\v2\station.dll
+Copy-Item out-msvc\v2\station.dll out-msvc\station.dll -Force
+.\out-msvc\weather.exe
+```
+
+```
+[v2] sensor-12: min 12.8 C, max 32.5 C, mean 21.6 C
+```
+
+`weather.exe` was not compiled or linked again, and its new output
+proves it loaded the new library. With the static library of 7.13 you
+would have had to **relink every program** that used it. The condition
+is that the **interface stays the same**: same names, same parameter
+types. The program only checks the names, and nothing checks that the
+code behind them still behaves.
+
+That is MSVC done.
+
+---
+
+### Environment 2: Windows, MinGW GCC
+
+**MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
+programs it makes are ordinary Windows programs. Ours is a UCRT build by
+Brecht Sanders: `g++ --version` says
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
+window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.14ProjectDynamicLibrary
+g++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. With `-shared` it compiles the
+  sources and then runs the linker to make a **DLL**.
+- **`-Wl,<option>`**: not a program but a way to hand an option **to the
+  linker**. We use it to ask for the import library (`--out-implib`).
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls
+  it, and the linker errors you get come from `ld.exe`.
+- **`objdump`**: prints information about object files, DLLs and
+  executables. With `-p` it shows a DLL's **export table** and the
+  **DLLs a program needs** (the `DLL Name` lines).
+- **`-lstdc++exp`**: a library option (`-l` means "link this library").
+  On our MinGW GCC 14, `std::println` needs this extra library ("the
+  experimental part of the C++ library"). It goes **after** everything
+  that needs it. Only the program needs it: the library does not call
+  `println`.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-gcc
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ─┐
+               ├──► g++ -shared ──► station.dll       the code
+   report.cpp ─┘                       libstation.dll.a   the import library: names only
+```
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o out-mingw-gcc\station.dll '-Wl,--out-implib,out-mingw-gcc\libstation.dll.a'
+Get-ChildItem out-mingw-gcc | Format-Table Name, Length -AutoSize
+```
+
+```
+Name             Length
+----             ------
+libstation.dll.a   3400
+station.dll      478558
+```
+
+- `-shared` makes a **DLL** instead of an executable.
+- `-DSTATION_BUILD_DLL` defines the macro for this build only, so
+  `STATION_API` means `dllexport` while the library is compiled.
+- `-Wl,--out-implib,...` hands an option to the linker: also write the
+  **import library**, `libstation.dll.a`, in the folder we name. It is
+  3,400 bytes, because it holds **only a list of names and the DLL they
+  live in**. It is the signpost, not the code.
+- `-std=c++23` selects the language mode, `-Wall -Wextra` ask for more
+  warnings, and `-o` names the DLL.
+
+> **PowerShell gotcha.** The quotes around `-Wl,--out-implib,...`
+> matter. PowerShell reads a comma as "a list of values" and the command
+> fails with *Missing argument in parameter list*. In `cmd` or on Linux
+> you do not need the quotes.
+
+#### 2. Look inside the library
+
+```powershell
+objdump -p out-mingw-gcc\station.dll | Select-String 'station'
+```
+
+```
+out-mingw-gcc\station.dll:     file format pei-x86-64
+Name 				0000000000024046 station.dll
+	[   0] +base[   1]  0000 _ZN7station10to_celsiusEd
+	[   1] +base[   2]  0001 _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
+	[   2] +base[   3]  0002 _ZN7station9summarizeERKSt6vectorIdSaIdEE
+```
+
+(`objdump -p` prints a lot more. We filtered for `station`.) **Three
+exports**: the three functions we marked with `STATION_API`. On Windows
+that is the whole export table, and it is the **public face** of the
+DLL: the only names a program can reach. The names are the
+Itanium-mangled names you read in 7.12.
+
+Look closely at the middle one, `format_reportB5cxx11`. That `B5cxx11`
+is a **tag meaning "returns the C++11 flavour of `std::string`"**.
+libstdc++, the C++ library that GCC and Clang use here, changed the
+layout of `std::string` in 2015, and the tag lets old and new code tell
+each other apart instead of crashing. This is the ABI showing up in a
+name.
+
+#### 3. Link the program, and ask what it needs
+
+The program is linked against the **signpost**, the import library, not
+against the DLL:
+
+```powershell
+g++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-gcc -lstation -o out-mingw-gcc\weather.exe -lstdc++exp
+```
+
+`-Lout-mingw-gcc` says "also search this folder", and `-lstation` means
+"find a library called `station`": the linker looks for
+`libstation.dll.a`. Now ask the finished program what it needs when it
+**starts**:
+
+```powershell
+objdump -p out-mingw-gcc\weather.exe | Select-String 'DLL Name: (station|libstdc)'
+```
+
+```
+	DLL Name: libstdc++-6.dll
+	DLL Name: station.dll
+```
+
+`station.dll` is now on the program's **list of requirements**. It is
+not inside the program. This is the big difference from 7.13. The other
+line is the C++ standard library, another DLL, which lives in
+`C:\mingw64\bin`. That is why a MinGW program only starts from a window
+where that folder is on the PATH.
+
+#### 4. Run it
+
+```powershell
+.\out-mingw-gcc\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It works because `station.dll` sits **in the same folder as
+`weather.exe`**, and the Windows loader looks in the **folder of the
+program first**. Here is the second place it looks. Copy the program to
+another folder, where there is no DLL beside it:
+
+```powershell
+New-Item -ItemType Directory out-mingw-gcc\elsewhere
+Copy-Item out-mingw-gcc\weather.exe out-mingw-gcc\elsewhere\
+.\out-mingw-gcc\elsewhere\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+Nothing is printed, and the exit code `-1073741515` is Windows' way of
+saying "a DLL was not found". (On your desktop you may also see a dialog
+box naming `station.dll`. Click OK.) Now add the folder that **does**
+have the DLL to the **PATH** of this window and run it again:
+
+```powershell
+$env:Path = "$PWD\out-mingw-gcc;$env:Path"
+.\out-mingw-gcc\elsewhere\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The loader found `station.dll` through the PATH.
+
+#### 5. Break it on purpose
+
+**a. Take the library away.** Rename the DLL and run the program from
+its own folder:
+
+```powershell
+Rename-Item out-mingw-gcc\station.dll station.dll.away
+.\out-mingw-gcc\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+The same exit code as before. The program linked fine, because the
+import library was there. It cannot **start**, because the DLL is gone.
+This is the first kind of failure that a static library never had: a
+build that succeeded and a program that does not run. Rename it back
+before you go on:
+
+```powershell
+Rename-Item out-mingw-gcc\station.dll.away station.dll
+```
+
+**b. Leave the library out of the link.** Compile `main.cpp` without
+naming the library:
+
+```powershell
+g++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-gcc\broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: ...Temp\ccj4TosJ.o:main.cpp:(.text+0x6a): undefined reference to `__imp__ZN7station9summarizeERKSt6vectorIdSaIdEE'
+...ld.exe: ...Temp\ccj4TosJ.o:main.cpp:(.text+0xb1): undefined reference to `__imp__ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE'
+collect2.exe: error: ld returned 1 exit status
+```
+
+(Paths shortened.) Read it closely. The linker asks for `summarize` and
+`format_report`, the two functions `main.cpp` calls. The names start
+with **`__imp_`**, "import": the program expects to reach the function
+**through a DLL**, and without the import library the linker has no idea
+where that is.
+
+**c. Name the library, but not the folder.**
+
+```powershell
+g++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-gcc\broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: cannot find -lstation: No such file or directory
+collect2.exe: error: ld returned 1 exit status
+```
+
+A different kind of message: not a missing **function**, a missing
+**file**. The linker searched its standard folders for
+`libstation.dll.a`, and our output folder is not one of them.
+
+#### 6. Replace the library without relinking the program
+
+The great strength of a dynamic library: you can fix or change the
+library and **ship one file**. `report_v2.cpp` has a second version of
+`format_report` with the same name, the same parameters and the same
+result type, and a different text. Build a library from `stats.cpp` and
+`report_v2.cpp` into a separate folder, copy the new DLL over the old
+one, and run the **same `weather.exe`**:
+
+```powershell
+New-Item -ItemType Directory out-mingw-gcc\v2
+g++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report_v2.cpp -o out-mingw-gcc\v2\station.dll '-Wl,--out-implib,out-mingw-gcc\v2\libstation.dll.a'
+Copy-Item out-mingw-gcc\v2\station.dll out-mingw-gcc\station.dll -Force
+.\out-mingw-gcc\weather.exe
+```
+
+```
+[v2] sensor-12: min 12.8 C, max 32.5 C, mean 21.6 C
+```
+
+`weather.exe` was not compiled or linked again, and its new output
+proves it loaded the new library. With the static library of 7.13 you
+would have had to **relink every program** that used it. The condition
+is that the **interface stays the same**: same names, same parameter
+types. The program only checks the names, and nothing checks that the
+code behind them still behaves.
+
+That is MinGW GCC done.
+
+---
+
+### Environment 3: Windows, MinGW Clang
+
+**MinGW-w64** brings the GNU tool chain to Windows, and its package also
+contains the **Clang** compiler. The programs it makes are ordinary
+Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
+`clang++ --version` says `clang version 19.1.1` and
+`Target: x86_64-w64-windows-gnu`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
+window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.14ProjectDynamicLibrary
+clang++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`clang++`**: the Clang compiler driver. With `-shared` it compiles
+  the sources and then runs the linker to make a **DLL**.
+- **`-Wl,<option>`**: not a program but a way to hand an option **to the
+  linker**. We use it to ask for the import library (`--out-implib`).
+- **`ld`**: the GNU linker. You will not usually type it: `clang++`
+  calls it, and the linker errors you get come from `ld`.
+- **`objdump`**: prints information about object files, DLLs and
+  executables. With `-p` it shows a DLL's **export table** and the
+  **DLLs a program needs** (the `DLL Name` lines).
+- **`-lstdc++exp`**: a library option (`-l` means "link this library").
+  On our MinGW Clang 19, `std::println` needs this extra library ("the
+  experimental part of the C++ library"). It goes **after** everything
+  that needs it. Only the program needs it: the library does not call
+  `println`.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-clang
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ─┐
+               ├──► clang++ -shared ──► station.dll       the code
+   report.cpp ─┘                       libstation.dll.a   the import library: names only
+```
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report.cpp -o out-mingw-clang\station.dll '-Wl,--out-implib,out-mingw-clang\libstation.dll.a'
+Get-ChildItem out-mingw-clang | Format-Table Name, Length -AutoSize
+```
+
+```
+Name             Length
+----             ------
+libstation.dll.a   3400
+station.dll      470022
+```
+
+- `-shared` makes a **DLL** instead of an executable.
+- `-DSTATION_BUILD_DLL` defines the macro for this build only, so
+  `STATION_API` means `dllexport` while the library is compiled.
+- `-Wl,--out-implib,...` hands an option to the linker: also write the
+  **import library**, `libstation.dll.a`, in the folder we name. It is
+  3,400 bytes, because it holds **only a list of names and the DLL they
+  live in**. It is the signpost, not the code.
+- `-std=c++23` selects the language mode, `-Wall -Wextra` ask for more
+  warnings, and `-o` names the DLL.
+
+> **PowerShell gotcha.** The quotes around `-Wl,--out-implib,...`
+> matter. PowerShell reads a comma as "a list of values" and the command
+> fails with *Missing argument in parameter list*. In `cmd` or on Linux
+> you do not need the quotes.
+
+#### 2. Look inside the library
+
+```powershell
+objdump -p out-mingw-clang\station.dll | Select-String 'station'
+```
+
+```
+out-mingw-clang\station.dll:     file format pei-x86-64
+Name 				0000000000027046 station.dll
+	[   0] +base[   1]  0000 _ZN7station10to_celsiusEd
+	[   1] +base[   2]  0001 _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
+	[   2] +base[   3]  0002 _ZN7station9summarizeERKSt6vectorIdSaIdEE
+```
+
+(`objdump -p` prints a lot more. We filtered for `station`.) **Three
+exports**: the three functions we marked with `STATION_API`. On Windows
+that is the whole export table, and it is the **public face** of the
+DLL: the only names a program can reach. The names are the
+Itanium-mangled names you read in 7.12.
+
+Look closely at the middle one, `format_reportB5cxx11`. That `B5cxx11`
+is a **tag meaning "returns the C++11 flavour of `std::string`"**.
+libstdc++, the C++ library that GCC and Clang use here, changed the
+layout of `std::string` in 2015, and the tag lets old and new code tell
+each other apart instead of crashing. This is the ABI showing up in a
+name.
+
+#### 3. Link the program, and ask what it needs
+
+The program is linked against the **signpost**, the import library, not
+against the DLL:
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -lstdc++exp
+```
+
+`-Lout-mingw-clang` says "also search this folder", and `-lstation`
+means "find a library called `station`": the linker looks for
+`libstation.dll.a`. Now ask the finished program what it needs when it
+**starts**:
+
+```powershell
+objdump -p out-mingw-clang\weather.exe | Select-String 'DLL Name: (station|libstdc)'
+```
+
+```
+	DLL Name: libstdc++-6.dll
+	DLL Name: station.dll
+```
+
+`station.dll` is now on the program's **list of requirements**. It is
+not inside the program. This is the big difference from 7.13. The other
+line is the C++ standard library, another DLL, which lives in
+`C:\mingw64\bin`. That is why a MinGW program only starts from a window
+where that folder is on the PATH.
+
+#### 4. Run it
+
+```powershell
+.\out-mingw-clang\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It works because `station.dll` sits **in the same folder as
+`weather.exe`**, and the Windows loader looks in the **folder of the
+program first**. Here is the second place it looks. Copy the program to
+another folder, where there is no DLL beside it:
+
+```powershell
+New-Item -ItemType Directory out-mingw-clang\elsewhere
+Copy-Item out-mingw-clang\weather.exe out-mingw-clang\elsewhere\
+.\out-mingw-clang\elsewhere\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+Nothing is printed, and the exit code `-1073741515` is Windows' way of
+saying "a DLL was not found". (On your desktop you may also see a dialog
+box naming `station.dll`. Click OK.) Now add the folder that **does**
+have the DLL to the **PATH** of this window and run it again:
+
+```powershell
+$env:Path = "$PWD\out-mingw-clang;$env:Path"
+.\out-mingw-clang\elsewhere\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The loader found `station.dll` through the PATH.
+
+#### 5. Break it on purpose
+
+**a. Take the library away.** Rename the DLL and run the program from
+its own folder:
+
+```powershell
+Rename-Item out-mingw-clang\station.dll station.dll.away
+.\out-mingw-clang\weather.exe
+$LASTEXITCODE
+```
+
+```
+-1073741515
+```
+
+The same exit code as before. The program linked fine, because the
+import library was there. It cannot **start**, because the DLL is gone.
+This is the first kind of failure that a static library never had: a
+build that succeeded and a program that does not run. Rename it back
+before you go on:
+
+```powershell
+Rename-Item out-mingw-clang\station.dll.away station.dll
+```
+
+**b. Leave the library out of the link.** Compile `main.cpp` without
+naming the library:
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: C:/Users/<you>/AppData/Local/Temp/main-febf2b.o:main.cpp:(.text+0x91): undefined reference to `__imp__ZN7station9summarizeERKSt6vectorIdSaIdEE'
+C:/mingw64/bin/ld: C:/Users/<you>/AppData/Local/Temp/main-febf2b.o:main.cpp:(.text+0xcf): undefined reference to `__imp__ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+(Paths shortened.) Read it closely. The linker asks for `summarize` and
+`format_report`, the two functions `main.cpp` calls. The names start
+with **`__imp_`**, "import": the program expects to reach the function
+**through a DLL**, and without the import library the linker has no idea
+where that is.
+
+**c. Name the library, but not the folder.**
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: cannot find -lstation: No such file or directory
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+A different kind of message: not a missing **function**, a missing
+**file**. The linker searched its standard folders for
+`libstation.dll.a`, and our output folder is not one of them.
+
+#### 6. Replace the library without relinking the program
+
+The great strength of a dynamic library: you can fix or change the
+library and **ship one file**. `report_v2.cpp` has a second version of
+`format_report` with the same name, the same parameters and the same
+result type, and a different text. Build a library from `stats.cpp` and
+`report_v2.cpp` into a separate folder, copy the new DLL over the old
+one, and run the **same `weather.exe`**:
+
+```powershell
+New-Item -ItemType Directory out-mingw-clang\v2
+clang++ -std=c++23 -Wall -Wextra -DSTATION_BUILD_DLL -shared stats.cpp report_v2.cpp -o out-mingw-clang\v2\station.dll '-Wl,--out-implib,out-mingw-clang\v2\libstation.dll.a'
+Copy-Item out-mingw-clang\v2\station.dll out-mingw-clang\station.dll -Force
+.\out-mingw-clang\weather.exe
+```
+
+```
+[v2] sensor-12: min 12.8 C, max 32.5 C, mean 21.6 C
+```
+
+`weather.exe` was not compiled or linked again, and its new output
+proves it loaded the new library. With the static library of 7.13 you
+would have had to **relink every program** that used it. The condition
+is that the **interface stays the same**: same names, same parameter
+types. The program only checks the names, and nothing checks that the
+code behind them still behaves.
+
+That is MinGW Clang done.
+
+---
+
+### Environment 4: Linux, GCC (Docker)
+
+You get a real Linux with GCC from the Docker container of chapter 2.
+Our image carries GCC 16.2 and GNU binutils 2.44.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary
+g++ --version
+```
+
+```
+g++ (GCC) 16.2.0
+```
+
+(`--version` prints a few more lines. We show only the first.)
+
+(`--rm` throws the container away when you leave. The files you create
+stay in your folder on Windows, in `out-linux-gcc`, because of the `-v`
+mount. They are ignored by git.)
+
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. With `-shared` it compiles the
+  sources and then runs the linker to make a **shared library**, a `.so`
+  file.
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls
+  it, and the linker errors you get come from `/usr/bin/ld`.
+- **`nm -D`**: lists the **symbol table** of a binary. With `-D` it
+  lists the **dynamic** symbols: the names a shared library offers to
+  the outside.
+- **`readelf -d`**: prints the **dynamic section** of an ELF file, which
+  includes the list of libraries the program needs (the `NEEDED` lines)
+  and any folder baked into it.
+- **`ldd`**: asks "which shared libraries will this program load, and
+  **where is each one found**?" It is the quickest way to see whether
+  the loader will succeed.
+- **`file`**: guesses what a file is from its first bytes.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-gcc
+```
+
+(`-p` means "no error if it already exists".)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ─┐
+               ├──► g++ -shared ──► libstation.so   the code (and nothing else: no import library)
+   report.cpp ─┘
+```
+
+```sh
+g++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report.cpp -o out-linux-gcc/libstation.so
+ls -l out-linux-gcc/libstation.so
+file out-linux-gcc/libstation.so
+```
+
+```
+-rwxr-xr-x 1 root root 352640 Oct 14 16:12 out-linux-gcc/libstation.so
+out-linux-gcc/libstation.so: ELF 64-bit LSB shared object, x86-64, version 1 (GNU/Linux), dynamically linked, not stripped
+```
+
+- **`-shared`** makes a `.so` instead of an executable.
+- **`-fPIC`** means "position-independent code". The library can be
+  loaded at **any address**, and several programs may load it at
+  different ones, so its code cannot assume where it lives.
+- **`-fvisibility=hidden`** hides everything we did not mark with
+  `STATION_API`, so only the three public functions are exported.
+- There is **no import library** on Linux. The `.so` itself serves both
+  as the thing the linker reads and the thing the program loads.
+
+(The date in the `ls -l` line will be yours, not ours.)
+
+#### 2. Look inside the library
+
+```sh
+nm -D --defined-only out-linux-gcc/libstation.so | grep station
+nm -D --defined-only out-linux-gcc/libstation.so | wc -l
+```
+
+```
+000000000001b809 T _ZN7station10to_celsiusEd
+000000000001c1b1 T _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
+000000000001b841 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+708
+```
+
+The addresses will differ on your machine. **Three `station` entries**:
+the three functions we marked. The names are the Itanium-mangled names
+you read in 7.12. The second command counts **all** the exported names
+in the library: there are hundreds, because the standard library's
+templates stay visible whatever we do. That is why we filter for
+`station`.
+
+Look closely at the middle name, `format_reportB5cxx11`. That `B5cxx11`
+is a **tag meaning "returns the C++11 flavour of `std::string`"**.
+libstdc++, the C++ library that GCC and Clang use here, changed the
+layout of `std::string` in 2015, and the tag lets old and new code tell
+each other apart instead of crashing. This is the ABI showing up in a
+name.
+
+#### 3. Link the program, and ask what it needs
+
+```sh
+g++ -std=c++23 -Wall -Wextra main.cpp -Lout-linux-gcc -lstation -o out-linux-gcc/weather
+```
+
+`-Lout-linux-gcc` says "also search this folder", and `-lstation` means
+"find a library called `station`": the linker looks for `libstation.so`.
+Now ask the finished program what it needs when it **starts**:
+
+```sh
+readelf -d out-linux-gcc/weather | grep NEEDED
+ldd out-linux-gcc/weather | grep -E 'station|not found'
+```
+
 ```
  0x0000000000000001 (NEEDED)             Shared library: [libstation.so]
  0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
- ...
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
 	libstation.so => not found
 ```
 
-`station.dll` is now on the program's **list of requirements**. It is not inside the program. This is the big difference from 7.13.
+`libstation.so` is now on the program's **list of requirements** (the
+`NEEDED` lines). It is not inside the program. This is the big
+difference from 7.13. And look at the last line: **`ldd` says
+`not found`**. The loader already knows it will not find our library.
+Let us see what that means.
 
-### The program cannot find its library
-
-On **Linux** try running `./weather` straight away. It stops, and says exactly why:
-
-```
-./weather: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
-```
-
-The exit code is 127. The linker found `libstation.so` fine, because we passed `-L.`. But **`-L` is a link-time option**. At run time the system's **loader** searches its own list of folders, and the current folder is not on it. There are two common fixes:
+#### 4. Run it
 
 ```sh
-LD_LIBRARY_PATH=. ./weather                          # tell the loader, for this one run
+./out-linux-gcc/weather
+echo $?
+```
+
+```
+./out-linux-gcc/weather: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+```
+
+The program does not start. The linker found `libstation.so` fine,
+because we passed `-L`. But **`-L` is a link-time option**. At run time
+the **loader** searches its own list of folders, and our output folder
+is not on it. There are two common fixes. The first is to tell the
+loader, for this one run:
+
+```sh
+LD_LIBRARY_PATH=out-linux-gcc ./out-linux-gcc/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`LD_LIBRARY_PATH` is a list of extra folders for the loader. The second
+fix is to bake the folder **into the program**. Link again, with
+`-Wl,-rpath,'$ORIGIN'`, and call the result `weather_rpath`:
+
+```sh
+g++ -std=c++23 -Wall -Wextra main.cpp -Lout-linux-gcc -lstation -Wl,-rpath,'$ORIGIN' -o out-linux-gcc/weather_rpath
+readelf -d out-linux-gcc/weather_rpath | grep -E 'RPATH|RUNPATH'
+./out-linux-gcc/weather_rpath
+```
+
+```
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`-Wl,` hands an option to the linker (as with `-Wl,--out-implib` on
+Windows). **`rpath`** stores a folder **inside the executable**, and
+**`$ORIGIN`** stands for "the folder this program is in". So the program
+looks for its library right next to itself, wherever you run it from.
+Quote the `$ORIGIN` so your shell does not eat it. Try it from another
+folder:
+
+```sh
+cd /
+/workspace/07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary/out-linux-gcc/weather_rpath
+cd /workspace/07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The linker wrote the entry as `RUNPATH`, the modern spelling of the
+older `RPATH`.)
+
+#### 5. Break it on purpose
+
+**a. Take the library away.** Move `libstation.so` out of the way and
+run the program that has the rpath:
+
+```sh
+mv out-linux-gcc/libstation.so out-linux-gcc/libstation.so.away
+./out-linux-gcc/weather_rpath
+echo $?
+ldd out-linux-gcc/weather_rpath | grep station
+```
+
+```
+./out-linux-gcc/weather_rpath: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+	libstation.so => not found
+```
+
+The program linked fine. It cannot **start**, because the library is
+gone. This is the first kind of failure that a static library never had:
+a build that succeeded and a program that does not run. Put it back
+before you go on:
+
+```sh
+mv out-linux-gcc/libstation.so.away out-linux-gcc/libstation.so
+```
+
+**b. Leave the library out of the link.** Compile `main.cpp` without
+naming the library:
+
+```sh
+g++ -std=c++23 -Wall -Wextra main.cpp -o out-linux-gcc/broken
+```
+
+```
+/usr/bin/ld: /tmp/ccdouMl2.o: in function `main':
+main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: main.cpp:(.text+0x72): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+collect2: error: ld returned 1 exit status
+```
+
+(The `/tmp/...` object file name is a temporary file and will differ.)
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only the library calls that one.
+
+**c. Name the library, but not the folder.**
+
+```sh
+g++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-linux-gcc/broken
+```
+
+```
+/usr/bin/ld: cannot find -lstation: No such file or directory
+collect2: error: ld returned 1 exit status
+```
+
+A different kind of message: not a missing **function**, a missing
+**file**. The linker searched its standard folders for `libstation.so`,
+and our output folder is not one of them.
+
+#### 6. Replace the library without relinking the program
+
+The great strength of a dynamic library: you can fix or change the
+library and **ship one file**. `report_v2.cpp` has a second version of
+`format_report` with the same name, the same parameters and the same
+result type, and a different text. Build a library from `stats.cpp` and
+`report_v2.cpp` into a separate folder, copy the new `.so` over the old
+one, and run the **same `weather_rpath`**:
+
+```sh
+mkdir -p out-linux-gcc/v2
+g++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report_v2.cpp -o out-linux-gcc/v2/libstation.so
+cp out-linux-gcc/v2/libstation.so out-linux-gcc/libstation.so
+./out-linux-gcc/weather_rpath
+```
+
+```
+[v2] sensor-12: min 12.8 C, max 32.5 C, mean 21.6 C
+```
+
+The program was not compiled or linked again, and its new output proves
+it loaded the new library. With the static library of 7.13 you would
+have had to **relink every program** that used it. The condition is that
+the **interface stays the same**: same names, same parameter types. The
+program only checks the names, and nothing checks that the code behind
+them still behaves.
+
+That is Linux GCC done.
+
+---
+
+### Environment 5: Linux, Clang (Docker)
+
+You get a real Linux with Clang from the Docker container of chapter 2.
+Our image carries Clang 21.1.8 and GNU binutils 2.44.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-clang
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary
+clang++ --version
+```
+
+```
+Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)
+```
+
+(`--version` prints a few more lines. We show only the first.)
+
+(`--rm` throws the container away when you leave. The files you create
+stay in your folder on Windows, in `out-linux-clang`, because of the
+`-v` mount. They are ignored by git.)
+
+#### The tools in this environment
+
+- **`clang++`**: the Clang compiler driver. With `-shared` it compiles
+  the sources and then runs the linker to make a **shared library**, a
+  `.so` file.
+- **`ld`**: the GNU linker. You will not usually type it: `clang++`
+  calls it, and the linker errors you get come from `/usr/bin/ld`.
+- **`nm -D`**: lists the **symbol table** of a binary. With `-D` it
+  lists the **dynamic** symbols: the names a shared library offers to
+  the outside.
+- **`readelf -d`**: prints the **dynamic section** of an ELF file, which
+  includes the list of libraries the program needs (the `NEEDED` lines)
+  and any folder baked into it.
+- **`ldd`**: asks "which shared libraries will this program load, and
+  **where is each one found**?" It is the quickest way to see whether
+  the loader will succeed.
+- **`file`**: guesses what a file is from its first bytes.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-clang
+```
+
+(`-p` means "no error if it already exists".)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ─┐
+               ├──► clang++ -shared ──► libstation.so   the code (and nothing else: no import library)
+   report.cpp ─┘
 ```
 
 ```sh
-g++ ... main.cpp -L. -lstation -Wl,-rpath,'$ORIGIN' -o weather    # bake it into the program
+clang++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report.cpp -o out-linux-clang/libstation.so
+ls -l out-linux-clang/libstation.so
+file out-linux-clang/libstation.so
 ```
 
-`LD_LIBRARY_PATH` is a list of extra folders. `-rpath` stores the folder **inside the executable**, and `$ORIGIN` stands for "the folder this program is in". With either of them, the program runs and prints the familiar line. (Quote the `$ORIGIN` so your shell does not eat it.)
+```
+-rwxr-xr-x 1 root root 306208 Oct 14 16:13 out-linux-clang/libstation.so
+out-linux-clang/libstation.so: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, BuildID[sha1]=2d52bd14fa7171caeb4aa2022dd3b8dab2aa5a4e, not stripped
+```
 
-On **Windows** the rule is different. The loader looks **in the folder of the `.exe` first**, which is why `weather.exe` just worked when `station.dll` sat next to it. Now try it yourself: **rename `station.dll` to `station.dll.away` and run `.\weather.exe` again.** Windows refuses to start the program and shows an error saying that `station.dll` was not found. (Rename it back afterwards.) Other places Windows searches include the folders on your **PATH**.
+- **`-shared`** makes a `.so` instead of an executable.
+- **`-fPIC`** means "position-independent code". The library can be
+  loaded at **any address**, and several programs may load it at
+  different ones, so its code cannot assume where it lives.
+- **`-fvisibility=hidden`** hides everything we did not mark with
+  `STATION_API`, so only the three public functions are exported.
+- There is **no import library** on Linux. The `.so` itself serves both
+  as the thing the linker reads and the thing the program loads.
+
+(The date in the `ls -l` line will be yours, not ours.)
+
+#### 2. Look inside the library
+
+```sh
+nm -D --defined-only out-linux-clang/libstation.so | grep station
+nm -D --defined-only out-linux-clang/libstation.so | wc -l
+```
+
+```
+00000000000185b0 T _ZN7station10to_celsiusEd
+0000000000018e60 T _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
+00000000000185f0 T _ZN7station9summarizeERKSt6vectorIdSaIdEE
+585
+```
+
+The addresses will differ on your machine. **Three `station` entries**:
+the three functions we marked. The names are the Itanium-mangled names
+you read in 7.12. The second command counts **all** the exported names
+in the library: there are hundreds, because the standard library's
+templates stay visible whatever we do. That is why we filter for
+`station`.
+
+Look closely at the middle name, `format_reportB5cxx11`. That `B5cxx11`
+is a **tag meaning "returns the C++11 flavour of `std::string`"**.
+libstdc++, the C++ library that GCC and Clang use here, changed the
+layout of `std::string` in 2015, and the tag lets old and new code tell
+each other apart instead of crashing. This is the ABI showing up in a
+name.
+
+#### 3. Link the program, and ask what it needs
+
+```sh
+clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-linux-clang -lstation -o out-linux-clang/weather
+```
+
+`-Lout-linux-clang` says "also search this folder", and `-lstation`
+means "find a library called `station`": the linker looks for
+`libstation.so`. Now ask the finished program what it needs when it
+**starts**:
+
+```sh
+readelf -d out-linux-clang/weather | grep NEEDED
+ldd out-linux-clang/weather | grep -E 'station|not found'
+```
+
+```
+ 0x0000000000000001 (NEEDED)             Shared library: [libstation.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+	libstation.so => not found
+```
+
+`libstation.so` is now on the program's **list of requirements** (the
+`NEEDED` lines). It is not inside the program. This is the big
+difference from 7.13. And look at the last line: **`ldd` says
+`not found`**. The loader already knows it will not find our library.
+Let us see what that means.
+
+#### 4. Run it
+
+```sh
+./out-linux-clang/weather
+echo $?
+```
+
+```
+./out-linux-clang/weather: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+```
+
+The program does not start. The linker found `libstation.so` fine,
+because we passed `-L`. But **`-L` is a link-time option**. At run time
+the **loader** searches its own list of folders, and our output folder
+is not on it. There are two common fixes. The first is to tell the
+loader, for this one run:
+
+```sh
+LD_LIBRARY_PATH=out-linux-clang ./out-linux-clang/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`LD_LIBRARY_PATH` is a list of extra folders for the loader. The second
+fix is to bake the folder **into the program**. Link again, with
+`-Wl,-rpath,'$ORIGIN'`, and call the result `weather_rpath`:
+
+```sh
+clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-linux-clang -lstation -Wl,-rpath,'$ORIGIN' -o out-linux-clang/weather_rpath
+readelf -d out-linux-clang/weather_rpath | grep -E 'RPATH|RUNPATH'
+./out-linux-clang/weather_rpath
+```
+
+```
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`-Wl,` hands an option to the linker (as with `-Wl,--out-implib` on
+Windows). **`rpath`** stores a folder **inside the executable**, and
+**`$ORIGIN`** stands for "the folder this program is in". So the program
+looks for its library right next to itself, wherever you run it from.
+Quote the `$ORIGIN` so your shell does not eat it. Try it from another
+folder:
+
+```sh
+cd /
+/workspace/07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary/out-linux-clang/weather_rpath
+cd /workspace/07.PracticalBuiltInFeatures/7.14ProjectDynamicLibrary
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The linker wrote the entry as `RUNPATH`, the modern spelling of the
+older `RPATH`.)
+
+#### 5. Break it on purpose
+
+**a. Take the library away.** Move `libstation.so` out of the way and
+run the program that has the rpath:
+
+```sh
+mv out-linux-clang/libstation.so out-linux-clang/libstation.so.away
+./out-linux-clang/weather_rpath
+echo $?
+ldd out-linux-clang/weather_rpath | grep station
+```
+
+```
+./out-linux-clang/weather_rpath: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+	libstation.so => not found
+```
+
+The program linked fine. It cannot **start**, because the library is
+gone. This is the first kind of failure that a static library never had:
+a build that succeeded and a program that does not run. Put it back
+before you go on:
+
+```sh
+mv out-linux-clang/libstation.so.away out-linux-clang/libstation.so
+```
+
+**b. Leave the library out of the link.** Compile `main.cpp` without
+naming the library:
+
+```sh
+clang++ -std=c++23 -Wall -Wextra main.cpp -o out-linux-clang/broken
+```
+
+```
+/usr/bin/ld: /tmp/main-3955fd.o: in function `main':
+main.cpp:(.text+0x91): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+main.cpp:(.text+0xe0): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+(The `/tmp/...` object file name is a temporary file and will differ.)
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only the library calls that one.
+
+**c. Name the library, but not the folder.**
+
+```sh
+clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-linux-clang/broken
+```
+
+```
+/usr/bin/ld: cannot find -lstation: No such file or directory
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+A different kind of message: not a missing **function**, a missing
+**file**. The linker searched its standard folders for `libstation.so`,
+and our output folder is not one of them.
+
+#### 6. Replace the library without relinking the program
+
+The great strength of a dynamic library: you can fix or change the
+library and **ship one file**. `report_v2.cpp` has a second version of
+`format_report` with the same name, the same parameters and the same
+result type, and a different text. Build a library from `stats.cpp` and
+`report_v2.cpp` into a separate folder, copy the new `.so` over the old
+one, and run the **same `weather_rpath`**:
+
+```sh
+mkdir -p out-linux-clang/v2
+clang++ -std=c++23 -Wall -Wextra -fPIC -fvisibility=hidden -shared stats.cpp report_v2.cpp -o out-linux-clang/v2/libstation.so
+cp out-linux-clang/v2/libstation.so out-linux-clang/libstation.so
+./out-linux-clang/weather_rpath
+```
+
+```
+[v2] sensor-12: min 12.8 C, max 32.5 C, mean 21.6 C
+```
+
+The program was not compiled or linked again, and its new output proves
+it loaded the new library. With the static library of 7.13 you would
+have had to **relink every program** that used it. The condition is that
+the **interface stays the same**: same names, same parameter types. The
+program only checks the names, and nothing checks that the code behind
+them still behaves.
+
+That is Linux Clang done.
+
+---
 
 ### Static or dynamic?
 
-| | Static library (7.13) | Dynamic library (7.14) |
-|---|---|---|
-| File names | `station.lib` / `libstation.a` | `station.dll` + `station.lib` (import) / `libstation.so` |
-| What the program contains | a **copy** of the code | only a **reference** to the library |
-| Needed to run the program | no | **yes**, the DLL / `.so` must be found at start |
-| Several programs using it | each carries its own copy | **share** one file |
-| Fixing a bug in the library | relink every program | replace one file, if the interface is unchanged |
-| Settings must match | at link time | at **run time** too |
-| Needs export markers | no | yes on Windows (`STATION_API`) |
+Same weather station, two ways to package the library. Side by side:
+
+**What the program contains**
+
+- Static (7.13): a **copy** of the library code.
+- Dynamic (7.14): only a **reference** to the library.
+
+**Needed to run the program**
+
+- Static: no, the code is already inside.
+- Dynamic: **yes**, the DLL or `.so` must be found when the program
+  starts.
+
+**Several programs using it**
+
+- Static: each carries its own copy.
+- Dynamic: they **share** one file.
+
+**Fixing a bug in the library**
+
+- Static: relink every program that uses it.
+- Dynamic: replace one file, **if the interface is unchanged**.
+
+**Settings that must match** (C runtime, language standard, debug or
+release)
+
+- Static: at link time.
+- Dynamic: at link time **and at run time**.
+
+**Export markers in the code**
+
+- Static: not needed.
+- Dynamic: needed on Windows (`STATION_API`).
+
+**What can go wrong**
+
+- Static: a link error.
+- Dynamic: a link error, **or a program that builds but does not start**
+  because the loader cannot find the library.
 
 ### The ABI warning
 
-The last row of the table needs a word. Look at what our library passes across the boundary: a `std::vector<double>` goes in, a `std::string` comes out. Both are **layouts defined by the standard library**, and different compilers, different versions, and even Debug and Release builds of the same compiler can lay them out differently. Our program works because **the same toolchain and the same options built both sides**.
+The "settings that must match" point needs a word. Look at what our
+library passes across the boundary: a `std::vector<double>` goes in, a
+`std::string` comes out. Both are **layouts defined by the standard
+library**, and different compilers, different versions, and even Debug
+and Release builds of the same compiler can lay them out differently.
+Our program works because **the same tool chain and the same options
+built both sides**.
 
 This is why you will see two styles in the real world:
 
-- Libraries shipped as **source or static libraries**, built by *you* with *your* compiler, so everything matches.
-- Libraries that ship as DLLs / `.so` files for everyone keep their public functions to **simple types** (integers, pointers, plain structs) and mark them **`extern "C"`**, so that the names are not mangled either.
+- Libraries shipped as **source or static libraries**, built by *you*
+  with *your* compiler, so everything matches.
+- Libraries that ship as DLLs or `.so` files for everyone keep their
+  public functions to **simple types** (integers, pointers, plain
+  structs) and mark them **`extern "C"`**, so that the names are not
+  mangled either.
 
-That second style is exactly what makes a library callable from other languages.
+That second style is exactly what makes a library callable from other
+languages.
+
+### Gotchas to take away
+
+A summary of what you met. Each point was shown in the environment where
+it applies.
+
+- A DLL **exports nothing** unless you mark it. `STATION_API` is
+  `dllexport` while you build the library and `dllimport` while you
+  build the program that uses it. On Linux `-fvisibility=hidden` gives
+  you the same rule.
+- On Windows you link against an **import library** (a signpost of
+  names), not against the DLL. On Linux the `.so` itself is used at link
+  time and at run time.
+- A dynamic library is needed **every time the program runs**. If the
+  loader cannot find it the program does not start: exit code
+  `-1073741515` on Windows, exit code `127` and
+  `error while loading shared libraries` on Linux.
+- Windows looks in the **folder of the program first**, then the PATH.
+  Linux looks in its standard folders, then `LD_LIBRARY_PATH`, and in
+  the **rpath** that was baked into the program
+  (`-Wl,-rpath,'$ORIGIN'`).
+- `-L` is a **link-time** option. It does not tell the loader anything.
+- `ldd` (Linux), `readelf -d`, `objdump -p` and `dumpbin /dependents`
+  tell you what a program needs **before** you run it.
+- You can replace a library without relinking the program, as long as
+  the **interface does not change**.
+- Mixing settings between the library and the program is how crashes
+  appear, not only link errors: build both sides with the **same tool
+  chain and the same options**.
 
 ---
 

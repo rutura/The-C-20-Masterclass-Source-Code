@@ -12,8 +12,9 @@ struct Summary {
     double average{};
 };
 
-// A plain free function on purpose: its mangled name is the first one we
-// will read inside the object files.
+// A plain free function on purpose: its mangled name is one of the three the
+// notes read in the library's export table (dumpbin /exports, objdump -p on
+// Windows, nm -D on Linux).
 STATION_API double to_celsius(double fahrenheit);
 
 // Needs at least one reading. An empty vector has no lowest or average.

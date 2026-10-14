@@ -6,7 +6,10 @@
 
 // PROJECT: the same program again, but now stats.cpp and report.cpp live in a
 // dynamic library. main.cpp is not linked to their code: the finished program
-// finds the library and loads it when it starts.
+// finds the library and loads it when it starts. The notes build it in five
+// environments, break it on purpose (library left out of the link, library
+// missing at start-up) and then replace the library with a second version
+// without relinking this program.
 
 int main() {
 
