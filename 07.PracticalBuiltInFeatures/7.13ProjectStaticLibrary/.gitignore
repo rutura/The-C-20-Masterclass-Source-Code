@@ -78,5 +78,5 @@ Makefile
 .AppleDouble
 .LSOverride
 
-# Outputs of the manual Linux build commands (no extension, so *.exe does not cover them)
-weather
+# Everything the manual build scripts and notes produce (one folder per environment)
+out-*/

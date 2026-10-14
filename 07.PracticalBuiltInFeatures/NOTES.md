@@ -5011,138 +5011,1405 @@ Think of a zip file, but without compression. A static library cannot run, and i
 
 That last sentence has a consequence: once the program is linked, **the library is no longer needed**. The code was *copied into* `weather`. You can delete `libstation.a`, and the program still runs.
 
-### Build the library
+### The files you will build
 
-Compile the two library files exactly as in 7.12, then use the **archiver** to bundle them. This is where the toolchains differ most.
+All the source files are in `7.13ProjectStaticLibrary`. They are the same
+weather-station files as in the last project:
 
-#### MSVC
+```
+   stats.h / stats.cpp     summarize(readings) and to_celsius(f)               ─┐ the library
+   report.h / report.cpp   format_report(sensor, summary), which CALLS         ─┘
+                           to_celsius
+   main.cpp                builds the readings, calls both, prints             the program
+```
+
+`report.cpp` calls `to_celsius`, which lives in `stats.cpp`. Both of
+them go into the library, so the library has to keep that promise
+**inside itself**, and `main.cpp` only has to find the library.
+
+### Pick your environment
+
+The project has **five environments**. Every one of them is a complete
+walk-through that you can do without reading any other. Do the one you
+have, and come back for the others if you are curious. In each one you
+will do the same five things:
+
+1. **Build the library**: compile the two library files, then bundle
+   their object files into one archive.
+2. **Look inside** the archive.
+3. **Link the program** against the library.
+4. **Break it** on purpose.
+5. **Delete the library** and run the program again.
+
+| Environment | Compiler driver | Archiver | Library file | Output folder |
+|---|---|---|---|---|
+| Windows, MSVC | `cl` | `lib` | `station.lib` | `out-msvc` |
+| Windows, MinGW GCC | `g++` | `ar` | `libstation.a` | `out-mingw-gcc` |
+| Windows, MinGW Clang | `clang++` | `ar` | `libstation.a` | `out-mingw-clang` |
+| Linux, GCC (Docker) | `g++` | `ar` | `libstation.a` | `out-linux-gcc` |
+| Linux, Clang (Docker) | `clang++` | `ar` | `libstation.a` | `out-linux-clang` |
+
+Every environment writes **everything it produces** (object files, the
+library, programs, even the ones you build to fail) into **its own output
+folder**, the one in the last column, inside `7.13ProjectStaticLibrary`.
+Your source folder stays clean, and when you are done you delete **one
+folder** to start over or to try another environment. Git ignores every
+`out-*` folder.
+
+Every folder in this project also has one script per environment
+(`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`,
+`build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of
+that environment from top to bottom. Type the commands yourself first,
+and use the scripts to check your work. (A script and your own commands
+fill the same output folder, so delete the folder between the two if you
+want to be sure the script did the work.)
+
+---
+
+### Environment 1: Windows, MSVC
+
+MSVC is Microsoft's C++ compiler, the one Visual Studio uses and the
+reference compiler of this course. Our version is `cl` 19.51 (Visual
+Studio 2026).
+
+#### Open the shell
+
+Open **Developer PowerShell for VS** from the Start menu. That is an
+ordinary PowerShell that already knows where the Microsoft tools are.
+(From any other PowerShell you can load it by hand:
+`& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.)
+Then, from the repository root:
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
-cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
-
-lib /nologo /OUT:station.lib stats.obj report.obj
-lib /nologo /LIST station.lib
+cd 07.PracticalBuiltInFeatures\7.13ProjectStaticLibrary
+cl
 ```
 
-The librarian is `lib`. Its `/LIST` option prints the members of an existing library:
+`cl` on its own prints a banner. Ours starts with
+`Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64`.
+If you see it, the shell is ready.
 
-```
-stats.obj
-report.obj
-```
+#### The tools in this environment
 
-#### MinGW GCC or Clang (Windows)
+- **`cl`**: the compiler driver. In this project we only use it to
+  compile (`/c`): every `.cpp` becomes an `.obj`.
+- **`lib`**: the **librarian**, Microsoft's archiver. It bundles `.obj`
+  files into one `.lib` file, lists what is inside a `.lib` (`/LIST`)
+  and can take a member back out (`/EXTRACT`). It does not link
+  anything.
+- **`link`**: the linker. It takes `.obj` files and `.lib` files and
+  writes the `.exe`.
+- **`dumpbin`**: Microsoft's "dump a binary" tool. It reads object
+  files, libraries and executables and prints what is inside. It only
+  reads: it never changes the file.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-
-ar rcs libstation.a stats.o report.o
-ar t libstation.a
-ar tv libstation.a
+mkdir out-msvc
 ```
 
-#### Linux, GCC or Clang
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
 
-```sh
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-
-ar rcs libstation.a stats.o report.o
-file libstation.a
-ar t libstation.a
-ar tv libstation.a
-```
-
-`ar` is the archiver, and its options come as a bundle of letters: **`r`** puts the files in, **`c`** creates the archive without a warning, **`s`** writes the symbol index that the linker will search. After it, `ar t` lists the members (`t` for table of contents) and `ar tv` adds sizes:
+#### 1. Build the library
 
 ```
-stats.o
-report.o
-rw-r--r-- 0/0  14576 Jan  1 00:00 1970 stats.o
-rw-r--r-- 0/0 475632 Jan  1 00:00 1970 report.o
-```
-
-On Linux, `file libstation.a` answers `current ar archive`.
-
-**Look inside.** The members are the object files you already know. Ask the symbol tools about the archive and you see the same `T` and `U` as before, now grouped by member:
-
-```powershell
-nm -C libstation.a | Select-String to_celsius      # MinGW; on Linux use grep
-```
-
-```
-0000000000000000 T station::to_celsius(double)      <- defined in the stats.o member
-                 U station::to_celsius(double)      <- needed by the report.o member
+   stats.cpp  ──► compile ──► stats.obj  ──┐
+                                           ├──► lib ──► station.lib
+   report.cpp ──► compile ──► report.obj ──┘
 ```
 
 ```powershell
-dumpbin /symbols station.lib | Select-String to_celsius      # MSVC
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp /Fo:out-msvc\
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp /Fo:out-msvc\
+lib /nologo /OUT:out-msvc\station.lib out-msvc\stats.obj out-msvc\report.obj
+lib /nologo /LIST out-msvc\station.lib
 ```
 
-The library is also **big**, because it holds the whole objects: `station.lib` is about 950 KB here, almost all of it `report`'s template code. Remember that number for 7.14.
+```
+out-msvc\stats.obj
+out-msvc\report.obj
+```
 
-### Link the program against the library
+- The two `cl` commands only **compile**: `/c` means "do not link", and
+  `/Fo:out-msvc\` says which **folder** gets the object files (the
+  trailing backslash is what tells `cl` it is a folder). `/std:c++latest`
+  is the newest language mode (never `/std:c++23` with `cl`), `/EHsc`
+  turns on normal exception handling, and `/MD` picks the **shared C
+  runtime**, which is also what CMake uses by default.
+- `lib /OUT:` names the library and the rest of the line is the list of
+  members to put in it. Nothing is linked: `lib` only **bundles**. You
+  cannot run `station.lib`.
+- `lib /LIST` prints the members of an existing library. MSVC stores
+  each member under the name you gave it on the command line, folder
+  included, which is why the folder shows up in the list.
 
-Compile `main.cpp` as usual. At the link step, name the library instead of the object files.
+#### 2. Look inside the archive
 
-#### MSVC
+**Which names do the members define, and which do they need?** The
+library holds the same two objects you would have linked by hand, so we
+ask `dumpbin` about the one name that connects them:
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp
-link /nologo main.obj station.lib /OUT:weather.exe
-.\weather.exe
+dumpbin /symbols out-msvc\station.lib | Select-String 'to_celsius'
 ```
 
-#### MinGW (Windows)
+```
+6FD 00000000 UNDEF  notype ()    External     | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
+049 00000000 SECT4  notype ()    External     | ?to_celsius@station@@YANN@Z (double __cdecl station::to_celsius(double))
+```
+
+(`dumpbin` wraps long lines at an odd place. We joined them here.) The
+same name shows up **twice**, once per member that mentions it. The line
+marked `SECT4` is the member that **defines** `to_celsius`
+(`stats.obj`). The line marked `UNDEF` is the member that **needs** it
+(`report.obj`). It is the pair you meet when you read two object files,
+now sitting inside one file.
+
+**How big is it?**
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-g++ main.o -L. -lstation -o weather.exe -lstdc++exp
-.\weather.exe
+Get-ChildItem out-msvc\stats.obj, out-msvc\report.obj, out-msvc\station.lib | Format-Table Name, Length -AutoSize
 ```
 
-#### Linux
+```
+Name        Length
+----        ------
+stats.obj    22407
+report.obj  745931
+station.lib 956916
+```
 
-```sh
-g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-g++ main.o -L. -lstation -o weather
-./weather
+The library is **not smaller** than the objects it holds: nothing is
+compressed, and it carries an index of names on top. Almost all of its
+size is `report.obj`, which pulls in a lot of template code for
+`std::format`. Your numbers will differ.
+
+**Are the members really untouched?** Take one member back out of the
+library and compare it with the object we put in:
+
+```powershell
+mkdir out-msvc\extracted
+lib /nologo /EXTRACT:out-msvc\stats.obj /OUT:out-msvc\extracted\stats.obj out-msvc\station.lib
+(Get-FileHash out-msvc\stats.obj).Hash -eq (Get-FileHash out-msvc\extracted\stats.obj).Hash
+```
+
+```
+True
+```
+
+`/EXTRACT:` names the member (under the name `/LIST` showed) and `/OUT:`
+says where to write the copy. `Get-FileHash` computes a fingerprint of
+a file's contents, so `True` means the two files are **identical, byte
+for byte**. Nothing was rewritten and nothing was merged: the library is
+a container.
+
+#### 3. Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead
+of the object files it holds:
+
+```powershell
+cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp /Fo:out-msvc\
+link /nologo out-msvc\main.obj out-msvc\station.lib /OUT:out-msvc\weather.exe
+.\out-msvc\weather.exe
+Get-ChildItem out-msvc\main.obj, out-msvc\weather.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+
+Name        Length
+----        ------
+main.obj    798453
+weather.exe 320512
+```
+
+You give `link` the **real file name**, `station.lib`: MSVC does not add
+a prefix or a suffix for you. `main.obj` needs `summarize` and
+`format_report`. The linker finds both in the index of the library,
+pulls those members out and copies them into the program. When
+`report.obj` arrives, it needs `to_celsius`, and that name is found in
+the same library. The names a member needs join the list of names still
+to find.
+
+Look at the sizes: the program (about 320 KB) is **smaller** than the
+library (about 950 KB). The library is a stock of parts, and the program
+takes only what it needs from it.
+
+#### 4. Break it on purpose
+
+**a. Leave the library out.** Link again with only `main.obj`:
+
+```powershell
+link /nologo out-msvc\main.obj /OUT:out-msvc\broken.exe
+```
+
+```
+main.obj : error LNK2019: unresolved external symbol "struct station::Summary __cdecl station::summarize(class std::vector<double,class std::allocator<double> > const &)" (?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z) referenced in function main
+main.obj : error LNK2019: unresolved external symbol "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > __cdecl station::format_report(class std::basic_string_view<char,struct std::char_traits<char> >,struct station::Summary const &)" (?format_report@station@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@AEBUSummary@1@@Z) referenced in function main
+out-msvc\broken.exe : fatal error LNK1120: 2 unresolved externals
+```
+
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only `report.obj` calls that one, and `report.obj` is
+inside the library we left out.
+
+**b. Change the order.** Put the library **before** the object that
+needs it:
+
+```powershell
+link /nologo out-msvc\station.lib out-msvc\main.obj /OUT:out-msvc\order.exe
+.\out-msvc\order.exe
 ```
 
 ```
 sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 ```
 
-Two shortcuts on the GCC and Clang side deserve an explanation:
+It still works. With MSVC the order of the inputs does not matter. (Keep
+that in mind: not every linker is so forgiving.)
 
-- **`-lstation`** means "find a library called `station`". The tool adds the `lib` in front and the `.a` at the end for you, so it looks for `libstation.a`. **That is why the file is called `libstation.a`.** MSVC does not do this: you give it the real file name, `station.lib`.
-- **`-L.`** means "also look in this folder". Without it, `-lstation` searches only the standard system folders and does not find the library sitting next to you.
+**c. Mix C runtimes.** `/MD` means "use the shared C runtime". `/MT`
+means "copy the C runtime into this program". Build a library whose
+`stats` member was compiled with `/MT`, and try to link it with a
+`main.obj` compiled with `/MD`:
 
-### Two gotchas
+```powershell
+cl /nologo /std:c++latest /EHsc /MT /W4 /c stats.cpp /Fo:out-msvc\stats_mt.obj
+lib /nologo /OUT:out-msvc\station_mt.lib out-msvc\stats_mt.obj out-msvc\report.obj
+link /nologo out-msvc\main.obj out-msvc\station_mt.lib /OUT:out-msvc\mt.exe
+```
 
-**1. On GCC and Clang, order matters.** The linker reads its inputs **left to right**, and only pulls members out of an archive to satisfy names it **already needs**. Put the library first and nothing needs anything yet, so nothing is pulled out:
+```
+station_mt.lib(stats_mt.obj) : error LNK2038: mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease' in main.obj
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+out-msvc\mt.exe : fatal error LNK1319: 1 mismatches detected
+```
+
+Every command compiled fine, the **link** refused. A static library is
+only a bundle of compiled code, so it takes on **whatever settings it
+was compiled with**: the C runtime (`/MD` or `/MT`), the language
+standard, debug or release. That is why every command in this project
+carries the same flags.
+
+#### 5. The finished program does not need the library
+
+Delete the library and run the program again:
+
+```powershell
+Remove-Item out-msvc\station.lib
+.\out-msvc\weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It still runs. The code it needed was **copied into** `weather.exe`
+at link time. The library was needed to **build** the program, not to
+**run** it.
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-msvc`. Nothing else was touched.
+
+That is MSVC done.
+
+---
+
+### Environment 2: Windows, MinGW GCC
+
+**MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
+programs it makes are ordinary Windows programs. Ours is a UCRT build by
+Brecht Sanders: `g++ --version` says
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
+window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.13ProjectStaticLibrary
+g++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. In this project we use it to
+  compile (`-c`) and to link.
+- **`ar`**: the **archiver**. It bundles object files into one `.a`
+  file, lists what is inside (`t`) and can take a member back out
+  (`x`). It does not link anything.
+- **`nm`**: lists the **symbol table** of an object file or of every
+  member of an archive: every name it defines or needs.
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls
+  it, and the linker errors you get come from `ld.exe`.
+- **`-lstdc++exp`**: a library option (`-l` means "link this library").
+  On our MinGW GCC 14, `std::println` needs this extra library ("the
+  experimental part of the C++ library"). It goes **after** everything
+  that needs it.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-gcc
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ──► compile ──► stats.o  ──┐
+                                         ├──► ar ──► libstation.a
+   report.cpp ──► compile ──► report.o ──┘
+```
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-gcc/report.o
+ar rcs out-mingw-gcc/libstation.a out-mingw-gcc/stats.o out-mingw-gcc/report.o
+ar t out-mingw-gcc/libstation.a
+ar tv out-mingw-gcc/libstation.a
+```
+
+```
+stats.o
+report.o
+rw-rw-rw- 0/0  32438 Oct 14 18:03 2026 stats.o
+rw-rw-rw- 0/0 645393 Oct 14 18:03 2026 report.o
+```
+
+- The two `g++` commands only **compile**: `-c` means "do not link", and
+  `-o` names the output file, here inside `out-mingw-gcc`.
+- `ar` takes its options as a bundle of letters: **`r`** puts the files
+  in, **`c`** creates the archive without a warning, **`s`** writes the
+  index of names that the linker will search. Then comes the library,
+  then the members. Nothing is linked: `ar` only **bundles**. You
+  cannot run `libstation.a`.
+- `ar t` lists the members (`t` for "table of contents"). `ar tv` adds
+  permissions, size and date (yours will differ). Notice that `ar`
+  stores only the **file name** of each member, not the folder.
+- The file is called `libstation.a` on purpose. In step 3 you will see
+  why: the linker looks for libraries by a name with `lib` in front and
+  `.a` at the end.
+
+#### 2. Look inside the archive
+
+**Which names do the members define, and which do they need?** The
+library holds the same two objects you would have linked by hand.
+`nm` prints a header for each member, and then the names inside it:
+
+```powershell
+nm -C out-mingw-gcc/libstation.a | Select-String 'to_celsius|\.o:'
+```
+
+```
+stats.o:
+0000000000000000 T station::to_celsius(double)
+report.o:
+                 U station::to_celsius(double)
+```
+
+`-C` ("demangle") prints C++ names instead of codes. **`T`** = defined,
+in the code ("text") section. **`U`** = undefined here: the linker must
+find it. The member `stats.o` **defines** `to_celsius`, the member
+`report.o` **needs** it. It is the pair you meet when you read two
+object files, now sitting inside one file.
+
+**How big is it?**
+
+```powershell
+Get-ChildItem out-mingw-gcc/stats.o, out-mingw-gcc/report.o, out-mingw-gcc/libstation.a | Format-Table Name, Length -AutoSize
+```
+
+```
+Name         Length
+----         ------
+stats.o       32438
+report.o     645393
+libstation.a 732566
+```
+
+The library is **not smaller** than the objects it holds: nothing is
+compressed, and it carries an index of names on top. Almost all of its
+size is `report.o`, which pulls in a lot of template code for
+`std::format`. Your numbers will differ.
+
+**Are the members really untouched?** Take one member back out of the
+archive and compare it with the object we put in:
+
+```powershell
+mkdir out-mingw-gcc/extracted
+ar x --output out-mingw-gcc/extracted out-mingw-gcc/libstation.a stats.o
+(Get-FileHash out-mingw-gcc/stats.o).Hash -eq (Get-FileHash out-mingw-gcc/extracted/stats.o).Hash
+```
+
+```
+True
+```
+
+`ar x` extracts, `--output` says into which folder (without it the file
+lands in the current folder), and `stats.o` names the member.
+`Get-FileHash` computes a fingerprint of a file's contents, so `True`
+means the two files are **identical, byte for byte**. Nothing was
+rewritten and nothing was merged: the archive is a container.
+
+#### 3. Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead
+of the object files it holds:
+
+```powershell
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-gcc/main.o
+g++ out-mingw-gcc/main.o -Lout-mingw-gcc -lstation -o out-mingw-gcc/weather.exe -lstdc++exp
+./out-mingw-gcc/weather.exe
+Get-ChildItem out-mingw-gcc/main.o, out-mingw-gcc/weather.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+
+Name        Length
+----        ------
+main.o      694645
+weather.exe 547014
+```
+
+Two options on that link line deserve an explanation:
+
+- **`-lstation`** means "find a library called `station`". The tool adds
+  the `lib` in front and the `.a` at the end for you, so it looks for
+  `libstation.a`. **That is why the file is called `libstation.a`.**
+- **`-Lout-mingw-gcc`** means "also look in this folder". Without it,
+  `-lstation` searches only the standard library folders and does not
+  find the library in your output folder.
+
+`main.o` needs `summarize` and `format_report`. The linker finds both in
+the index of the archive, pulls those members out and copies them into
+the program. When `report.o` arrives, it needs `to_celsius`, and that
+name is found in the same archive. The names a member needs join the
+list of names still to find.
+
+The program (about 550 KB) is **smaller** than the library (about
+730 KB). The library is a stock of parts, and the program takes only
+what it needs from it.
+
+#### 4. Break it on purpose
+
+**a. Leave the library out.** Link again with only `main.o`:
+
+```powershell
+g++ out-mingw-gcc/main.o -o out-mingw-gcc/broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xab): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+collect2.exe: error: ld returned 1 exit status
+```
+
+(The long path in front of each line is shortened to `...`.) Read it
+closely. The linker asks for `summarize` and `format_report`, the two
+functions `main.cpp` calls. It does **not** ask for `to_celsius`: only
+`report.o` calls that one, and `report.o` is inside the library we left
+out.
+
+**b. Change the order.** Put the library **before** the object that
+needs it:
+
+```powershell
+g++ -Lout-mingw-gcc -lstation out-mingw-gcc/main.o -o out-mingw-gcc/broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xab): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+collect2.exe: error: ld returned 1 exit status
+```
+
+Same files, same flags, only the order changed, and the link fails with
+the same message as if the library were missing. The linker reads its
+inputs **left to right**, and only pulls members out of an archive to
+satisfy names it **already needs**. Here it met the library first, when
+nothing needed anything yet, so it pulled nothing out. The rule is
+simple: **libraries go after the objects that use them.** The same rule
+puts `-lstdc++exp` at the very end.
+
+**c. Forget `-L`.** Name the library, but do not say where it is:
+
+```powershell
+g++ out-mingw-gcc/main.o -lstation -o out-mingw-gcc/broken.exe -lstdc++exp
+```
+
+```
+...ld.exe: cannot find -lstation: No such file or directory
+collect2.exe: error: ld returned 1 exit status
+```
+
+This one is a different kind of message: not a missing **function**, a
+missing **file**. The linker searched its standard folders for
+`libstation.a`, and our output folder is not one of them.
+
+#### 5. The finished program does not need the library
+
+Delete the library and run the program again:
+
+```powershell
+Remove-Item out-mingw-gcc/libstation.a
+./out-mingw-gcc/weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It still runs. The code it needed was **copied into** `weather.exe`
+at link time. The library was needed to **build** the program, not to
+**run** it. (The program still needs `C:\mingw64\bin` on the PATH, for
+the DLLs of the C++ runtime. That has nothing to do with our library.)
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-mingw-gcc`. Nothing else was touched.
+
+That is MinGW GCC done.
+
+---
+
+### Environment 3: Windows, MinGW Clang
+
+**MinGW-w64** brings the GNU tool chain to Windows, and its package also
+contains the **Clang** compiler. The programs it makes are ordinary
+Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
+`clang++ --version` says `clang version 19.1.1` and
+`Target: x86_64-w64-windows-gnu`.
+
+#### Open the shell
+
+Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
+window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.13ProjectStaticLibrary
+clang++ --version
+```
+
+If you see a version banner, you are ready.
+
+#### The tools in this environment
+
+- **`clang++`**: the Clang compiler driver. In this project we use it to
+  compile (`-c`) and to link.
+- **`ar`**: the **archiver**. It bundles object files into one `.a`
+  file, lists what is inside (`t`) and can take a member back out
+  (`x`). It does not link anything. It is the same `ar` as with GCC,
+  because the object files have the same format.
+- **`nm`**: lists the **symbol table** of an object file or of every
+  member of an archive: every name it defines or needs.
+- **`ld`**: the GNU linker. You will not usually type it: `clang++`
+  calls it, and the linker errors you get come from `ld`.
+- **`-lstdc++exp`**: a library option (`-l` means "link this library").
+  On our MinGW Clang 19, `std::println` needs this extra library ("the
+  experimental part of the C++ library"). It goes **after** everything
+  that needs it.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-clang
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ──► compile ──► stats.o  ──┐
+                                         ├──► ar ──► libstation.a
+   report.cpp ──► compile ──► report.o ──┘
+```
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-clang/report.o
+ar rcs out-mingw-clang/libstation.a out-mingw-clang/stats.o out-mingw-clang/report.o
+ar t out-mingw-clang/libstation.a
+ar tv out-mingw-clang/libstation.a
+```
+
+```
+stats.o
+report.o
+rw-rw-rw- 0/0  20911 Oct 14 18:03 2026 stats.o
+rw-rw-rw- 0/0 440055 Oct 14 18:03 2026 report.o
+```
+
+- The two `clang++` commands only **compile**: `-c` means "do not
+  link", and `-o` names the output file, here inside `out-mingw-clang`.
+- `ar` takes its options as a bundle of letters: **`r`** puts the files
+  in, **`c`** creates the archive without a warning, **`s`** writes the
+  index of names that the linker will search. Then comes the library,
+  then the members. Nothing is linked: `ar` only **bundles**. You
+  cannot run `libstation.a`.
+- `ar t` lists the members (`t` for "table of contents"). `ar tv` adds
+  permissions, size and date (yours will differ). Notice that `ar`
+  stores only the **file name** of each member, not the folder.
+- The file is called `libstation.a` on purpose. In step 3 you will see
+  why: the linker looks for libraries by a name with `lib` in front and
+  `.a` at the end.
+
+#### 2. Look inside the archive
+
+**Which names do the members define, and which do they need?** The
+library holds the same two objects you would have linked by hand.
+`nm` prints a header for each member, and then the names inside it:
+
+```powershell
+nm -C out-mingw-clang/libstation.a | Select-String 'to_celsius|\.o:'
+```
+
+```
+stats.o:
+0000000000000000 T station::to_celsius(double)
+report.o:
+                 U station::to_celsius(double)
+```
+
+`-C` ("demangle") prints C++ names instead of codes. **`T`** = defined,
+in the code ("text") section. **`U`** = undefined here: the linker must
+find it. The member `stats.o` **defines** `to_celsius`, the member
+`report.o` **needs** it. It is the pair you meet when you read two
+object files, now sitting inside one file.
+
+**How big is it?**
+
+```powershell
+Get-ChildItem out-mingw-clang/stats.o, out-mingw-clang/report.o, out-mingw-clang/libstation.a | Format-Table Name, Length -AutoSize
+```
+
+```
+Name         Length
+----         ------
+stats.o       20911
+report.o     440055
+libstation.a 512796
+```
+
+The library is **not smaller** than the objects it holds: nothing is
+compressed, and it carries an index of names on top. Almost all of its
+size is `report.o`, which pulls in a lot of template code for
+`std::format`. Your numbers will differ.
+
+**Are the members really untouched?** Take one member back out of the
+archive and compare it with the object we put in:
+
+```powershell
+mkdir out-mingw-clang/extracted
+ar x --output out-mingw-clang/extracted out-mingw-clang/libstation.a stats.o
+(Get-FileHash out-mingw-clang/stats.o).Hash -eq (Get-FileHash out-mingw-clang/extracted/stats.o).Hash
+```
+
+```
+True
+```
+
+`ar x` extracts, `--output` says into which folder (without it the file
+lands in the current folder), and `stats.o` names the member.
+`Get-FileHash` computes a fingerprint of a file's contents, so `True`
+means the two files are **identical, byte for byte**. Nothing was
+rewritten and nothing was merged: the archive is a container.
+
+#### 3. Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead
+of the object files it holds:
+
+```powershell
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
+clang++ out-mingw-clang/main.o -Lout-mingw-clang -lstation -o out-mingw-clang/weather.exe -lstdc++exp
+./out-mingw-clang/weather.exe
+Get-ChildItem out-mingw-clang/main.o, out-mingw-clang/weather.exe | Format-Table Name, Length -AutoSize
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+
+Name        Length
+----        ------
+main.o      471155
+weather.exe 537648
+```
+
+Two options on that link line deserve an explanation:
+
+- **`-lstation`** means "find a library called `station`". The tool adds
+  the `lib` in front and the `.a` at the end for you, so it looks for
+  `libstation.a`. **That is why the file is called `libstation.a`.**
+- **`-Lout-mingw-clang`** means "also look in this folder". Without it,
+  `-lstation` searches only the standard library folders and does not
+  find the library in your output folder.
+
+`main.o` needs `summarize` and `format_report`. The linker finds both in
+the index of the archive, pulls those members out and copies them into
+the program. When `report.o` arrives, it needs `to_celsius`, and that
+name is found in the same archive. The names a member needs join the
+list of names still to find.
+
+Sizes depend on the toolchain: here the program (about 540 KB) is a
+little **bigger** than the library (about 510 KB). Do not expect a rule
+from the sizes. What matters is that the program was built from the
+parts of the library it needed.
+
+#### 4. Break it on purpose
+
+**a. Leave the library out.** Link again with only `main.o`:
+
+```powershell
+clang++ out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0xd1): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only `report.o` calls that one, and `report.o` is inside
+the library we left out.
+
+**b. Change the order.** Put the library **before** the object that
+needs it:
+
+```powershell
+clang++ -Lout-mingw-clang -lstation out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0xd1): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Same files, same flags, only the order changed, and the link fails with
+the same message as if the library were missing. The linker reads its
+inputs **left to right**, and only pulls members out of an archive to
+satisfy names it **already needs**. Here it met the library first, when
+nothing needed anything yet, so it pulled nothing out. The rule is
+simple: **libraries go after the objects that use them.** The same rule
+puts `-lstdc++exp` at the very end.
+
+**c. Forget `-L`.** Name the library, but do not say where it is:
+
+```powershell
+clang++ out-mingw-clang/main.o -lstation -o out-mingw-clang/broken.exe -lstdc++exp
+```
+
+```
+C:/mingw64/bin/ld: cannot find -lstation: No such file or directory
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+This one is a different kind of message: not a missing **function**, a
+missing **file**. The linker searched its standard folders for
+`libstation.a`, and our output folder is not one of them.
+
+#### 5. The finished program does not need the library
+
+Delete the library and run the program again:
+
+```powershell
+Remove-Item out-mingw-clang/libstation.a
+./out-mingw-clang/weather.exe
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It still runs. The code it needed was **copied into** `weather.exe`
+at link time. The library was needed to **build** the program, not to
+**run** it. (The program still needs `C:\mingw64\bin` on the PATH, for
+the DLLs of the C++ runtime. That has nothing to do with our library.)
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-mingw-clang`. Nothing else was
+touched.
+
+That is MinGW Clang done.
+
+---
+
+### Environment 4: Linux, GCC (Docker)
+
+You get a real Linux with GCC from the Docker container of chapter 2.
+Our image carries GCC 16.2 and GNU binutils 2.44.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
 
 ```sh
-g++ -L. -lstation main.o -o broken
+cd 07.PracticalBuiltInFeatures/7.13ProjectStaticLibrary
+g++ --version
 ```
 
 ```
-main.o: in function `main':
-main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, ...> const&)'
+g++ (GCC) 16.2.0
 ```
 
-Same files, same flags, only the order changed, and the link fails. The rule is simple: **libraries go after the objects that use them.** (This is the same rule that applied to `-lstdc++exp` in 7.12.) MSVC's `link` does not care about the order.
+(`--rm` throws the container away when you leave. The files you create
+stay in your folder on Windows, in `out-linux-gcc`, because of the `-v`
+mount. They are ignored by git.)
 
-**2. Compile everything with the same settings.** `/MD` means "use the shared C runtime". `/MT` means "copy the C runtime into this program". If the library and the program disagree, MSVC refuses to link:
+#### The tools in this environment
+
+- **`g++`**: the GCC compiler driver. In this project we use it to
+  compile (`-c`) and to link.
+- **`ar`**: the **archiver**. It bundles object files into one `.a`
+  file, lists what is inside (`t`) and can take a member back out
+  (`x`). It does not link anything.
+- **`nm`**: lists the **symbol table** of an object file or of every
+  member of an archive: every name it defines or needs.
+- **`file`**: guesses what a file is from its first bytes.
+- **`cmp`**: compares two files byte by byte.
+- **`ld`**: the GNU linker. You will not usually type it: `g++` calls
+  it, and the linker errors you get come from `/usr/bin/ld`.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-gcc
+```
+
+(`-p` means "no error if it already exists".)
+
+#### 1. Build the library
 
 ```
-stats_mt.obj : error LNK2038: mismatch detected for 'RuntimeLibrary':
-    value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease' in main.obj
+   stats.cpp  ──► compile ──► stats.o  ──┐
+                                         ├──► ar ──► libstation.a
+   report.cpp ──► compile ──► report.o ──┘
 ```
 
-That is why every command in this project carries `/MD`. The same goes for the language standard, and for debug versus release builds. A static library is only a bundle of compiled code, so it takes on **whatever settings it was compiled with**.
+```sh
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-gcc/report.o
+ar rcs out-linux-gcc/libstation.a out-linux-gcc/stats.o out-linux-gcc/report.o
+file out-linux-gcc/libstation.a
+ar t out-linux-gcc/libstation.a
+ar tv out-linux-gcc/libstation.a
+```
+
+```
+out-linux-gcc/libstation.a: current ar archive
+stats.o
+report.o
+rw-r--r-- 0/0  14576 Jan  1 00:00 1970 stats.o
+rw-r--r-- 0/0 475632 Jan  1 00:00 1970 report.o
+```
+
+- The two `g++` commands only **compile**: `-c` means "do not link", and
+  `-o` names the output file, here inside `out-linux-gcc`.
+- `ar` takes its options as a bundle of letters: **`r`** puts the files
+  in, **`c`** creates the archive without a warning, **`s`** writes the
+  index of names that the linker will search. Then comes the library,
+  then the members. Nothing is linked: `ar` only **bundles**. You
+  cannot run `libstation.a`.
+- `file` says `current ar archive`: not an object file, not a program,
+  an **archive**.
+- `ar t` lists the members (`t` for "table of contents"). `ar tv` adds
+  permissions, size and date. The date 1970 and the owner `0/0` are not
+  a mistake: this `ar` writes fixed values, so the same input always
+  gives the same archive. Notice that `ar` stores only the **file name**
+  of each member, not the folder.
+- The file is called `libstation.a` on purpose. In step 3 you will see
+  why: the linker looks for libraries by a name with `lib` in front and
+  `.a` at the end.
+
+#### 2. Look inside the archive
+
+**Which names do the members define, and which do they need?** The
+library holds the same two objects you would have linked by hand.
+`nm` prints a header for each member, and then the names inside it:
+
+```sh
+nm -C out-linux-gcc/libstation.a | grep -E 'to_celsius|\.o:'
+```
+
+```
+stats.o:
+0000000000000000 T station::to_celsius(double)
+report.o:
+                 U station::to_celsius(double)
+```
+
+`-C` ("demangle") prints C++ names instead of codes. **`T`** = defined,
+in the code ("text") section. **`U`** = undefined here: the linker must
+find it. The member `stats.o` **defines** `to_celsius`, the member
+`report.o` **needs** it. It is the pair you meet when you read two
+object files, now sitting inside one file.
+
+**How big is it?**
+
+```sh
+ls -l out-linux-gcc/stats.o out-linux-gcc/report.o out-linux-gcc/libstation.a
+```
+
+```
+-rw-r--r-- 1 root root 550756 Oct 14 15:03 out-linux-gcc/libstation.a
+-rw-r--r-- 1 root root 475632 Oct 14 15:03 out-linux-gcc/report.o
+-rw-r--r-- 1 root root  14576 Oct 14 15:03 out-linux-gcc/stats.o
+```
+
+The library is **not smaller** than the objects it holds: nothing is
+compressed, and it carries an index of names on top. Almost all of its
+size is `report.o`, which pulls in a lot of template code for
+`std::format`. Your numbers and dates will differ.
+
+**Are the members really untouched?** Take one member back out of the
+archive and compare it with the object we put in:
+
+```sh
+mkdir -p out-linux-gcc/extracted
+ar x --output out-linux-gcc/extracted out-linux-gcc/libstation.a stats.o
+cmp out-linux-gcc/stats.o out-linux-gcc/extracted/stats.o && echo "identical"
+```
+
+```
+identical
+```
+
+`ar x` extracts, `--output` says into which folder (without it the file
+lands in the current folder), and `stats.o` names the member. `cmp`
+prints nothing when two files are the same, so we add an `echo` to see
+the result: the two files are **identical, byte for byte**. Nothing was
+rewritten and nothing was merged: the archive is a container.
+
+#### 3. Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead
+of the object files it holds:
+
+```sh
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o out-linux-gcc/main.o
+g++ out-linux-gcc/main.o -Lout-linux-gcc -lstation -o out-linux-gcc/weather
+./out-linux-gcc/weather
+ls -l out-linux-gcc/main.o out-linux-gcc/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+-rw-r--r-- 1 root root 493568 Oct 14 15:03 out-linux-gcc/main.o
+-rwxr-xr-x 1 root root 272160 Oct 14 15:03 out-linux-gcc/weather
+```
+
+Two options on that link line deserve an explanation:
+
+- **`-lstation`** means "find a library called `station`". The tool adds
+  the `lib` in front and the `.a` at the end for you, so it looks for
+  `libstation.a`. **That is why the file is called `libstation.a`.**
+- **`-Lout-linux-gcc`** means "also look in this folder". Without it,
+  `-lstation` searches only the standard library folders and does not
+  find the library in your output folder.
+
+`main.o` needs `summarize` and `format_report`. The linker finds both in
+the index of the archive, pulls those members out and copies them into
+the program. When `report.o` arrives, it needs `to_celsius`, and that
+name is found in the same archive. The names a member needs join the
+list of names still to find.
+
+The program (about 270 KB) is **smaller** than the library (about
+550 KB). The library is a stock of parts, and the program takes only
+what it needs from it.
+
+#### 4. Break it on purpose
+
+**a. Leave the library out.** Link again with only `main.o`:
+
+```sh
+g++ out-linux-gcc/main.o -o out-linux-gcc/broken
+```
+
+```
+/usr/bin/ld: out-linux-gcc/main.o: in function `main':
+main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: main.cpp:(.text+0x72): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+collect2: error: ld returned 1 exit status
+```
+
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only `report.o` calls that one, and `report.o` is inside
+the library we left out.
+
+**b. Change the order.** Put the library **before** the object that
+needs it:
+
+```sh
+g++ -Lout-linux-gcc -lstation out-linux-gcc/main.o -o out-linux-gcc/broken
+```
+
+```
+/usr/bin/ld: out-linux-gcc/main.o: in function `main':
+main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: main.cpp:(.text+0x72): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+collect2: error: ld returned 1 exit status
+```
+
+Same files, same flags, only the order changed, and the link fails with
+the same message as if the library were missing. The linker reads its
+inputs **left to right**, and only pulls members out of an archive to
+satisfy names it **already needs**. Here it met the library first, when
+nothing needed anything yet, so it pulled nothing out. The rule is
+simple: **libraries go after the objects that use them.**
+
+**c. Forget `-L`.** Name the library, but do not say where it is:
+
+```sh
+g++ out-linux-gcc/main.o -lstation -o out-linux-gcc/broken
+```
+
+```
+/usr/bin/ld: cannot find -lstation: No such file or directory
+collect2: error: ld returned 1 exit status
+```
+
+This one is a different kind of message: not a missing **function**, a
+missing **file**. The linker searched its standard folders for
+`libstation.a`, and our output folder is not one of them.
+
+#### 5. The finished program does not need the library
+
+Delete the library and run the program again:
+
+```sh
+rm out-linux-gcc/libstation.a
+./out-linux-gcc/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It still runs. The code it needed was **copied into** `weather` at link
+time. The library was needed to **build** the program, not to **run**
+it.
+
+When you want to start over, or try another environment, delete the
+folder: `rm -rf out-linux-gcc` inside the container (or
+`Remove-Item -Recurse out-linux-gcc` in PowerShell on Windows). Nothing
+else was touched.
+
+That is Linux GCC done.
+
+---
+
+### Environment 5: Linux, Clang (Docker)
+
+You get a real Linux with Clang from the Docker container of chapter 2.
+Our image carries Clang 21.1.8 and GNU binutils 2.44, and uses GNU's
+libstdc++, the C++ library that comes with Linux.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-clang
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.13ProjectStaticLibrary
+clang++ --version | head -1
+```
+
+```
+Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)
+```
+
+(`--rm` throws the container away when you leave. The files you create
+stay in your folder on Windows, in `out-linux-clang`, because of the
+`-v` mount. They are ignored by git.)
+
+#### The tools in this environment
+
+- **`clang++`**: the Clang compiler driver. In this project we use it to
+  compile (`-c`) and to link.
+- **`ar`**: the **archiver**. It bundles object files into one `.a`
+  file, lists what is inside (`t`) and can take a member back out
+  (`x`). It does not link anything.
+- **`nm`**: lists the **symbol table** of an object file or of every
+  member of an archive: every name it defines or needs.
+- **`file`**: guesses what a file is from its first bytes.
+- **`cmp`**: compares two files byte by byte.
+- **`ld`**: the GNU linker. You will not usually type it: `clang++`
+  calls it, and the linker errors you get come from `/usr/bin/ld`.
+
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-clang
+```
+
+(`-p` means "no error if it already exists".)
+
+#### 1. Build the library
+
+```
+   stats.cpp  ──► compile ──► stats.o  ──┐
+                                         ├──► ar ──► libstation.a
+   report.cpp ──► compile ──► report.o ──┘
+```
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-clang/report.o
+ar rcs out-linux-clang/libstation.a out-linux-clang/stats.o out-linux-clang/report.o
+file out-linux-clang/libstation.a
+ar t out-linux-clang/libstation.a
+ar tv out-linux-clang/libstation.a
+```
+
+```
+out-linux-clang/libstation.a: current ar archive
+stats.o
+report.o
+rw-r--r-- 0/0  18200 Jan  1 00:00 1970 stats.o
+rw-r--r-- 0/0 389104 Jan  1 00:00 1970 report.o
+```
+
+- The two `clang++` commands only **compile**: `-c` means "do not
+  link", and `-o` names the output file, here inside `out-linux-clang`.
+- `ar` takes its options as a bundle of letters: **`r`** puts the files
+  in, **`c`** creates the archive without a warning, **`s`** writes the
+  index of names that the linker will search. Then comes the library,
+  then the members. Nothing is linked: `ar` only **bundles**. You
+  cannot run `libstation.a`.
+- `file` says `current ar archive`: not an object file, not a program,
+  an **archive**.
+- `ar t` lists the members (`t` for "table of contents"). `ar tv` adds
+  permissions, size and date. The date 1970 and the owner `0/0` are not
+  a mistake: this `ar` writes fixed values, so the same input always
+  gives the same archive. Notice that `ar` stores only the **file name**
+  of each member, not the folder.
+- The file is called `libstation.a` on purpose. In step 3 you will see
+  why: the linker looks for libraries by a name with `lib` in front and
+  `.a` at the end.
+
+#### 2. Look inside the archive
+
+**Which names do the members define, and which do they need?** The
+library holds the same two objects you would have linked by hand.
+`nm` prints a header for each member, and then the names inside it:
+
+```sh
+nm -C out-linux-clang/libstation.a | grep -E 'to_celsius|\.o:'
+```
+
+```
+stats.o:
+0000000000000000 T station::to_celsius(double)
+report.o:
+                 U station::to_celsius(double)
+```
+
+`-C` ("demangle") prints C++ names instead of codes. **`T`** = defined,
+in the code ("text") section. **`U`** = undefined here: the linker must
+find it. The member `stats.o` **defines** `to_celsius`, the member
+`report.o` **needs** it. It is the pair you meet when you read two
+object files, now sitting inside one file.
+
+**How big is it?**
+
+```sh
+ls -l out-linux-clang/stats.o out-linux-clang/report.o out-linux-clang/libstation.a
+```
+
+```
+-rw-r--r-- 1 root root 459248 Oct 14 15:03 out-linux-clang/libstation.a
+-rw-r--r-- 1 root root 389104 Oct 14 15:03 out-linux-clang/report.o
+-rw-r--r-- 1 root root  18200 Oct 14 15:03 out-linux-clang/stats.o
+```
+
+The library is **not smaller** than the objects it holds: nothing is
+compressed, and it carries an index of names on top. Almost all of its
+size is `report.o`, which pulls in a lot of template code for
+`std::format`. Your numbers and dates will differ.
+
+**Are the members really untouched?** Take one member back out of the
+archive and compare it with the object we put in:
+
+```sh
+mkdir -p out-linux-clang/extracted
+ar x --output out-linux-clang/extracted out-linux-clang/libstation.a stats.o
+cmp out-linux-clang/stats.o out-linux-clang/extracted/stats.o && echo "identical"
+```
+
+```
+identical
+```
+
+`ar x` extracts, `--output` says into which folder (without it the file
+lands in the current folder), and `stats.o` names the member. `cmp`
+prints nothing when two files are the same, so we add an `echo` to see
+the result: the two files are **identical, byte for byte**. Nothing was
+rewritten and nothing was merged: the archive is a container.
+
+#### 3. Link the program against the library
+
+Compile `main.cpp` as usual. At the link step, name the library instead
+of the object files it holds:
+
+```sh
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-linux-clang/main.o
+clang++ out-linux-clang/main.o -Lout-linux-clang -lstation -o out-linux-clang/weather
+./out-linux-clang/weather
+ls -l out-linux-clang/main.o out-linux-clang/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+-rw-r--r-- 1 root root 410280 Oct 14 15:03 out-linux-clang/main.o
+-rwxr-xr-x 1 root root 229744 Oct 14 15:03 out-linux-clang/weather
+```
+
+Two options on that link line deserve an explanation:
+
+- **`-lstation`** means "find a library called `station`". The tool adds
+  the `lib` in front and the `.a` at the end for you, so it looks for
+  `libstation.a`. **That is why the file is called `libstation.a`.**
+- **`-Lout-linux-clang`** means "also look in this folder". Without it,
+  `-lstation` searches only the standard library folders and does not
+  find the library in your output folder.
+
+`main.o` needs `summarize` and `format_report`. The linker finds both in
+the index of the archive, pulls those members out and copies them into
+the program. When `report.o` arrives, it needs `to_celsius`, and that
+name is found in the same archive. The names a member needs join the
+list of names still to find.
+
+The program (about 230 KB) is **smaller** than the library (about
+460 KB). The library is a stock of parts, and the program takes only
+what it needs from it.
+
+#### 4. Break it on purpose
+
+**a. Leave the library out.** Link again with only `main.o`:
+
+```sh
+clang++ out-linux-clang/main.o -o out-linux-clang/broken
+```
+
+```
+/usr/bin/ld: out-linux-clang/main.o: in function `main':
+main.cpp:(.text+0x91): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: main.cpp:(.text+0xe0): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Read it closely. The linker asks for `summarize` and `format_report`,
+the two functions `main.cpp` calls. It does **not** ask for
+`to_celsius`: only `report.o` calls that one, and `report.o` is inside
+the library we left out.
+
+**b. Change the order.** Put the library **before** the object that
+needs it:
+
+```sh
+clang++ -Lout-linux-clang -lstation out-linux-clang/main.o -o out-linux-clang/broken
+```
+
+```
+/usr/bin/ld: out-linux-clang/main.o: in function `main':
+main.cpp:(.text+0x91): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+/usr/bin/ld: main.cpp:(.text+0xe0): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+Same files, same flags, only the order changed, and the link fails with
+the same message as if the library were missing. The linker reads its
+inputs **left to right**, and only pulls members out of an archive to
+satisfy names it **already needs**. Here it met the library first, when
+nothing needed anything yet, so it pulled nothing out. The rule is
+simple: **libraries go after the objects that use them.**
+
+**c. Forget `-L`.** Name the library, but do not say where it is:
+
+```sh
+clang++ out-linux-clang/main.o -lstation -o out-linux-clang/broken
+```
+
+```
+/usr/bin/ld: cannot find -lstation: No such file or directory
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+This one is a different kind of message: not a missing **function**, a
+missing **file**. The linker searched its standard folders for
+`libstation.a`, and our output folder is not one of them.
+
+#### 5. The finished program does not need the library
+
+Delete the library and run the program again:
+
+```sh
+rm out-linux-clang/libstation.a
+./out-linux-clang/weather
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+It still runs. The code it needed was **copied into** `weather` at link
+time. The library was needed to **build** the program, not to **run**
+it.
+
+When you want to start over, or try another environment, delete the
+folder: `rm -rf out-linux-clang` inside the container (or
+`Remove-Item -Recurse out-linux-clang` in PowerShell on Windows).
+Nothing else was touched.
+
+That is Linux Clang done.
+
+---
 
 ### What a static library is good for
 
@@ -5153,7 +6420,34 @@ That is why every command in this project carries `/MD`. The same goes for the l
 | Not so good | Every program that uses the library gets its **own copy** of the code. |
 | Not so good | To fix a bug in the library you must **relink every program** that uses it. |
 
-The second kind of library, in 7.14, trades those points the other way round.
+We checked the second row with a three-line program that only calls
+`to_celsius`. The linker took the `stats` member and left the `report`
+member out, on MSVC, GCC and Clang alike. It took `stats` **whole**:
+`summarize` came along although nobody called it. A member is copied in
+completely or not at all, which is one more reason to keep the files of
+a library small and focused.
+
+### Gotchas to take away
+
+A summary of what you met. Each point was shown in the environment where
+it applies.
+
+- A static library is an **archive** of object files. Nothing is
+  rewritten, nothing is merged, and nothing is linked until a program
+  asks for a name.
+- With `g++` and `clang++`, **libraries go after the objects that use
+  them**, and `-lname` needs `-L<folder>` unless the library lives in a
+  standard folder. MSVC's `link` takes the real file name and does not
+  mind the order.
+- Compile the library and the program with the **same settings**: with
+  MSVC the C runtime option (`/MD` everywhere), and in every
+  environment the language standard and debug or release. Mixing them is
+  how `LNK2038` appears.
+- Once the program is linked, the **library is no longer needed** to run
+  it.
+
+The second kind of library, in 7.14, trades the points of the table the
+other way round.
 
 ---
 
