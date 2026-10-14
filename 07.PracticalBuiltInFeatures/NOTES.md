@@ -458,7 +458,7 @@ catch (const std::out_of_range& ex) {
 
 ---
 
-## 7.5 Sorting, searching, and `accumulate`
+## 7.5 Sorting, searching,  accumulate and algorithms in general
 
 ### Two ways to tell the computer what to do
 
