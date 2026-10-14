@@ -4986,9 +4986,11 @@ plain name, as C does".
 
 ## 7.13 Project: a static library
 
-In 7.12 you linked three object files by hand. Imagine a program with three hundred. You would not pass three hundred names to the linker every time, and you would not want to hand your teammates a folder of loose `.o` files either. The answer is a **library**: a bundle of compiled code with a name.
+In the last project, you linked three object files by hand. Imagine a program with three hundred. You would not pass three hundred names to the linker every time, and you would not want to hand your teammates a folder of loose `.o` files either. The practical answer we have to this is a **library**: a bundle of compiled code with a name.
 
-There are two kinds. This lecture is the first one, the **static library**. The code is in `7.13ProjectStaticLibrary`. It is the same weather-station program as before, but now `stats.cpp` and `report.cpp` are bundled together and `main.cpp` is built against the bundle.
+There are two kinds of libraries, and this lecture covers the first one, the **static library**. 
+
+We are working on the same weather-station program as we did in the last lecture, but now `stats.cpp` and `report.cpp` are bundled together in a **static library** and `main.cpp` is built and linked against the bundle.
 
 ```
    stats.cpp  ──► stats.o  ──┐
