@@ -3475,19 +3475,30 @@ will do the same four things:
 3. Build `single.cpp` in **one step**.
 4. Build the **multi-file** program, then break it on purpose.
 
-| Environment | Compiler driver | Linker | Object files |
-|---|---|---|---|
-| Windows, MSVC | `cl` | `link` | `.obj` |
-| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` |
-| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` |
-| Linux, GCC (Docker) | `g++` | `ld` (called by `g++`) | `.o` |
-| Linux, Clang (Docker) | `clang++` | `ld` (called by `clang++`) | `.o` |
+| Environment | Compiler driver | Linker | Object files | Output folder |
+|---|---|---|---|---|
+| Windows, MSVC | `cl` | `link` | `.obj` | `out-msvc` |
+| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` | `out-mingw-gcc` |
+| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` | `out-mingw-clang` |
+| Linux, GCC (Docker) | `g++` | `ld` (called by `g++`) | `.o` | `out-linux-gcc` |
+| Linux, Clang (Docker) | `clang++` | `ld` (called by `clang++`) | `.o` | `out-linux-clang` |
+
+Every environment writes **everything it produces** (object files,
+programs, even the ones you build to fail) into **its own output
+folder**, the one in the last column, inside `7.12ProjectManualCompile`.
+Your source folder stays clean, you can see at a glance what a build
+made, and when you are done you delete **one folder** to start over or to
+try another environment. Two environments never overwrite each other's
+files, so you can build with MSVC, then with MinGW, and compare the two
+folders side by side. Git ignores every `out-*` folder.
 
 Every folder in this project also has one script per environment
 (`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`,
 `build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of
 that environment from top to bottom. Type the commands yourself first,
-and use the scripts to check your work.
+and use the scripts to check your work. (A script and your own commands
+fill the same output folder, so delete the folder between the two if you
+want to be sure the script did the work.)
 
 ---
 
@@ -3531,6 +3542,18 @@ If you see it, the shell is ready.
   need it because the names in an object file look like noise (more on
   that below).
 
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-msvc
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
 #### 1. Single file, two steps
 
 ```
@@ -3538,9 +3561,9 @@ If you see it, the shell is ready.
 ```
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c single.cpp
-link /nologo single.obj /OUT:single_two_step.exe
-.\single_two_step.exe
+cl /nologo /std:c++latest /EHsc /MD /W4 /c single.cpp /Fo:out-msvc\
+link /nologo out-msvc\single.obj /OUT:out-msvc\single_two_step.exe
+.\out-msvc\single_two_step.exe
 ```
 
 ```
@@ -3556,13 +3579,16 @@ average: 70.9 F
   `error C2039: 'println': is not a member of 'std'`.
 - `/EHsc` turns on normal C++ exception handling. `/W4` asks for more
   warnings. `/nologo` hides the banner.
+- `/Fo:out-msvc\` says **which folder** gets the object file. The
+  trailing backslash is what tells `cl` it is a folder and not a file
+  name.
 - `/MD` picks the **shared C runtime**. CMake uses it by default, so we
   use it too. All your objects must agree on this option, otherwise the
   link fails (we meet that in 7.13).
 - The second command has no `.cpp` file at all: `link` only joins
-  objects. `/OUT:` names the result.
+  objects. `/OUT:` names the result, here inside `out-msvc`.
 
-You now have two new files: `single.obj` (the object) and
+You now have two new files in `out-msvc`: `single.obj` (the object) and
 `single_two_step.exe` (the program).
 
 #### 2. Read the object files and the binary
@@ -3571,14 +3597,14 @@ First, make two more small objects to look at: `stats.obj` (which
 **defines** `to_celsius`) and `report.obj` (which **uses** it).
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
-cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp /Fo:out-msvc\
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp /Fo:out-msvc\
 ```
 
 **What kind of file is it?**
 
 ```powershell
-dumpbin /headers stats.obj | Select-String 'File Type|machine'
+dumpbin /headers out-msvc\stats.obj | Select-String 'File Type|machine'
 ```
 
 ```
@@ -3594,8 +3620,8 @@ still contains **hundreds** of symbols from `std::vector`, `std::format`
 and friends, so we filter for our own namespace, `station`:
 
 ```powershell
-dumpbin /symbols stats.obj | Select-String 'External.*station'
-dumpbin /symbols report.obj | Select-String 'UNDEF.*to_celsius'
+dumpbin /symbols out-msvc\stats.obj | Select-String 'External.*station'
+dumpbin /symbols out-msvc\report.obj | Select-String 'UNDEF.*to_celsius'
 ```
 
 ```
@@ -3654,8 +3680,8 @@ live in one program.
 a table of what it needs.
 
 ```powershell
-dumpbin /headers single_two_step.exe | Select-String 'File Type|machine|subsystem'
-dumpbin /dependents single_two_step.exe
+dumpbin /headers out-msvc\single_two_step.exe | Select-String 'File Type|machine|subsystem'
+dumpbin /dependents out-msvc\single_two_step.exe
 ```
 
 ```
@@ -3698,9 +3724,9 @@ binary interface). In 7.14 you will see why it matters for libraries.
 Hand the source file straight to `cl` and let it run both steps:
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fe:single_one_step.exe
-.\single_one_step.exe
-Get-ChildItem single.obj, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fo:out-msvc\ /Fe:out-msvc\single_one_step.exe
+.\out-msvc\single_one_step.exe
+Get-ChildItem out-msvc\single.obj, out-msvc\single_two_step.exe, out-msvc\single_one_step.exe | Format-Table Name, Length -AutoSize
 ```
 
 ```
@@ -3708,13 +3734,13 @@ average: 70.9 F
 
 Name                Length
 ----                ------
-single.obj          801210
+single.obj          801282
 single_two_step.exe 311808
 single_one_step.exe 311808
 ```
 
-`/Fe:` names the executable. Both programs have **exactly the same
-size**. That is the point: `cl` is a driver, it runs the compiler and
+`/Fe:` names the executable, and `/Fo:` is the same output-folder option
+as before. Both programs have **exactly the same size**. That is the point: `cl` is a driver, it runs the compiler and
 then `link` and passes your options along. The one-step form just does
 not keep the object file.
 
@@ -3731,11 +3757,11 @@ file is **not a small program**, it is a half-finished one.
 Compile each `.cpp` on its own, then link all three objects together:
 
 ```powershell
-cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp
-cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp
-cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp
-link /nologo main.obj stats.obj report.obj /OUT:weather.exe
-.\weather.exe
+cl /nologo /std:c++latest /EHsc /MD /W4 /c stats.cpp /Fo:out-msvc\
+cl /nologo /std:c++latest /EHsc /MD /W4 /c report.cpp /Fo:out-msvc\
+cl /nologo /std:c++latest /EHsc /MD /W4 /c main.cpp /Fo:out-msvc\
+link /nologo out-msvc\main.obj out-msvc\stats.obj out-msvc\report.obj /OUT:out-msvc\weather.exe
+.\out-msvc\weather.exe
 ```
 
 ```
@@ -3746,13 +3772,13 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.obj`**:
 
 ```powershell
-link /nologo main.obj report.obj /OUT:broken.exe
+link /nologo out-msvc\main.obj out-msvc\report.obj /OUT:out-msvc\broken.exe
 ```
 
 ```
 main.obj : error LNK2019: unresolved external symbol "struct station::Summary __cdecl station::summarize(class std::vector<double,class std::allocator<double> > const &)" (?summarize@station@@YA?AUSummary@1@AEBV?$vector@NV?$allocator@N@std@@@std@@@Z) referenced in function main
 report.obj : error LNK2019: unresolved external symbol "double __cdecl station::to_celsius(double)" (?to_celsius@station@@YANN@Z) referenced in function ... (long text shortened)
-broken.exe : fatal error LNK1120: 2 unresolved externals
+out-msvc\broken.exe : fatal error LNK1120: 2 unresolved externals
 ```
 
 Read that with fresh eyes. Every `.cpp` compiled without complaint. The
@@ -3761,6 +3787,9 @@ defines `to_celsius`") were never kept. And look: the odd-looking text
 in parentheses is the mangled name from the table above, the very one
 that was UNDEF in `report.obj`. Whenever you see `LNK2019`, ask: **did I
 forget to compile or link the file that defines it?**
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-msvc`. Nothing else was touched.
 
 That is MSVC done.
 
@@ -3803,6 +3832,18 @@ If you see a version banner, you are ready.
   format, architecture, and (with `-p`) which DLLs a program needs.
 - **`c++filt`**: turns a mangled C++ name back into readable C++.
 
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-gcc
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
 #### 1. Single file, two steps
 
 ```
@@ -3810,9 +3851,9 @@ If you see a version banner, you are ready.
 ```
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-g++ single.o -o single_two_step.exe -lstdc++exp
-.\single_two_step.exe
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o out-mingw-gcc/single.o
+g++ out-mingw-gcc/single.o -o out-mingw-gcc/single_two_step.exe -lstdc++exp
+./out-mingw-gcc/single_two_step.exe
 ```
 
 ```
@@ -3823,7 +3864,8 @@ average: 70.9 F
   `single.o`.
 - `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more
   warnings.
-- `-o` names the output file.
+- `-o` names the output file. We put it inside `out-mingw-gcc`, so your
+  source folder stays clean.
 - The second command has no `.cpp` file at all: `g++` is being used as a
   **front end for the linker**.
 
@@ -3831,12 +3873,12 @@ average: 70.9 F
 > fails:
 >
 > ```powershell
-> g++ single.o -o nolib.exe
+> g++ out-mingw-gcc/single.o -o out-mingw-gcc/nolib.exe
 > ```
 >
 > ```
-> ...ld.exe: single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
-> ...ld.exe: single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
+> ...ld.exe: out-mingw-gcc/single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
+> ...ld.exe: out-mingw-gcc/single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
 > collect2.exe: error: ld returned 1 exit status
 > ```
 >
@@ -3852,18 +3894,18 @@ First, make two more small objects to look at: `stats.o` (which
 **defines** `to_celsius`) and `report.o` (which **uses** it).
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-gcc/report.o
 ```
 
 **What kind of file is it?**
 
 ```powershell
-objdump -f stats.o
+objdump -f out-mingw-gcc/stats.o
 ```
 
 ```
-stats.o:     file format pe-x86-64
+out-mingw-gcc/stats.o:     file format pe-x86-64
 architecture: i386:x86-64, flags 0x00000039:
 HAS_RELOC, HAS_DEBUG, HAS_SYMS, HAS_LOCALS
 start address 0x0000000000000000
@@ -3877,9 +3919,9 @@ still contains **hundreds** of symbols from `std::vector`, `std::format`
 and friends, so we filter for our own namespace, `station`:
 
 ```powershell
-nm stats.o | Select-String station
-nm -C stats.o | Select-String station
-nm report.o | Select-String to_celsius
+nm out-mingw-gcc/stats.o | Select-String station
+nm -C out-mingw-gcc/stats.o | Select-String station
+nm out-mingw-gcc/report.o | Select-String to_celsius
 ```
 
 ```
@@ -3935,12 +3977,12 @@ named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is
 a table of what it needs.
 
 ```powershell
-objdump -f single_two_step.exe
-objdump -p single_two_step.exe | Select-String 'DLL Name'
+objdump -f out-mingw-gcc/single_two_step.exe
+objdump -p out-mingw-gcc/single_two_step.exe | Select-String 'DLL Name'
 ```
 
 ```
-single_two_step.exe:     file format pei-x86-64
+out-mingw-gcc/single_two_step.exe:     file format pei-x86-64
 architecture: i386:x86-64, flags 0x0000013b:
 HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
 start address 0x0000000140001125
@@ -3977,9 +4019,9 @@ will see why it matters for libraries.
 Hand the source file straight to `g++` and let it run both steps:
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
-.\single_one_step.exe
-Get-ChildItem single.o, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+g++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-gcc/single_one_step.exe -lstdc++exp
+./out-mingw-gcc/single_one_step.exe
+Get-ChildItem out-mingw-gcc/single.o, out-mingw-gcc/single_two_step.exe, out-mingw-gcc/single_one_step.exe | Format-Table Name, Length -AutoSize
 ```
 
 ```
@@ -4009,11 +4051,11 @@ file is **not a small program**, it is a half-finished one.
 Compile each `.cpp` on its own, then link all three objects together:
 
 ```powershell
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-g++ main.o stats.o report.o -o weather.exe -lstdc++exp
-.\weather.exe
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-gcc/report.o
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-gcc/main.o
+g++ out-mingw-gcc/main.o out-mingw-gcc/stats.o out-mingw-gcc/report.o -o out-mingw-gcc/weather.exe -lstdc++exp
+./out-mingw-gcc/weather.exe
 ```
 
 ```
@@ -4024,14 +4066,14 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.o`**:
 
 ```powershell
-g++ main.o report.o -o broken.exe -lstdc++exp
+g++ out-mingw-gcc/main.o out-mingw-gcc/report.o -o out-mingw-gcc/broken.exe -lstdc++exp
 ```
 
 ```
-...ld.exe: main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-...ld.exe: report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
-...ld.exe: report.o:report.cpp:(.text+0x50): undefined reference to `station::to_celsius(double)'
-...ld.exe: report.o:report.cpp:(.text+0x6a): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x50): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x6a): undefined reference to `station::to_celsius(double)'
 collect2.exe: error: ld returned 1 exit status
 ```
 
@@ -4042,6 +4084,9 @@ that two promises ("someone defines `summarize`", "someone defines
 `report.o` asks for `to_celsius` three times. Whenever you see
 `undefined reference`, ask: **did I forget to compile or link the file
 that defines it?** (And did I put `-lstdc++exp` after the objects?)
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-mingw-gcc`. Nothing else was touched.
 
 That is MinGW GCC done.
 
@@ -4086,6 +4131,18 @@ If you see a version banner, you are ready.
   format, architecture, and (with `-p`) which DLLs a program needs.
 - **`c++filt`**: turns a mangled C++ name back into readable C++.
 
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```powershell
+mkdir out-mingw-clang
+```
+
+(If it already exists from an earlier run, PowerShell says so. That is
+harmless.)
+
 #### 1. Single file, two steps
 
 ```
@@ -4093,9 +4150,9 @@ If you see a version banner, you are ready.
 ```
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-clang++ single.o -o single_two_step.exe -lstdc++exp
-.\single_two_step.exe
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o out-mingw-clang/single.o
+clang++ out-mingw-clang/single.o -o out-mingw-clang/single_two_step.exe -lstdc++exp
+./out-mingw-clang/single_two_step.exe
 ```
 
 ```
@@ -4106,7 +4163,8 @@ average: 70.9 F
   `single.o`.
 - `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more
   warnings.
-- `-o` names the output file.
+- `-o` names the output file. We put it inside `out-mingw-clang`, so your
+  source folder stays clean.
 - The second command has no `.cpp` file at all: `clang++` is being used
   as a **front end for the linker**.
 
@@ -4114,12 +4172,12 @@ average: 70.9 F
 > fails:
 >
 > ```powershell
-> clang++ single.o -o nolib.exe
+> clang++ out-mingw-clang/single.o -o out-mingw-clang/nolib.exe
 > ```
 >
 > ```
-> C:/mingw64/bin/ld: single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
-> C:/mingw64/bin/ld: single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
+> C:/mingw64/bin/ld: out-mingw-clang/single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
+> C:/mingw64/bin/ld: out-mingw-clang/single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
 > clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 > ```
 >
@@ -4135,18 +4193,18 @@ First, make two more small objects to look at: `stats.o` (which
 **defines** `to_celsius`) and `report.o` (which **uses** it).
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-clang/report.o
 ```
 
 **What kind of file is it?**
 
 ```powershell
-objdump -f stats.o
+objdump -f out-mingw-clang/stats.o
 ```
 
 ```
-stats.o:     file format pe-x86-64
+out-mingw-clang/stats.o:     file format pe-x86-64
 architecture: i386:x86-64, flags 0x0000003d:
 HAS_RELOC, HAS_LINENO, HAS_DEBUG, HAS_SYMS, HAS_LOCALS
 start address 0x0000000000000000
@@ -4160,9 +4218,9 @@ still contains **hundreds** of symbols from `std::vector`, `std::format`
 and friends, so we filter for our own namespace, `station`:
 
 ```powershell
-nm stats.o | Select-String station
-nm -C stats.o | Select-String station
-nm report.o | Select-String to_celsius
+nm out-mingw-clang/stats.o | Select-String station
+nm -C out-mingw-clang/stats.o | Select-String station
+nm out-mingw-clang/report.o | Select-String to_celsius
 ```
 
 ```
@@ -4219,12 +4277,12 @@ named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is
 a table of what it needs.
 
 ```powershell
-objdump -f single_two_step.exe
-objdump -p single_two_step.exe | Select-String 'DLL Name'
+objdump -f out-mingw-clang/single_two_step.exe
+objdump -p out-mingw-clang/single_two_step.exe | Select-String 'DLL Name'
 ```
 
 ```
-single_two_step.exe:     file format pei-x86-64
+out-mingw-clang/single_two_step.exe:     file format pei-x86-64
 architecture: i386:x86-64, flags 0x0000013b:
 HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
 start address 0x0000000140001125
@@ -4257,9 +4315,9 @@ binary interface). In 7.14 you will see why it matters for libraries.
 Hand the source file straight to `clang++` and let it run both steps:
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
-.\single_one_step.exe
-Get-ChildItem single.o, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+clang++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-clang/single_one_step.exe -lstdc++exp
+./out-mingw-clang/single_one_step.exe
+Get-ChildItem out-mingw-clang/single.o, out-mingw-clang/single_two_step.exe, out-mingw-clang/single_one_step.exe | Format-Table Name, Length -AutoSize
 ```
 
 ```
@@ -4291,11 +4349,11 @@ bookkeeping the linker needs.
 Compile each `.cpp` on its own, then link all three objects together:
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-clang++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-clang++ main.o stats.o report.o -o weather.exe -lstdc++exp
-.\weather.exe
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-clang/report.o
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
+clang++ out-mingw-clang/main.o out-mingw-clang/stats.o out-mingw-clang/report.o -o out-mingw-clang/weather.exe -lstdc++exp
+./out-mingw-clang/weather.exe
 ```
 
 ```
@@ -4306,14 +4364,14 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.o`**:
 
 ```powershell
-clang++ main.o report.o -o broken.exe -lstdc++exp
+clang++ out-mingw-clang/main.o out-mingw-clang/report.o -o out-mingw-clang/broken.exe -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x4a): undefined reference to `station::to_celsius(double)'
-C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x5f): undefined reference to `station::to_celsius(double)'
-C:/mingw64/bin/ld: report.o:report.cpp:(.text+0x74): undefined reference to `station::to_celsius(double)'
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x4a): undefined reference to `station::to_celsius(double)'
+C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x5f): undefined reference to `station::to_celsius(double)'
+C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x74): undefined reference to `station::to_celsius(double)'
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
@@ -4323,6 +4381,9 @@ defines `to_celsius`") were never kept. One line per place that asked:
 `report.o` asks for `to_celsius` three times. Whenever you see
 `undefined reference`, ask: **did I forget to compile or link the file
 that defines it?** (And did I put `-lstdc++exp` after the objects?)
+
+When you want to start over, or try another environment, delete the
+folder: `Remove-Item -Recurse out-mingw-clang`. Nothing else was touched.
 
 That is MinGW Clang done.
 
@@ -4354,8 +4415,8 @@ g++ (GCC) 16.2.0
 ```
 
 (`--rm` throws the container away when you leave. The files you create
-stay in your folder on Windows, because of the `-v` mount. They are
-ignored by git.)
+stay in your folder on Windows, in `out-linux-gcc`, because of the `-v` mount.
+They are ignored by git.)
 
 #### The tools in this environment
 
@@ -4373,6 +4434,17 @@ ignored by git.)
 - **`ldd`**: lists the **shared libraries** a program needs at start-up.
 - **`c++filt`**: turns a mangled C++ name back into readable C++.
 
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-gcc
+```
+
+(`-p` means "no error if it already exists".)
+
 #### 1. Single file, two steps
 
 ```
@@ -4380,9 +4452,9 @@ ignored by git.)
 ```
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-g++ single.o -o single_two_step
-./single_two_step
+g++ -std=c++23 -Wall -Wextra -c single.cpp -o out-linux-gcc/single.o
+g++ out-linux-gcc/single.o -o out-linux-gcc/single_two_step
+./out-linux-gcc/single_two_step
 ```
 
 ```
@@ -4393,7 +4465,8 @@ average: 70.9 F
   `single.o`.
 - `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more
   warnings.
-- `-o` names the output file. On Linux the program has no extension.
+- `-o` names the output file, here inside `out-linux-gcc`. On Linux the
+  program has no extension.
 - The second command has no `.cpp` file at all: `g++` is being used as a
   **front end for the linker**.
 - There is no extra library to add here: GCC 16 has `std::println` built
@@ -4405,19 +4478,19 @@ First, make two more small objects to look at: `stats.o` (which
 **defines** `to_celsius`) and `report.o` (which **uses** it).
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-gcc/report.o
 ```
 
 **What kind of file is it?**
 
 ```sh
-file stats.o
-readelf -h stats.o | grep -E 'Class|Type|Machine'
+file out-linux-gcc/stats.o
+readelf -h out-linux-gcc/stats.o | grep -E 'Class|Type|Machine'
 ```
 
 ```
-stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (GNU/Linux), not stripped
+out-linux-gcc/stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (GNU/Linux), not stripped
   Class:                             ELF64
   Type:                              REL (Relocatable file)
   Machine:                           Advanced Micro Devices X86-64
@@ -4432,9 +4505,9 @@ still contains **hundreds** of symbols from `std::vector`, `std::format`
 and friends, so we filter for our own namespace, `station`:
 
 ```sh
-nm stats.o | grep station
-nm -C stats.o | grep station
-nm report.o | grep to_celsius
+nm out-linux-gcc/stats.o | grep station
+nm -C out-linux-gcc/stats.o | grep station
+nm out-linux-gcc/report.o | grep to_celsius
 ```
 
 ```
@@ -4490,13 +4563,13 @@ named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is
 a table of what it needs.
 
 ```sh
-file single_two_step
-readelf -h single_two_step | grep -E 'Type|Machine'
-ldd single_two_step
+file out-linux-gcc/single_two_step
+readelf -h out-linux-gcc/single_two_step | grep -E 'Type|Machine'
+ldd out-linux-gcc/single_two_step
 ```
 
 ```
-single_two_step: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, not stripped
+out-linux-gcc/single_two_step: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, not stripped
   Type:                              EXEC (Executable file)
   Machine:                           Advanced Micro Devices X86-64
 	linux-vdso.so.1 (0x00007ffeba50d000)
@@ -4527,16 +4600,16 @@ why it matters for libraries.
 Hand the source file straight to `g++` and let it run both steps:
 
 ```sh
-g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
-./single_one_step
-ls -l single.o single_two_step single_one_step
+g++ -std=c++23 -Wall -Wextra single.cpp -o out-linux-gcc/single_one_step
+./out-linux-gcc/single_one_step
+ls -l out-linux-gcc/single.o out-linux-gcc/single_two_step out-linux-gcc/single_one_step
 ```
 
 ```
 average: 70.9 F
--rw-r--r-- 1 root root 492960 Oct 12 07:36 single.o
--rwxr-xr-x 1 root root 254640 Oct 12 07:36 single_two_step
--rwxr-xr-x 1 root root 254640 Oct 12 07:36 single_one_step
+-rw-r--r-- 1 root root 492960 Oct 14 14:39 out-linux-gcc/single.o
+-rwxr-xr-x 1 root root 254640 Oct 14 14:39 out-linux-gcc/single_one_step
+-rwxr-xr-x 1 root root 254640 Oct 14 14:39 out-linux-gcc/single_two_step
 ```
 
 Both programs have **exactly the same size**. That is the point: `g++`
@@ -4556,11 +4629,11 @@ file is **not a small program**, it is a half-finished one.
 Compile each `.cpp` on its own, then link all three objects together:
 
 ```sh
-g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-g++ main.o stats.o report.o -o weather
-./weather
+g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-gcc/stats.o
+g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-gcc/report.o
+g++ -std=c++23 -Wall -Wextra -c main.cpp -o out-linux-gcc/main.o
+g++ out-linux-gcc/main.o out-linux-gcc/stats.o out-linux-gcc/report.o -o out-linux-gcc/weather
+./out-linux-gcc/weather
 ```
 
 ```
@@ -4571,13 +4644,13 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.o`**:
 
 ```sh
-g++ main.o report.o -o broken
+g++ out-linux-gcc/main.o out-linux-gcc/report.o -o out-linux-gcc/broken
 ```
 
 ```
-/usr/bin/ld: main.o: in function `main':
+/usr/bin/ld: out-linux-gcc/main.o: in function `main':
 main.cpp:(.text+0x46): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-/usr/bin/ld: report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
+/usr/bin/ld: out-linux-gcc/report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
 report.cpp:(.text+0x37): undefined reference to `station::to_celsius(double)'
 /usr/bin/ld: report.cpp:(.text+0x52): undefined reference to `station::to_celsius(double)'
 /usr/bin/ld: report.cpp:(.text+0x6c): undefined reference to `station::to_celsius(double)'
@@ -4589,6 +4662,11 @@ error is that two promises ("someone defines `summarize`", "someone
 defines `to_celsius`") were never kept. The message even tells you
 **which function was asking**. Whenever you see `undefined reference`,
 ask: **did I forget to compile or link the file that defines it?**
+
+When you want to start over, or try another environment, delete the
+folder: `rm -rf out-linux-gcc` inside the container (or
+`Remove-Item -Recurse out-linux-gcc` in PowerShell on Windows). Nothing
+else was touched.
 
 That is Linux GCC done.
 
@@ -4621,8 +4699,8 @@ Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213
 ```
 
 (`--rm` throws the container away when you leave. The files you create
-stay in your folder on Windows, because of the `-v` mount. They are
-ignored by git.)
+stay in your folder on Windows, in `out-linux-clang`, because of the `-v` mount.
+They are ignored by git.)
 
 #### The tools in this environment
 
@@ -4640,6 +4718,17 @@ ignored by git.)
 - **`ldd`**: lists the **shared libraries** a program needs at start-up.
 - **`c++filt`**: turns a mangled C++ name back into readable C++.
 
+#### A folder for the output
+
+Make the folder first. Every file the tools produce in this walk-through
+goes into it, and nothing lands next to your sources:
+
+```sh
+mkdir -p out-linux-clang
+```
+
+(`-p` means "no error if it already exists".)
+
 #### 1. Single file, two steps
 
 ```
@@ -4647,9 +4736,9 @@ ignored by git.)
 ```
 
 ```sh
-clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-clang++ single.o -o single_two_step
-./single_two_step
+clang++ -std=c++23 -Wall -Wextra -c single.cpp -o out-linux-clang/single.o
+clang++ out-linux-clang/single.o -o out-linux-clang/single_two_step
+./out-linux-clang/single_two_step
 ```
 
 ```
@@ -4660,7 +4749,8 @@ average: 70.9 F
   `single.o`.
 - `-std=c++23` selects the language mode. `-Wall -Wextra` ask for more
   warnings.
-- `-o` names the output file. On Linux the program has no extension.
+- `-o` names the output file, here inside `out-linux-clang`. On Linux the
+  program has no extension.
 - The second command has no `.cpp` file at all: `clang++` is being used
   as a **front end for the linker**.
 - There is no extra library to add here: the library in this image has
@@ -4673,19 +4763,19 @@ First, make two more small objects to look at: `stats.o` (which
 **defines** `to_celsius`) and `report.o` (which **uses** it).
 
 ```sh
-clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-clang/report.o
 ```
 
 **What kind of file is it?**
 
 ```sh
-file stats.o
-readelf -h stats.o | grep -E 'Class|Type|Machine'
+file out-linux-clang/stats.o
+readelf -h out-linux-clang/stats.o | grep -E 'Class|Type|Machine'
 ```
 
 ```
-stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
+out-linux-clang/stats.o: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), not stripped
   Class:                             ELF64
   Type:                              REL (Relocatable file)
   Machine:                           Advanced Micro Devices X86-64
@@ -4700,9 +4790,9 @@ still contains **hundreds** of symbols from `std::vector`, `std::format`
 and friends, so we filter for our own namespace, `station`:
 
 ```sh
-nm stats.o | grep station
-nm -C stats.o | grep station
-nm report.o | grep to_celsius
+nm out-linux-clang/stats.o | grep station
+nm -C out-linux-clang/stats.o | grep station
+nm out-linux-clang/report.o | grep to_celsius
 ```
 
 ```
@@ -4759,13 +4849,13 @@ named it `_ZN7station10to_celsiusEi`: the `d` became an `i`, which is
 a table of what it needs.
 
 ```sh
-file single_two_step
-readelf -h single_two_step | grep -E 'Type|Machine'
-ldd single_two_step
+file out-linux-clang/single_two_step
+readelf -h out-linux-clang/single_two_step | grep -E 'Type|Machine'
+ldd out-linux-clang/single_two_step
 ```
 
 ```
-single_two_step: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ea95edc592d2bd6cf3865035ef5f167eba8a2998, for GNU/Linux 3.2.0, not stripped
+out-linux-clang/single_two_step: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=ea95edc592d2bd6cf3865035ef5f167eba8a2998, for GNU/Linux 3.2.0, not stripped
   Type:                              DYN (Position-Independent Executable file)
   Machine:                           Advanced Micro Devices X86-64
 	linux-vdso.so.1 (0x00007ffd739bd000)
@@ -4796,16 +4886,16 @@ see why it matters for libraries.
 Hand the source file straight to `clang++` and let it run both steps:
 
 ```sh
-clang++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
-./single_one_step
-ls -l single.o single_two_step single_one_step
+clang++ -std=c++23 -Wall -Wextra single.cpp -o out-linux-clang/single_one_step
+./out-linux-clang/single_one_step
+ls -l out-linux-clang/single.o out-linux-clang/single_two_step out-linux-clang/single_one_step
 ```
 
 ```
 average: 70.9 F
--rw-r--r-- 1 root root 416128 Oct 12 07:36 single.o
--rwxr-xr-x 1 root root 221624 Oct 12 07:36 single_two_step
--rwxr-xr-x 1 root root 221624 Oct 12 07:36 single_one_step
+-rw-r--r-- 1 root root 416128 Oct 14 14:39 out-linux-clang/single.o
+-rwxr-xr-x 1 root root 221624 Oct 14 14:39 out-linux-clang/single_one_step
+-rwxr-xr-x 1 root root 221624 Oct 14 14:39 out-linux-clang/single_two_step
 ```
 
 Both programs have **exactly the same size**. That is the point:
@@ -4826,11 +4916,11 @@ file is **not a small program**, it is a half-finished one.
 Compile each `.cpp` on its own, then link all three objects together:
 
 ```sh
-clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-clang++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-clang++ main.o stats.o report.o -o weather
-./weather
+clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-clang/stats.o
+clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-clang/report.o
+clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-linux-clang/main.o
+clang++ out-linux-clang/main.o out-linux-clang/stats.o out-linux-clang/report.o -o out-linux-clang/weather
+./out-linux-clang/weather
 ```
 
 ```
@@ -4841,13 +4931,13 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.o`**:
 
 ```sh
-clang++ main.o report.o -o broken
+clang++ out-linux-clang/main.o out-linux-clang/report.o -o out-linux-clang/broken
 ```
 
 ```
-/usr/bin/ld: main.o: in function `main':
+/usr/bin/ld: out-linux-clang/main.o: in function `main':
 main.cpp:(.text+0x91): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-/usr/bin/ld: report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
+/usr/bin/ld: out-linux-clang/report.o: in function `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)':
 report.cpp:(.text+0x3f): undefined reference to `station::to_celsius(double)'
 /usr/bin/ld: report.cpp:(.text+0x52): undefined reference to `station::to_celsius(double)'
 /usr/bin/ld: report.cpp:(.text+0x65): undefined reference to `station::to_celsius(double)'
@@ -4859,6 +4949,11 @@ error is that two promises ("someone defines `summarize`", "someone
 defines `to_celsius`") were never kept. The message even tells you
 **which function was asking**. Whenever you see `undefined reference`,
 ask: **did I forget to compile or link the file that defines it?**
+
+When you want to start over, or try another environment, delete the
+folder: `rm -rf out-linux-clang` inside the container (or
+`Remove-Item -Recurse out-linux-clang` in PowerShell on Windows). Nothing
+else was touched.
 
 That is Linux Clang done.
 

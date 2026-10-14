@@ -1,6 +1,8 @@
 # Answer key for the notes: MSVC on Windows, no CMake.
 # Run from a Developer PowerShell for VS, inside this folder.
 # The steps are in the same order as the notes.
+# Everything the tools produce goes into out-msvc, so deleting that one folder
+# cleans up.
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,34 +27,37 @@ function StepMustFail {
 # /MD picks the shared C runtime, which is also what CMake uses by default.
 $flags = '/nologo', '/std:c++latest', '/EHsc', '/MD', '/W4'
 
+New-Item -ItemType Directory -Force out-msvc | Out-Null
+
 # 1. Single file, two steps (source -> object -> executable)
-Step cl @flags /c single.cpp
-Step link /nologo single.obj /OUT:single_two_step.exe
-Step .\single_two_step.exe
+# /Fo: names the folder (the trailing backslash matters) for the object files.
+Step cl @flags /c single.cpp /Fo:out-msvc\
+Step link /nologo out-msvc\single.obj /OUT:out-msvc\single_two_step.exe
+Step .\out-msvc\single_two_step.exe
 
 # 2. Read the object files and the binary
-Step cl @flags /c stats.cpp
-Step cl @flags /c report.cpp
+Step cl @flags /c stats.cpp /Fo:out-msvc\
+Step cl @flags /c report.cpp /Fo:out-msvc\
 # A tiny program still has hundreds of std:: symbols, so filter for our namespace.
 # UNDEF means "not defined in this object, the linker must find it".
-dumpbin /headers stats.obj | Select-String 'File Type|machine'
-dumpbin /symbols stats.obj | Select-String 'External.*station'
-dumpbin /symbols report.obj | Select-String 'UNDEF.*to_celsius'
+dumpbin /headers out-msvc\stats.obj | Select-String 'File Type|machine'
+dumpbin /symbols out-msvc\stats.obj | Select-String 'External.*station'
+dumpbin /symbols out-msvc\report.obj | Select-String 'UNDEF.*to_celsius'
 Step undname '?to_celsius@station@@YANN@Z'
-dumpbin /headers single_two_step.exe | Select-String 'File Type|machine|subsystem'
-dumpbin /dependents single_two_step.exe
+dumpbin /headers out-msvc\single_two_step.exe | Select-String 'File Type|machine|subsystem'
+dumpbin /dependents out-msvc\single_two_step.exe
 
 # 3. Single file, one step (cl drives the linker for us)
-Step cl @flags single.cpp /Fe:single_one_step.exe
-Step .\single_one_step.exe
-Get-ChildItem single.obj, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+Step cl @flags single.cpp /Fo:out-msvc\ /Fe:out-msvc\single_one_step.exe
+Step .\out-msvc\single_one_step.exe
+Get-ChildItem out-msvc\single.obj, out-msvc\single_two_step.exe, out-msvc\single_one_step.exe | Format-Table Name, Length -AutoSize
 
 # 4. Multiple files: three objects, one link
-Step cl @flags /c stats.cpp
-Step cl @flags /c report.cpp
-Step cl @flags /c main.cpp
-Step link /nologo main.obj stats.obj report.obj /OUT:weather.exe
-Step .\weather.exe
+Step cl @flags /c stats.cpp /Fo:out-msvc\
+Step cl @flags /c report.cpp /Fo:out-msvc\
+Step cl @flags /c main.cpp /Fo:out-msvc\
+Step link /nologo out-msvc\main.obj out-msvc\stats.obj out-msvc\report.obj /OUT:out-msvc\weather.exe
+Step .\out-msvc\weather.exe
 
 # Break it on purpose: leave stats.obj out
-StepMustFail link /nologo main.obj report.obj /OUT:broken.exe
+StepMustFail link /nologo out-msvc\main.obj out-msvc\report.obj /OUT:out-msvc\broken.exe

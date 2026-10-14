@@ -2,6 +2,8 @@
 # Answer key for the notes: Linux with Clang, no CMake.
 # Run inside this folder (in the course's Clang container, or any Linux with clang++).
 # The steps are in the same order as the notes.
+# Everything the tools produce goes into out-linux-clang, so deleting that one
+# folder cleans up.
 set -e
 
 run() { echo "> $*"; "$@"; }
@@ -13,37 +15,39 @@ run_must_fail() {
     echo "(failed, as expected)"
 }
 
+mkdir -p out-linux-clang
+
 # 1. Single file, two steps
-run clang++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-run clang++ single.o -o single_two_step
-run ./single_two_step
+run clang++ -std=c++23 -Wall -Wextra -c single.cpp -o out-linux-clang/single.o
+run clang++ out-linux-clang/single.o -o out-linux-clang/single_two_step
+run ./out-linux-clang/single_two_step
 
 # 2. Read the object files and the binary
-run clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-run clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-run file stats.o
-readelf -h stats.o | grep -E 'Class|Type|Machine'
+run clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-clang/stats.o
+run clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-clang/report.o
+run file out-linux-clang/stats.o
+readelf -h out-linux-clang/stats.o | grep -E 'Class|Type|Machine'
 # A tiny program still has hundreds of std:: symbols, so filter for our namespace.
 # U means "undefined here, the linker must find it".
-nm stats.o | grep station
-nm -C stats.o | grep station
-nm report.o | grep to_celsius
+nm out-linux-clang/stats.o | grep station
+nm -C out-linux-clang/stats.o | grep station
+nm out-linux-clang/report.o | grep to_celsius
 run c++filt _ZN7station10to_celsiusEd
-run file single_two_step
-readelf -h single_two_step | grep -E 'Type|Machine'
-run ldd single_two_step
+run file out-linux-clang/single_two_step
+readelf -h out-linux-clang/single_two_step | grep -E 'Type|Machine'
+run ldd out-linux-clang/single_two_step
 
 # 3. Single file, one step
-run clang++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step
-run ./single_one_step
-run ls -l single.o single_two_step single_one_step
+run clang++ -std=c++23 -Wall -Wextra single.cpp -o out-linux-clang/single_one_step
+run ./out-linux-clang/single_one_step
+run ls -l out-linux-clang/single.o out-linux-clang/single_two_step out-linux-clang/single_one_step
 
 # 4. Multiple files: three objects, one link
-run clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-run clang++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-run clang++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-run clang++ main.o stats.o report.o -o weather
-run ./weather
+run clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-linux-clang/stats.o
+run clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-linux-clang/report.o
+run clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-linux-clang/main.o
+run clang++ out-linux-clang/main.o out-linux-clang/stats.o out-linux-clang/report.o -o out-linux-clang/weather
+run ./out-linux-clang/weather
 
 # Break it on purpose: leave stats.o out
-run_must_fail clang++ main.o report.o -o broken
+run_must_fail clang++ out-linux-clang/main.o out-linux-clang/report.o -o out-linux-clang/broken

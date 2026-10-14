@@ -1,6 +1,8 @@
 # Answer key for the notes: MinGW GCC on Windows, no CMake.
 # Needs C:\mingw64\bin on PATH. Run inside this folder.
 # The steps are in the same order as the notes.
+# Everything the tools produce goes into out-mingw-gcc, so deleting that one
+# folder cleans up.
 
 $ErrorActionPreference = 'Stop'
 
@@ -24,35 +26,37 @@ function StepMustFail {
 # -lstdc++exp: GCC 14's std::println needs this extra library.
 # It goes AFTER the objects that need it.
 
+New-Item -ItemType Directory -Force out-mingw-gcc | Out-Null
+
 # 1. Single file, two steps
-Step g++ -std=c++23 -Wall -Wextra -c single.cpp -o single.o
-Step g++ single.o -o single_two_step.exe -lstdc++exp
-Step .\single_two_step.exe
+Step g++ -std=c++23 -Wall -Wextra -c single.cpp -o out-mingw-gcc/single.o
+Step g++ out-mingw-gcc/single.o -o out-mingw-gcc/single_two_step.exe -lstdc++exp
+Step ./out-mingw-gcc/single_two_step.exe
 
 # 2. Read the object files and the binary
-Step g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-Step g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-Step objdump -f stats.o
+Step g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-gcc/stats.o
+Step g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-gcc/report.o
+Step objdump -f out-mingw-gcc/stats.o
 # A tiny program still has hundreds of std:: symbols, so filter for our namespace.
 # U means "undefined here, the linker must find it".
-nm stats.o | Select-String station
-nm -C stats.o | Select-String station
-nm report.o | Select-String to_celsius
+nm out-mingw-gcc/stats.o | Select-String station
+nm -C out-mingw-gcc/stats.o | Select-String station
+nm out-mingw-gcc/report.o | Select-String to_celsius
 Step c++filt _ZN7station10to_celsiusEd
-Step objdump -f single_two_step.exe
-objdump -p single_two_step.exe | Select-String 'DLL Name'
+Step objdump -f out-mingw-gcc/single_two_step.exe
+objdump -p out-mingw-gcc/single_two_step.exe | Select-String 'DLL Name'
 
 # 3. Single file, one step
-Step g++ -std=c++23 -Wall -Wextra single.cpp -o single_one_step.exe -lstdc++exp
-Step .\single_one_step.exe
-Get-ChildItem single.o, single_two_step.exe, single_one_step.exe | Format-Table Name, Length -AutoSize
+Step g++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-gcc/single_one_step.exe -lstdc++exp
+Step ./out-mingw-gcc/single_one_step.exe
+Get-ChildItem out-mingw-gcc/single.o, out-mingw-gcc/single_two_step.exe, out-mingw-gcc/single_one_step.exe | Format-Table Name, Length -AutoSize
 
 # 4. Multiple files: three objects, one link
-Step g++ -std=c++23 -Wall -Wextra -c stats.cpp -o stats.o
-Step g++ -std=c++23 -Wall -Wextra -c report.cpp -o report.o
-Step g++ -std=c++23 -Wall -Wextra -c main.cpp -o main.o
-Step g++ main.o stats.o report.o -o weather.exe -lstdc++exp
-Step .\weather.exe
+Step g++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-gcc/stats.o
+Step g++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-gcc/report.o
+Step g++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-gcc/main.o
+Step g++ out-mingw-gcc/main.o out-mingw-gcc/stats.o out-mingw-gcc/report.o -o out-mingw-gcc/weather.exe -lstdc++exp
+Step ./out-mingw-gcc/weather.exe
 
 # Break it on purpose: leave stats.o out
-StepMustFail g++ main.o report.o -o broken.exe -lstdc++exp
+StepMustFail g++ out-mingw-gcc/main.o out-mingw-gcc/report.o -o out-mingw-gcc/broken.exe -lstdc++exp
