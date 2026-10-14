@@ -5275,10 +5275,43 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 It still works. With MSVC the order of the inputs does not matter. (Keep
 that in mind: not every linker is so forgiving.)
 
-**c. Mix C runtimes.** `/MD` means "use the shared C runtime". `/MT`
-means "copy the C runtime into this program". Build a library whose
-`stats` member was compiled with `/MT`, and try to link it with a
-`main.obj` compiled with `/MD`:
+**c. Mix C runtimes.** 
+
+##### The idea
+
+Almost every program needs a set of ready-made basics that you never wrote: ask the system for memory, print text, open a file, copy a string, take a square root. That bundle is the C runtime. The C++ standard library (std::vector, std::println) is built on top of it.
+
+Your program has to get that bundle from somewhere. /MD and /MT are the two choices:
+
+```
+   /MD  "shared"                     /MT  "copied in"
+
+   weather.exe ─┐                    weather.exe
+   other.exe  ──┼──► one copy of     (has its own copy of the
+   another.exe ─┘    the runtime      runtime inside it)
+                     on the machine
+                     (DLL files)
+
+```
+
+- **/MD**: "My program uses the runtime that is already installed on the machine." One copy sits on the computer, in DLL files, and every program shares it. This is what we saw in 7.12 when dumpbin /dependents listed VCRUNTIME140.dll and the api-ms-win-crt-*.dll files. The D stands for DLL.
+
+- **/MT**: "My program carries its own copy." The pieces it needs are copied into the .exe. The program does not need those DLLs, but it is usually bigger. I haven't measured the size difference here.
+CMake uses /MD by default, so this course uses it everywhere.
+
+##### Why mixing them is a problem
+
+The runtime does more than hold recipes. It also keeps books, for example a record of which memory has been handed out. If half of your program uses the shared copy and the other half uses its own, you now have two sets of books in one program. Memory handed out by one set can be handed back to the other, which doesn't know about it. That leads to crashes that are very hard to find.
+
+So the linker refuses to build the program at all and tells you at link time. That is the LNK2038 error in the notes. Read it like this:
+
+```
+mismatch detected for 'RuntimeLibrary':
+   value 'MT_StaticRelease'  doesn't match
+   value 'MD_DynamicRelease' in main.obj
+```
+
+Try this out:
 
 ```powershell
 cl /nologo /std:c++latest /EHsc /MT /W4 /c stats.cpp /Fo:out-msvc\stats_mt.obj
