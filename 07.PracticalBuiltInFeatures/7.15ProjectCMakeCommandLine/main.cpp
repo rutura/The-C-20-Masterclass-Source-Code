@@ -7,7 +7,10 @@
 // PROJECT: the same program, built the way real projects are built: CMake
 // reads CMakeLists.txt, generates the compiler and linker commands you typed by
 // hand in 7.12 to 7.14, and runs them. This project is about driving CMake from
-// the command line, not about the C++.
+// the command line, not about the C++: the notes configure, build, rebuild, ask
+// for a Release build and a dynamic library, install, and break it on purpose,
+// in five environments, with everything written into one out-<environment>
+// folder.
 
 int main() {
 

@@ -8157,9 +8157,17 @@ it applies.
 
 ## 7.15 Project: driving CMake from the command line
 
-You have now typed, by hand, every kind of command a build needs: compile, link, archive, build a DLL. Real projects have hundreds of them, in the right order, with the right flags for the right compiler. **CMake** writes and runs those commands for you.
+You have now typed, by hand, every kind of command a build needs:
+compile, link, archive, build a DLL. Real projects have hundreds of
+them, in the right order, with the right flags for the right compiler.
+**CMake** writes and runs those commands for you.
 
-Until now you have probably used CMake through an IDE. In this project we call it **directly, from the command line**, in all five environments, and we keep checking its work against what we typed in 7.12 to 7.14. The code is in `7.15ProjectCMakeCommandLine`. It is the same weather station, with a `CMakeLists.txt` that builds a library called `station` and a program called `rooster` that uses it.
+Until now you have probably used CMake through an IDE. In this project
+we call it **directly, from the command line**, in all five
+environments, and we keep checking its work against what we typed in
+7.12 to 7.14. The code is in `7.15ProjectCMakeCommandLine`. It is the
+same weather station, with a `CMakeLists.txt` that builds a library
+called `station` and a program called `rooster` that uses it.
 
 ### Three layers
 
@@ -8170,137 +8178,2312 @@ Until now you have probably used CMake through an IDE. In this project we call i
                         writes the plan         commands)         in order
 ```
 
-`cmake` itself never compiles anything. It reads your `CMakeLists.txt`, finds out which compiler you have, and writes a plan. A **generator** turns the plan into build files for some build tool. We always use **Ninja**, a small fast build tool, with `-G Ninja`. The tool then runs the compiler.
+- **`cmake`** reads your `CMakeLists.txt`, finds out which compiler you
+  have, and writes a plan. It never compiles anything itself.
+- A **generator** turns the plan into build files for some build tool.
+  We always use **Ninja**, a small, fast build tool, with `-G Ninja`.
+- **Ninja** reads the plan and runs the compiler, the archiver and the
+  linker, in the right order.
 
-### The commands, step by step
+### What is new
 
-#### 1. Configure
+**Configure and build are two separate commands.**
+`cmake -S . -B <folder>` is the **configure** step: it reads
+`CMakeLists.txt` and writes the plan into a folder.
+`cmake --build <folder>` is the **build** step: it runs the plan. You
+configure once, and then build as many times as you like.
 
-```powershell
-cmake -S . -B build-msvc -G Ninja
-```
+**Out-of-source build.** Everything CMake generates goes into the build
+folder you name, never next to your sources. That is why you can delete
+the whole folder to start again.
 
-- **`-S .`** the **S**ource folder: where `CMakeLists.txt` is.
-- **`-B build-msvc`** the **B**uild folder: where everything generated goes. It is created for you. Nothing is written next to your source files, which is called an **out-of-source build**, and it is why you can delete the whole folder to start again.
-- **`-G Ninja`** the generator.
+**Cache variables.** An option written `-D<NAME>=<value>` sets a **cache
+variable**: a named setting stored in a file called `CMakeCache.txt` in
+the build folder. Think of the cache as that folder's memory of what you
+asked for.
 
-That is all CMake needs on MSVC, because the Developer PowerShell has already put `cl` on the PATH, and CMake finds it. On the other compilers you tell CMake which one to use, and you do it with **`-D` options**. A `-D` sets a **cache variable**, a named setting stored in the build folder.
+**Targets.** A **target** is a thing `CMakeLists.txt` defines. Ours has
+two: `station` (the library) and `rooster` (the program).
 
-```powershell
-# MinGW GCC (normal PowerShell, NOT the VS Developer one)
-cmake -S . -B build-mingw-gcc -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+**One build type per folder.** With Ninja, a build folder is configured
+for **one** build type, such as `Debug` or `Release`. If you want both,
+you make two build folders.
 
-# MinGW Clang
-cmake -S . -B build-mingw-clang -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-```
+**The export header.** In 7.14 you wrote the `STATION_API` macro by hand
+to export the functions of a DLL. CMake can write an equivalent header
+for you. You will see it in a minute.
 
-```sh
-# Linux, GCC
-cmake -S . -B build-gcc -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+### The file: `CMakeLists.txt`
 
-# Linux, Clang
-cmake -S . -B build-clang -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-```
-
-> **Gotcha: the compiler belongs to the build folder.** CMake stores the compiler in the build folder's cache. If you re-run `cmake` on an existing `-B` folder with a different `-DCMAKE_CXX_COMPILER`, it warns `You have changed variables that require your cache to be deleted`, throws the cache away and starts again, so whatever you had configured there is lost. Keep **one build folder per compiler**, which is why each command above has its own. And if you open the **Developer** PowerShell and then ask for MinGW, `cl` is first on the PATH, so be explicit with the `-D` options, or use a normal PowerShell.
-
-#### 2. Build, and watch what CMake runs
-
-```powershell
-cmake --build build-msvc --verbose
-.\build-msvc\rooster.exe
-```
-
-`cmake --build <folder>` runs the build tool for you. **`--verbose`** makes it print the **real commands** it runs. Read them. This is the payoff of the previous three lectures. On Linux with GCC, the five steps for our program were:
-
-```
-[1/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -c stats.cpp  -o stats.cpp.o
-[2/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -c report.cpp -o report.cpp.o
-[3/5] g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23                     -c main.cpp   -o main.cpp.o
-[4/5] ar qc libstation.a stats.cpp.o report.cpp.o   &&   ranlib libstation.a
-[5/5] g++ main.cpp.o -o rooster libstation.a
-```
-
-(Trimmed for the page, and the paths are shortened.) Compare with what you typed:
-
-| CMake ran | You typed in |
-|---|---|
-| steps 1 to 3: `g++ ... -c file.cpp -o file.o` | 7.12: one `-c` per source file |
-| step 4: `ar qc libstation.a ...` then `ranlib` | 7.13: `ar rcs libstation.a ...` (`ranlib` is the "write the index" step that `s` did for us) |
-| step 5: `g++ main.o ... libstation.a -o rooster` | 7.12 and 7.13: the link step |
-
-On MSVC, it is the same story with different spellings. Configured with `-DCMAKE_BUILD_TYPE=Release`, the command for step 1 was `cl.exe /nologo /TP -DSTATION_STATIC_DEFINE ... /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD ... -c stats.cpp`, and for step 4 `lib.exe /nologo /machine:x64 /out:station.lib stats.cpp.obj report.cpp.obj`. Notice the flags: `/EHsc`, `-std:c++latest` and `-MD` are the ones you typed by hand. CMake put them there because `CMAKE_CXX_STANDARD 23` and its defaults ask for them.
-
-**CMake is not magic. It is a command generator.** Whenever a CMake build misbehaves, `--verbose` shows you the exact command that went wrong, and you can run it yourself.
-
-#### 3. Build one target
-
-```powershell
-cmake --build build-msvc --target station
-```
-
-A **target** is a thing `CMakeLists.txt` defines: here `station` (the library) and `rooster` (the program). `--target station` builds the library and nothing else, and it is how you ask "does just this part compile?" Without `--target`, CMake builds everything.
-
-#### 4. Same sources, different library kind
-
-`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or `SHARED`**. The **command line** decides, with one variable:
-
-```powershell
-cmake -S . -B build-msvc-shared -G Ninja -DBUILD_SHARED_LIBS=ON
-cmake --build build-msvc-shared
-```
-
-On MSVC, `build-msvc-shared` now contains `station.dll` and `station.lib` (the import library from 7.14), and `rooster.exe` finds the DLL because they are in the same folder. On MinGW you get `libstation.dll` and `libstation.dll.a`; on Linux `libstation.so`. One flag, and 7.13 turned into 7.14, with no source changes.
-
-How can that work when 7.14 needed `STATION_API` on every function? That is what these lines of `CMakeLists.txt` are for:
+Here it is, without the comments. Read it once, and you will meet every
+line again in the commands below.
 
 ```cmake
+cmake_minimum_required(VERSION 3.20)
+project(rooster)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_library(station stats.cpp stats.h report.cpp report.h)
+
 include(GenerateExportHeader)
 generate_export_header(station)
+target_include_directories(station PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR})
+set_target_properties(station PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(station PUBLIC STATION_STATIC_DEFINE)
 endif()
+
+add_executable(rooster main.cpp)
+target_link_libraries(rooster PRIVATE station)
+
+if(WIN32 AND NOT MSVC)
+    target_link_libraries(rooster PRIVATE stdc++exp)
+endif()
+
+install(TARGETS rooster station
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
+install(FILES stats.h report.h ${CMAKE_CURRENT_BINARY_DIR}/station_export.h
+    DESTINATION include)
 ```
 
-`generate_export_header(station)` **writes the header for us**. It creates `station_export.h` in the build folder, which defines `STATION_EXPORT` as `dllexport` while the library is compiled, `dllimport` for the program using it, and visibility on Linux, which is the macro we wrote ourselves in 7.14. For a **static** library there is nothing to import or export, so the `if` tells the header to define `STATION_EXPORT` as nothing. Without that line, a static build on Windows would label the functions `dllimport` and fail to link.
+- `add_library(station ...)` has **no `STATIC` or `SHARED`** keyword.
+  The command line decides, with one variable (step 5).
+- `generate_export_header(station)` **writes a header for us**,
+  `station_export.h`, into the build folder. It defines `STATION_EXPORT`
+  as `dllexport` while the library is compiled, `dllimport` for the
+  program that uses it, and visibility on Linux: the macro you wrote
+  yourself in 7.14. The `stats.h` and `report.h` of this folder include
+  it.
+- `CXX_VISIBILITY_PRESET hidden` is the `-fvisibility=hidden` of 7.14.
+- A **static** library has nothing to import or export, so the `if`
+  tells the header to define `STATION_EXPORT` as nothing. Without that
+  line, a static build on Windows would label the functions `dllimport`
+  and fail to link.
+- `target_link_libraries(rooster PRIVATE station)` says "the program
+  uses the library", and gives you the link step for free.
+- On MinGW, `stdc++exp` is the `-lstdc++exp` of 7.12, written once for
+  everybody.
+- `install(...)` says what `cmake --install` copies, and where (step 6).
 
-The other lines are worth reading too. `target_link_libraries(rooster PRIVATE station)` says "the program uses the library", and gives you the link step for free. And on MinGW, `if(WIN32 AND NOT MSVC) target_link_libraries(rooster PRIVATE stdc++exp)` is the `-lstdc++exp` from 7.12, written once for everybody.
+### Pick your environment
 
-#### 5. Install
+The project has **five environments**. Every one of them is a complete
+walk-through that you can do without reading any other. Do the one you
+have, and come back for the others if you are curious. In each one you
+will do the same seven things:
+
+1. **Configure**, and look at what CMake wrote.
+2. **Build** and watch the real commands it runs.
+3. **Build again**, and see that only what changed is rebuilt.
+4. Build **one target**, and a **Release** build.
+5. Ask for a **dynamic library** instead of a static one, with one
+   option.
+6. **Install** the results into a folder.
+7. **Break it** on purpose.
+
+| Environment | Compiler CMake uses | Output folder |
+|---|---|---|
+| Windows, MSVC | `cl` | `out-msvc` |
+| Windows, MinGW GCC | `g++` | `out-mingw-gcc` |
+| Windows, MinGW Clang | `clang++` | `out-mingw-clang` |
+| Linux, GCC (Docker) | `g++` | `out-linux-gcc` |
+| Linux, Clang (Docker) | `clang++` | `out-linux-clang` |
+
+Every environment writes **everything it produces** into **its own
+output folder**, the one in the last column, inside
+`7.15ProjectCMakeCommandLine`. The build folders live inside it:
+`out-msvc/static`, `out-msvc/shared`, and so on. Your source folder
+stays clean, and when you are done you delete **one folder** to start
+over or to try another environment. Git ignores every `out-*` folder.
+
+Every folder in this project also has one script per environment
+(`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`,
+`build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of
+that environment from top to bottom. Type the commands yourself first,
+and use the scripts to check your work. (A script and your own commands
+fill the same output folder, so delete the folder between the two if you
+want to be sure the script did the work.)
+
+---
+
+### Environment 1: Windows, MSVC
+
+MSVC is Microsoft's C++ compiler, the one Visual Studio uses and the
+reference compiler of this course. Our version is `cl` 19.51 (Visual
+Studio 2026).
+
+#### Open the shell
+
+Open **Developer PowerShell for VS** from the Start menu. That is an
+ordinary PowerShell that already knows where the Microsoft tools are,
+`cl` included. (From any other PowerShell you can load it by hand:
+`& "<your VS folder>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64`.)
+Then, from the repository root:
 
 ```powershell
-cmake --install build-msvc --prefix install-msvc
+cd 07.PracticalBuiltInFeatures\7.15ProjectCMakeCommandLine
+cmake --version
+ninja --version
 ```
 
-`--install` copies the **finished products** to a clean folder, controlled by the `install(...)` lines in `CMakeLists.txt`. `--prefix` names the folder.
-
 ```
-install-msvc/bin/rooster.exe
-install-msvc/lib/station.lib
-install-msvc/include/stats.h
-install-msvc/include/report.h
-install-msvc/include/station_export.h
+cmake version 3.30.2
+...
+1.12.1
 ```
 
-That is the **layout you hand to someone else**: the program in `bin`, the library in `lib`, the headers in `include`. They can use `station` without ever seeing a `.cpp` file.
+(`cmake --version` prints a few more lines. Both tools must print a
+version before you go on.)
+
+#### The tools in this environment
+
+- **`cmake`**: the program this whole project is about. It configures,
+  builds (by calling Ninja), and installs.
+- **`ninja`**: the build tool. CMake calls it for you. It decides
+  **what** has to be rebuilt and runs the commands.
+- **`cl`, `lib`, `link`**: the compiler driver, the librarian and the
+  linker of 7.12 and 7.13. In this project you never type them: CMake
+  does. You will see them in the verbose output.
+
+#### Where the output goes
+
+You do not have to make a folder: CMake creates `out-msvc/static` (and
+`out-msvc` above it) by itself when it configures.
+
+#### 1. Configure
+
+```powershell
+cmake -S . -B out-msvc/static -G Ninja
+```
+
+```
+-- The C compiler identification is MSVC 19.51.36260.0
+-- The CXX compiler identification is MSVC 19.51.36260.0
+...
+-- Configuring done (2.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/.../7.15ProjectCMakeCommandLine/out-msvc/static
+```
+
+(The many `Detecting ...` and `Check for working ...` lines are left
+out.)
+
+- **`-S .`**: the **S**ource folder, where `CMakeLists.txt` is.
+- **`-B out-msvc/static`**: the **B**uild folder, where everything
+  generated goes. CMake creates it.
+- **`-G Ninja`**: the generator.
+
+CMake checked a **C** compiler too, because `project(rooster)` does not
+list languages, and so turns on C as well as C++. That is all CMake
+needs on MSVC: the Developer PowerShell has already put `cl` on the
+PATH, and CMake takes the first compiler it finds.
+
+Now look at what configuring wrote:
+
+```powershell
+Get-ChildItem out-msvc\static -Name
+Select-String -Path out-msvc\static\CMakeCache.txt -Pattern '^(CMAKE_CXX_COMPILER:|CMAKE_BUILD_TYPE:|CMAKE_GENERATOR:|CMAKE_MAKE_PROGRAM:)' | ForEach-Object { $_.Line }
+```
+
+```
+CMakeFiles
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+station_export.h
+CMAKE_BUILD_TYPE:STRING=Debug
+CMAKE_CXX_COMPILER:FILEPATH=C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/mingw64/bin/ninja.exe
+CMAKE_GENERATOR:INTERNAL=Ninja
+```
+
+(Yours will show your own paths.)
+
+- **`build.ninja`**: the plan: the list of commands Ninja will run.
+- **`CMakeCache.txt`**: the cache, the folder's memory. It remembers the
+  compiler (`cl.exe`), the generator, and the **build type**. On MSVC
+  CMake chose `Debug` for us. In step 4 you will see what that means.
+- **`station_export.h`**: the export header that
+  `generate_export_header` wrote.
+- **`cmake_install.cmake`** and **`CMakeFiles`**: CMake's own working
+  files. You never edit them.
+
+#### 2. Build, and watch the real commands
+
+```powershell
+cmake --build out-msvc/static --verbose
+.\out-msvc\static\rooster.exe
+```
+
+`cmake --build <folder>` runs Ninja for you. **`--verbose`** makes it
+print the **real commands**:
+
+```
+[1/5] cl.exe /nologo /TP -DSTATION_STATIC_DEFINE -I... /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++latest -MDd /showIncludes /FoCMakeFiles\station.dir\stats.cpp.obj /FdCMakeFiles\station.dir\station.pdb /FS -c ...\stats.cpp
+[2/5] cl.exe ... -c ...\report.cpp
+[3/5] cl.exe ... -c ...\main.cpp
+[4/5] lib.exe /nologo /machine:x64 /out:station.lib CMakeFiles\station.dir\stats.cpp.obj CMakeFiles\station.dir\report.cpp.obj
+[5/5] ... link.exe /nologo CMakeFiles\rooster.dir\main.cpp.obj /out:rooster.exe ... /debug /INCREMENTAL /subsystem:console station.lib kernel32.lib user32.lib ...
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Paths are shortened, the first few lines of `--verbose` and the start
+of the long link line are left out.) Read them. This is the payoff of
+the previous three lectures. Compare with what you typed:
+
+- **Steps 1 to 3** are the compile commands of 7.12: one
+  `cl ... -c file.cpp` per source file. You recognise `/EHsc` and
+  `-std:c++latest`. CMake added `/nologo`, `/TP` ("treat this file as
+  C++") and `/showIncludes` (Ninja uses it to track which headers a file
+  includes).
+- **`-MDd`** is the `/MD` you typed by hand, in its **Debug** flavour:
+  the debug version of the shared C runtime. The other flags,
+  `/Zi /Ob0 /Od /RTC1`, ask for debug information, no inlining, no
+  optimisation and run-time checks. That is what the `Debug` build type
+  means.
+- **`-DSTATION_STATIC_DEFINE`** comes from the
+  `if(NOT BUILD_SHARED_LIBS)` in `CMakeLists.txt`.
+- **Step 4** is the `lib` command of 7.13, making `station.lib`.
+- **Step 5** is the link of 7.12 and 7.13: `rooster.exe` from
+  `main.cpp.obj` and `station.lib`, plus the Windows libraries
+  (`kernel32.lib` and friends) that every Windows program links. CMake
+  runs it through a small helper, `cmake -E vs_link_exe`, which also
+  deals with manifests. The real linker, `link.exe`, is in the line.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake
+build misbehaves, `--verbose` shows you the exact command that went
+wrong, and you can run it yourself.
+
+#### 3. Build again: only what changed
+
+Run the same build without changing anything:
+
+```powershell
+cmake --build out-msvc/static
+```
+
+```
+ninja: no work to do.
+```
+
+Now change one source file. Setting its "last modified" time to now is
+what saving the file in your editor does:
+
+```powershell
+(Get-Item stats.cpp).LastWriteTime = Get-Date
+cmake --build out-msvc/static
+```
+
+```
+[1/3] Building CXX object CMakeFiles\station.dir\stats.cpp.obj
+[2/3] Linking CXX static library station.lib
+[3/3] Linking CXX executable rooster.exe
+```
+
+Only `stats.cpp` was recompiled. `report.cpp` and `main.cpp` were left
+alone, and then the library and the program were rebuilt, because they
+depend on `stats.cpp.obj`. This is why you use a build tool: with three
+files it hardly matters, with three thousand it is the difference
+between seconds and an hour.
+
+#### 4. One target, and a Release build
+
+Make a **second** build folder, this time for the `Release` build type,
+and build only the **library** target:
+
+```powershell
+cmake -S . -B out-msvc/release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build out-msvc/release --target station --verbose
+Get-ChildItem out-msvc\release -Name
+```
+
+```
+[1/3] cl.exe /nologo /TP -DSTATION_STATIC_DEFINE -I... /DWIN32 /D_WINDOWS /EHsc /O2 /Ob2 /DNDEBUG -std:c++latest -MD /showIncludes /FoCMakeFiles\station.dir\stats.cpp.obj /FdCMakeFiles\station.dir\station.pdb /FS -c ...\stats.cpp
+[2/3] cl.exe ... -c ...\report.cpp
+[3/3] ... lib.exe /nologo /machine:x64 /out:station.lib CMakeFiles\station.dir\stats.cpp.obj CMakeFiles\station.dir\report.cpp.obj && cd .
+CMakeFiles
+.ninja_deps
+.ninja_log
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+station.lib
+station_export.h
+```
+
+- **`-DCMAKE_BUILD_TYPE=Release`** sets a cache variable. Look at the
+  flags it changed: `/Zi /Ob0 /Od /RTC1` became **`/O2 /Ob2 /DNDEBUG`**
+  (optimise, inline, and switch off `assert`), and `-MDd` became
+  **`-MD`**, the very `/MD` you typed in 7.12 to 7.14.
+- **`--target station`** builds the library and **nothing else**. There
+  is a `station.lib` in the folder and no `rooster.exe`. A target is how
+  you ask "does just this part compile?" Without `--target`, CMake
+  builds everything.
+
+Now build the rest and run it:
+
+```powershell
+cmake --build out-msvc/release
+.\out-msvc\release\rooster.exe
+```
+
+```
+[1/2] Building CXX object CMakeFiles\rooster.dir\main.cpp.obj
+[2/2] Linking CXX executable rooster.exe
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Ninja built only what was missing.
+
+#### 5. A dynamic library, with one option
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or
+`SHARED`**. The **command line** decides, with one variable:
+
+```powershell
+cmake -S . -B out-msvc/shared -G Ninja -DBUILD_SHARED_LIBS=ON
+cmake --build out-msvc/shared --verbose
+```
+
+```
+[1/5] cl.exe /nologo /TP -Dstation_EXPORTS -I... /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++latest -MDd /showIncludes /FoCMakeFiles\station.dir\stats.cpp.obj /FdCMakeFiles\station.dir\ /FS -c ...\stats.cpp
+[2/5] cl.exe ... -c ...\report.cpp
+[3/5] cl.exe ... -c ...\main.cpp
+[4/5] ... link.exe /nologo CMakeFiles\station.dir\stats.cpp.obj CMakeFiles\station.dir\report.cpp.obj ...
+[5/5] ... link.exe /nologo CMakeFiles\rooster.dir\main.cpp.obj /out:rooster.exe ... station.lib ...
+```
+
+(Shortened again.) Two things to notice. The library files are compiled
+with **`-Dstation_EXPORTS`**: that is the macro that
+`generate_export_header` looks for, and it is the `/DSTATION_BUILD_DLL`
+you typed in 7.14. CMake defines it for you. And step 4 is now a
+**link** that makes a DLL, not a `lib` that makes an archive. Look at
+the result:
+
+```powershell
+Get-ChildItem out-msvc\shared\*.dll, out-msvc\shared\*.lib | Format-Table Name, Length -AutoSize
+.\out-msvc\shared\rooster.exe
+```
+
+```
+Name         Length
+----         ------
+station.dll 1213952
+station.lib    3196
+
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`station.dll` is the code and `station.lib` is the small **import
+library**, the signpost of 7.14. The DLL is large because this is a
+`Debug` build. The program runs because `station.dll` sits in the **same
+folder** as `rooster.exe`, where the Windows loader looks first. One
+option, and 7.13 turned into 7.14, with no source changes.
+
+#### 6. Install
+
+```powershell
+cmake --install out-msvc/static --prefix out-msvc/install
+Get-ChildItem out-msvc\install -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-msvc\install\bin\rooster.exe
+```
+
+```
+-- Install configuration: "Debug"
+-- Installing: .../out-msvc/install/bin/rooster.exe
+-- Installing: .../out-msvc/install/lib/station.lib
+-- Installing: .../out-msvc/install/include/stats.h
+-- Installing: .../out-msvc/install/include/report.h
+-- Installing: .../out-msvc/install/include/station_export.h
+out-msvc\install\bin\rooster.exe
+out-msvc\install\include\report.h
+out-msvc\install\include\station_export.h
+out-msvc\install\include\stats.h
+out-msvc\install\lib\station.lib
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`--install` copies the **finished products** to a clean folder, as the
+`install(...)` lines in `CMakeLists.txt` say. `--prefix` names the
+folder. That is the **layout you hand to someone else**: the program in
+`bin`, the library in `lib`, the headers in `include`. (The
+`Install configuration: "Debug"` line is the build type again.)
+
+Installing the **dynamic** build puts the DLL next to the program:
+
+```powershell
+cmake --install out-msvc/shared --prefix out-msvc/install-shared
+Get-ChildItem out-msvc\install-shared -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-msvc\install-shared\bin\rooster.exe
+```
+
+```
+out-msvc\install-shared\bin\rooster.exe
+out-msvc\install-shared\bin\station.dll
+out-msvc\install-shared\include\report.h
+out-msvc\install-shared\include\station_export.h
+out-msvc\install-shared\include\stats.h
+out-msvc\install-shared\lib\station.lib
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The `-- Installing:` lines are left out.) The `RUNTIME DESTINATION bin`
+line in `CMakeLists.txt` covers programs **and DLLs**, so `station.dll`
+lands in `bin`, next to `rooster.exe`, where Windows finds it. The
+import library goes to `lib`.
+
+#### 7. Break it on purpose
+
+**a. A folder without `CMakeLists.txt`.** Point `-S` at the wrong
+folder:
+
+```powershell
+cmake -S out-msvc -B out-msvc/oops -G Ninja
+```
+
+```
+CMake Error: The source directory ".../out-msvc" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+`-S` must name the folder that **contains** `CMakeLists.txt`.
+
+**b. A target that does not exist.** A typo in `--target`:
+
+```powershell
+cmake --build out-msvc/static --target stationn
+```
+
+```
+ninja: error: unknown target 'stationn', did you mean 'station'?
+```
+
+That message comes from Ninja, which knows the list of targets from
+`build.ninja`.
+
+**c. Build a folder that was never configured.**
+
+```powershell
+cmake --build out-msvc/nothere
+```
+
+```
+Error: .../out-msvc/nothere is not a directory
+```
+
+You have to **configure** (`-S ... -B ...`) before you can **build**.
+
+**d. Another generator in a folder that already has one.** The cache
+remembers the generator:
+
+```powershell
+cmake -S . -B out-msvc/static -G "NMake Makefiles"
+```
+
+```
+CMake Error: Error: generator : NMake Makefiles
+Does not match the generator used previously: Ninja
+Either remove the CMakeCache.txt file and CMakeFiles directory or choose a different binary directory.
+```
+
+One build folder, one generator. CMake offers two ways out: delete the
+folder or pick another. That is why every variant in this project,
+`static`, `release`, `shared`, has **its own folder**.
+
+That is MSVC done.
+
+---
+
+### Environment 2: Windows, MinGW GCC
+
+**MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
+programs it makes are ordinary Windows programs. Ours is a UCRT build by
+Brecht Sanders: `g++ --version` says
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+
+#### Open the shell
+
+Open a **normal PowerShell**, not the Visual Studio Developer one, whose
+`cl` would be picked up first. Put `C:\mingw64\bin` first on the PATH
+**for this window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.15ProjectCMakeCommandLine
+cmake --version
+ninja --version
+g++ --version
+```
+
+```
+cmake version 3.30.4
+...
+1.12.1
+g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0
+...
+```
+
+(Each `--version` prints a few more lines. Our MinGW package brings its
+own `cmake` and `ninja`: `Get-Command cmake` tells you which `cmake`
+runs for you. Both are fine.)
+
+#### The tools in this environment
+
+- **`cmake`**: the program this whole project is about. It configures,
+  builds (by calling Ninja), and installs.
+- **`ninja`**: the build tool. CMake calls it for you. It decides
+  **what** has to be rebuilt and runs the commands.
+- **`gcc` and `g++`**: the C and C++ compiler. CMake has to be **told**
+  which compiler to use, with
+  `-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++`. Without the options
+  it would use whatever it finds first.
+- **`ar.exe` and `ranlib.exe`**: the archiver of 7.13 and the tool that
+  writes the archive's index. You never type them here: CMake does.
+
+#### Where the output goes
+
+You do not have to make a folder: CMake creates `out-mingw-gcc/static`
+(and `out-mingw-gcc` above it) by itself when it configures.
+
+#### 1. Configure
+
+```powershell
+cmake -S . -B out-mingw-gcc/static -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+```
+
+```
+-- The C compiler identification is GNU 14.2.0
+-- The CXX compiler identification is GNU 14.2.0
+...
+-- Configuring done (1.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/.../7.15ProjectCMakeCommandLine/out-mingw-gcc/static
+```
+
+(The many `Detecting ...` and `Check for working ...` lines are left
+out.)
+
+- **`-S .`**: the **S**ource folder, where `CMakeLists.txt` is.
+- **`-B out-mingw-gcc/static`**: the **B**uild folder, where everything
+  generated goes. CMake creates it.
+- **`-G Ninja`**: the generator.
+- **`-D...`**: a **cache variable**. These two say which compilers to
+  use. CMake checks a **C** compiler too, because `project(rooster)`
+  does not list languages, and so turns on C as well as C++.
+
+Now look at what configuring wrote:
+
+```powershell
+Get-ChildItem out-mingw-gcc\static -Name
+Select-String -Path out-mingw-gcc\static\CMakeCache.txt -Pattern '^(CMAKE_CXX_COMPILER:|CMAKE_BUILD_TYPE:|CMAKE_GENERATOR:|CMAKE_MAKE_PROGRAM:|CMAKE_AR:)' | ForEach-Object { $_.Line }
+```
+
+```
+CMakeFiles
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+station_export.h
+CMAKE_AR:FILEPATH=C:/mingw64/bin/ar.exe
+CMAKE_BUILD_TYPE:STRING=
+CMAKE_CXX_COMPILER:STRING=C:/mingw64/bin/g++.exe
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/mingw64/bin/ninja.exe
+CMAKE_GENERATOR:INTERNAL=Ninja
+```
+
+- **`build.ninja`**: the plan: the list of commands Ninja will run.
+- **`CMakeCache.txt`**: the cache, the folder's memory. It remembers the
+  compiler, the archiver, the generator, and the **build type**. The
+  build type is **empty** here: no optimisation flags and no debug
+  flags. Step 4 comes back to this.
+- **`station_export.h`**: the export header that
+  `generate_export_header` wrote.
+- **`cmake_install.cmake`** and **`CMakeFiles`**: CMake's own working
+  files. You never edit them.
+
+> **The compiler belongs to the build folder.** CMake stores the
+> compiler in the cache. That has a consequence you will see in step 7:
+> change the compiler of an existing folder and CMake throws the cache
+> away. Keep **one build folder per compiler**.
+
+#### 2. Build, and watch the real commands
+
+```powershell
+cmake --build out-mingw-gcc/static --verbose
+.\out-mingw-gcc\static\rooster.exe
+```
+
+`cmake --build <folder>` runs Ninja for you. **`--verbose`** makes it
+print the **real commands**:
+
+```
+[1/5] g++.exe -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/5] g++.exe -DSTATION_STATIC_DEFINE ... -c ...report.cpp
+[3/5] g++.exe -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -MD ... -c ...main.cpp
+[4/5] ... cmake.exe -E rm -f libstation.a && ... ar.exe qc libstation.a CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj && ... ranlib.exe libstation.a && cd .
+[5/5] ... g++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe -Wl,--out-implib,librooster.dll.a ... libstation.a -lstdc++exp -lkernel32 -luser32 -lgdi32 ...
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Paths are shortened, the first few lines of `--verbose` and the end of
+the long link line are left out.) Read them. This is the payoff of the
+previous three lectures. Compare with what you typed:
+
+- **Steps 1 to 3** are the compile commands of 7.12: one
+  `g++ ... -c file.cpp -o file.obj` per source file. CMake added
+  `-MD -MT -MF`, which write a list of the headers each file includes,
+  so Ninja knows what to rebuild. It also passes **`-std=gnu++23`**, not
+  the `-std=c++23` you typed: `gnu++23` is C++23 plus GNU extensions,
+  because CMake's `CXX_EXTENSIONS` defaults to on.
+- **`-fvisibility=hidden`** is on the two **library** files only: it
+  comes from `CXX_VISIBILITY_PRESET hidden`, the flag of 7.14.
+  `main.cpp` does not have it. `-DSTATION_STATIC_DEFINE` is on all
+  three, because the library marks it `PUBLIC`.
+- **Step 4** is the archive of 7.13. CMake first removes any old
+  `libstation.a`, then runs **`ar qc`** and **`ranlib`**. You typed
+  `ar rcs`: the `s` writes the archive's index, and `ranlib` is the same
+  "write the index" step as a separate command.
+- **Step 5** is the link of 7.12 and 7.13: `rooster.exe` from
+  `main.cpp.obj` and `libstation.a`, then **`-lstdc++exp`** (the
+  `target_link_libraries(... stdc++exp)` line of `CMakeLists.txt`, in
+  the right place: **after** the objects that need it), then the Windows
+  libraries every Windows program links.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake
+build misbehaves, `--verbose` shows you the exact command that went
+wrong, and you can run it yourself.
+
+#### 3. Build again: only what changed
+
+Run the same build without changing anything:
+
+```powershell
+cmake --build out-mingw-gcc/static
+```
+
+```
+ninja: no work to do.
+```
+
+Now change one source file. Setting its "last modified" time to now is
+what saving the file in your editor does:
+
+```powershell
+(Get-Item stats.cpp).LastWriteTime = Get-Date
+cmake --build out-mingw-gcc/static
+```
+
+```
+[1/3] Building CXX object CMakeFiles/station.dir/stats.cpp.obj
+[2/3] Linking CXX static library libstation.a
+[3/3] Linking CXX executable rooster.exe
+```
+
+Only `stats.cpp` was recompiled. `report.cpp` and `main.cpp` were left
+alone, and then the library and the program were rebuilt, because they
+depend on `stats.cpp.obj`. This is why you use a build tool: with three
+files it hardly matters, with three thousand it is the difference
+between seconds and an hour.
+
+#### 4. One target, and a Release build
+
+Make a **second** build folder, this time for the `Release` build type,
+and build only the **library** target:
+
+```powershell
+cmake -S . -B out-mingw-gcc/release -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release
+cmake --build out-mingw-gcc/release --target station --verbose
+Get-ChildItem out-mingw-gcc\release -Name
+```
+
+```
+[1/3] g++.exe -DSTATION_STATIC_DEFINE -I... -O3 -DNDEBUG -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/3] g++.exe ... -c ...report.cpp
+[3/3] ... ar.exe qc libstation.a CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj && ... ranlib.exe libstation.a && cd .
+CMakeFiles
+.ninja_deps
+.ninja_log
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+libstation.a
+station_export.h
+```
+
+- **`-DCMAKE_BUILD_TYPE=Release`** sets a cache variable. Look at the
+  flags it added: **`-O3 -DNDEBUG`** (optimise hard, and switch off
+  `assert`). The folder from step 1 had neither.
+- **`--target station`** builds the library and **nothing else**. There
+  is a `libstation.a` in the folder and no `rooster.exe`. A target is
+  how you ask "does just this part compile?" Without `--target`, CMake
+  builds everything.
+
+Now build the rest and run it:
+
+```powershell
+cmake --build out-mingw-gcc/release
+.\out-mingw-gcc\release\rooster.exe
+```
+
+```
+[1/2] Building CXX object CMakeFiles/rooster.dir/main.cpp.obj
+[2/2] Linking CXX executable rooster.exe
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Ninja built only what was missing.
+
+#### 5. A dynamic library, with one option
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or
+`SHARED`**. The **command line** decides, with one variable:
+
+```powershell
+cmake -S . -B out-mingw-gcc/shared -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DBUILD_SHARED_LIBS=ON
+cmake --build out-mingw-gcc/shared --verbose
+```
+
+```
+[1/5] g++.exe -Dstation_EXPORTS -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/5] g++.exe -Dstation_EXPORTS ... -c ...report.cpp
+[3/5] g++.exe -I... -std=gnu++23 -MD ... -c ...main.cpp
+[4/5] ... g++.exe -shared -o libstation.dll -Wl,--out-implib,libstation.dll.a ... CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj ...
+[5/5] ... g++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe ... libstation.dll.a -lstdc++exp ...
+```
+
+(Shortened again.) Three things to notice. The library files are
+compiled with **`-Dstation_EXPORTS`**: that is the macro that
+`generate_export_header` looks for, and it is the `-DSTATION_BUILD_DLL`
+you typed in 7.14. CMake defines it for you. Step 4 is now a
+**`-shared`** link that makes a DLL and its import library
+(`-Wl,--out-implib,...`, the option from 7.14), not an archive. And the
+program is linked against **`libstation.dll.a`**, the import library,
+with `-lstdc++exp` after it. Look at the result:
+
+```powershell
+Get-ChildItem out-mingw-gcc\shared\*.dll, out-mingw-gcc\shared\*.a | Format-Table Name, Length -AutoSize
+.\out-mingw-gcc\shared\rooster.exe
+```
+
+```
+Name              Length
+----              ------
+libstation.dll   477964
+libstation.dll.a   3446
+
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`libstation.dll` is the code and `libstation.dll.a` is the small
+**import library**, the signpost of 7.14. CMake adds the `lib` prefix to
+the name. The program runs because the DLL sits in the **same folder**
+as `rooster.exe`, where the Windows loader looks first. One option, and
+7.13 turned into 7.14, with no source changes.
+
+#### 6. Install
+
+```powershell
+cmake --install out-mingw-gcc/static --prefix out-mingw-gcc/install
+Get-ChildItem out-mingw-gcc\install -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-mingw-gcc\install\bin\rooster.exe
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-mingw-gcc/install/bin/rooster.exe
+-- Installing: .../out-mingw-gcc/install/lib/libstation.a
+-- Installing: .../out-mingw-gcc/install/include/stats.h
+-- Installing: .../out-mingw-gcc/install/include/report.h
+-- Installing: .../out-mingw-gcc/install/include/station_export.h
+out-mingw-gcc\install\bin\rooster.exe
+out-mingw-gcc\install\include\report.h
+out-mingw-gcc\install\include\station_export.h
+out-mingw-gcc\install\include\stats.h
+out-mingw-gcc\install\lib\libstation.a
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`--install` copies the **finished products** to a clean folder, as the
+`install(...)` lines in `CMakeLists.txt` say. `--prefix` names the
+folder. That is the **layout you hand to someone else**: the program in
+`bin`, the library in `lib`, the headers in `include`.
+(`Install configuration: ""` is the empty build type from step 1.)
+
+Installing the **dynamic** build puts the DLL next to the program:
+
+```powershell
+cmake --install out-mingw-gcc/shared --prefix out-mingw-gcc/install-shared
+Get-ChildItem out-mingw-gcc\install-shared -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-mingw-gcc\install-shared\bin\rooster.exe
+```
+
+```
+out-mingw-gcc\install-shared\bin\libstation.dll
+out-mingw-gcc\install-shared\bin\rooster.exe
+out-mingw-gcc\install-shared\include\report.h
+out-mingw-gcc\install-shared\include\station_export.h
+out-mingw-gcc\install-shared\include\stats.h
+out-mingw-gcc\install-shared\lib\libstation.dll.a
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The `-- Installing:` lines are left out.) The `RUNTIME DESTINATION bin`
+line in `CMakeLists.txt` covers programs **and DLLs**, so
+`libstation.dll` lands in `bin`, next to `rooster.exe`, where Windows
+finds it. The import library goes to `lib`.
+
+#### 7. Break it on purpose
+
+**a. A folder without `CMakeLists.txt`.** Point `-S` at the wrong
+folder:
+
+```powershell
+cmake -S out-mingw-gcc -B out-mingw-gcc/oops -G Ninja
+```
+
+```
+CMake Error: The source directory ".../out-mingw-gcc" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+`-S` must name the folder that **contains** `CMakeLists.txt`.
+
+**b. A target that does not exist.** A typo in `--target`:
+
+```powershell
+cmake --build out-mingw-gcc/static --target stationn
+```
+
+```
+ninja: error: unknown target 'stationn', did you mean 'station'?
+```
+
+That message comes from Ninja, which knows the list of targets from
+`build.ninja`.
+
+**c. Build a folder that was never configured.**
+
+```powershell
+cmake --build out-mingw-gcc/nothere
+```
+
+```
+Error: .../out-mingw-gcc/nothere is not a directory
+```
+
+You have to **configure** (`-S ... -B ...`) before you can **build**.
+
+**d. Change the compiler of a folder that is already configured.** First
+configure a throw-away folder with GCC, then run the command again with
+the C++ compiler changed to Clang:
+
+```powershell
+cmake -S . -B out-mingw-gcc/swap -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+cmake -S . -B out-mingw-gcc/swap -G Ninja -DCMAKE_CXX_COMPILER=clang++
+```
+
+```
+-- Configuring done (0.1s)
+You have changed variables that require your cache to be deleted.
+Configure will be re-run and you may have to reset some variables.
+The following variables have changed:
+CMAKE_CXX_COMPILER= clang++
+
+-- The C compiler identification is GNU 14.2.0
+-- The CXX compiler identification is Clang 19.1.1
+...
+```
+
+This is a **warning, not an error**, and that is what makes it
+dangerous. CMake **throws the cache away** and starts again. Everything
+you had set is gone: only the option you just gave survived, so the **C
+compiler fell back to the default**. We asked for GCC and ended up with
+a folder that is not what we configured. (In Windows PowerShell the
+warning may appear wrapped in red error text. CMake writes it to stderr.
+It is still only a warning.) **Keep one build folder per compiler**,
+which is why each command in this project has its own.
+
+That is MinGW GCC done.
+
+---
+
+### Environment 3: Windows, MinGW Clang
+
+**MinGW-w64** brings the GNU tool chain to Windows, and its package also
+contains the **Clang** compiler. The programs it makes are ordinary
+Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
+`clang++ --version` says `clang version 19.1.1` and
+`Target: x86_64-w64-windows-gnu`.
+
+#### Open the shell
+
+Open a **normal PowerShell**, not the Visual Studio Developer one, whose
+`cl` would be picked up first. Put `C:\mingw64\bin` first on the PATH
+**for this window**, then go to the folder (from the repository root):
+
+```powershell
+$env:Path = "C:\mingw64\bin;$env:Path"
+cd 07.PracticalBuiltInFeatures\7.15ProjectCMakeCommandLine
+cmake --version
+ninja --version
+clang++ --version
+```
+
+```
+cmake version 3.30.4
+...
+1.12.1
+(built by Brecht Sanders, r2) clang version 19.1.1
+...
+```
+
+(Each `--version` prints a few more lines. Our MinGW package brings its
+own `cmake` and `ninja`: `Get-Command cmake` tells you which `cmake`
+runs for you. Both are fine.)
+
+#### The tools in this environment
+
+- **`cmake`**: the program this whole project is about. It configures,
+  builds (by calling Ninja), and installs.
+- **`ninja`**: the build tool. CMake calls it for you. It decides
+  **what** has to be rebuilt and runs the commands.
+- **`clang` and `clang++`**: the C and C++ compiler. CMake has to be
+  **told** which compiler to use, with
+  `-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++`. Without the
+  options it would use whatever it finds first.
+- **`llvm-ar.exe` and `llvm-ranlib.exe`**: the archiver of 7.13 and the
+  tool that writes the archive's index. You never type them here: CMake
+  does.
+
+#### Where the output goes
+
+You do not have to make a folder: CMake creates `out-mingw-clang/static`
+(and `out-mingw-clang` above it) by itself when it configures.
+
+#### 1. Configure
+
+```powershell
+cmake -S . -B out-mingw-clang/static -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+
+```
+-- The C compiler identification is Clang 19.1.1
+-- The CXX compiler identification is Clang 19.1.1
+...
+-- Configuring done (1.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/.../7.15ProjectCMakeCommandLine/out-mingw-clang/static
+```
+
+(The many `Detecting ...` and `Check for working ...` lines are left
+out.)
+
+- **`-S .`**: the **S**ource folder, where `CMakeLists.txt` is.
+- **`-B out-mingw-clang/static`**: the **B**uild folder, where
+  everything generated goes. CMake creates it.
+- **`-G Ninja`**: the generator.
+- **`-D...`**: a **cache variable**. These two say which compilers to
+  use. CMake checks a **C** compiler too, because `project(rooster)`
+  does not list languages, and so turns on C as well as C++.
+
+Now look at what configuring wrote:
+
+```powershell
+Get-ChildItem out-mingw-clang\static -Name
+Select-String -Path out-mingw-clang\static\CMakeCache.txt -Pattern '^(CMAKE_CXX_COMPILER:|CMAKE_BUILD_TYPE:|CMAKE_GENERATOR:|CMAKE_MAKE_PROGRAM:|CMAKE_AR:)' | ForEach-Object { $_.Line }
+```
+
+```
+CMakeFiles
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+station_export.h
+CMAKE_AR:FILEPATH=C:/mingw64/bin/llvm-ar.exe
+CMAKE_BUILD_TYPE:STRING=
+CMAKE_CXX_COMPILER:STRING=C:/mingw64/bin/clang++.exe
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/mingw64/bin/ninja.exe
+CMAKE_GENERATOR:INTERNAL=Ninja
+```
+
+- **`build.ninja`**: the plan: the list of commands Ninja will run.
+- **`CMakeCache.txt`**: the cache, the folder's memory. It remembers the
+  compiler, the archiver, the generator, and the **build type**. The
+  build type is **empty** here: no optimisation flags and no debug
+  flags. Step 4 comes back to this.
+- **`station_export.h`**: the export header that
+  `generate_export_header` wrote.
+- **`cmake_install.cmake`** and **`CMakeFiles`**: CMake's own working
+  files. You never edit them.
+
+> **The compiler belongs to the build folder.** CMake stores the
+> compiler in the cache. That has a consequence you will see in step 7:
+> change the compiler of an existing folder and CMake throws the cache
+> away. Keep **one build folder per compiler**.
+
+#### 2. Build, and watch the real commands
+
+```powershell
+cmake --build out-mingw-clang/static --verbose
+.\out-mingw-clang\static\rooster.exe
+```
+
+`cmake --build <folder>` runs Ninja for you. **`--verbose`** makes it
+print the **real commands**:
+
+```
+[1/5] clang++.exe -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/5] clang++.exe -DSTATION_STATIC_DEFINE ... -c ...report.cpp
+[3/5] clang++.exe -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -MD ... -c ...main.cpp
+[4/5] ... cmake.exe -E rm -f libstation.a && ... llvm-ar.exe qc libstation.a CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj && ... llvm-ranlib.exe libstation.a && cd .
+[5/5] ... clang++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe -Wl,--out-implib,librooster.dll.a ... libstation.a -lstdc++exp -lkernel32 -luser32 -lgdi32 ...
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Paths are shortened, the first few lines of `--verbose` and the end of
+the long link line are left out.) Read them. This is the payoff of the
+previous three lectures. Compare with what you typed:
+
+- **Steps 1 to 3** are the compile commands of 7.12: one
+  `clang++ ... -c file.cpp -o file.obj` per source file. CMake added
+  `-MD -MT -MF`, which write a list of the headers each file includes,
+  so Ninja knows what to rebuild. It also passes **`-std=gnu++23`**, not
+  the `-std=c++23` you typed: `gnu++23` is C++23 plus GNU extensions,
+  because CMake's `CXX_EXTENSIONS` defaults to on.
+- **`-fvisibility=hidden`** is on the two **library** files only: it
+  comes from `CXX_VISIBILITY_PRESET hidden`, the flag of 7.14.
+  `main.cpp` does not have it. `-DSTATION_STATIC_DEFINE` is on all
+  three, because the library marks it `PUBLIC`.
+- **Step 4** is the archive of 7.13. CMake first removes any old
+  `libstation.a`, then runs **`llvm-ar qc`** and **`llvm-ranlib`**, the
+  LLVM versions of `ar` and `ranlib` that go with Clang. You typed
+  `ar rcs`: the `s` writes the archive's index, and `ranlib` is the same
+  "write the index" step as a separate command.
+- **Step 5** is the link of 7.12 and 7.13: `rooster.exe` from
+  `main.cpp.obj` and `libstation.a`, then **`-lstdc++exp`** (the
+  `target_link_libraries(... stdc++exp)` line of `CMakeLists.txt`, in
+  the right place: **after** the objects that need it), then the Windows
+  libraries every Windows program links.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake
+build misbehaves, `--verbose` shows you the exact command that went
+wrong, and you can run it yourself.
+
+#### 3. Build again: only what changed
+
+Run the same build without changing anything:
+
+```powershell
+cmake --build out-mingw-clang/static
+```
+
+```
+ninja: no work to do.
+```
+
+Now change one source file. Setting its "last modified" time to now is
+what saving the file in your editor does:
+
+```powershell
+(Get-Item stats.cpp).LastWriteTime = Get-Date
+cmake --build out-mingw-clang/static
+```
+
+```
+[1/3] Building CXX object CMakeFiles/station.dir/stats.cpp.obj
+[2/3] Linking CXX static library libstation.a
+[3/3] Linking CXX executable rooster.exe
+```
+
+Only `stats.cpp` was recompiled. `report.cpp` and `main.cpp` were left
+alone, and then the library and the program were rebuilt, because they
+depend on `stats.cpp.obj`. This is why you use a build tool: with three
+files it hardly matters, with three thousand it is the difference
+between seconds and an hour.
+
+#### 4. One target, and a Release build
+
+Make a **second** build folder, this time for the `Release` build type,
+and build only the **library** target:
+
+```powershell
+cmake -S . -B out-mingw-clang/release -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release
+cmake --build out-mingw-clang/release --target station --verbose
+Get-ChildItem out-mingw-clang\release -Name
+```
+
+```
+[1/3] clang++.exe -DSTATION_STATIC_DEFINE -I... -O3 -DNDEBUG -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/3] clang++.exe ... -c ...report.cpp
+[3/3] ... llvm-ar.exe qc libstation.a CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj && ... llvm-ranlib.exe libstation.a && cd .
+CMakeFiles
+.ninja_deps
+.ninja_log
+build.ninja
+CMakeCache.txt
+cmake_install.cmake
+libstation.a
+station_export.h
+```
+
+- **`-DCMAKE_BUILD_TYPE=Release`** sets a cache variable. Look at the
+  flags it added: **`-O3 -DNDEBUG`** (optimise hard, and switch off
+  `assert`). The folder from step 1 had neither.
+- **`--target station`** builds the library and **nothing else**. There
+  is a `libstation.a` in the folder and no `rooster.exe`. A target is
+  how you ask "does just this part compile?" Without `--target`, CMake
+  builds everything.
+
+Now build the rest and run it:
+
+```powershell
+cmake --build out-mingw-clang/release
+.\out-mingw-clang\release\rooster.exe
+```
+
+```
+[1/2] Building CXX object CMakeFiles/rooster.dir/main.cpp.obj
+[2/2] Linking CXX executable rooster.exe
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Ninja built only what was missing.
+
+#### 5. A dynamic library, with one option
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or
+`SHARED`**. The **command line** decides, with one variable:
+
+```powershell
+cmake -S . -B out-mingw-clang/shared -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DBUILD_SHARED_LIBS=ON
+cmake --build out-mingw-clang/shared --verbose
+```
+
+```
+[1/5] clang++.exe -Dstation_EXPORTS -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.obj -MF CMakeFiles\station.dir\stats.cpp.obj.d -o CMakeFiles/station.dir/stats.cpp.obj -c ...stats.cpp
+[2/5] clang++.exe -Dstation_EXPORTS ... -c ...report.cpp
+[3/5] clang++.exe -I... -std=gnu++23 -MD ... -c ...main.cpp
+[4/5] ... clang++.exe -shared -o libstation.dll -Wl,--out-implib,libstation.dll.a ... CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj ...
+[5/5] ... clang++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe ... libstation.dll.a -lstdc++exp ...
+```
+
+(Shortened again.) Three things to notice. The library files are
+compiled with **`-Dstation_EXPORTS`**: that is the macro that
+`generate_export_header` looks for, and it is the `-DSTATION_BUILD_DLL`
+you typed in 7.14. CMake defines it for you. Step 4 is now a
+**`-shared`** link that makes a DLL and its import library
+(`-Wl,--out-implib,...`, the option from 7.14), not an archive. And the
+program is linked against **`libstation.dll.a`**, the import library,
+with `-lstdc++exp` after it. Look at the result:
+
+```powershell
+Get-ChildItem out-mingw-clang\shared\*.dll, out-mingw-clang\shared\*.a | Format-Table Name, Length -AutoSize
+.\out-mingw-clang\shared\rooster.exe
+```
+
+```
+Name              Length
+----              ------
+libstation.dll   469940
+libstation.dll.a   3446
+
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`libstation.dll` is the code and `libstation.dll.a` is the small
+**import library**, the signpost of 7.14. CMake adds the `lib` prefix to
+the name. The program runs because the DLL sits in the **same folder**
+as `rooster.exe`, where the Windows loader looks first. One option, and
+7.13 turned into 7.14, with no source changes.
+
+#### 6. Install
+
+```powershell
+cmake --install out-mingw-clang/static --prefix out-mingw-clang/install
+Get-ChildItem out-mingw-clang\install -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-mingw-clang\install\bin\rooster.exe
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-mingw-clang/install/bin/rooster.exe
+-- Installing: .../out-mingw-clang/install/lib/libstation.a
+-- Installing: .../out-mingw-clang/install/include/stats.h
+-- Installing: .../out-mingw-clang/install/include/report.h
+-- Installing: .../out-mingw-clang/install/include/station_export.h
+out-mingw-clang\install\bin\rooster.exe
+out-mingw-clang\install\include\report.h
+out-mingw-clang\install\include\station_export.h
+out-mingw-clang\install\include\stats.h
+out-mingw-clang\install\lib\libstation.a
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+`--install` copies the **finished products** to a clean folder, as the
+`install(...)` lines in `CMakeLists.txt` say. `--prefix` names the
+folder. That is the **layout you hand to someone else**: the program in
+`bin`, the library in `lib`, the headers in `include`.
+(`Install configuration: ""` is the empty build type from step 1.)
+
+Installing the **dynamic** build puts the DLL next to the program:
+
+```powershell
+cmake --install out-mingw-clang/shared --prefix out-mingw-clang/install-shared
+Get-ChildItem out-mingw-clang\install-shared -Recurse -File | ForEach-Object { $_.FullName.Substring((Get-Location).Path.Length + 1) }
+.\out-mingw-clang\install-shared\bin\rooster.exe
+```
+
+```
+out-mingw-clang\install-shared\bin\libstation.dll
+out-mingw-clang\install-shared\bin\rooster.exe
+out-mingw-clang\install-shared\include\report.h
+out-mingw-clang\install-shared\include\station_export.h
+out-mingw-clang\install-shared\include\stats.h
+out-mingw-clang\install-shared\lib\libstation.dll.a
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The `-- Installing:` lines are left out.) The `RUNTIME DESTINATION bin`
+line in `CMakeLists.txt` covers programs **and DLLs**, so
+`libstation.dll` lands in `bin`, next to `rooster.exe`, where Windows
+finds it. The import library goes to `lib`.
+
+#### 7. Break it on purpose
+
+**a. A folder without `CMakeLists.txt`.** Point `-S` at the wrong
+folder:
+
+```powershell
+cmake -S out-mingw-clang -B out-mingw-clang/oops -G Ninja
+```
+
+```
+CMake Error: The source directory ".../out-mingw-clang" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+`-S` must name the folder that **contains** `CMakeLists.txt`.
+
+**b. A target that does not exist.** A typo in `--target`:
+
+```powershell
+cmake --build out-mingw-clang/static --target stationn
+```
+
+```
+ninja: error: unknown target 'stationn', did you mean 'station'?
+```
+
+That message comes from Ninja, which knows the list of targets from
+`build.ninja`.
+
+**c. Build a folder that was never configured.**
+
+```powershell
+cmake --build out-mingw-clang/nothere
+```
+
+```
+Error: .../out-mingw-clang/nothere is not a directory
+```
+
+You have to **configure** (`-S ... -B ...`) before you can **build**.
+
+**d. Change the compiler of a folder that is already configured.** First
+configure a throw-away folder with Clang, then run the command again
+with the C++ compiler changed to GCC:
+
+```powershell
+cmake -S . -B out-mingw-clang/swap -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake -S . -B out-mingw-clang/swap -G Ninja -DCMAKE_CXX_COMPILER=g++
+```
+
+```
+-- Configuring done (0.1s)
+You have changed variables that require your cache to be deleted.
+Configure will be re-run and you may have to reset some variables.
+The following variables have changed:
+CMAKE_CXX_COMPILER= g++
+
+-- The C compiler identification is GNU 14.2.0
+-- The CXX compiler identification is GNU 14.2.0
+...
+```
+
+This is a **warning, not an error**, and that is what makes it
+dangerous. CMake **throws the cache away** and starts again. Everything
+you had set is gone: only the option you just gave survived, so the **C
+compiler fell back to the default**. We asked for Clang and ended up
+with a folder that is not what we configured. (In Windows PowerShell the
+warning may appear wrapped in red error text. CMake writes it to stderr.
+It is still only a warning.) **Keep one build folder per compiler**,
+which is why each command in this project has its own.
+
+That is MinGW Clang done.
+
+---
+
+### Environment 4: Linux, GCC (Docker)
+
+You get a real Linux with GCC from the Docker container of chapter 2.
+Our image carries GCC 16.2, CMake 3.31.6 and Ninja 1.12.1.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-gcc
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine
+cmake --version
+ninja --version
+g++ --version
+```
+
+```
+cmake version 3.31.6
+...
+1.12.1
+g++ (GCC) 16.2.0
+...
+```
+
+(Each `--version` prints a few more lines. `--rm` throws the container
+away when you leave. The files you create stay in your folder on
+Windows, in `out-linux-gcc`, because of the `-v` mount. They are ignored
+by git.)
+
+#### The tools in this environment
+
+- **`cmake`**: the program this whole project is about. It configures,
+  builds (by calling Ninja), and installs.
+- **`ninja`**: the build tool. CMake calls it for you. It decides
+  **what** has to be rebuilt and runs the commands.
+- **`gcc` and `g++`**: the C and C++ compiler. CMake has to be **told**
+  which compiler to use, with
+  `-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++`. Without the options
+  it would use whatever it finds first.
+- **`ar` and `ranlib`**: the archiver of 7.13 and the tool that writes
+  the archive's index. You never type them here: CMake does.
+- **`readelf` and `ldd`**: the tools of 7.14 for asking a program which
+  libraries it needs and where the loader finds them.
+
+#### Where the output goes
+
+You do not have to make a folder: CMake creates `out-linux-gcc/static`
+(and `out-linux-gcc` above it) by itself when it configures.
+
+#### 1. Configure
+
+```sh
+cmake -S . -B out-linux-gcc/static -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+```
+
+```
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
+...
+-- Configuring done (1.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-gcc/static
+```
+
+(The many `Detecting ...` and `Check for working ...` lines are left
+out.)
+
+- **`-S .`**: the **S**ource folder, where `CMakeLists.txt` is.
+- **`-B out-linux-gcc/static`**: the **B**uild folder, where everything
+  generated goes. CMake creates it.
+- **`-G Ninja`**: the generator.
+- **`-D...`**: a **cache variable**. These two say which compilers to
+  use. CMake checks a **C** compiler too, because `project(rooster)`
+  does not list languages, and so turns on C as well as C++.
+
+Now look at what configuring wrote:
+
+```sh
+ls out-linux-gcc/static
+grep -E '^(CMAKE_CXX_COMPILER:|CMAKE_BUILD_TYPE:|CMAKE_GENERATOR:|CMAKE_MAKE_PROGRAM:|CMAKE_AR:)' out-linux-gcc/static/CMakeCache.txt
+```
+
+```
+CMakeCache.txt
+CMakeFiles
+build.ninja
+cmake_install.cmake
+station_export.h
+CMAKE_AR:FILEPATH=/usr/bin/ar
+CMAKE_BUILD_TYPE:STRING=
+CMAKE_CXX_COMPILER:STRING=/usr/local/bin/g++
+CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/ninja
+CMAKE_GENERATOR:INTERNAL=Ninja
+```
+
+- **`build.ninja`**: the plan: the list of commands Ninja will run.
+- **`CMakeCache.txt`**: the cache, the folder's memory. It remembers the
+  compiler, the archiver, the generator, and the **build type**. The
+  build type is **empty** here: no optimisation flags and no debug
+  flags. Step 4 comes back to this.
+- **`station_export.h`**: the export header that
+  `generate_export_header` wrote.
+- **`cmake_install.cmake`** and **`CMakeFiles`**: CMake's own working
+  files. You never edit them.
+
+> **The compiler belongs to the build folder.** CMake stores the
+> compiler in the cache. That has a consequence you will see in step 7:
+> change the compiler of an existing folder and CMake throws the cache
+> away. Keep **one build folder per compiler**.
+
+#### 2. Build, and watch the real commands
+
+```sh
+cmake --build out-linux-gcc/static --verbose
+./out-linux-gcc/static/rooster
+```
+
+`cmake --build <folder>` runs Ninja for you. **`--verbose`** makes it
+print the **real commands**:
+
+```
+[1/5] /usr/local/bin/g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/5] /usr/local/bin/g++ -DSTATION_STATIC_DEFINE ... -c .../report.cpp
+[3/5] /usr/local/bin/g++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -MD ... -c .../main.cpp
+[4/5] : && /usr/bin/cmake -E rm -f libstation.a && /usr/bin/ar qc libstation.a CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && /usr/bin/ranlib libstation.a && :
+[5/5] : && /usr/local/bin/g++ -Wl,--dependency-file=CMakeFiles/rooster.dir/link.d CMakeFiles/rooster.dir/main.cpp.o -o rooster libstation.a && :
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Paths are shortened, and the first few lines of `--verbose` are left
+out.) Read them. This is the payoff of the previous three lectures.
+Compare with what you typed:
+
+- **Steps 1 to 3** are the compile commands of 7.12: one
+  `g++ ... -c file.cpp -o file.o` per source file. CMake added
+  `-MD -MT -MF`, which write a list of the headers each file includes,
+  so Ninja knows what to rebuild. It also passes **`-std=gnu++23`**, not
+  the `-std=c++23` you typed: `gnu++23` is C++23 plus GNU extensions,
+  because CMake's `CXX_EXTENSIONS` defaults to on. The compiler has its
+  full path, `/usr/local/bin/g++`, because that is what is in the cache.
+- **`-fvisibility=hidden`** is on the two **library** files only: it
+  comes from `CXX_VISIBILITY_PRESET hidden`, the flag of 7.14.
+  `main.cpp` does not have it. `-DSTATION_STATIC_DEFINE` is on all
+  three, because the library marks it `PUBLIC`.
+- **Step 4** is the archive of 7.13. The `: &&` at the start is a
+  do-nothing command that Ninja needs, and CMake first removes any old
+  `libstation.a`. Then comes **`ar qc`** and **`ranlib`**. You typed
+  `ar rcs`: the `s` writes the archive's index, and `ranlib` is the same
+  "write the index" step as a separate command.
+- **Step 5** is the link of 7.12 and 7.13: `main.cpp.o` and
+  `libstation.a` into `rooster`. The `-Wl,--dependency-file=...` option
+  makes the linker list the files it read, for Ninja.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake
+build misbehaves, `--verbose` shows you the exact command that went
+wrong, and you can run it yourself.
+
+#### 3. Build again: only what changed
+
+Run the same build without changing anything:
+
+```sh
+cmake --build out-linux-gcc/static
+```
+
+```
+ninja: no work to do.
+```
+
+Now change one source file. `touch` sets its "last modified" time to
+now, which is what saving the file in your editor does:
+
+```sh
+touch stats.cpp
+cmake --build out-linux-gcc/static
+```
+
+```
+[1/3] Building CXX object CMakeFiles/station.dir/stats.cpp.o
+[2/3] Linking CXX static library libstation.a
+[3/3] Linking CXX executable rooster
+```
+
+Only `stats.cpp` was recompiled. `report.cpp` and `main.cpp` were left
+alone, and then the library and the program were rebuilt, because they
+depend on `stats.cpp.o`. This is why you use a build tool: with three
+files it hardly matters, with three thousand it is the difference
+between seconds and an hour.
+
+#### 4. One target, and a Release build
+
+Make a **second** build folder, this time for the `Release` build type,
+and build only the **library** target:
+
+```sh
+cmake -S . -B out-linux-gcc/release -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release
+cmake --build out-linux-gcc/release --target station --verbose
+ls out-linux-gcc/release
+```
+
+```
+[1/3] /usr/local/bin/g++ -DSTATION_STATIC_DEFINE -I... -O3 -DNDEBUG -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/3] /usr/local/bin/g++ ... -c .../report.cpp
+[3/3] : && /usr/bin/cmake -E rm -f libstation.a && /usr/bin/ar qc libstation.a CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && /usr/bin/ranlib libstation.a && :
+CMakeCache.txt
+CMakeFiles
+build.ninja
+cmake_install.cmake
+libstation.a
+station_export.h
+```
+
+- **`-DCMAKE_BUILD_TYPE=Release`** sets a cache variable. Look at the
+  flags it added: **`-O3 -DNDEBUG`** (optimise hard, and switch off
+  `assert`). The folder from step 1 had neither.
+- **`--target station`** builds the library and **nothing else**. There
+  is a `libstation.a` in the folder and no `rooster`. A target is how
+  you ask "does just this part compile?" Without `--target`, CMake
+  builds everything.
+
+Now build the rest and run it:
+
+```sh
+cmake --build out-linux-gcc/release
+./out-linux-gcc/release/rooster
+```
+
+```
+[1/2] Building CXX object CMakeFiles/rooster.dir/main.cpp.o
+[2/2] Linking CXX executable rooster
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Ninja built only what was missing.
+
+#### 5. A dynamic library, with one option
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or
+`SHARED`**. The **command line** decides, with one variable:
+
+```sh
+cmake -S . -B out-linux-gcc/shared -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DBUILD_SHARED_LIBS=ON
+cmake --build out-linux-gcc/shared --verbose
+```
+
+```
+[1/5] /usr/local/bin/g++ -Dstation_EXPORTS -I... -std=gnu++23 -fPIC -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/5] /usr/local/bin/g++ -Dstation_EXPORTS ... -c .../report.cpp
+[3/5] /usr/local/bin/g++ -I... -std=gnu++23 -MD ... -c .../main.cpp
+[4/5] : && /usr/local/bin/g++ -fPIC -Wl,--dependency-file=CMakeFiles/station.dir/link.d -shared -Wl,-soname,libstation.so -o libstation.so CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && :
+[5/5] : && /usr/local/bin/g++ -Wl,--dependency-file=CMakeFiles/rooster.dir/link.d CMakeFiles/rooster.dir/main.cpp.o -o rooster -Wl,-rpath,.../out-linux-gcc/shared: libstation.so && :
+```
+
+(Shortened again, and the order of steps 1 to 3 can differ from run to
+run.) Look at what CMake typed for you, and compare with 7.14:
+
+- The library files are compiled with **`-Dstation_EXPORTS`**, the macro
+  that `generate_export_header` looks for. It is the
+  `-DSTATION_BUILD_DLL` you typed in 7.14.
+- They are also compiled with **`-fPIC`**, and with
+  **`-fvisibility=hidden`**, the two flags of 7.14. CMake added `-fPIC`
+  by itself, because a shared library needs it.
+- Step 4 is a **`-shared`** link that makes `libstation.so`, with
+  `-Wl,-soname,libstation.so` giving it its run-time name.
+- Step 5 links the program against `libstation.so`, and look at
+  **`-Wl,-rpath,.../out-linux-gcc/shared:`**. CMake **baked the build
+  folder into the program**, the same idea as the `-Wl,-rpath,'$ORIGIN'`
+  you typed in 7.14, but with an absolute path.
+
+```sh
+ls -l out-linux-gcc/shared/libstation.so out-linux-gcc/shared/rooster
+./out-linux-gcc/shared/rooster
+readelf -d out-linux-gcc/shared/rooster | grep -E 'NEEDED.*station|RUNPATH'
+ldd out-linux-gcc/shared/rooster | grep station
+```
+
+```
+-rwxr-xr-x 1 root root 352640 Oct 14 16:37 out-linux-gcc/shared/libstation.so
+-rwxr-xr-x 1 root root 324888 Oct 14 16:37 out-linux-gcc/shared/rooster
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+ 0x0000000000000001 (NEEDED)             Shared library: [libstation.so]
+ 0x000000000000001d (RUNPATH)            Library runpath: [/workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-gcc/shared:]
+	libstation.so => /workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-gcc/shared/libstation.so (0x00007f775da6d000)
+```
+
+The program starts **without** `LD_LIBRARY_PATH`, and `ldd` finds the
+library, thanks to the `RUNPATH` that CMake wrote into it. (The address
+in brackets differs on every run, and the date in the `ls` lines will be
+yours.) One option, and 7.13 turned into 7.14, with no source changes.
+
+#### 6. Install
+
+```sh
+cmake --install out-linux-gcc/static --prefix out-linux-gcc/install
+find out-linux-gcc/install -type f
+./out-linux-gcc/install/bin/rooster
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-linux-gcc/install/bin/rooster
+-- Installing: .../out-linux-gcc/install/lib/libstation.a
+-- Installing: .../out-linux-gcc/install/include/stats.h
+-- Installing: .../out-linux-gcc/install/include/report.h
+-- Installing: .../out-linux-gcc/install/include/station_export.h
+out-linux-gcc/install/bin/rooster
+out-linux-gcc/install/lib/libstation.a
+out-linux-gcc/install/include/stats.h
+out-linux-gcc/install/include/report.h
+out-linux-gcc/install/include/station_export.h
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The order of the `find` lines can differ.) `--install` copies the
+**finished products** to a clean folder, as the `install(...)` lines in
+`CMakeLists.txt` say. `--prefix` names the folder. That is the **layout
+you hand to someone else**: the program in `bin`, the library in `lib`,
+the headers in `include`. (`Install configuration: ""` is the empty
+build type from step 1.)
+
+Now install the **dynamic** build, and run the installed program:
+
+```sh
+cmake --install out-linux-gcc/shared --prefix out-linux-gcc/install-shared
+./out-linux-gcc/install-shared/bin/rooster
+echo $?
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-linux-gcc/install-shared/bin/rooster
+-- Set non-toolchain portion of runtime path of ".../out-linux-gcc/install-shared/bin/rooster" to ""
+-- Installing: .../out-linux-gcc/install-shared/lib/libstation.so
+-- Installing: .../out-linux-gcc/install-shared/include/stats.h
+-- Installing: .../out-linux-gcc/install-shared/include/report.h
+-- Installing: .../out-linux-gcc/install-shared/include/station_export.h
+./out-linux-gcc/install-shared/bin/rooster: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+```
+
+It **fails**, with the error you know from 7.14. Look at the line
+`Set non-toolchain portion of runtime path ... to ""`: when it installs
+a program, CMake **removes the build-folder path** from its `RUNPATH`,
+because the build folder is not meant to be there when you hand the
+program to someone. Now the loader has no idea where `libstation.so` is.
+You know two fixes from 7.14. The first is to tell the loader for one
+run:
+
+```sh
+LD_LIBRARY_PATH=out-linux-gcc/install-shared/lib ./out-linux-gcc/install-shared/bin/rooster
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The second is to ask CMake to write a **relative** path, for the
+installed program, with one more cache variable. `$ORIGIN` is "the
+folder the program is in", so `$ORIGIN/../lib` is the `lib` folder next
+to `bin`. Configure the dynamic folder again with it, and install again:
+
+```sh
+cmake -S . -B out-linux-gcc/shared -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DBUILD_SHARED_LIBS=ON '-DCMAKE_INSTALL_RPATH=$ORIGIN/../lib'
+cmake --build out-linux-gcc/shared
+cmake --install out-linux-gcc/shared --prefix out-linux-gcc/install-shared
+readelf -d out-linux-gcc/install-shared/bin/rooster | grep RUNPATH
+./out-linux-gcc/install-shared/bin/rooster
+```
+
+```
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib]
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Quote the `$ORIGIN` so your shell does not eat it. The `-- Installing:`
+lines are left out.) The installed program now finds its library
+wherever you put the `install-shared` folder. On Windows none of this
+was needed: the DLL goes in `bin`, next to the program.
+
+#### 7. Break it on purpose
+
+**a. A folder without `CMakeLists.txt`.** Point `-S` at the wrong
+folder:
+
+```sh
+cmake -S out-linux-gcc -B out-linux-gcc/oops -G Ninja
+```
+
+```
+CMake Error: The source directory ".../out-linux-gcc" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+`-S` must name the folder that **contains** `CMakeLists.txt`.
+
+**b. A target that does not exist.** A typo in `--target`:
+
+```sh
+cmake --build out-linux-gcc/static --target stationn
+```
+
+```
+ninja: error: unknown target 'stationn', did you mean 'station'?
+```
+
+That message comes from Ninja, which knows the list of targets from
+`build.ninja`.
+
+**c. Build a folder that was never configured.**
+
+```sh
+cmake --build out-linux-gcc/nothere
+```
+
+```
+Error: .../out-linux-gcc/nothere is not a directory
+```
+
+You have to **configure** (`-S ... -B ...`) before you can **build**.
+
+**d. Change the compiler of a folder that is already configured.** First
+configure a throw-away folder with GCC 16, then run the command again
+with the C++ compiler changed to the GCC 14 that the image also carries
+(`/usr/bin/g++-14`):
+
+```sh
+cmake -S . -B out-linux-gcc/swap -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+cmake -S . -B out-linux-gcc/swap -G Ninja -DCMAKE_CXX_COMPILER=/usr/bin/g++-14
+```
+
+```
+-- Configuring done (0.0s)
+You have changed variables that require your cache to be deleted.
+Configure will be re-run and you may have to reset some variables.
+The following variables have changed:
+CMAKE_CXX_COMPILER= /usr/bin/g++-14
+
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 14.2.0
+...
+```
+
+This is a **warning, not an error**, and that is what makes it
+dangerous. CMake **throws the cache away** and starts again. Everything
+you had set is gone, and only the option you just gave survived. Look at
+the last two lines: the C compiler is GCC **16.2.0** and the C++
+compiler is GCC **14.2.0**. You now have a folder that is **neither of
+the two you asked for**. **Keep one build folder per compiler**, which
+is why each command in this project has its own.
+
+That is Linux GCC done.
+
+---
+
+### Environment 5: Linux, Clang (Docker)
+
+You get a real Linux with Clang from the Docker container of chapter 2.
+Our image carries Clang 21.1.8, CMake 3.31.6 and Ninja 1.12.1.
+
+#### Open the shell
+
+From the repository root, in PowerShell:
+
+```powershell
+docker run -it --rm -v "${PWD}:/workspace" cpp-masterclass-clang
+```
+
+You land in `/workspace`, which is the repository. Now, inside the
+container:
+
+```sh
+cd 07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine
+cmake --version
+ninja --version
+clang++ --version
+```
+
+```
+cmake version 3.31.6
+...
+1.12.1
+Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)
+...
+```
+
+(Each `--version` prints a few more lines. `--rm` throws the container
+away when you leave. The files you create stay in your folder on
+Windows, in `out-linux-clang`, because of the `-v` mount. They are
+ignored by git.)
+
+#### The tools in this environment
+
+- **`cmake`**: the program this whole project is about. It configures,
+  builds (by calling Ninja), and installs.
+- **`ninja`**: the build tool. CMake calls it for you. It decides
+  **what** has to be rebuilt and runs the commands.
+- **`clang` and `clang++`**: the C and C++ compiler. CMake has to be
+  **told** which compiler to use, with
+  `-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++`. Without the
+  options it would use whatever it finds first.
+- **`llvm-ar` and `llvm-ranlib`**: the archiver of 7.13 and the tool
+  that writes the archive's index. You never type them here: CMake does.
+- **`readelf` and `ldd`**: the tools of 7.14 for asking a program which
+  libraries it needs and where the loader finds them.
+
+#### Where the output goes
+
+You do not have to make a folder: CMake creates `out-linux-clang/static`
+(and `out-linux-clang` above it) by itself when it configures.
+
+#### 1. Configure
+
+```sh
+cmake -S . -B out-linux-clang/static -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+
+```
+-- The C compiler identification is Clang 21.1.8
+-- The CXX compiler identification is Clang 21.1.8
+...
+-- Configuring done (1.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-clang/static
+```
+
+(The many `Detecting ...` and `Check for working ...` lines are left
+out.)
+
+- **`-S .`**: the **S**ource folder, where `CMakeLists.txt` is.
+- **`-B out-linux-clang/static`**: the **B**uild folder, where
+  everything generated goes. CMake creates it.
+- **`-G Ninja`**: the generator.
+- **`-D...`**: a **cache variable**. These two say which compilers to
+  use. CMake checks a **C** compiler too, because `project(rooster)`
+  does not list languages, and so turns on C as well as C++.
+
+Now look at what configuring wrote:
+
+```sh
+ls out-linux-clang/static
+grep -E '^(CMAKE_CXX_COMPILER:|CMAKE_BUILD_TYPE:|CMAKE_GENERATOR:|CMAKE_MAKE_PROGRAM:|CMAKE_AR:)' out-linux-clang/static/CMakeCache.txt
+```
+
+```
+CMakeCache.txt
+CMakeFiles
+build.ninja
+cmake_install.cmake
+station_export.h
+CMAKE_AR:FILEPATH=/usr/bin/llvm-ar
+CMAKE_BUILD_TYPE:STRING=
+CMAKE_CXX_COMPILER:STRING=/usr/bin/clang++
+CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/ninja
+CMAKE_GENERATOR:INTERNAL=Ninja
+```
+
+- **`build.ninja`**: the plan: the list of commands Ninja will run.
+- **`CMakeCache.txt`**: the cache, the folder's memory. It remembers the
+  compiler, the archiver, the generator, and the **build type**. The
+  build type is **empty** here: no optimisation flags and no debug
+  flags. Step 4 comes back to this.
+- **`station_export.h`**: the export header that
+  `generate_export_header` wrote.
+- **`cmake_install.cmake`** and **`CMakeFiles`**: CMake's own working
+  files. You never edit them.
+
+> **The compiler belongs to the build folder.** CMake stores the
+> compiler in the cache. That has a consequence you will see in step 7:
+> change the compiler of an existing folder and CMake throws the cache
+> away. Keep **one build folder per compiler**.
+
+#### 2. Build, and watch the real commands
+
+```sh
+cmake --build out-linux-clang/static --verbose
+./out-linux-clang/static/rooster
+```
+
+`cmake --build <folder>` runs Ninja for you. **`--verbose`** makes it
+print the **real commands**:
+
+```
+[1/5] /usr/bin/clang++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/5] /usr/bin/clang++ -DSTATION_STATIC_DEFINE ... -c .../report.cpp
+[3/5] /usr/bin/clang++ -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -MD ... -c .../main.cpp
+[4/5] : && /usr/bin/cmake -E rm -f libstation.a && /usr/bin/llvm-ar qc libstation.a CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && /usr/bin/llvm-ranlib libstation.a && :
+[5/5] : && /usr/bin/clang++ -Xlinker --dependency-file=CMakeFiles/rooster.dir/link.d CMakeFiles/rooster.dir/main.cpp.o -o rooster libstation.a && :
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Paths are shortened, and the first few lines of `--verbose` are left
+out.) Read them. This is the payoff of the previous three lectures.
+Compare with what you typed:
+
+- **Steps 1 to 3** are the compile commands of 7.12: one
+  `clang++ ... -c file.cpp -o file.o` per source file. CMake added
+  `-MD -MT -MF`, which write a list of the headers each file includes,
+  so Ninja knows what to rebuild. It also passes **`-std=gnu++23`**, not
+  the `-std=c++23` you typed: `gnu++23` is C++23 plus GNU extensions,
+  because CMake's `CXX_EXTENSIONS` defaults to on. The compiler has its
+  full path, `/usr/bin/clang++`, because that is what is in the cache.
+- **`-fvisibility=hidden`** is on the two **library** files only: it
+  comes from `CXX_VISIBILITY_PRESET hidden`, the flag of 7.14.
+  `main.cpp` does not have it. `-DSTATION_STATIC_DEFINE` is on all
+  three, because the library marks it `PUBLIC`.
+- **Step 4** is the archive of 7.13. The `: &&` at the start is a
+  do-nothing command that Ninja needs, and CMake first removes any old
+  `libstation.a`. Then comes **`llvm-ar qc`** and **`llvm-ranlib`**, the
+  LLVM versions of `ar` and `ranlib` that go with Clang. You typed
+  `ar rcs`: the `s` writes the archive's index, and `ranlib` is the same
+  "write the index" step as a separate command.
+- **Step 5** is the link of 7.12 and 7.13: `main.cpp.o` and
+  `libstation.a` into `rooster`. The `-Xlinker --dependency-file=...`
+  option makes the linker list the files it read, for Ninja.
+
+**CMake is not magic. It is a command generator.** Whenever a CMake
+build misbehaves, `--verbose` shows you the exact command that went
+wrong, and you can run it yourself.
+
+#### 3. Build again: only what changed
+
+Run the same build without changing anything:
+
+```sh
+cmake --build out-linux-clang/static
+```
+
+```
+ninja: no work to do.
+```
+
+Now change one source file. `touch` sets its "last modified" time to
+now, which is what saving the file in your editor does:
+
+```sh
+touch stats.cpp
+cmake --build out-linux-clang/static
+```
+
+```
+[1/3] Building CXX object CMakeFiles/station.dir/stats.cpp.o
+[2/3] Linking CXX static library libstation.a
+[3/3] Linking CXX executable rooster
+```
+
+Only `stats.cpp` was recompiled. `report.cpp` and `main.cpp` were left
+alone, and then the library and the program were rebuilt, because they
+depend on `stats.cpp.o`. This is why you use a build tool: with three
+files it hardly matters, with three thousand it is the difference
+between seconds and an hour.
+
+#### 4. One target, and a Release build
+
+Make a **second** build folder, this time for the `Release` build type,
+and build only the **library** target:
+
+```sh
+cmake -S . -B out-linux-clang/release -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release
+cmake --build out-linux-clang/release --target station --verbose
+ls out-linux-clang/release
+```
+
+```
+[1/3] /usr/bin/clang++ -DSTATION_STATIC_DEFINE -I... -O3 -DNDEBUG -std=gnu++23 -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/3] /usr/bin/clang++ ... -c .../report.cpp
+[3/3] : && /usr/bin/cmake -E rm -f libstation.a && /usr/bin/llvm-ar qc libstation.a CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && /usr/bin/llvm-ranlib libstation.a && :
+CMakeCache.txt
+CMakeFiles
+build.ninja
+cmake_install.cmake
+libstation.a
+station_export.h
+```
+
+- **`-DCMAKE_BUILD_TYPE=Release`** sets a cache variable. Look at the
+  flags it added: **`-O3 -DNDEBUG`** (optimise hard, and switch off
+  `assert`). The folder from step 1 had neither.
+- **`--target station`** builds the library and **nothing else**. There
+  is a `libstation.a` in the folder and no `rooster`. A target is how
+  you ask "does just this part compile?" Without `--target`, CMake
+  builds everything.
+
+Now build the rest and run it:
+
+```sh
+cmake --build out-linux-clang/release
+./out-linux-clang/release/rooster
+```
+
+```
+[1/2] Building CXX object CMakeFiles/rooster.dir/main.cpp.o
+[2/2] Linking CXX executable rooster
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+Ninja built only what was missing.
+
+#### 5. A dynamic library, with one option
+
+`CMakeLists.txt` says `add_library(station ...)` with **no `STATIC` or
+`SHARED`**. The **command line** decides, with one variable:
+
+```sh
+cmake -S . -B out-linux-clang/shared -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DBUILD_SHARED_LIBS=ON
+cmake --build out-linux-clang/shared --verbose
+```
+
+```
+[1/5] /usr/bin/clang++ -Dstation_EXPORTS -I... -std=gnu++23 -fPIC -fvisibility=hidden -MD -MT CMakeFiles/station.dir/stats.cpp.o -MF CMakeFiles/station.dir/stats.cpp.o.d -o CMakeFiles/station.dir/stats.cpp.o -c .../stats.cpp
+[2/5] /usr/bin/clang++ -Dstation_EXPORTS ... -c .../report.cpp
+[3/5] /usr/bin/clang++ -I... -std=gnu++23 -MD ... -c .../main.cpp
+[4/5] : && /usr/bin/clang++ -fPIC -Xlinker --dependency-file=CMakeFiles/station.dir/link.d -shared -Wl,-soname,libstation.so -o libstation.so CMakeFiles/station.dir/stats.cpp.o CMakeFiles/station.dir/report.cpp.o && :
+[5/5] : && /usr/bin/clang++ -Xlinker --dependency-file=CMakeFiles/rooster.dir/link.d CMakeFiles/rooster.dir/main.cpp.o -o rooster -Wl,-rpath,.../out-linux-clang/shared: libstation.so && :
+```
+
+(Shortened again, and the order of steps 1 to 3 can differ from run to
+run.) Look at what CMake typed for you, and compare with 7.14:
+
+- The library files are compiled with **`-Dstation_EXPORTS`**, the macro
+  that `generate_export_header` looks for. It is the
+  `-DSTATION_BUILD_DLL` you typed in 7.14.
+- They are also compiled with **`-fPIC`**, and with
+  **`-fvisibility=hidden`**, the two flags of 7.14. CMake added `-fPIC`
+  by itself, because a shared library needs it.
+- Step 4 is a **`-shared`** link that makes `libstation.so`, with
+  `-Wl,-soname,libstation.so` giving it its run-time name.
+- Step 5 links the program against `libstation.so`, and look at
+  **`-Wl,-rpath,.../out-linux-clang/shared:`**. CMake **baked the build
+  folder into the program**, the same idea as the `-Wl,-rpath,'$ORIGIN'`
+  you typed in 7.14, but with an absolute path.
+
+```sh
+ls -l out-linux-clang/shared/libstation.so out-linux-clang/shared/rooster
+./out-linux-clang/shared/rooster
+readelf -d out-linux-clang/shared/rooster | grep -E 'NEEDED.*station|RUNPATH'
+ldd out-linux-clang/shared/rooster | grep station
+```
+
+```
+-rwxr-xr-x 1 root root 305992 Oct 14 16:38 out-linux-clang/shared/libstation.so
+-rwxr-xr-x 1 root root 277672 Oct 14 16:38 out-linux-clang/shared/rooster
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+ 0x0000000000000001 (NEEDED)             Shared library: [libstation.so]
+ 0x000000000000001d (RUNPATH)            Library runpath: [/workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-clang/shared:]
+	libstation.so => /workspace/07.PracticalBuiltInFeatures/7.15ProjectCMakeCommandLine/out-linux-clang/shared/libstation.so (0x00007f775da6d000)
+```
+
+The program starts **without** `LD_LIBRARY_PATH`, and `ldd` finds the
+library, thanks to the `RUNPATH` that CMake wrote into it. (The address
+in brackets differs on every run, and the date in the `ls` lines will be
+yours.) One option, and 7.13 turned into 7.14, with no source changes.
+
+#### 6. Install
+
+```sh
+cmake --install out-linux-clang/static --prefix out-linux-clang/install
+find out-linux-clang/install -type f
+./out-linux-clang/install/bin/rooster
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-linux-clang/install/bin/rooster
+-- Installing: .../out-linux-clang/install/lib/libstation.a
+-- Installing: .../out-linux-clang/install/include/stats.h
+-- Installing: .../out-linux-clang/install/include/report.h
+-- Installing: .../out-linux-clang/install/include/station_export.h
+out-linux-clang/install/bin/rooster
+out-linux-clang/install/lib/libstation.a
+out-linux-clang/install/include/stats.h
+out-linux-clang/install/include/report.h
+out-linux-clang/install/include/station_export.h
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(The order of the `find` lines can differ.) `--install` copies the
+**finished products** to a clean folder, as the `install(...)` lines in
+`CMakeLists.txt` say. `--prefix` names the folder. That is the **layout
+you hand to someone else**: the program in `bin`, the library in `lib`,
+the headers in `include`. (`Install configuration: ""` is the empty
+build type from step 1.)
+
+Now install the **dynamic** build, and run the installed program:
+
+```sh
+cmake --install out-linux-clang/shared --prefix out-linux-clang/install-shared
+./out-linux-clang/install-shared/bin/rooster
+echo $?
+```
+
+```
+-- Install configuration: ""
+-- Installing: .../out-linux-clang/install-shared/bin/rooster
+-- Set non-toolchain portion of runtime path of ".../out-linux-clang/install-shared/bin/rooster" to ""
+-- Installing: .../out-linux-clang/install-shared/lib/libstation.so
+-- Installing: .../out-linux-clang/install-shared/include/stats.h
+-- Installing: .../out-linux-clang/install-shared/include/report.h
+-- Installing: .../out-linux-clang/install-shared/include/station_export.h
+./out-linux-clang/install-shared/bin/rooster: error while loading shared libraries: libstation.so: cannot open shared object file: No such file or directory
+127
+```
+
+It **fails**, with the error you know from 7.14. Look at the line
+`Set non-toolchain portion of runtime path ... to ""`: when it installs
+a program, CMake **removes the build-folder path** from its `RUNPATH`,
+because the build folder is not meant to be there when you hand the
+program to someone. Now the loader has no idea where `libstation.so` is.
+You know two fixes from 7.14. The first is to tell the loader for one
+run:
+
+```sh
+LD_LIBRARY_PATH=out-linux-clang/install-shared/lib ./out-linux-clang/install-shared/bin/rooster
+```
+
+```
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+The second is to ask CMake to write a **relative** path, for the
+installed program, with one more cache variable. `$ORIGIN` is "the
+folder the program is in", so `$ORIGIN/../lib` is the `lib` folder next
+to `bin`. Configure the dynamic folder again with it, and install again:
+
+```sh
+cmake -S . -B out-linux-clang/shared -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DBUILD_SHARED_LIBS=ON '-DCMAKE_INSTALL_RPATH=$ORIGIN/../lib'
+cmake --build out-linux-clang/shared
+cmake --install out-linux-clang/shared --prefix out-linux-clang/install-shared
+readelf -d out-linux-clang/install-shared/bin/rooster | grep RUNPATH
+./out-linux-clang/install-shared/bin/rooster
+```
+
+```
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN/../lib]
+sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
+```
+
+(Quote the `$ORIGIN` so your shell does not eat it. The `-- Installing:`
+lines are left out.) The installed program now finds its library
+wherever you put the `install-shared` folder. On Windows none of this
+was needed: the DLL goes in `bin`, next to the program.
+
+#### 7. Break it on purpose
+
+**a. A folder without `CMakeLists.txt`.** Point `-S` at the wrong
+folder:
+
+```sh
+cmake -S out-linux-clang -B out-linux-clang/oops -G Ninja
+```
+
+```
+CMake Error: The source directory ".../out-linux-clang" does not appear to contain CMakeLists.txt.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+`-S` must name the folder that **contains** `CMakeLists.txt`.
+
+**b. A target that does not exist.** A typo in `--target`:
+
+```sh
+cmake --build out-linux-clang/static --target stationn
+```
+
+```
+ninja: error: unknown target 'stationn', did you mean 'station'?
+```
+
+That message comes from Ninja, which knows the list of targets from
+`build.ninja`.
+
+**c. Build a folder that was never configured.**
+
+```sh
+cmake --build out-linux-clang/nothere
+```
+
+```
+Error: .../out-linux-clang/nothere is not a directory
+```
+
+You have to **configure** (`-S ... -B ...`) before you can **build**.
+
+**d. Another generator in a folder that already has one.** The cache
+remembers the generator:
+
+```sh
+cmake -S . -B out-linux-clang/static -G "Unix Makefiles"
+```
+
+```
+CMake Error: Error: generator : Unix Makefiles
+Does not match the generator used previously: Ninja
+Either remove the CMakeCache.txt file and CMakeFiles directory or choose a different binary directory.
+```
+
+One build folder, one generator. CMake offers two ways out: delete the
+folder or pick another. That is why every variant in this project,
+`static`, `release`, `shared`, has **its own folder**. (Changing the
+compiler of an existing folder is a related trap: CMake warns, throws
+the cache away, and starts again. The Clang image has no other compiler
+to show it with, but the MinGW and GCC walk-throughs do.)
+
+That is Linux Clang done.
+
+---
 
 ### Options you will use all the time
 
-| Command or option | What it does |
-|---|---|
-| `-S <dir>` / `-B <dir>` | source folder / build folder |
-| `-G Ninja` | which generator to use |
-| `-D<NAME>=<value>` | set a cache variable |
-| `-DCMAKE_CXX_COMPILER=<c++>` | pick the compiler, once per build folder |
-| `-DCMAKE_BUILD_TYPE=Release` | optimised build (Ninja builds one type per folder) |
-| `-DBUILD_SHARED_LIBS=ON` | `add_library` without a keyword makes `.dll` / `.so` |
-| `cmake --build <dir>` | build everything |
-| `--target <name>` | build one target only |
-| `--verbose` | print the real compiler commands |
-| `cmake --install <dir> --prefix <dir>` | copy the finished products out |
+- **`-S <dir>`** and **`-B <dir>`**: the source folder and the build
+  folder.
+- **`-G Ninja`**: which generator to use.
+- **`-D<NAME>=<value>`**: set a cache variable.
+- **`-DCMAKE_CXX_COMPILER=<c++>`**: pick the compiler, once per build
+  folder.
+- **`-DCMAKE_BUILD_TYPE=Release`**: an optimised build (Ninja builds one
+  type per folder).
+- **`-DBUILD_SHARED_LIBS=ON`**: `add_library` without a keyword makes a
+  `.dll` or `.so`.
+- **`cmake --build <dir>`**: build everything that changed.
+- **`--target <name>`**: build one target only.
+- **`--verbose`**: print the real compiler commands.
+- **`cmake --install <dir> --prefix <dir>`**: copy the finished products
+  out.
 
-> **Gotcha: the build type.** With Ninja, each build folder is **one** build type, chosen at configure time. If you do not pass `-DCMAKE_BUILD_TYPE`, MSVC builds with its Debug settings (the install output says `Install configuration: "Debug"`). Pass `-DCMAKE_BUILD_TYPE=Release` and `/O2 /DNDEBUG` appear in the verbose output.
+> **Gotcha: the build type.** With Ninja, each build folder is **one**
+> build type, chosen at configure time. On MSVC, if you do not pass
+> `-DCMAKE_BUILD_TYPE`, you get `Debug` (`/Od /RTC1 -MDd`, and the
+> install output says `Install configuration: "Debug"`). On MinGW and
+> Linux you get **no** build type at all: no optimisation and no debug
+> information. Pass `-DCMAKE_BUILD_TYPE=Release` and the optimisation
+> flags appear in the verbose output (`/O2 /DNDEBUG` or `-O3 -DNDEBUG`).
 
 ### What to take away from the four projects
 
@@ -8312,7 +10495,12 @@ That is the **layout you hand to someone else**: the program in `bin`, the libra
    CMake writes all of these commands. You read them with --verbose.
 ```
 
-When something fails to build, you now know which stage it came from: **compiler** errors come with a line of your code, **linker** errors (`undefined reference`, `LNK2019`) are about missing or mismatched names, and **run-time** loading errors (`cannot open shared object file`, a missing DLL) are about where the loader looks.
+When something fails to build, you now know which stage it came from:
+**compiler** errors come with a line of your code, **linker** errors
+(`undefined reference`, `LNK2019`) are about missing or mismatched
+names, and **run-time** loading errors
+(`cannot open shared object file`, a missing DLL) are about where the
+loader looks.
 
 ---
 

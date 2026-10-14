@@ -12,8 +12,9 @@ struct Summary {
     double average{};
 };
 
-// A plain free function on purpose: its mangled name is the first one we
-// will read inside the object files.
+// A plain free function, so the verbose build output stays easy to read.
+// STATION_EXPORT comes from station_export.h, which CMake generates into the
+// build folder (generate_export_header), instead of the hand-written macro of 7.14.
 STATION_EXPORT double to_celsius(double fahrenheit);
 
 // Needs at least one reading. An empty vector has no lowest or average.

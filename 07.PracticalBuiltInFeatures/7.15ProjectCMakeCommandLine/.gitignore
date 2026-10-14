@@ -78,6 +78,5 @@ Makefile
 .AppleDouble
 .LSOverride
 
-# CMake build and install folders created by the commands in the notes
-build*/
-install*/
+# Everything the manual build scripts and notes produce (one folder per environment)
+out-*/
