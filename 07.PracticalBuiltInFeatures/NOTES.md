@@ -1208,13 +1208,16 @@ by mistake.
 
 ## 7.6 Ranges and views
 
-In this lecture, we are expxloring C++20's **ranges library**
-two more declarative building features: **filter** (keep only what matches)
- and **transform** (map each value to a new one) - that chain together instead
-of nesting loops inside loops.
+In this lecture, we explore C++20's **ranges library** through two declarative
+building blocks: **filter** (keep only what matches) and **transform** (map each
+value to a new one). 
 
-```
-   the procedural way: nested loops, one running vector per step
+We will use them in two ways: first **nested**, like any
+other function calls, then **piped** with `|`. Seeing both is the best way to
+understand what the pipe really is. Here is the big idea:
+
+```cpp
+   // the procedural way: one running vector per step
 
    std::vector<int> evens{};
    for (int x : numbers) {
@@ -1225,16 +1228,22 @@ of nesting loops inside loops.
        squares.push_back(x * x);                     // transform, by hand
    }
 
-   the declarative way: state what, chain it, let the library iterate
+   // Utility lambdas to help out
+   auto is_even{[](int x) { return x % 2 == 0; }};
+   auto square{[](int x) { return x * x; }};
 
-   numbers | std::views::filter(even) | std::views::transform(square)
+   // the nested way: call the library, hand each result to the next call
+   std::views::transform(std::views::filter(numbers, is_even), square)
+
+   // the piped way: the same calls, written in the order they happen
+   numbers | std::views::filter(is_even) | std::views::transform(square)
 ```
 
 In English: take `numbers`, keep only the even ones, then square each of
-those that survived the filter. Nothing is computed yet - the result just
-sits in the air as a view, waiting for something to iterate it.
+those that survived the filter. Nothing is computed yet: 
+the result **just sits in the air** as a view, waiting for something to iterate it.
 
-### A view does not build a container - it wraps one, lazily
+### A view does not build a container, it wraps one, lazily
 
 ```cpp
 auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
@@ -1243,37 +1252,42 @@ auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
 ```
    std::views::iota(1, 11)
 
-   NOT this (eager - builds the whole thing up front):
-      ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐State w
+   NOT this (eager, builds the whole thing up front):
+      ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐
       │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │    a real std::vector<int>
       └───┴───┴───┴───┴───┴───┴───┴───┴───┴────┘
 
-   THIS (lazy - a tiny object that knows the RULE):
+   THIS (lazy, a tiny object that knows the RULE):
       counted = "start at 1, stop before 11, +1 each step"
-                 no elements exist yet - they are generated as you iterate
+                 no elements exist yet, they are generated as you iterate
 ```
 
-### Piping views together
+### `filter` and `transform` are ordinary function calls
 
-`std::views::filter` and `std::views::transform` wrap a range the same
-way, and chain together with `|`, read left to right like a pipeline.
-Like `accumulate`'s fourth argument, each one is a **higher-order
-function**: `filter` takes a lambda that decides *keep or drop*,
-`transform` takes a lambda that decides *old value or new value* - you
-supply the small decision, the view supplies the iteration.
+Each one is a **higher-order function**, like `accumulate`'s fourth argument:
+`filter` takes a lambda that decides *keep or drop*, and `transform` takes a
+lambda that decides *how the old value turns into the new value*. You supply
+the small decision, the view supplies the iteration.
+
+We name the three lambdas once, so the rest of the lecture is about the shape
+of the expressions and not about lambda syntax:
 
 ```cpp
-auto evenSquares{
-    counted | std::views::filter([](int x) { return x % 2 == 0; })
-            | std::views::transform([](int x) { return x * x; })};
+auto is_even{[](int x) { return x % 2 == 0; }};
+auto square{[](int x) { return x * x; }};
+auto above_twenty{[](int x) { return x > 20; }};
 ```
 
-NOTE: The result of the pipeline above is a **view**, or a description of a range,
-that comes up with real values only when something iterates it. 
-Hence the name **lazy evaluation**.
+Now call `filter` the plain way: hand it the range and the predicate, and it
+hands you back a view.
+
+```cpp
+auto evens{std::views::filter(counted, is_even)};
+auto squares{std::views::transform(evens, square)};
+```
 
 ```
-   counted ──filter(even)──► evens ──transform(square)──► evenSquares
+   counted ──filter(is_even)──► evens ──transform(square)──► squares
 
     1  2  3  4  5  6  7  8  9  10
        │     │     │     │     │
@@ -1284,27 +1298,102 @@ Hence the name **lazy evaluation**.
        4    16    36    64    100          (transform squared each one)
 ```
 
+Neither call builds a container. `evens` wraps `counted`, and `squares`
+wraps `evens`: each is a **view**, a description of a range that produces real
+values only when something iterates it.
+
+### Nesting the calls
+
+A call that returns a view returns a **range**, and a range is exactly what
+the next call wants as its first argument. So the intermediate names are
+optional: put the call inside the call.
+
+```cpp
+auto nested{
+    std::views::transform(std::views::filter(counted, is_even), square)};
+```
+
+```
+   std::views::transform( std::views::filter( counted, is_even ), square )
+                                              └── step 1 ──┘
+                          └────────────── step 2 ───────────────┘
+
+   the innermost call happens first, you read from the inside out
+```
+
+With two steps this is still fine. Now add a third one: keep only the even
+squares that are above 20.
+
+```cpp
+auto nested_deeper{
+    std::views::filter(
+        std::views::transform(
+            std::views::filter(counted, is_even),
+            square),
+        above_twenty)};
+```
+
+It works, and it prints `36 64 100`. But look at what happened to the
+reading order: the **first** thing that happens is buried in the middle, the
+**last** thing that happens is the first thing you read, and every lambda sits
+far away from the call that uses it. Every extra step makes it worse.
+
+### Piping the calls
+
+The pipe fixes exactly that. `range | adaptor(arguments)` means the same as
+`adaptor(range, arguments)`, so the pipe is the nesting turned inside out,
+written in the order things happen.
+
+```cpp
+auto piped{
+    counted | std::views::filter(is_even)
+            | std::views::transform(square)
+            | std::views::filter(above_twenty)};
+```
+
+Same views, same values (`36 64 100`), but now each lambda sits right next to
+the step it belongs to, and the code reads like the English sentence: take
+`counted`, keep the evens, square them, keep those above twenty.
+
+The `|` here is an overloaded operator that the ranges library defines. Chapter
+12 shows how you can write one yourself.
+
+**The pattern to remember:** nested reads inside out, piped reads left to
+right. They build the same view, so use the pipe whenever there is more than
+one step.
+
 ### Laziness: nothing runs until you actually iterate
 
 ```
-   auto evenSquares{ counted | filter(...) | transform(...) };
+   auto piped{ counted | filter(...) | transform(...) | filter(...) };
         │
-        └─  at THIS line: nothing has been filtered, nothing squared -
-            evenSquares is just a recipe wrapping counted
+        └─  at THIS line: nothing has been filtered, nothing squared,
+            piped is just a recipe wrapping counted
 
-   for (int x : evenSquares) { ... }
+   for (int x : piped) { ... }
         │
         └─  NOW, one element at a time, as the loop asks for the next
-            value: pull from counted → test filter → apply transform
+            value: pull from counted → test filter → apply transform →
+            test the second filter
 ```
 
-`evenSquares` is only ever iterated by something that asks for values -
-a range-based for, `std::accumulate`, or copying it into a
-`std::vector`. The same pipeline works over a real container, not just a
-generated sequence like `iota`:
+This is called **lazy evaluation**. `piped` is only iterated by something that
+asks for values: a range-based for, `std::accumulate`, or a copy into a
+`std::vector`. A view is a range like any other, so `accumulate` works on it
+directly:
 
 ```cpp
-numbers | std::views::filter(...) | std::views::transform(...)
+std::accumulate(piped.begin(), piped.end(), 0);   // 36 + 64 + 100 = 200
+```
+
+The same pipeline works over a real container, not just a generated sequence
+like `iota`. Here it runs over a `std::array<int, 10>` called `numbers`:
+
+```cpp
+constexpr std::array numbers{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+auto from_array{
+    numbers | std::views::filter(is_even)
+            | std::views::transform(square)};
 ```
 
 `filter` and `transform` are exactly the "declarative, higher-order,
