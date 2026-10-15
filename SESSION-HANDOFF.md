@@ -188,6 +188,7 @@ What chapter 10 left for chapter 11 (done, kept for reference):
 - Build everything under `D:\Sandbox\` (the antivirus blocks binaries elsewhere). Build dirs go in `D:\Sandbox\_build\<name>`.
 - Never commit or push unless asked. (This session the user did ask for both.)
 - No em dashes in notes or docs.
+- Lecture 7.6 (ranges and views) teaches the **nested call form first** (`std::views::transform(std::views::filter(counted, is_even), square)`, then a three-step nest that reads inside out), and only then the pipe, explained as `a | f(x)` meaning `f(a, x)`. The user's original `show_values` generic lambda (`auto& values`) is kept: it centralizes the printing. It is the one deliberate exception to "no generic lambdas before chapter 16", allowed by the "teach it first, briefly" rule: the 7.6 notes explain the `auto` parameter and why `auto&` (filter views are not const-iterable) right where it is first used, and point to chapter 16. Alternatives tried and rejected: a function template (students do not know templates yet), `std::println("{}", view)` range formatting (fails on MinGW GCC 14.2, MinGW Clang 19.1 and Clang 21 with libstdc++ 14: "std::formatter must be specialized"), a loop at every call site (too repetitive), `std::ranges::for_each` (not taught before 7.6). Verified with identical output (0 warnings): MSVC (cl and CMake/Ninja, `/W4`), MinGW GCC 14.2, MinGW Clang 19.1, GCC 16.2 and Clang 21.1.8 in the containers (`-Wall -Wextra`).
 
 ## Per-chapter workflow (definition of done)
 
