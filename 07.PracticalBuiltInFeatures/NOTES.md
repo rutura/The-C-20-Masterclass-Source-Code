@@ -1308,35 +1308,6 @@ auto counted{std::views::iota(1, 11)};   // the integers 1..10, generated lazily
                  no elements exist yet, they are generated as you iterate
 ```
 
-To see the values, something has to ask for them. A view is a range, so the
-range-based `for` loop from 7.2 works on it. We will print many views, so we
-write that loop once, inside a lambda:
-
-```cpp
-auto show_values{
-    [](auto& values, const std::string& message) {
-        std::print("{}: ", message);
-        for (const auto& value : values) {
-            std::print("{} ", value);
-        }
-        std::println("");
-    }
-};
-```
-
-There is one new thing here: the parameter `auto& values`. Every view has a
-different type, and it is far too long to write by hand. An `auto` parameter
-tells the compiler to deduce the type afresh at each call, so the same lambda
-prints an `iota` view, a filter view or anything else you hand it ( a future chapter
-covers this properly under the name **generic lambdas**).
-
-It is `auto&` and not `const auto&` because a filter view remembers where its
-first match is, so it has to be allowed to change while it is iterated. The
-price is that you pass a named view, not a temporary one.
-
-Each trip around the loop asks the view for the next value, and only then is
-it produced. The snippets below leave `show_values` out and show only how each
-view is built.
 ### `filter` and `transform` are ordinary function calls
 
 Each one is a **higher-order function**, like `accumulate`'s fourth argument:
@@ -1408,14 +1379,6 @@ auto nested_deeper{
         above_twenty)};
 ```
 
-```
-   std::views::filter(                           <- step 3, but you read it FIRST
-       std::views::transform(                    <- step 2
-           std::views::filter(counted, is_even), <- step 1, buried in the middle
-           square),                              <- belongs to step 2, far from its call
-       above_twenty)                             <- belongs to step 3, far from its call
-```
-
 It works, and it prints `36 64 100`. But look at what happened to the
 reading order: the **first** thing that happens is buried in the middle, the
 **last** thing that happens is the first thing you read, and every lambda sits
@@ -1432,18 +1395,6 @@ auto piped{
     counted | std::views::filter(is_even)
             | std::views::transform(square)
             | std::views::filter(above_twenty)};
-```
-
-```
-   counted | filter(is_even) | transform(square) | filter(above_twenty)
-
-   a | f(x)      ==      f(a, x)
-
-   so, one step at a time:
-
-   counted | filter(is_even)                 ==  filter(counted, is_even)
-   (that)  | transform(square)               ==  transform(that, square)
-   (that)  | filter(above_twenty)            ==  filter(that, above_twenty)
 ```
 
 Same views, same values (`36 64 100`), but now each lambda sits right next to
@@ -1489,19 +1440,6 @@ constexpr std::array numbers{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 auto from_array{
     numbers | std::views::filter(is_even)
             | std::views::transform(square)};
-```
-
-The whole program prints:
-
-```
-Generate integers 1-10: 1 2 3 4 5 6 7 8 9 10
-Filtering even integers: 2 4 6 8 10
-Mapping even integers to squares: 4 16 36 64 100
-Nested: squares of even integers: 4 16 36 64 100
-Nested: even squares above 20: 36 64 100
-Piped: even squares above 20: 36 64 100
-Sum of even squares above 20: 200
-Squares of even integers in numbers: 4 16 36 64 100
 ```
 
 `filter` and `transform` are exactly the "declarative, higher-order,
