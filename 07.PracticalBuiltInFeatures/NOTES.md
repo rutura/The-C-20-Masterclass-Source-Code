@@ -1464,7 +1464,7 @@ log.find_first_not_of("noon is "); // first character NOT in this set
 
 ```
    log:  n  o  o  n     i  s     1  2  p  m  ;     m  i  d  n  i  g  h  t     i  s     n  o  t
-   idx:  0  1  2  3  4  5  6  7  8  9  10 ...                              23 24            ...
+   idx:  0  1  2  3  4  5  6  7  8  9  10 ...                                 23 24            ...
 
    log.find("is")     →  5     (first "is": "noon [is] 12pm...")
    log.rfind("is")    →  23    (last "is": "...midnight [is] not")
