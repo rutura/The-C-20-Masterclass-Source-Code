@@ -1408,11 +1408,16 @@ into a new one, and all three let you state *what* instead of *how*.
 In this lecture, we explore more on `std::string` and its built-in features.
 In previous chapters and lectures, we had a chance to look at things like
 `length()`/`size()`, `empty()`, `==`/`!=`, `+`, and `starts_with`/`ends_with`. 
-We'll now look at some of the other built-in features that `std::string` provides.
+Let's look as some more!
 
 ### Assignment, concatenation, swap
 
 ```cpp
+std::string title{"cat"};
+std::string subtitle;             // empty string
+std::string first{"one"};
+std::string second{"two"};
+
 subtitle.assign(title);     // same effect as: subtitle = title;
 title.append("acomb");      // "cat" -> "catacomb"
 first.swap(second);         // exchange contents, no copy of the data
@@ -1431,6 +1436,8 @@ first.swap(second);         // exchange contents, no copy of the data
 ### `substr`: pull out a piece
 
 ```cpp
+const std::string filename{"report_final.pdf"};
+
 filename.substr(0, 6);   // "report_final.pdf" -> "report"
 ```
 
@@ -1448,6 +1455,8 @@ filename.substr(0, 6);   // "report_final.pdf" -> "report"
 ### The `find` family: locate things inside a string
 
 ```cpp
+const std::string log{"noon is 12pm; midnight is not"};
+
 log.find("is");                    // first occurrence, from the front
 log.rfind("is");                   // last occurrence
 log.find_first_not_of("noon is "); // first character NOT in this set
@@ -1459,6 +1468,20 @@ log.find_first_not_of("noon is "); // first character NOT in this set
 
    log.find("is")     →  5     (first "is": "noon [is] 12pm...")
    log.rfind("is")    →  23    (last "is": "...midnight [is] not")
+```
+
+`find_first_not_of` works from the front, skipping every character that is
+in the set you give it, and stops at the first one that is not:
+
+```
+   log.find_first_not_of("noon is ")      the set: n, o, i, s and the space
+
+   idx:           0  1  2  3  4  5  6  7  8
+   char:          n  o  o  n  ␣  i  s  ␣  1          (␣ = a space)
+   in the set?    ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✗
+                                          ▲
+                  skipped, skipped, ...   first character NOT in the set
+                                          → returns 8
 ```
 
 Every `find`-family function returns **`std::string::npos`** when nothing
@@ -1475,8 +1498,10 @@ matches:
 ### `erase` / `replace`: edit in place
 
 ```cpp
+std::string sentence{"The quick brown fox jumps over the lazy dog"};
+std::size_t position{sentence.find(' ')};    // 3: the first space
+
 sentence.erase(19);                          // drop everything from index 19 on
-sentence.replace(position, 1, "_");          // 1 char at position -> "_"
 ```
 
 ```
@@ -1492,10 +1517,16 @@ sentence.replace(position, 1, "_");          // 1 char at position -> "_"
    sentence:  The quick brown fox        (everything from index 19 on: GONE)
 ```
 
+```cpp
+std::string sentence{"The quick brown fox jumps over the lazy dog"};
+sentence.replace(position, 1, "_");          // 1 char at position -> "_"
+```
+
 Looping a `find` + `replace` together is the everyday pattern for
 "replace every occurrence of X":
 
 ```cpp
+std::string sentence{"The quick brown fox"};
 std::size_t pos{sentence.find(' ')};
 while (pos != std::string::npos) {
     sentence.replace(pos, 1, "_");
@@ -1518,6 +1549,8 @@ while (pos != std::string::npos) {
 ### `insert`: splice text into the middle
 
 ```cpp
+std::string greeting{"Hello, !"};
+
 greeting.insert(7, "World");   // "Hello, !" -> "Hello, World!"
 ```
 
@@ -1571,6 +1604,10 @@ a string the same way `std::cin` pulls them from the keyboard:
 
 ```cpp
 std::istringstream record{"Ada 3 19.99"};
+std::string item;
+int quantity{};
+double price{};
+
 record >> item >> quantity >> price;
 ```
 
@@ -1587,11 +1624,10 @@ record >> item >> quantity >> price;
 
 ### Raw string literals: when backslashes are getting out of hand
 
-An ordinary string literal treats `\` as the start of an **escape
-sequence** - `\n` for a newline, `\t` for a tab, and so on. That means
-a literal backslash has to be escaped too, by doubling it, `\\`. A
-Windows-style file path is a good example of this getting out of hand
-fast:
+An ordinary string literal treats `\` as the start of an **escape sequence**:  
+`\n` for a newline, `\t` for a tab, and so on. That means a literal backslash 
+has to be escaped too, by doubling it, `\\`. A Windows-style file path is a good 
+example of this getting out of hand fast:
 
 ```cpp
 std::string path{"C:\\Users\\Ada\\Documents\\notes.txt"};   // every \ doubled
@@ -1617,10 +1653,91 @@ std::string raw_path{R"(C:\Users\Ada\Documents\notes.txt)"};   // no doubling ne
 
 Both lines above produce the **exact same string** - `R"(...)"` doesn't
 change what's stored, only how much escaping you have to type to get
-there. It earns its keep anywhere backslashes pile up: file paths,
-Windows registry keys, and - as the next lecture will lean on heavily -
-regular expression patterns, which use backslashes constantly (`\d`,
-`\w`, `\s`, ...).
+there. Raw string literals show their value anywhere backslashes pile up: file paths,
+Windows registry keys, and regular expression patterns (We'll learn about these in a 
+few lectures ahead), which use backslashes constantly (`\d`,`\w`, `\s`, ...).
+
+### Raw string literal vs. `std::string` literal: two different questions
+
+These two names sound alike, and students often mix them up. They answer
+**different questions** about a piece of text in your code:
+
+- **Raw string literal or ordinary literal?** This is about the **spelling**: how backslashes
+  are treated. `"..."` is ordinary (`\` starts an escape sequence).
+  `R"(...)"` is raw (`\` is just a character).
+
+- **`std::string` or not?** This is about the **type** you get. A plain
+  literal like `"cat"` is **not** a `std::string`. It is a C-style array
+  of characters, `const char[4]` (`c`, `a`, `t` and a hidden end marker).
+  Add the `s` suffix, `"cat"s`, and the literal itself becomes a
+  `std::string`.
+
+Here are all four combinations in one complete program. They all print
+the same characters, because the spelling decides how you type the
+backslashes, not what ends up stored:
+
+```cpp
+#include <print>
+#include <string>
+
+int main() {
+    using namespace std::string_literals;   // makes the "s" suffix available
+
+    // C-style literals: the type is const char[N], so we keep them in a const char*
+    const char* ordinary{"C:\\Users\\Ada\\notes.txt"};
+    const char* raw{R"(C:\Users\Ada\notes.txt)"};
+
+    // std::string literals: the "s" suffix makes the literal itself a std::string
+    std::string ordinary_s{"C:\\Users\\Ada\\notes.txt"s};
+    std::string raw_s{R"(C:\Users\Ada\notes.txt)"s};
+
+    std::println("{}", ordinary);     // C:\Users\Ada\notes.txt
+    std::println("{}", raw);          // C:\Users\Ada\notes.txt
+    std::println("{}", ordinary_s);   // C:\Users\Ada\notes.txt
+    std::println("{}", raw_s);        // C:\Users\Ada\notes.txt
+
+    return 0;
+}
+```
+
+The earlier examples, `std::string path{"C:\\Users..."}` and
+`std::string raw_path{R"(C:\Users...)"}`, did not need the `s`. A
+`std::string` can be built from a C-style literal, so we got a
+`std::string` either way.
+
+#### When does the `s` suffix actually matter?
+
+When there is no `std::string` on the left to do the converting for you.
+You saw it in 7.5, with `"mango"s` inside `std::array`. Here are the two
+everyday cases, `auto` and `+`:
+
+```cpp
+#include <string>
+
+int main() {
+    using namespace std::string_literals;
+
+    auto plain{"cat"};     // const char*  - NOT a std::string!
+    auto proper{"cat"s};   // std::string
+
+    // auto bad{"cat" + "acomb"};   // error: cannot add two C-style literals
+    auto joined{"cat"s + "acomb"};  // OK: std::string + literal gives "catacomb"
+
+    return 0;
+}
+```
+
+```
+   "cat"    →  const char[4]   c  a  t  \0       just characters in memory:
+                                                  no .size(), no .find(), no +
+
+   "cat"s   →  std::string     "cat"             the full string type:
+                                                  .size(), .find(), .append(), +, ...
+```
+
+**Rule of thumb**: 
+- pick raw or ordinary by how many backslashes you would have to double. 
+- Add `s` when you need a real `std::string` right at that spot** (with `auto`, or before a `+`). 
 
 ---
 
