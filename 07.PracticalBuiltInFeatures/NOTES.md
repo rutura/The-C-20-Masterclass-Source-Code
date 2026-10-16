@@ -1477,11 +1477,11 @@ in the set you give it, and stops at the first one that is not:
    log.find_first_not_of("noon is ")      the set: n, o, i, s and the space
 
    idx:           0  1  2  3  4  5  6  7  8
-   char:          n  o  o  n  ␣  i  s  ␣  1          (␣ = a space)
-   in the set?    ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✗
+   char:          n  o  o  n  ␣  i   s  ␣  1          (␣ = a space)
+   in the set?    ✓  ✓  ✓  ✓  ✓  ✓  ✓  ✗
                                           ▲
                   skipped, skipped, ...   first character NOT in the set
-                                          → returns 8
+                                          → returns index 8
 ```
 
 Every `find`-family function returns **`std::string::npos`** when nothing
@@ -1508,8 +1508,8 @@ sentence.erase(19);                          // drop everything from index 19 on
    sentence:  The quick brown fox jumps over the lazy dog
    index:     0         1         2         3
               0123456789012345678901234567890...
-                                ▲
-                               19
+                                 ▲
+                                 19
 
    sentence.erase(19);
                 │
@@ -1707,9 +1707,8 @@ The earlier examples, `std::string path{"C:\\Users..."}` and
 
 #### When does the `s` suffix actually matter?
 
-When there is no `std::string` on the left to do the converting for you.
-You saw it in 7.5, with `"mango"s` inside `std::array`. Here are the two
-everyday cases, `auto` and `+`:
+When there is no `std::string` on the left to do the converting for you. 
+Here are the two everyday cases, `auto` and `+`:
 
 ```cpp
 #include <string>
