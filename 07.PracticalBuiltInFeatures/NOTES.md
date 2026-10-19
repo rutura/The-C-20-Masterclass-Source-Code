@@ -2227,7 +2227,7 @@ std::println("kilo  = {}/{}", std::kilo::num, std::kilo::den);     // "kilo  = 1
 `chrono` uses exactly these to define its predefined duration types
 (`milliseconds` is a duration ticking in `milli`-second units) 
 
-### `main2_durations.cpp` - Durations: an amount of time, with the unit baked into the type
+### Durations: an amount of time, with the unit baked into the type
 
 A **duration** is an amount of time between two points of time. It's like
 saying "5 minutes" or "5000 milliseconds". It's a span of time. C++'s
@@ -2253,7 +2253,7 @@ std::chrono::hours two_hours{2};
 `std::chrono::minutes`, `std::chrono::milliseconds`, and `std::chrono::hours`
 are all **duration types** - `nanoseconds`, `microseconds`, `milliseconds`,
 `seconds`, `minutes`, `hours`, `days`, `weeks`, `months`, and `years` all
-exist, ready to use, no setup required. You can print one directly, add and
+exist, ready to use. You can print one directly, add and
 subtract them, and compare them:
 
 ```cpp
@@ -2285,12 +2285,12 @@ std::println("{}", race_duration); // "5432s" - chrono picked a common unit itse
                               5400 + 32  =  5432 seconds total
 ```
 
-The `min`, `s`, `h`, `ms`, `us`, `ns` suffixes above are **standard chrono
-literals** - they build a duration directly from a numeric literal, no type
+The `min`, `s`, `h`, `ms`, `us`, `ns` suffixes above are **standard chrono literals**  
+they build a duration directly from a numeric literal, no type
 name needed. They live in the inline namespace `std::chrono_literals` (also
 reachable via `std::literals::chrono_literals`), and are additionally
-re-exported directly into `std::chrono` - so `using namespace
-std::chrono;` alone is enough to use them.
+re-exported directly into `std::chrono` - so `using namespace std::chrono;` 
+alone is enough to use them.
 
 So far, every duration you've reached for already existed in the library.
 That covers the vast majority of real code - but what if you needed a unit
@@ -2303,7 +2303,8 @@ seconds long **one tick** of that number is.
 
 Why use a `std::ratio` instead of just a number like `10` or `1000`? Because that
 gives us the ability to represent **fractions** of a second exactly. So we get the 
-ability to say "one tick is 1/1000 of a second" (milliseconds) or "one tick is 1/60 of a second" (sixtieths of a second) without losing precision.
+ability to say "one tick is 1/1000 of a second" (milliseconds) 
+or "one tick is 1/60 of a second" (sixtieths of a second) without losing precision.
 
 One thing worth noting is that if you declare ratio and leave out the denominator,
 the denominator defaults to 1. For example, `ratio<60>` is equivalent to `ratio<60, 1>`. 
@@ -2335,8 +2336,7 @@ class duration { /* ... */ };
                                      (an arithmetic type: long, double, ...)
 ```
 
-`std::chrono::minutes` is really nothing more than `duration<some integer
-type, ratio<60>>` under a shorter name. Spelling it out yourself lets you
+`std::chrono::minutes` is really nothing more than `duration<some integer type, ratio<60>>` under a shorter name. Spelling it out yourself lets you
 describe a unit the library doesn't name for you:
 
 ```cpp
@@ -2359,10 +2359,12 @@ This is exactly how `std::chrono::milliseconds` is built under the hood -
 `ratio` lecture - you're just spelling it out yourself instead of reaching
 for the predefined name.
 
-**Three constructors exist**: default, "from a tick count" (as `d1` and
-`d1_ms` above), and "from another duration" - the last one is how
-conversions between duration types happen. The default constructor does
-**not** zero-initialize when `Rep` is a fundamental type like `long` - the
+**Three constructors (ways to build a duration)**: 
+- default, 
+- "from a tick count" 
+- "from another duration" - the last one is how conversions between duration types happen. 
+
+The default constructor does **not** zero-initialize when `Rep` is a fundamental type like `long` - the
 tick count is left indeterminate, exactly like a bare `long x;`. This is
 exactly why this course always brace-initializes: `{}` forces the tick
 count to `0`, a bare declaration does not.
@@ -2385,9 +2387,8 @@ std::println("{} {} {}",
 // "0min -9223372036854775808min 9223372036854775807min"
 ```
 
-**`floor()`, `ceil()`, and `round()` work on durations exactly as they do
-on plain numbers** - rounding `250ms` down/up/nearest to a whole number of
-seconds:
+**`floor()`, `ceil()`, and `round()` work on durations exactly as they do on plain numbers**  
+rounding `250ms` down/up/nearest to a whole number of seconds:
 
 ```cpp
 std::println("{} {} {}",
@@ -2463,17 +2464,15 @@ std::chrono::duration<long, std::ratio<60>> d9{10};   // 10 minutes
 std::chrono::duration<long> d10{d9};                   // 600 seconds - implicit, exact
 ```
 
-`std::chrono::duration<long>` here leans on `Period`'s default of
+NOTE: `std::chrono::duration<long>` here leans on `Period`'s default of
 `std::ratio<1>` - it's shorthand for `std::chrono::duration<long,
 std::ratio<1>>`, i.e. "ticks in seconds" - the same default-argument
-mechanic as
-`std::ratio<Num, Den = 1>` from earlier.
+mechanic as `std::ratio<Num, Den = 1>` from earlier.
 
-**One extra rule applies specifically to the predefined durations** you
-started this section with. The standard mandates that types like `minutes`
-and `seconds` use **integral** Reps - so, just like the `long`-based
-example above, a conversion that *could* produce a fractional result is a
-compile-time error, even when the specific numbers involved divide evenly:
+**One extra rule applies specifically to the predefined durations**. 
+The standard mandates that types like `minutes`  and `seconds` use **integral** Reps
+Just like the `long`-based example above, a conversion that *could* produce a 
+fractional result is a compile-time error, even when the specific numbers involved divide evenly:
 
 ```cpp
 std::chrono::seconds s{60};
@@ -2489,8 +2488,7 @@ std::chrono::minutes m{2};
 std::chrono::seconds s{m};   // Ok, implicit - 120s
 ```
 
-And the `duration_cast` you just saw works just as well on the race-time
-example from earlier:
+You can use `duration_cast` to force the conversion if inclined.
 
 ```cpp
 using namespace std::chrono_literals;
@@ -2500,7 +2498,9 @@ std::println("{}", std::chrono::duration_cast<std::chrono::seconds>(90min + 32s)
 **`hh_mm_ss`** is a small helper type whose only job is to take a single
 duration - one number and a unit - and re-slice it into the separate
 hours/minutes/seconds fields you'd actually show on a clock or a countdown
-timer. It takes any duration and splits it back into display-ready fields -
+timer. 
+
+It takes any duration and splits it back into display-ready fields -
 `hours()`, `minutes()`, `seconds()`, `subseconds()`, all non-negative, plus
 `is_negative()`:
 
@@ -2520,10 +2520,13 @@ std::println("{}h {}m {}s", split.hours().count(),
    hh_mm_ss   ──►  several numbers, one per field  (1h 23m 45s)
 ```
 
-### `main3_clocks_and_dates.cpp` - Clocks: a source of "now"
+### Clocks: a source of "now"
 
 There are two different questions you ask about time in everyday
-life: "what time is it right now?" and "how long did that just take?".
+life: 
+- "what time is it right now?" and 
+- "how long did that just take?".
+
 Those are two different jobs - one wants a wall-clock reading you'd
 show a person, the other wants an elapsed amount of time you'd measure with
 a stopwatch. C++ gives you a different **clock** for each job.
@@ -2531,8 +2534,7 @@ a stopwatch. C++ gives you a different **clock** for each job.
 **Asking "what time is it right now?"** - `std::chrono::system_clock` is
 that clock. Its `now()` returns the current `time_point`, and
 `std::println`/`std::format` understand a `time_point` directly, using the
-same `{:...}` spec grammar from 7.8 - `%` codes replace a type letter like
-`f` or `d`:
+same `{:...}` spec grammar we have seen.
 
 ```cpp
 auto now_utc{std::chrono::system_clock::now()};
@@ -2564,8 +2566,8 @@ std::println("Local: {:%Y-%m-%d %H:%M:%S}", now_local);
 > will fail to compile there. This works on MSVC and on GCC's libstdc++,
 > which is what we build with.
 
-**Locale is a separate axis from time zone - it changes how a time is
-written, not which instant or zone is being shown.** Setting a locale
+Locale is a separate concept from time zone - it changes **how a time is written**, 
+not which instant or zone is being shown. Setting a locale
 makes formatted output follow the user's own conventions (date order,
 month names, ...), and the `L` specifier formats according to whatever 
 locale is currently set:
