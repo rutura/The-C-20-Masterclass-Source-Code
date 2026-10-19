@@ -2035,10 +2035,9 @@ need to keep it around - it avoids a copy the caller never asked for:
 
 ## 7.10 Date and Time Utilities
 
-Time shows up everywhere in real programs - how long an operation took,
-what the timestamp on a log line should read, what today's date is.
-**`<chrono>`** is the standard library's time toolkit, and this lecture
-covers the three pieces of it you're actually likely to reach for:
+In this lecture, we are going to look at the standard library's time toolkit, `<chrono>`.
+It allows us to measure time, get the current time, and work with dates. 
+We'll explore the three main pieces: 
 
 ```
    DURATIONS    an amount of time            ("90 minutes and 32 seconds")
@@ -2046,18 +2045,9 @@ covers the three pieces of it you're actually likely to reach for:
    DATES        a genuine calendar day       (year_month_day, since C++20)
 ```
 
-Everything lives in `<chrono>`, namespace `std::chrono`. Underneath sits
-`<ratio>` - the compile-time fraction type chrono uses to describe exactly
-how long "one tick" is, for every duration type, with zero runtime cost.
-This lecture walks the three pieces in that order, one file per topic -
-`main1_ratios.cpp`, `main2_durations.cpp`, and `main3_clocks_and_dates.cpp`
-- so each can be built and stepped through on its own.
+Let's start by the facilities in place to describe fractions. 
 
-> `<chrono>`'s calendar support goes further than what's covered here -
-> weekday-based dates, time zone conversion (`zoned_time`), and more - see
-> the note at the end of this lecture for where to look if you need it.
-
-### `main1_ratios.cpp` - `std::ratio`: an exact fraction, known at compile time
+### `std::ratio`: an exact fraction, known at compile time
 
 `std::ratio` lets you represent any finite rational number exactly, and
 use it at compile time. It lives in `<ratio>`, namespace `std`. This is
@@ -2109,8 +2099,8 @@ out the greatest common divisor `gcd` of `n` and `d`:
    ratio<2, 8>   and   ratio<1, 4>   →  the exact same TYPE after normalization
 ```
 
-`main1_ratios.cpp` proves it with `ratio_equal`, one of the compile-time
-comparison templates covered below:
+We can use `std::ratio_equal` to check that two different spellings of the same
+rational number are indeed the same type.
 
 ```cpp
 // (2) Two different SPELLINGS, but the exact same type after normalization.
@@ -2119,12 +2109,9 @@ std::println("ratio<2,8> == ratio<1,4>: {}",
 // "ratio<2,8> == ratio<1,4>: true"
 ```
 
-**Naming a ratio with `using`, as soon as you plan to reuse it.** A type
+**Naming a ratio with `using`** A type
 alias changes nothing about how the ratio behaves - it is just a shorter
-name for the exact same type. `main1_ratios.cpp` introduces two aliases
-right here, before the arithmetic, so the rest of the file can lean on
-short names instead of the full `std::ratio<1, 4>` spelling wherever it's
-convenient:
+name for the exact same type. 
 
 ```cpp
 // (3) Two named ratios, and their sum computed through the aliases.
@@ -2145,15 +2132,10 @@ std::println("quarter_hour + third_hour = {}/{}", sum_via_aliases::num, sum_via_
    the alias buys you readability, nothing else.
 ```
 
-**The four arithmetic operations, spelled out in full.** Because ratios
+**The four arithmetic operations.** Because ratios
 are types, not objects, you cannot write `ratio<1,4> + ratio<1,3>` - the
 library gives you four class templates instead, one per operation, each
 computing a *new* `ratio` type through an embedded `::type` alias.
-`main1_ratios.cpp` deliberately goes back to the full spelling here
-(rather than reusing `quarter_hour`/`third_hour`) so you see both styles
-side by side - use whichever reads better at the call site. It runs all
-four, back-to-back, against the plain fraction math so you can check
-every result by hand:
 
 ```cpp
 // (4) Addition: a quarter of an hour + a third of an hour.
@@ -2217,11 +2199,7 @@ std::println("(1/2) / (1/4) = {}/{}", quotient_type::num, quotient_type::den);
 **Comparisons work the same way** - `ratio_equal`, `ratio_not_equal`,
 `ratio_less`, `ratio_less_equal`, `ratio_greater`, and
 `ratio_greater_equal` are all evaluated at compile time, on types, not
-values. Each produces a `std::bool_constant` - itself a
-`std::integral_constant<bool, ...>`, a struct template pairing a type
-with a compile-time constant value (`integral_constant<int, 15>` stores
-an `int` valued 15; `bool_constant<true>` is `integral_constant<bool,
-true>`). Read the answer off the result's `::value` member:
+values. You can read the answer off the result's `::value` member:
 
 ```cpp
 // (8)-(10) Comparing 1/3 against 1/4 - and 1/4 against itself.
@@ -2247,9 +2225,7 @@ std::println("kilo  = {}/{}", std::kilo::num, std::kilo::den);     // "kilo  = 1
 ```
 
 `chrono` uses exactly these to define its predefined duration types
-(`milliseconds` is a duration ticking in `milli`-second units) - which is
-the whole reason `ratio` exists as a lecture prerequisite: every duration
-type is tagged with a ratio describing its tick length.
+(`milliseconds` is a duration ticking in `milli`-second units) 
 
 ### `main2_durations.cpp` - Durations: an amount of time, with the unit baked into the type
 
