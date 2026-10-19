@@ -2715,6 +2715,7 @@ std::println("{:%Y-%m-%d %H:%M}", meeting_time);   // "2020-06-22 09:35"
 *Regular expressions* are a way to describe patterns in text. You
 can use them, for example, to check whether a password entered by a
 user lives up to a set of security rules like:
+
 - at least 8 characters long
 - contains at least one uppercase letter
 - contains at least one lowercase letter
@@ -2726,7 +2727,7 @@ above: none of them name a specific password - they all describe a
 *pattern* the text must fit. That's exactly what a **regular expression**
 describes - the *shape* of text, not literal characters. 
 
-`<regex>` gives you four things to do with a pattern:
+`<regex>` gives us four things we can do with a pattern:
 
 ```
    MATCH     does this WHOLE string fit the pattern?      regex_match
@@ -2736,7 +2737,8 @@ describes - the *shape* of text, not literal characters.
    REPLACE   rewrite every match in a copy of the string   regex_replace
 ```
 
-We will explore all these bit by bit. But before we start, let's look at the basic building blocks of a regex pattern. The table below shows some of the most common pieces:
+We will explore all these bit by bit. But before we start, let's look at the basic 
+building blocks of a regex pattern. The table below shows some of the most common pieces:
 
 | Pattern piece | Means                          |
 |----------------|--------------------------------|
@@ -2749,6 +2751,9 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 | `.`            | the **wildcard** - any single character except a newline |
 | `^` / `$`      | anchors - "start of string" / "end of string" |
 | `()`           | a **capture group** - remembers what matched inside it |
+| `\|`           | **alternation** - "or": matches what's on its left *or* what's on its 
+                     right (`cat\|dog`). To match a literal pipe, put a backslash in 
+                     front of it (see `regex_replace` below) |
 | `+`            | one or more of the preceding piece |
 | `*`            | zero or more of the preceding piece |
 | `{n}`          | exactly `n` occurrences        |
@@ -2759,21 +2764,20 @@ We will explore all these bit by bit. But before we start, let's look at the bas
 
 Every backslash piece in the table above (`\d`, `\w`, `\s`) is a
 **metacharacter** - the *regex engine's own* shorthand for a whole
-category of characters. `\d` doesn't mean "a digit" the way a letter
-means itself; it's special syntax the regex engine interprets.
+category of characters. 
 
-A `\t`, `\n`, or `\r` appearing in a pattern is a completely different
-thing: an ordinary **C++ string escape**, resolved by the compiler
+A `\t`, `\n`, or `\r` appearing in a pattern is a different matter.
+These represent an ordinary **C++ string escape**, resolved by the compiler
 *before* the regex engine ever sees the string. By the time
 `std::regex{"\t"}` runs, C++ has already turned `"\t"` into a string
 holding one real tab byte - the regex engine just sees a literal
 character to match, the exact same way it would see a literal `a`. It
 never even knows a backslash was involved.
 
-| Kind | Examples | Interpreted by | Means |
-|------|----------|-----------------|-------|
-| **Metacharacter** | `\d`, `\w`, `\s` | the regex engine | a whole *category* of characters |
-| **C++ string escape** | `\t`, `\n`, `\r` | the C++ compiler | one specific *literal* character |
+| Kind                  | Examples         | Interpreted by   | Means                                |
+|-----------------------|------------------|------------------|--------------------------------------|
+| **Metacharacter**     | `\d`, `\w`, `\s` | the regex engine | a whole *category* of characters     |
+| **C++ string escape** | `\t`, `\n`, `\r` | the C++ compiler | one specific *literal* character     |
 
 ```cpp
 std::regex{R"(\d)"}   // metacharacter - the regex engine sees "\d" and
@@ -2805,12 +2809,6 @@ std::regex{"\t"}      // C++ escape - the regex engine never sees a
              ▼
         regex engine's rule: "match this exact character" - nothing special
 ```
-
-This is exactly why raw string literals matter for the metacharacter
-row and not the escape-sequence row: `R"(\d)"` protects the backslash so
-the *regex engine* gets to interpret it, while `"\t"` deliberately lets
-*C++* consume the backslash first.
-
 Let's put these to test with a few examples, all using `std::regex_match`.
 This function checks whether the *entire* string fits the pattern, returning `true` or `false`.
 
@@ -2875,7 +2873,7 @@ std::regex_match("aaaa", std::regex{"a{2,4}"});      // true  - {2,4} means betw
 std::regex_match("aaaaa", std::regex{"a{2,4}"});     // false - five is one too many
 ```
 
-### `main1_matching.cpp` - `regex_match`: does the whole string fit?
+### `regex_match`: does the whole string fit?
 
 `regex_match` requires the **entire** string to satisfy the pattern -
 one leftover character the pattern doesn't account for is enough to fail:
@@ -2937,7 +2935,7 @@ if (std::smatch m; std::regex_match(input, m, ship_date)) {
 }
 ```
 
-### `main2_searching.cpp` - `regex_search`: find a match anywhere, and find them all
+### `regex_search`: find a match anywhere, and find them all
 
 `regex_match` demands the whole string fit. `regex_search` looks for a
 match **anywhere** inside it, and captures what it found in a
@@ -2984,7 +2982,7 @@ while (std::regex_search(ticket, match, ticket_id)) {
    search 3:  nothing left to find → loop ends
 ```
 
-### `main3_walking_matches.cpp` - walking every match directly
+### walking every match directly
 
 Before getting to regex, let's explore the iteration tools we've already
 covered using the `for` loop. Take a plain `std::vector<std::string>`
@@ -2998,8 +2996,7 @@ for (std::size_t i{0}; i < names.size(); ++i) {
 }
 ```
 
-A range-based `for` loop used constantly since `std::array` in a few past
-lectures hides the index entirely - you just say "for each name in names":
+A range-based `for` loop hides the index entirely. You just say "for each name in names":
 
 ```cpp
 for (const auto& name : names) {
@@ -3007,9 +3004,8 @@ for (const auto& name : names) {
 }
 ```
 
-What the range-based `for` loop is hiding is an **iterator** - an object
-that knows how to move to the next element and how to read the current
-one. 
+What the range-based `for` loop is hiding is an **iterator**. An object
+that knows how to move to the next element and how to read the current one. 
 
 ```
    index:      0           1            2
@@ -3068,12 +3064,9 @@ role `names.end()` played above: "one past the last match."
 > **Watch out!** The `begin, end, regex` constructor
 > only accepts the regex by **reference** - passing a temporary
 > `std::regex{...}` directly (instead of a named variable) is a compile
-> error, on purpose. The iterator stores a pointer to the regex you gave
-> it rather than copying it, and a temporary would be destroyed before
-> the iterator finished using it - a dangling pointer waiting to happen.
-> This is why `item` above is a named variable declared *before* the
-> loop, not `std::sregex_iterator{shopping_list.cbegin(), shopping_list.cend(),
-> std::regex{R"([\w]+)"}}` inline.
+> error, on purpose. The reason for that is out of scope for now. So I won't 
+> say more about this. Just be aware that you need to name your regex before
+> passing it to the iterator. Just we name the regex `item` in the example below. 
 
 ```cpp
 std::string shopping_list{"eggs milk  bread rice"};
@@ -3187,109 +3180,265 @@ std::vector<std::string> tokens{
      token 1            token 2           token 3
 ```
 
-### `main4_replacing.cpp` - `regex_replace`: rewrite every match in a copy
+### `regex_replace`: rewrite every match in a copy
 
-Every tool so far has answered a yes/no or "where/what" question: does
-this fit the pattern (`regex_match`), is the pattern in there somewhere
-(`regex_search`), what are all the places it shows up (the iterators).
-`regex_replace` is the first tool that actually **edits text** - "find
-this shape, and swap it out for something else," the same everyday task
-as a find-and-replace in a text editor, except the "find" part is a
-whole pattern instead of one exact word.
+The tools so far only *read* text: does it match? (`regex_match`), is the
+pattern in there (`regex_search`), where are all the matches (the iterators). 
+
+`regex_replace` is the first one that produces **different text** out of the 
+text you already have. As the name implies, it replaces a text **pattern** with some 
+other text, and returns the transformed string. You can use it to reformat a record, 
+strip markup from text, or reshape a sentence. 
+
+WHAT IT DOES: it takes text in and returns a **new** string.
+
+Here is how a typical call looks:
 
 ```
-   find-and-replace in a text editor:      find EXACT text  →  swap in new text
+   regex_replace( input_text,  pattern,  replacement )
+                       │          │           │
+                       │          │           └─ what to write in place of each match
+                       │          └─ which parts of the input to rewrite
+                       │
+                       └─ only read, never modified
 
-   regex_replace:                          find a SHAPE     →  swap in new text
-                                            (any tab, any date, any word, ...)
+                       │
+                       ▼
+                 returns a NEW std::string
 ```
 
-Three things end up mattering once you actually use it, and the rest of
-this section walks them in order:
+#### The general idea
 
-- Does it touch the **original** string?
-- Can the replacement text **reuse** pieces of what it just matched?
-- What happens to the parts that **didn't** match?
+Assuming a call like:
 
-`regex_replace` rewrites every match in a **copy** of the string, leaving
-the original untouched - question one, answered:
+```cpp
+   regex_replace( input_text,  pattern,  replacement )
+```
+
+Here is the general flow of what happens:
+
+```
+   for each match, scanning left to right:
+       1. copy the unmatched text between the previous match and this one
+       2. write the replacement, with $1, $2, ... filled in after the last match:
+       3. copy the remaining tail
+```
+
+Every outcome in this section runs the **same procedure**. Learn it once
+on a small example, and each outcome below becomes "the same procedure
+with one detail changed".
+
+```cpp
+std::string input{"cat-7, dog-42, bird"};
+std::regex  re{R"((\w+)-(\d+))"};                          // word, dash, number (two capture groups)
+std::string result{std::regex_replace(input, re, "DOG")};  // Replace the whole match with the literal text "DOG"
+std::string result{std::regex_replace(input, re, "$2:$1")};  // Fiddle with the capture groups: $1 = "cat", $2 = "7"
+                                                             // for the first match, etc.
+```
+
+**Step 1: find the matches.** The engine scans the input and cuts it into
+*matched* pieces and *unmatched* pieces:
+
+```
+   input:    c a t - 7 ,   d o g - 4 2 ,   b i r d
+             └───┬───┘     └────┬────┘
+              match 1        match 2
+
+   match 1:  $1 = "cat"    $2 = "7"
+   match 2:  $1 = "dog"    $2 = "42"
+
+   Cut into pieces:
+
+   [ match 1 ][ ", " ][ match 2 ][ ", bird" ]
+                  ▲                   ▲
+              unmatched           unmatched
+              (in between)        (the tail)
+```
+
+**Step 2: build the result, left to right.** For every match, two things
+happen in order: the unmatched text in front of it is **copied**, then the
+**replacement** is written, with `$1`, `$2`, ... filled in from *that*
+match's groups. After the last match, the remaining tail is copied.
+
+Here it is on the example, with the replacement `"$2:$1"`:
+
+```
+   input:     [cat-7]  ", "  [dog-42]  ", bird"
+                 │       │       │         │
+                 ▼       ▼       ▼         ▼
+             replace   copy    replace   copy
+                 │       │       │         │
+                 ▼       ▼       ▼         ▼
+   result:    [7:cat]  ", "  [42:dog]  ", bird"
+
+   result = "7:cat, 42:dog, bird"
+```
+
+```
+   input   still "cat-7, dog-42, bird"     <- never modified
+   result  "7:cat, 42:dog, bird"            <- the new string that is returned
+```
+
+A summary of the two key points to remember about `regex_replace`:
+
+```
+   1. the REPLACEMENT STRING     does it contain $1, $2, ... ?
+
+          ","            no $   same literal text written for every match
+          "$2:$1"        $n     each match gets its OWN captured pieces
+                                  match 1 -> 7:cat
+                                  match 2 -> 42:dog
+
+   2. the optional 4th ARGUMENT  (a flag; leaving it out = the default)
+
+          (nothing)           copy steps 1 and 3 run      unmatched text is kept
+          format_no_copy      copy steps 1 and 3 SKIPPED  unmatched text is dropped
+
+                 default:         7:cat, 42:dog, bird
+                 format_no_copy:  7:cat42:dog
+```
+
+
+#### Example 1: swap a separator (pipes to commas)
+
+You start with a record that uses `|` between fields, and you want the
+same record as comma-separated values.
 
 ```cpp
 std::string data{"apple|3|0.99"};
-std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};   // pipes -> commas
+std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};
 ```
 
-Note the pattern escapes the pipe as `\|` - unlike the tab above, `|`
-is a regex metacharacter (alternation), so matching a *literal* pipe
+```
+   START                 data      "apple|3|0.99"
+
+   regex_replace(data, \|, ",")    every "|" becomes ","
+
+   END                   csv_line  "apple,3,0.99"      <- the returned string
+                         data      "apple|3|0.99"      <- still exactly as it was
+```
+
+NOTE: If you don't grab the returned string, nothing happens to the original data:
+
+```
+   WRONG - the result is thrown away, data is untouched, nothing happened:
+
+       std::regex_replace(data, std::regex{R"(\|)"}, ",");
+
+   RIGHT - catch the returned string:
+
+       std::string csv_line{std::regex_replace(data, std::regex{R"(\|)"}, ",")};
+```
+
+Note the pattern escapes the pipe as `\|`. Recall from the table at the start of this
+lecture that `|` is a regex metacharacter (alternation), so matching a *literal* pipe
 character requires escaping it.
 
-```
-   data (before the call):  "apple|3|0.99"
-   regex_replace RETURNS a brand new string - it has to be caught, or it's lost:
-   csv_line:                "apple,3,0.99"     (caught in its own variable, above)
-   data (after the call):   "apple|3|0.99"     (printed again - still unchanged)
-```
+#### Example 2: rearrange pieces of the match (capture groups in the replacement)
 
-Question two: can the replacement reuse pieces of what it just matched?
-Yes - the replacement text can reference capture groups with `$1`, `$2`,
-and so on. Question three, for now: the *default* mode still copies
-through everything that did **not** match, alongside the replaced text:
+Now the goal is bigger than swapping one character. You start with a
+snippet of markup and want to pull the title and summary text out of it
+and present them in your own format.
+
+The capture groups `(...)` from earlier lectures don't only *report* what
+they matched. The replacement text can *use* them: `$1` is whatever group
+1 captured, `$2` is group 2, and so on.
 
 ```cpp
+std::string article{"<article><title>Launch Day</title><summary>It shipped</summary></article>"};
 std::regex markup{"<title>(.*)</title><summary>(.*)</summary>"};
-std::regex_replace(article, markup, "TITLE=$1 and SUMMARY=$2");
+std::string replacement{"TITLE=$1 and SUMMARY=$2"};
+
+std::string default_result{std::regex_replace(article, markup, replacement)};
 ```
 
 ```
-   article: "<article><title>Launch Day</title><summary>It shipped</summary></article>"
-                       └──────┬──────┘        └───────┬───────┘
-                          $1=Launch Day           $2=It shipped
+   START   article:
+           <article><title>Launch Day</title><summary>It shipped</summary></article>
+           └───┬───┘└──────────────────────────┬─────────────────────────┘└───┬────┘
+            no match            the whole match (pattern markup)           no match
+                                              │
+                              ┌───────────────┴────────────────┐
+                              ▼                                ▼
+                        $1 = "Launch Day"              $2 = "It shipped"
 
-   default replace: "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
-                      └───┬───┘                                      └───┬────┘
-                   copied through untouched                  copied through untouched
+   The matched part is replaced by "TITLE=$1 and SUMMARY=$2", with the
+   groups filled in:
+
+   END     default_result:
+           <article>TITLE=Launch Day and SUMMARY=It shipped</article>
+           └───┬───┘└───────────────────┬──────────────────┘└───┬────┘
+          copied as-is          the replacement            copied as-is
 ```
 
-Revisiting question three: `regex_constants::format_no_copy` flips that
-default - it drops everything that did **not** match instead of copying
-it through, so only the replaced text survives:
+By default everything that did **not** match is carried over into the
+result untouched. That is why `<article>` and `</article>` are still
+there: the rewrite only touched the part the pattern matched, and the
+rest of the string came along for the ride.
+
+#### Example 3: keep only what the replacement produced
+
+Sometimes the surrounding text is exactly what you want to get rid of.
+Passing `std::regex_constants::format_no_copy` as a fourth argument
+changes the rule for the unmatched parts: **drop** them instead of
+copying them.
 
 ```cpp
-std::regex_replace(article, markup, replacement, std::regex_constants::format_no_copy);
+std::string no_copy_result{std::regex_replace(article, markup, replacement,
+    std::regex_constants::format_no_copy)};
 ```
 
 ```
-   default:         "<article>TITLE=Launch Day and SUMMARY=It shipped</article>"
-   format_no_copy:            "TITLE=Launch Day and SUMMARY=It shipped"
-                      ▲                                                ▲
-                 "<article>" and "</article>" are GONE - format_no_copy
-                 only keeps what the replacement text produced
+   article:         <article><title>Launch Day</title><summary>It shipped</summary></article>
+
+   default:         <article>TITLE=Launch Day and SUMMARY=It shipped</article>
+                    └───┬───┘                                       └───┬────┘
+                      kept                                            kept
+
+   format_no_copy:           TITLE=Launch Day and SUMMARY=It shipped
+                    └───┬───┘                                       └───┬────┘
+                     dropped                                        dropped
 ```
 
-Combining a capture group with `format_no_copy` turns replace into a
-reflow tool: every word becomes "the word, followed by a newline," and
-the untouched whitespace between words is dropped instead of being
-copied through:
+Here is what it all boils down to: 
+
+```
+   (no flag)         result = unmatched text  +  replacement(s)
+   format_no_copy    result =                    replacement(s)
+```
+
+#### Example 4: reflow text, one word per line
+
+In this example, we take a sentence and reformat it so that each word is on its own line.
 
 ```cpp
+std::string headline{"Regex makes text processing easy"};
 std::regex one_word{R"(([\w]+))"};
-std::regex_replace(headline, one_word, "$1\n", std::regex_constants::format_no_copy);
+std::string one_per_line{std::regex_replace(headline, one_word, "$1\n",
+    std::regex_constants::format_no_copy)};
 ```
 
 ```
-   headline: "Regex makes text processing easy"
+   START   headline:   Regex makes text processing easy
+                       └─┬─┘ └─┬─┘ └─┬┘ └───┬────┘ └┬─┘
+                         │     │     │      │       │
+                       each run of word characters is one match,
+                       and the word itself is captured as $1
 
-   default    would keep the original spacing between replaced words
-   format_no_copy keeps ONLY "$1\n" for each word - the spaces that
-                  matched nothing are thrown away, so the words land
-                  one per line:
+   Each match is replaced by "$1\n": the word, then a newline.
+   The spaces between words match nothing, so format_no_copy drops them.
 
-                  Regex
-                  makes
-                  text
-                  processing
-                  easy
+   END     one_per_line:
+                       Regex
+                       makes
+                       text
+                       processing
+                       easy
 ```
+
+Without `format_no_copy` the spaces would be copied through, and every
+line after the first would start with a stray space. Dropping the
+unmatched text is what makes this come out clean.
 
 ---
 
