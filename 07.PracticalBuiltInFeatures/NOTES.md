@@ -2736,28 +2736,60 @@ describes - the *shape* of text, not literal characters.
    REPLACE   rewrite every match in a copy of the string   regex_replace
 ```
 
+There is no single "regular expression language". Over the decades, several
+regex *grammars* (flavors) have grown up, and they differ in small but
+annoying ways: which characters are special, whether `\d` exists, whether
+`+` and `|` need a backslash, and so on. The C++ Standard Library lets you
+pick from these grammars:
+
+- `ECMAScript`: the flavor of JavaScript (with a few C++ tweaks). Also very
+  close to what Perl and Python use.
+- `basic`: POSIX Basic Regular Expressions, used by classic tools like `sed`.
+- `extended`: POSIX Extended Regular Expressions, used by tools like `egrep`.
+- `awk`: the grammar of the POSIX `awk` tool.
+- `grep`: like `basic`, but a newline also separates alternatives.
+- `egrep`: like `extended`, but a newline also separates alternatives.
+
+**The one C++ uses by default is ECMAScript.** If you write
+`std::regex{"\\d+"}` and don't ask for anything else, the pattern is
+interpreted as a (slightly modified) ECMAScript regex. That's also why
+everything in the table below, with `\d`, `\w`, `\s` and friends, works out of
+the box. The POSIX grammars have no `\d`, for example, so a pattern that
+works in one grammar may behave differently or fail in another.
+
+If you ever need a different grammar, you can pass it as a second argument to
+the `std::regex` constructor, using the flags in `std::regex_constants`:
+
+```cpp
+std::regex re{"[0-9]+", std::regex_constants::extended};
+```
+
+This is just for your information. In this course we'll stick with the
+default ECMAScript grammar, which is what you will most likely meet in real
+projects, and it's the one most developers already know from other languages.
+
 We will explore all these bit by bit. But before we start, let's look at the basic 
 building blocks of a regex pattern. The table below shows some of the most common pieces:
 
-| Pattern piece | Means                          |
-|----------------|--------------------------------|
-| `\d`           | a single digit                 |
-| `\w`           | a single "word" character (letter, digit, `_`) |
-| `\s`           | a single whitespace character (space, tab, newline, ...) |
-| `[A-Z]`        | one uppercase letter (a range) |
-| `[a-z]`        | one lowercase letter (a range) |
-| `[...]`        | a **character set** - one character from whatever's inside the brackets |
-| `.`            | the **wildcard** - any single character except a newline |
-| `^` / `$`      | anchors - "start of string" / "end of string" |
-| `()`           | a **capture group** - remembers what matched inside it |
-| `\|`           | **alternation** - "or": matches what's on its left *or* what's on its 
-                     right (`cat\|dog`). To match a literal pipe, put a backslash in 
-                     front of it (see `regex_replace` below) |
-| `+`            | one or more of the preceding piece |
-| `*`            | zero or more of the preceding piece |
-| `{n}`          | exactly `n` occurrences        |
-| `{n,}`         | `n` or more occurrences        |
-| `{n,m}`        | between `n` and `m`, inclusive |
+| Pattern piece  | Means                                                                     |
+|----------------|---------------------------------------------------------------------------|
+| `\d`           | a single digit                                                            |
+| `\w`           | a single text character (letter, digit, `_`)                              |
+| `\s`           | a single whitespace character (space, tab, newline, ...)                  |
+| `[A-Z]`        | one uppercase letter (a range)                                            |
+| `[a-z]`        | one lowercase letter (a range)                                            |
+| `[...]`        | a **character set** - one character from whatever's inside the brackets   |
+| `.`            | the **wildcard** - any single character except a newline                  |
+| `^` / `$`      | anchors - "start of string" / "end of string"                             |
+| `()`           | a **capture group** - remembers what matched inside it                    |
+| `\|`           | **alternation** - "or": matches what's on its left *or* what's on its     |
+|                |     right (`cat\|dog`). To match a literal pipe, put a backslash in       |
+|                |     front of it (see `regex_replace` below)                               |
+| `+`            | one or more of the preceding piece                                        |
+| `*`            | zero or more of the preceding piece                                       |
+| `{n}`          | exactly `n` occurrences                                                   |
+| `{n,}`         | `n` or more occurrences                                                   |
+| `{n,m}`        | between `n` and `m`, inclusive                                            |
 
 ### Metacharacters vs. escape sequences: two different `\`'s
 
