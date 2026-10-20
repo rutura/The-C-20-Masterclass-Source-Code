@@ -9,4 +9,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Create executable
 add_executable(rooster1_ratios main1_ratios.cpp)
+add_executable(rooster2_durations main2_durations.cpp)
 
