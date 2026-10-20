@@ -2520,10 +2520,10 @@ std::println("{}h {}m {}s", split.hours().count(),
    hh_mm_ss   ──►  several numbers, one per field  (1h 23m 45s)
 ```
 
-### Clocks: a source of "now"
+### Clocks and Dates
 
-There are two different questions you ask about time in everyday
-life: 
+There are two different questions you ask about time in everyday life: 
+
 - "what time is it right now?" and 
 - "how long did that just take?".
 
@@ -2541,9 +2541,8 @@ auto now_utc{std::chrono::system_clock::now()};
 std::println("UTC: {:%Y-%m-%d %H:%M:%S}", now_utc);
 ```
 
-**A gotcha worth knowing up front: `system_clock::now()` is always UTC,
-never your local time.** Printing it directly, no matter how you format
-it, still shows the UTC hour - a student in Nairobi (UTC+3) or New York
+NOTE: `system_clock::now()` is always UTC, never your local time. 
+Printing it directly shows the UTC hour:  a person in Nairobi (UTC+3) or New York
 (UTC-5) will not see their own wall-clock time from this alone. To get
 that, convert the UTC `time_point` to a specific **time zone**:
 `current_zone()` asks the OS which zone it's configured for, and
