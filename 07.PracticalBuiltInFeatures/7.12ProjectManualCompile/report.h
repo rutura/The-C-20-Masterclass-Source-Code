@@ -7,6 +7,6 @@
 
 namespace station {
 
-std::string format_report(std::string_view sensor, const Summary& summary);
+    std::string format_report(std::string_view sensor, const Summary& summary);
 
 }   // namespace station
