@@ -3538,40 +3538,52 @@ keeps that promise.
 
 ### Pick your environment
 
-The project has **five environments**. Every one of them is a complete
-walk-through that you can do without reading any other. Do the one you
-have, and come back for the others if you are curious. In each one you
-will do the same four things:
+The project has **five environments**. I use these environments because they are the 
+ones I have available on my system. Do the one you have, and come back for the others 
+if you are curious. In each one you will do the same four things:
 
 1. Build `single.cpp` in **two steps** (compile, then link).
 2. **Read** what is inside the object files and the finished binary.
 3. Build `single.cpp` in **one step**.
 4. Build the **multi-file** program, then break it on purpose.
 
-| Environment | Compiler driver | Linker | Object files | Output folder |
-|---|---|---|---|---|
-| Windows, MSVC | `cl` | `link` | `.obj` | `out-msvc` |
-| Windows, MinGW GCC | `g++` | `ld` (called by `g++`) | `.o` | `out-mingw-gcc` |
-| Windows, MinGW Clang | `clang++` | `ld` (called by `clang++`) | `.o` | `out-mingw-clang` |
-| Linux, GCC (Docker) | `g++` | `ld` (called by `g++`) | `.o` | `out-linux-gcc` |
-| Linux, Clang (Docker) | `clang++` | `ld` (called by `clang++`) | `.o` | `out-linux-clang` |
+- **Windows, MSVC**
+  - Compiler driver: `cl`
+  - Linker: `link`
+  - Object files: `.obj`
+  - Output folder: `out-msvc`
+- **Windows, MinGW GCC**
+  - Compiler driver: `g++`
+  - Linker: `ld` (called by `g++`)
+  - Object files: `.o`
+  - Output folder: `out-mingw-gcc`
+- **Windows, MinGW Clang**
+  - Compiler driver: `clang++`
+  - Linker: `ld` (called by `clang++`)
+  - Object files: `.o`
+  - Output folder: `out-mingw-clang`
+- **Linux, GCC (Docker)**
+  - Compiler driver: `g++`
+  - Linker: `ld` (called by `g++`)
+  - Object files: `.o`
+  - Output folder: `out-linux-gcc`
+- **Linux, Clang (Docker)**
+  - Compiler driver: `clang++`
+  - Linker: `ld` (called by `clang++`)
+  - Object files: `.o`
+  - Output folder: `out-linux-clang`
 
 Every environment writes **everything it produces** (object files,
-programs, even the ones you build to fail) into **its own output
-folder**, the one in the last column, inside `7.12ProjectManualCompile`.
-Your source folder stays clean, you can see at a glance what a build
-made, and when you are done you delete **one folder** to start over or to
-try another environment. Two environments never overwrite each other's
-files, so you can build with MSVC, then with MinGW, and compare the two
-folders side by side. Git ignores every `out-*` folder.
+programs, even the ones you build to fail) into **its own output folder**.
 
-Every folder in this project also has one script per environment
+The starter folder for this project also has one script per environment
 (`build-msvc.ps1`, `build-mingw-gcc.ps1`, `build-mingw-clang.ps1`,
 `build-linux-gcc.sh`, `build-linux-clang.sh`) that runs the commands of
-that environment from top to bottom. Type the commands yourself first,
-and use the scripts to check your work. (A script and your own commands
-fill the same output folder, so delete the folder between the two if you
-want to be sure the script did the work.)
+that environment from top to bottom. 
+
+Type the commands yourself first, and use the scripts to check your work. 
+(A script and your own commands fill the same output folder, so delete the 
+folder between the two if you want to be sure the script did the work.)
 
 ---
 
@@ -3657,7 +3669,7 @@ average: 70.9 F
   name.
 - `/MD` picks the **shared C runtime**. CMake uses it by default, so we
   use it too. All your objects must agree on this option, otherwise the
-  link fails (we meet that in 7.13).
+  link fails (we talk more about this in a later lecture ).
 - The second command has no `.cpp` file at all: `link` only joins
   objects. `/OUT:` names the result, here inside `out-msvc`.
 
@@ -3710,16 +3722,15 @@ things to see:
 - In `stats.obj`, `to_celsius` is **External** and has a section
   (`SECT4`): this object **defines** it.
 - In `report.obj`, the same name is **UNDEF**: "undefined here, the
-  linker must find it". That is the note from the start of the lecture,
-  made visible. The linker's whole job is to **match every UNDEF with
+  linker must find it". The linker's whole job is to **match every UNDEF with
   exactly one definition**.
 
 **Name mangling.** You wrote `to_celsius`. The object file says
 `?to_celsius@station@@YANN@Z`. That is **name mangling**. C++ allows
 several functions with the same name and different parameters
-(overloading, lecture 6.9), but a linker only compares **plain names**.
-So the compiler puts the **namespace, the name and the parameter types
-into the one name** it hands to the linker. `undname` reads it back:
+(overloading), but a linker only compares **plain names**.
+So the compiler puts the **namespace, the name and the parameter types into the one name** 
+it hands to the linker. `undname` reads it back:
 
 ```powershell
 undname '?to_celsius@station@@YANN@Z'
@@ -3743,8 +3754,8 @@ taken apart:
 | `N` | the parameter type: `double` |
 | `@` then `Z` | end of the parameter list, end of the name |
 
-Do not try to memorise this. The point is that **the parameter types are
-inside the name**. We tried an overload `int to_celsius(int)` and MSVC
+Do not try to memorise this. The point is that **the parameter types are inside the name**. 
+We tried an overload `int to_celsius(int)` and MSVC
 named it `?to_celsius@station@@YAHH@Z`: the return type and the
 parameter are now `H`, which is `int`. Two different names, so both can
 live in one program.
@@ -3777,7 +3788,7 @@ File Type: EXECUTABLE IMAGE
 **dependencies** are the DLLs Windows loads when the program starts:
 `MSVCP140.dll` is the C++ standard library and `VCRUNTIME140*.dll` and
 `api-ms-win-crt-*.dll` are the C runtime. That is what `/MD` ("shared
-runtime") means. We come back to dependencies in 7.14.
+runtime") means. We come back to dependencies in a later lecture.
 
 **The ABI.** Notice that MSVC's objects use COFF, as do MinGW's (next
 environments), but **a MSVC object cannot be linked with a MinGW one**.
@@ -3787,10 +3798,11 @@ built by MinGW GCC. It fails with
 `undefined reference to __security_cookie`, a name MinGW's libraries do
 not provide). MinGW asks for the name `_ZN7station10to_celsiusEd`, and
 MSVC's object only has `?to_celsius@station@@YANN@Z`. The C++ libraries
-behind the two are different too. **A C++ library is tied to the
-compiler and standard library that built it.** That agreement about
-names, layouts and calling conventions is the **ABI** (application
-binary interface). In 7.14 you will see why it matters for libraries.
+behind the two are different too. 
+
+**A C++ library is tied to the compiler and standard library that built it.** 
+That agreement about names, layouts and calling conventions is the **ABI** (application
+binary interface).
 
 #### 3. Single file, one step
 
