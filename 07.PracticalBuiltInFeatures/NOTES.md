@@ -3476,16 +3476,15 @@ unmatched text is what makes this come out clean.
 ## 7.12 Project: building by hand
 
 Up to now you have gone through your IDE to build your binaries. In this
-project we take the lid off. You will call the **compiler and the linker
-yourself**, on the command line, and then open the files they produce to
-see what is really inside.
+project we take the lid off. You will call the 
+**compiler and the linker yourself**, on the command line, and then open 
+the files they produce to see what is really inside.
 
 We do it for a reason. Sooner or later a build fails with a message like
 `undefined reference to ...` or `unresolved external symbol ...`. Those
 messages come from the **linker**, not the compiler, and they only make
 sense once you have gone down to this level at least once, seen what the
-tools do under the hood and looked at what is inside the files they
-produce.
+tools do under the hood and looked at what is inside the files they produce.
 
 NOTE: This lecture and the few that follow are unusual in a beginner C++
 course. But these ideas widen your view of what the tools do under the
@@ -3505,13 +3504,13 @@ understand what is happening.
                                                    (object files)
 ```
 
-- The **compiler** turns **one `.cpp` file at a time** into an **object
-  file**: machine code for that file, plus a table of names. Each file
-  is compiled in complete ignorance of the others.
+- The **compiler** turns **one `.cpp` file at a time** into 
+  an **object file**: machine code for that file, plus a table of names. 
+  Each file is compiled in complete ignorance of the others.
 - The **linker** takes all the object files, matches every reference to
   a function with the object that defines it, and writes the final
   program.
-- What you type is rarely the compiler or the linker itself. `cl`, `g++`
+- What you call on the command line is rarely the compiler or the linker itself. `cl`, `g++`
   and `clang++` are **drivers**: programs that run the compiler, then
   the linker, and pass your options along. That is why one command can
   do both jobs, and why the same command can also do only the first job
