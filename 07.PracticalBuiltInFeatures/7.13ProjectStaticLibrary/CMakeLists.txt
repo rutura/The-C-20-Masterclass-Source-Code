@@ -7,8 +7,9 @@ project(rooster)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# The same two files the notes archive by hand, as a static library.
+add_library(station STATIC stats.cpp stats.h report.cpp report.h)
+
 # Create executable
 add_executable(rooster main.cpp)
-
-# For multi-file projects with headers and separate .cpp files
-# add_executable(rooster main.cpp dog.cpp dog.h cat.cpp cat.h)
+target_link_libraries(rooster PRIVATE station)
