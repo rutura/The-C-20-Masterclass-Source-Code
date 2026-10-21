@@ -2787,7 +2787,7 @@ building blocks of a regex pattern. The table below shows some of the most commo
 |                |     front of it (see `regex_replace` below)                               |
 | `+`            | one or more of the preceding piece                                        |
 | `*`            | zero or more of the preceding piece                                       |
-| `{n}`          | exactly `n` occurrences                                                   |
+| `{n}`          | exactly `n` occurrences of the preceding piece                            |
 | `{n,}`         | `n` or more occurrences                                                   |
 | `{n,m}`        | between `n` and `m`, inclusive                                            |
 
@@ -2932,7 +2932,7 @@ std::regex_match("K", city_name);         // false - no lowercase letters follow
           (it needs AT LEAST one)                 → NO MATCH, false
 ```
 
-```
+```cpp
    std::regex invoice_code{R"(\d{5})"};   // exactly 5 digits
    std::regex_match("48213",   invoice_code)   → true   (exactly 5 digits, nothing more)
    std::regex_match("48213-1", invoice_code)   → false  (the "-1" is unaccounted for -
