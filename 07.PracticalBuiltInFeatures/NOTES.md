@@ -3814,7 +3814,12 @@ cl /nologo /std:c++latest /EHsc /MD /W4 single.cpp /Fo:out-msvc\ /Fe:out-msvc\si
 Get-ChildItem out-msvc\single.obj, out-msvc\single_two_step.exe, out-msvc\single_one_step.exe | Format-Table Name, Length -AutoSize
 ```
 
-```
+``
+
+Look at the sizes again: the object file (about 800 KB) is **bigger**
+than the program built from it (about 310 KB). Two lines of
+`std::println` and `std::accumulate` pull in a lot of templates, and the
+object keeps a copy of every template instan`
 average: 70.9 F
 
 Name                Length
@@ -3827,12 +3832,7 @@ single_one_step.exe 311808
 `/Fe:` names the executable, and `/Fo:` is the same output-folder option
 as before. Both programs have **exactly the same size**. That is the point: `cl` is a driver, it runs the compiler and
 then `link` and passes your options along. The one-step form just does
-not keep the object file.
-
-Look at the sizes again: the object file (about 800 KB) is **bigger**
-than the program built from it (about 310 KB). Two lines of
-`std::println` and `std::accumulate` pull in a lot of templates, and the
-object keeps a copy of every template instantiation the file used, plus
+not keep the object file.tiation the file used, plus
 the bookkeeping the linker needs. The linker then keeps only what the
 program uses. Your numbers will differ. The lesson is that an object
 file is **not a small program**, it is a half-finished one.
