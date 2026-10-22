@@ -3887,6 +3887,14 @@ programs it makes are ordinary Windows programs. Ours is a UCRT build by
 Brecht Sanders: `g++ --version` says
 `g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
 
+
+The steps: 
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
+
 #### Open the shell
 
 Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
@@ -4185,6 +4193,14 @@ Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
 Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
 `clang++ --version` says `clang version 19.1.1` and
 `Target: x86_64-w64-windows-gnu`.
+
+
+The steps: 
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
 
 #### Open the shell
 
@@ -5716,6 +5732,13 @@ Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
 `clang++ --version` says `clang version 19.1.1` and
 `Target: x86_64-w64-windows-gnu`.
 
+The steps: 
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
+
 #### Open the shell
 
 Open a normal PowerShell and put `C:\mingw64\bin` on the PATH **for this
@@ -5982,6 +6005,13 @@ That is MinGW Clang done.
 
 You get a real Linux with GCC from the Docker container of chapter 2.
 Our image carries GCC 16.2 and GNU binutils 2.44.
+
+The steps: 
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
 
 #### Open the shell
 
@@ -6258,6 +6288,13 @@ That is Linux GCC done.
 You get a real Linux with Clang from the Docker container of chapter 2.
 Our image carries Clang 21.1.8 and GNU binutils 2.44, and uses GNU's
 libstdc++, the C++ library that comes with Linux.
+
+The steps:
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
 
 #### Open the shell
 
