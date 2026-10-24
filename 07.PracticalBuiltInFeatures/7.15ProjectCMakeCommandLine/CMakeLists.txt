@@ -31,9 +31,13 @@ endif()
 add_executable(rooster main.cpp)
 target_link_libraries(rooster PRIVATE station)
 
-# MinGW's GCC 14 needs this extra library for std::println.
+# MinGW needs this extra library for std::println. Clang must also link with its
+# own linker (lld): GNU ld rejects Clang objects plus GCC's libstdc++exp.a.
 if(WIN32 AND NOT MSVC)
     target_link_libraries(rooster PRIVATE stdc++exp)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_link_options(rooster PRIVATE -fuse-ld=lld)
+    endif()
 endif()
 
 # What "cmake --install" copies, and where (relative to --prefix).

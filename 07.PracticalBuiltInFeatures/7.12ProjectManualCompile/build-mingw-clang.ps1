@@ -23,14 +23,18 @@ function StepMustFail {
     Write-Host "(failed, as expected)"
 }
 
-# -lstdc++exp: the libstdc++ that MinGW Clang uses needs this extra library
-# for std::println. It goes AFTER the objects that need it.
+# Two link options for std::println with MinGW Clang:
+# -lstdc++exp: the libstdc++ that MinGW Clang uses needs this extra library. It
+#   goes AFTER the objects that need it.
+# -fuse-ld=lld: link with Clang's own linker. The default GNU ld refuses the
+#   mix of Clang-built objects and GCC-built libstdc++exp.a, with "duplicate
+#   section ... has different size" errors.
 
 New-Item -ItemType Directory -Force out-mingw-clang | Out-Null
 
 # 1. Single file, two steps
 Step clang++ -std=c++23 -Wall -Wextra -c single.cpp -o out-mingw-clang/single.o
-Step clang++ out-mingw-clang/single.o -o out-mingw-clang/single_two_step.exe -lstdc++exp
+Step clang++ out-mingw-clang/single.o -o out-mingw-clang/single_two_step.exe -fuse-ld=lld -lstdc++exp
 Step ./out-mingw-clang/single_two_step.exe
 
 # 2. Read the object files and the binary
@@ -47,7 +51,7 @@ Step objdump -f out-mingw-clang/single_two_step.exe
 objdump -p out-mingw-clang/single_two_step.exe | Select-String 'DLL Name'
 
 # 3. Single file, one step
-Step clang++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-clang/single_one_step.exe -lstdc++exp
+Step clang++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-clang/single_one_step.exe -fuse-ld=lld -lstdc++exp
 Step ./out-mingw-clang/single_one_step.exe
 Get-ChildItem out-mingw-clang/single.o, out-mingw-clang/single_two_step.exe, out-mingw-clang/single_one_step.exe | Format-Table Name, Length -AutoSize
 
@@ -55,8 +59,8 @@ Get-ChildItem out-mingw-clang/single.o, out-mingw-clang/single_two_step.exe, out
 Step clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-clang/stats.o
 Step clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-clang/report.o
 Step clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
-Step clang++ out-mingw-clang/main.o out-mingw-clang/stats.o out-mingw-clang/report.o -o out-mingw-clang/weather.exe -lstdc++exp
+Step clang++ out-mingw-clang/main.o out-mingw-clang/stats.o out-mingw-clang/report.o -o out-mingw-clang/weather.exe -fuse-ld=lld -lstdc++exp
 Step ./out-mingw-clang/weather.exe
 
 # Break it on purpose: leave stats.o out
-StepMustFail clang++ out-mingw-clang/main.o out-mingw-clang/report.o -o out-mingw-clang/broken.exe -lstdc++exp
+StepMustFail clang++ out-mingw-clang/main.o out-mingw-clang/report.o -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp

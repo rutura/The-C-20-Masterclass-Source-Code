@@ -3888,7 +3888,7 @@ Brecht Sanders: `g++ --version` says
 `g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
 
 
-The steps: 
+The steps:
 
 1. Build `single.cpp` in **two steps** (compile, then link).
 2. **Read** what is inside the object files and the finished binary.
@@ -4189,13 +4189,13 @@ That is MinGW GCC done.
 
 **MinGW-w64** brings the GNU tool chain to Windows, and its package also
 contains the **Clang** compiler. The programs it makes are ordinary
-Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Windows programs. Clang here uses MinGW's libstdc++ (the one of GCC 16.2)
+and, for the final link, LLVM's own linker **lld**.
 Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
-`clang++ --version` says `clang version 19.1.1` and
+`clang++ --version` says `clang version 23.1.3` and
 `Target: x86_64-w64-windows-gnu`.
 
-
-The steps: 
+The steps:
 
 1. Build `single.cpp` in **two steps** (compile, then link).
 2. **Read** what is inside the object files and the finished binary.
@@ -4220,12 +4220,14 @@ If you see a version banner, you are ready.
 - **`clang++`**: the Clang compiler driver. You give it `.cpp` files and
   options. It runs the compiler and, unless you say `-c`, then runs the
   linker for you.
-- **`ld`**: the GNU linker. You will not usually type it: `clang++`
-  calls it. The linker errors you get come from `ld`, and you will see
-  its name in them.
+- **`lld`**: the LLVM linker (`ld.lld`). You will not usually type it:
+  `clang++` calls it when you add **`-fuse-ld=lld`** ("use lld as the
+  linker"). The linker errors you get come from `ld.lld`, and you will
+  see its name in them. The GNU linker `ld` is installed too, and it is
+  what `clang++` would pick on its own. We will see why we do not let it.
 - **`-lstdc++exp`**: not a program but a library option (`-l` means
-  "link this library"). On our MinGW Clang 19, `std::println` needs this
-  extra library ("the experimental part of the C++ library").
+  "link this library"). On MinGW, `std::println` needs this extra
+  library ("the experimental part of the C++ library").
 - **`nm`**: lists the **symbol table** of an object file: every name it
   defines or needs. We need it to see what the linker sees.
 - **`objdump`**: prints information about object files and executables:
@@ -4252,7 +4254,7 @@ harmless.)
 
 ```powershell
 clang++ -std=c++23 -Wall -Wextra -c single.cpp -o out-mingw-clang/single.o
-clang++ out-mingw-clang/single.o -o out-mingw-clang/single_two_step.exe -lstdc++exp
+clang++ out-mingw-clang/single.o -o out-mingw-clang/single_two_step.exe -fuse-ld=lld -lstdc++exp
 ./out-mingw-clang/single_two_step.exe
 ```
 
@@ -4268,25 +4270,56 @@ average: 70.9 F
   source folder stays clean.
 - The second command has no `.cpp` file at all: `clang++` is being used
   as a **front end for the linker**.
+- `-fuse-ld=lld` and `-lstdc++exp` are the two MinGW extras, explained in
+  the box below. Both belong to the **link** command only.
 
-> **Gotcha, MinGW only: `-lstdc++exp`.** Leave it out and the link
-> fails:
+> **Gotcha, MinGW Clang: two link options.** `std::println` needs
+> `-lstdc++exp`, and Clang must link with lld. Each one has its own
+> symptom when missing.
+>
+> **Leave out `-lstdc++exp`** and the link fails:
 >
 > ```powershell
-> clang++ out-mingw-clang/single.o -o out-mingw-clang/nolib.exe
+> clang++ out-mingw-clang/single.o -o out-mingw-clang/nolib.exe -fuse-ld=lld
 > ```
 >
 > ```
-> C:/mingw64/bin/ld: out-mingw-clang/single.o:single.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
-> C:/mingw64/bin/ld: out-mingw-clang/single.o:single.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
+> ld.lld: error: undefined symbol: std::__open_terminal(_iobuf*)
+> >>> referenced by out-mingw-clang/single.o:(std::vprint_unicode(...))
+> ld.lld: error: undefined symbol: std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)
+> >>> referenced by out-mingw-clang/single.o:(std::vprint_unicode(...))
 > clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 > ```
 >
-> (Long symbol names shortened with `...`.) Notice that the message is
-> about **missing names**, not syntax: your code compiled fine. This is
-> a **linker** error, and it comes from `ld`. The library has to come
-> **after** the objects that need it. Newer compilers, like the Clang 21
-> in our Linux container, do not need it.
+> (Long lines shortened with `...`.) The message is about **missing
+> names**, not syntax: your code compiled fine. This is a **linker**
+> error. (With the GNU linker the library has to come **after** the
+> objects that need it. lld is more forgiving and accepts any order, but
+> put it last anyway, so the same line works with both linkers.)
+>
+> **Leave out `-fuse-ld=lld`** and `clang++` uses the GNU linker `ld`,
+> which prints a wall of text:
+>
+> ```powershell
+> clang++ out-mingw-clang/single.o -o out-mingw-clang/nold.exe -lstdc++exp
+> ```
+>
+> ```
+> C:/mingw64/lib/libstdc++exp.a(print.o): duplicate section `.rdata$_ZTSSt9exception[_ZTSSt9exception]' has different size
+> C:/mingw64/lib/libstdc++exp.a(print.o): duplicate section `.rdata$_ZTSSt13runtime_error[_ZTSSt13runtime_error]' has different size
+> ...about twenty more lines like these...
+> ```
+>
+> These are **warnings**, so the program is still written and it runs.
+> But the cause is real: `libstdc++exp.a` was built by **GCC**, your
+> object file by **Clang**, and both carry their own copy of some
+> library data (the type information of `std::runtime_error` and
+> friends) with slightly different sizes. GNU `ld` complains about the
+> mismatch. Clang's own linker, **lld**, does not, so with `-fuse-ld=lld`
+> the link is clean. (Mind that a script run with
+> `$ErrorActionPreference = 'Stop'` in Windows PowerShell treats the
+> warning text as a failure and stops.) Newer setups, like the Clang 21
+> in our Linux container, need neither option.
 
 #### 2. Read the object files and the binary
 
@@ -4384,9 +4417,9 @@ objdump -p out-mingw-clang/single_two_step.exe | Select-String 'DLL Name'
 
 ```
 out-mingw-clang/single_two_step.exe:     file format pei-x86-64
-architecture: i386:x86-64, flags 0x0000013b:
-HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
-start address 0x0000000140001125
+architecture: i386:x86-64, flags 0x0000013f:
+HAS_RELOC, EXEC_P, HAS_LINENO, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
+start address 0x000000014000105f
 
 	DLL Name: libgcc_s_seh-1.dll
 	DLL Name: libstdc++-6.dll
@@ -4416,7 +4449,7 @@ binary interface). In 7.14 you will see why it matters for libraries.
 Hand the source file straight to `clang++` and let it run both steps:
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-clang/single_one_step.exe -lstdc++exp
+clang++ -std=c++23 -Wall -Wextra single.cpp -o out-mingw-clang/single_one_step.exe -fuse-ld=lld -lstdc++exp
 ./out-mingw-clang/single_one_step.exe
 Get-ChildItem out-mingw-clang/single.o, out-mingw-clang/single_two_step.exe, out-mingw-clang/single_one_step.exe | Format-Table Name, Length -AutoSize
 ```
@@ -4426,9 +4459,9 @@ average: 70.9 F
 
 Name                Length
 ----                ------
-single.o            478750
-single_two_step.exe 502064
-single_one_step.exe 502064
+single.o            506328
+single_two_step.exe 305664
+single_one_step.exe 305664
 ```
 
 Both programs have **exactly the same size**. That is the point:
@@ -4436,14 +4469,15 @@ Both programs have **exactly the same size**. That is the point:
 passes your options along. The one-step form just does not keep the
 object file.
 
-Look at the sizes again. Here the object file (about 480 KB) is a little
-**smaller** than the program built from it (about 500 KB). With other
-tool chains the object is bigger than the program: what each compiler
-keeps in an object file differs, and your numbers will differ too. The
-lesson is that an object file is **not a small program**, it is a
-half-finished one: the template code that `std::println` and
-`std::accumulate` bring in is spread over it, together with the
-bookkeeping the linker needs.
+Look at the sizes again. Here the object file (about 500 KB) is
+**bigger** than the program built from it (about 300 KB). That is the
+linker at work: the object carries every piece of template code that
+`std::println` and `std::accumulate` brought in, and the linker keeps
+only what the program really uses. With other tool chains the numbers
+go the other way, and yours will differ too. The lesson is that an
+object file is **not a small program**, it is a half-finished one: all
+that template code is spread over it, together with the bookkeeping the
+linker needs.
 
 #### 4. Multiple files
 
@@ -4453,7 +4487,7 @@ Compile each `.cpp` on its own, then link all three objects together:
 clang++ -std=c++23 -Wall -Wextra -c stats.cpp -o out-mingw-clang/stats.o
 clang++ -std=c++23 -Wall -Wextra -c report.cpp -o out-mingw-clang/report.o
 clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
-clang++ out-mingw-clang/main.o out-mingw-clang/stats.o out-mingw-clang/report.o -o out-mingw-clang/weather.exe -lstdc++exp
+clang++ out-mingw-clang/main.o out-mingw-clang/stats.o out-mingw-clang/report.o -o out-mingw-clang/weather.exe -fuse-ld=lld -lstdc++exp
 ./out-mingw-clang/weather.exe
 ```
 
@@ -4465,23 +4499,26 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 starve it. Link again, this time **leaving out `stats.o`**:
 
 ```powershell
-clang++ out-mingw-clang/main.o out-mingw-clang/report.o -o out-mingw-clang/broken.exe -lstdc++exp
+clang++ out-mingw-clang/main.o out-mingw-clang/report.o -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x4a): undefined reference to `station::to_celsius(double)'
-C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x5f): undefined reference to `station::to_celsius(double)'
-C:/mingw64/bin/ld: out-mingw-clang/report.o:report.cpp:(.text+0x74): undefined reference to `station::to_celsius(double)'
+ld.lld: error: undefined symbol: station::summarize(std::vector<double, std::allocator<double>> const&)
+>>> referenced by out-mingw-clang/main.o:(main)
+ld.lld: error: undefined symbol: station::to_celsius(double)
+>>> referenced by out-mingw-clang/report.o:(station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char>>, station::Summary const&))
+>>> referenced by out-mingw-clang/report.o:(station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char>>, station::Summary const&))
+>>> referenced by out-mingw-clang/report.o:(station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char>>, station::Summary const&))
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
 Read that with fresh eyes. Every `.cpp` compiled without complaint. The
 error is that two promises ("someone defines `summarize`", "someone
-defines `to_celsius`") were never kept. One line per place that asked:
-`report.o` asks for `to_celsius` three times. Whenever you see
-`undefined reference`, ask: **did I forget to compile or link the file
-that defines it?** (And did I put `-lstdc++exp` after the objects?)
+defines `to_celsius`") were never kept. lld prints the missing name once,
+then one `>>> referenced by` line for each place that asked: `report.o`
+asks for `to_celsius` three times. Whenever you see `undefined
+symbol` or `undefined reference`, ask: **did I forget to compile or
+link the file that defines it?**
 
 When you want to start over, or try another environment, delete the
 folder: `Remove-Item -Recurse out-mingw-clang`. Nothing else was touched.
@@ -4855,8 +4892,8 @@ average: 70.9 F
 - The second command has no `.cpp` file at all: `clang++` is being used
   as a **front end for the linker**.
 - There is no extra library to add here: the library in this image has
-  `std::println` built in. (On the older MinGW Clang 19 you need
-  `-lstdc++exp`.)
+  `std::println` built in. (On MinGW Clang you need `-lstdc++exp` and
+  `-fuse-ld=lld`, see 7.12.)
 
 #### 2. Read the object files and the binary
 
@@ -5067,7 +5104,9 @@ it applies.
 
 - `/std:c++latest`, never `/std:c++23`, with `cl`.
 - MinGW GCC and Clang need `-lstdc++exp` for `std::println`, and it must
-  come **after** the objects. The Linux containers do not need it.
+  come **after** the objects. MinGW Clang also needs `-fuse-ld=lld`:
+  with the default GNU linker it prints a wall of "duplicate section"
+  warnings. The Linux containers need neither.
 - `LNK2019` / `undefined reference` means the **linker** could not find
   a definition: check that you compiled and linked the file that has it.
 - Objects from different compilers do not mix, even when both are `.obj`
@@ -5727,12 +5766,13 @@ That is MinGW GCC done.
 
 **MinGW-w64** brings the GNU tool chain to Windows, and its package also
 contains the **Clang** compiler. The programs it makes are ordinary
-Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Windows programs. Clang here uses MinGW's libstdc++ (the one of GCC 16.2)
+and, for the final link of a program, LLVM's own linker **lld**.
 Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
-`clang++ --version` says `clang version 19.1.1` and
+`clang++ --version` says `clang version 23.1.3` and
 `Target: x86_64-w64-windows-gnu`.
 
-The steps: 
+The steps:
 
 1. Build `single.cpp` in **two steps** (compile, then link).
 2. **Read** what is inside the object files and the finished binary.
@@ -5762,12 +5802,14 @@ If you see a version banner, you are ready.
   because the object files have the same format.
 - **`nm`**: lists the **symbol table** of an object file or of every
   member of an archive: every name it defines or needs.
-- **`ld`**: the GNU linker. You will not usually type it: `clang++`
-  calls it, and the linker errors you get come from `ld`.
+- **`lld`**: the LLVM linker. You will not usually type it: `clang++`
+  calls it when you add `-fuse-ld=lld`, and the linker errors you get
+  come from `ld.lld`. (Why not the GNU linker `ld`? See the gotcha in
+  7.12: it prints a wall of duplicate-section warnings with
+  `-lstdc++exp`.)
 - **`-lstdc++exp`**: a library option (`-l` means "link this library").
-  On our MinGW Clang 19, `std::println` needs this extra library ("the
-  experimental part of the C++ library"). It goes **after** everything
-  that needs it.
+  On MinGW, `std::println` needs this extra library ("the experimental
+  part of the C++ library"). Put it **after** everything that needs it.
 
 #### A folder for the output
 
@@ -5800,8 +5842,8 @@ ar tv out-mingw-clang/libstation.a
 ```
 stats.o
 report.o
-rw-rw-rw- 0/0  20911 Oct 14 18:03 2026 stats.o
-rw-rw-rw- 0/0 440055 Oct 14 18:03 2026 report.o
+rw-rw-rw- 0/0  17495 Oct 24 09:29 2026 stats.o
+rw-rw-rw- 0/0 485934 Oct 24 09:29 2026 report.o
 ```
 
 - The two `clang++` commands only **compile**: `-c` means "do not
@@ -5850,9 +5892,9 @@ Get-ChildItem out-mingw-clang/stats.o, out-mingw-clang/report.o, out-mingw-clang
 ```
 Name         Length
 ----         ------
-stats.o       20911
-report.o     440055
-libstation.a 512796
+stats.o       17495
+report.o     485934
+libstation.a 557238
 ```
 
 The library is **not smaller** than the objects it holds: nothing is
@@ -5886,7 +5928,7 @@ of the object files it holds:
 
 ```powershell
 clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
-clang++ out-mingw-clang/main.o -Lout-mingw-clang -lstation -o out-mingw-clang/weather.exe -lstdc++exp
+clang++ out-mingw-clang/main.o -Lout-mingw-clang -lstation -o out-mingw-clang/weather.exe -fuse-ld=lld -lstdc++exp
 ./out-mingw-clang/weather.exe
 Get-ChildItem out-mingw-clang/main.o, out-mingw-clang/weather.exe | Format-Table Name, Length -AutoSize
 ```
@@ -5896,11 +5938,12 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 
 Name        Length
 ----        ------
-main.o      471155
-weather.exe 537648
+main.o      506300
+weather.exe 324096
 ```
 
-Two options on that link line deserve an explanation:
+Two options on that link line deserve an explanation (the other two,
+`-fuse-ld=lld` and `-lstdc++exp`, are the MinGW extras of 7.12):
 
 - **`-lstation`** means "find a library called `station`". The tool adds
   the `lib` in front and the `.a` at the end for you, so it looks for
@@ -5915,22 +5958,25 @@ the program. When `report.o` arrives, it needs `to_celsius`, and that
 name is found in the same archive. The names a member needs join the
 list of names still to find.
 
-Sizes depend on the toolchain: here the program (about 540 KB) is a
-little **bigger** than the library (about 510 KB). Do not expect a rule
-from the sizes. What matters is that the program was built from the
-parts of the library it needed.
+Sizes depend on the toolchain: here the program (about 320 KB) is
+**smaller** than the library (about 560 KB), because the linker kept
+only what the program uses. Do not expect a rule from the sizes. What
+matters is that the program was built from the parts of the library it
+needed.
 
 #### 4. Break it on purpose
 
 **a. Leave the library out.** Link again with only `main.o`:
 
 ```powershell
-clang++ out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
+clang++ out-mingw-clang/main.o -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0xd1): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+ld.lld: error: undefined symbol: station::summarize(std::vector<double, std::allocator<double>> const&)
+>>> referenced by out-mingw-clang/main.o:(main)
+ld.lld: error: undefined symbol: station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char>>, station::Summary const&)
+>>> referenced by out-mingw-clang/main.o:(main)
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
@@ -5940,34 +5986,45 @@ the two functions `main.cpp` calls. It does **not** ask for
 the library we left out.
 
 **b. Change the order.** Put the library **before** the object that
-needs it:
+needs it. With lld this link **works**: lld searches all its inputs
+together, whatever the order. The order rule belongs to the **GNU
+linker**, so we ask for it by name with `-fuse-ld=ld`. We also leave out
+`-lstdc++exp` here (with `ld` it brings back the duplicate-section
+warnings of 7.12), which is why two extra lines about `std::println`
+appear at the end of the message:
 
 ```powershell
-clang++ -Lout-mingw-clang -lstation out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
+clang++ -fuse-ld=ld -Lout-mingw-clang -lstation out-mingw-clang/main.o -o out-mingw-clang/broken.exe
 ```
 
 ```
 C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0x97): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
 C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text+0xd1): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text$...): undefined reference to `std::__open_terminal(_iobuf*)'
+C:/mingw64/bin/ld: out-mingw-clang/main.o:main.cpp:(.text$...): undefined reference to `std::__write_to_terminal(void*, std::span<char, 18446744073709551615ull>)'
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
-Same files, same flags, only the order changed, and the link fails with
-the same message as if the library were missing. The linker reads its
-inputs **left to right**, and only pulls members out of an archive to
-satisfy names it **already needs**. Here it met the library first, when
-nothing needed anything yet, so it pulled nothing out. The rule is
-simple: **libraries go after the objects that use them.** The same rule
-puts `-lstdc++exp` at the very end.
+(Long symbol names shortened with `...`.) Ignore the last two
+`undefined reference` lines, they are the missing `-lstdc++exp`. The
+first two are the point: same files, same flags, only the order changed,
+and the link fails with the same message as if the library were missing.
+The GNU linker reads its inputs **left to right**, and only pulls
+members out of an archive to satisfy names it **already needs**. Here it
+met the library first, when nothing needed anything yet, so it pulled
+nothing out. The rule is simple: **libraries go after the objects that
+use them.** The same rule puts `-lstdc++exp` at the very end. lld is
+more forgiving, but a command that is right for both linkers is the
+safer habit.
 
 **c. Forget `-L`.** Name the library, but do not say where it is:
 
 ```powershell
-clang++ out-mingw-clang/main.o -lstation -o out-mingw-clang/broken.exe -lstdc++exp
+clang++ out-mingw-clang/main.o -lstation -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: cannot find -lstation: No such file or directory
+lld: error: unable to find library -lstation
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
@@ -6006,7 +6063,7 @@ That is MinGW Clang done.
 You get a real Linux with GCC from the Docker container of chapter 2.
 Our image carries GCC 16.2 and GNU binutils 2.44.
 
-The steps: 
+The steps:
 
 1. Build `single.cpp` in **two steps** (compile, then link).
 2. **Read** what is inside the object files and the finished binary.
@@ -7309,9 +7366,10 @@ That is MinGW GCC done.
 
 **MinGW-w64** brings the GNU tool chain to Windows, and its package also
 contains the **Clang** compiler. The programs it makes are ordinary
-Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Windows programs. Clang here uses MinGW's libstdc++ (the one of GCC 16.2)
+and, for the final link of a program, LLVM's own linker **lld**.
 Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
-`clang++ --version` says `clang version 19.1.1` and
+`clang++ --version` says `clang version 23.1.3` and
 `Target: x86_64-w64-windows-gnu`.
 
 #### Open the shell
@@ -7333,16 +7391,18 @@ If you see a version banner, you are ready.
   the sources and then runs the linker to make a **DLL**.
 - **`-Wl,<option>`**: not a program but a way to hand an option **to the
   linker**. We use it to ask for the import library (`--out-implib`).
-- **`ld`**: the GNU linker. You will not usually type it: `clang++`
-  calls it, and the linker errors you get come from `ld`.
+- **`ld` and `lld`**: the GNU and the LLVM linker. You will not usually
+  type them: `clang++` calls one of them. It uses the GNU `ld` for the
+  DLL and, because we add `-fuse-ld=lld`, the LLVM `lld` for the program
+  (the reason is the gotcha in 7.12). The linker errors you get come
+  from whichever one ran, and you will see its name in them.
 - **`objdump`**: prints information about object files, DLLs and
   executables. With `-p` it shows a DLL's **export table** and the
   **DLLs a program needs** (the `DLL Name` lines).
 - **`-lstdc++exp`**: a library option (`-l` means "link this library").
-  On our MinGW Clang 19, `std::println` needs this extra library ("the
-  experimental part of the C++ library"). It goes **after** everything
-  that needs it. Only the program needs it: the library does not call
-  `println`.
+  On MinGW, `std::println` needs this extra library ("the experimental
+  part of the C++ library"). Put it **after** everything that needs it.
+  Only the program needs it: the library does not call `println`.
 
 #### A folder for the output
 
@@ -7373,7 +7433,7 @@ Get-ChildItem out-mingw-clang | Format-Table Name, Length -AutoSize
 Name             Length
 ----             ------
 libstation.dll.a   3400
-station.dll      470022
+station.dll      497812
 ```
 
 - `-shared` makes a **DLL** instead of an executable.
@@ -7399,7 +7459,7 @@ objdump -p out-mingw-clang\station.dll | Select-String 'station'
 
 ```
 out-mingw-clang\station.dll:     file format pei-x86-64
-Name 				0000000000027046 station.dll
+Name 				000000000002c046 station.dll
 	[   0] +base[   1]  0000 _ZN7station10to_celsiusEd
 	[   1] +base[   2]  0001 _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
 	[   2] +base[   3]  0002 _ZN7station9summarizeERKSt6vectorIdSaIdEE
@@ -7424,12 +7484,13 @@ The program is linked against the **signpost**, the import library, not
 against the DLL:
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -lstdc++exp
+clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -fuse-ld=lld -lstdc++exp
 ```
 
 `-Lout-mingw-clang` says "also search this folder", and `-lstation`
 means "find a library called `station`": the linker looks for
-`libstation.dll.a`. Now ask the finished program what it needs when it
+`libstation.dll.a`. (`-fuse-ld=lld` and `-lstdc++exp` are the MinGW
+extras of 7.12.) Now ask the finished program what it needs when it
 **starts**:
 
 ```powershell
@@ -7518,29 +7579,32 @@ Rename-Item out-mingw-clang\station.dll.away station.dll
 naming the library:
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -lstdc++exp
+clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -fuse-ld=lld -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: C:/Users/<you>/AppData/Local/Temp/main-febf2b.o:main.cpp:(.text+0x91): undefined reference to `__imp__ZN7station9summarizeERKSt6vectorIdSaIdEE'
-C:/mingw64/bin/ld: C:/Users/<you>/AppData/Local/Temp/main-febf2b.o:main.cpp:(.text+0xcf): undefined reference to `__imp__ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE'
+ld.lld: error: undefined symbol: __declspec(dllimport) station::summarize(std::vector<double, std::allocator<double>> const&)
+>>> referenced by C:/Users/<you>/AppData/Local/Temp/main-cda861.o:(main)
+ld.lld: error: undefined symbol: __declspec(dllimport) station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char>>, station::Summary const&)
+>>> referenced by C:/Users/<you>/AppData/Local/Temp/main-cda861.o:(main)
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
 (Paths shortened.) Read it closely. The linker asks for `summarize` and
-`format_report`, the two functions `main.cpp` calls. The names start
-with **`__imp_`**, "import": the program expects to reach the function
+`format_report`, the two functions `main.cpp` calls. They are marked
+**`__declspec(dllimport)`**: the program expects to reach the function
 **through a DLL**, and without the import library the linker has no idea
-where that is.
+where that is. (The GNU linker says the same with an `__imp_` prefix on
+the mangled name, "import".)
 
 **c. Name the library, but not the folder.**
 
 ```powershell
-clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -lstdc++exp
+clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -fuse-ld=lld -lstdc++exp
 ```
 
 ```
-C:/mingw64/bin/ld: cannot find -lstation: No such file or directory
+lld: error: unable to find library -lstation
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
 ```
 
@@ -8365,6 +8429,9 @@ target_link_libraries(rooster PRIVATE station)
 
 if(WIN32 AND NOT MSVC)
     target_link_libraries(rooster PRIVATE stdc++exp)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_link_options(rooster PRIVATE -fuse-ld=lld)
+    endif()
 endif()
 
 install(TARGETS rooster station
@@ -8391,7 +8458,9 @@ install(FILES stats.h report.h ${CMAKE_CURRENT_BINARY_DIR}/station_export.h
 - `target_link_libraries(rooster PRIVATE station)` says "the program
   uses the library", and gives you the link step for free.
 - On MinGW, `stdc++exp` is the `-lstdc++exp` of 7.12, written once for
-  everybody.
+  everybody. For Clang, `target_link_options(... -fuse-ld=lld)` adds the
+  other MinGW extra of 7.12 to the link command of the program. The
+  inner `if` asks CMake which compiler it found.
 - `install(...)` says what `cmake --install` copies, and where (step 6).
 
 ### Pick your environment
@@ -9224,8 +9293,8 @@ Configure will be re-run and you may have to reset some variables.
 The following variables have changed:
 CMAKE_CXX_COMPILER= clang++
 
--- The C compiler identification is GNU 14.2.0
--- The CXX compiler identification is Clang 19.1.1
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is Clang 23.1.3
 ...
 ```
 
@@ -9246,9 +9315,10 @@ That is MinGW GCC done.
 
 **MinGW-w64** brings the GNU tool chain to Windows, and its package also
 contains the **Clang** compiler. The programs it makes are ordinary
-Windows programs. Clang here uses MinGW's libstdc++ and the GNU linker.
+Windows programs. Clang here uses MinGW's libstdc++ (the one of GCC 16.2)
+and, for the final link of a program, LLVM's own linker **lld**.
 Ours is a UCRT build by Brecht Sanders in `C:\mingw64`:
-`clang++ --version` says `clang version 19.1.1` and
+`clang++ --version` says `clang version 23.1.3` and
 `Target: x86_64-w64-windows-gnu`.
 
 #### Open the shell
@@ -9266,10 +9336,10 @@ clang++ --version
 ```
 
 ```
-cmake version 3.30.4
+cmake version 4.4.4
 ...
-1.12.1
-(built by Brecht Sanders, r2) clang version 19.1.1
+1.13.2
+(built by Brecht Sanders, r3) clang version 23.1.3
 ...
 ```
 
@@ -9303,10 +9373,10 @@ cmake -S . -B out-mingw-clang/static -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_C
 ```
 
 ```
--- The C compiler identification is Clang 19.1.1
--- The CXX compiler identification is Clang 19.1.1
+-- The C compiler identification is Clang 23.1.3
+-- The CXX compiler identification is Clang 23.1.3
 ...
--- Configuring done (1.2s)
+-- Configuring done (1.3s)
 -- Generating done (0.0s)
 -- Build files have been written to: D:/.../7.15ProjectCMakeCommandLine/out-mingw-clang/static
 ```
@@ -9372,7 +9442,7 @@ print the **real commands**:
 [2/5] clang++.exe -DSTATION_STATIC_DEFINE ... -c ...report.cpp
 [3/5] clang++.exe -DSTATION_STATIC_DEFINE -I... -std=gnu++23 -MD ... -c ...main.cpp
 [4/5] ... cmake.exe -E rm -f libstation.a && ... llvm-ar.exe qc libstation.a CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj && ... llvm-ranlib.exe libstation.a && cd .
-[5/5] ... clang++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe -Wl,--out-implib,librooster.dll.a ... libstation.a -lstdc++exp -lkernel32 -luser32 -lgdi32 ...
+[5/5] ... clang++.exe -fuse-ld=lld CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe -Wl,--out-implib,librooster.dll.a ... libstation.a -lstdc++exp -lkernel32 -luser32 -lgdi32 ...
 ```
 
 ```
@@ -9399,10 +9469,11 @@ previous three lectures. Compare with what you typed:
   `ar rcs`: the `s` writes the archive's index, and `ranlib` is the same
   "write the index" step as a separate command.
 - **Step 5** is the link of 7.12 and 7.13: `rooster.exe` from
-  `main.cpp.obj` and `libstation.a`, then **`-lstdc++exp`** (the
-  `target_link_libraries(... stdc++exp)` line of `CMakeLists.txt`, in
-  the right place: **after** the objects that need it), then the Windows
-  libraries every Windows program links.
+  `main.cpp.obj` and `libstation.a`, with **`-fuse-ld=lld`** first (the
+  `target_link_options` line of `CMakeLists.txt`), then **`-lstdc++exp`**
+  (the `target_link_libraries(... stdc++exp)` line, in the right place:
+  **after** the objects that need it), then the Windows libraries every
+  Windows program links.
 
 **CMake is not magic. It is a command generator.** Whenever a CMake
 build misbehaves, `--verbose` shows you the exact command that went
@@ -9503,7 +9574,7 @@ cmake --build out-mingw-clang/shared --verbose
 [2/5] clang++.exe -Dstation_EXPORTS ... -c ...report.cpp
 [3/5] clang++.exe -I... -std=gnu++23 -MD ... -c ...main.cpp
 [4/5] ... clang++.exe -shared -o libstation.dll -Wl,--out-implib,libstation.dll.a ... CMakeFiles/station.dir/stats.cpp.obj CMakeFiles/station.dir/report.cpp.obj ...
-[5/5] ... clang++.exe CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe ... libstation.dll.a -lstdc++exp ...
+[5/5] ... clang++.exe -fuse-ld=lld CMakeFiles/rooster.dir/main.cpp.obj -o rooster.exe ... libstation.dll.a -lstdc++exp ...
 ```
 
 (Shortened again.) Three things to notice. The library files are
@@ -9523,7 +9594,7 @@ Get-ChildItem out-mingw-clang\shared\*.dll, out-mingw-clang\shared\*.a | Format-
 ```
 Name              Length
 ----              ------
-libstation.dll   469940
+libstation.dll   497812
 libstation.dll.a   3446
 
 sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
@@ -9644,8 +9715,8 @@ Configure will be re-run and you may have to reset some variables.
 The following variables have changed:
 CMAKE_CXX_COMPILER= g++
 
--- The C compiler identification is GNU 14.2.0
--- The CXX compiler identification is GNU 14.2.0
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
 ...
 ```
 

@@ -23,8 +23,12 @@ function StepMustFail {
     Write-Host "(failed, as expected)"
 }
 
-# -lstdc++exp: the libstdc++ that MinGW Clang uses needs this extra library
-# for std::println. It goes AFTER the objects and libraries that need it.
+# Two link options for std::println with MinGW Clang:
+# -lstdc++exp: the libstdc++ that MinGW Clang uses needs this extra library. It
+#   goes AFTER the objects and libraries that need it.
+# -fuse-ld=lld: link with Clang's own linker. The default GNU ld refuses the
+#   mix of Clang-built objects and GCC-built libstdc++exp.a, with "duplicate
+#   section ... has different size" errors.
 
 New-Item -ItemType Directory -Force out-mingw-clang | Out-Null
 
@@ -48,17 +52,20 @@ Step ar x --output out-mingw-clang/extracted out-mingw-clang/libstation.a stats.
 # 3. Link the program against the library.
 #    -L<folder> = also search this folder, -lstation = find libstation.a
 Step clang++ -std=c++23 -Wall -Wextra -c main.cpp -o out-mingw-clang/main.o
-Step clang++ out-mingw-clang/main.o -Lout-mingw-clang -lstation -o out-mingw-clang/weather.exe -lstdc++exp
+Step clang++ out-mingw-clang/main.o -Lout-mingw-clang -lstation -o out-mingw-clang/weather.exe -fuse-ld=lld -lstdc++exp
 Step ./out-mingw-clang/weather.exe
 Get-ChildItem out-mingw-clang/main.o, out-mingw-clang/weather.exe | Format-Table Name, Length -AutoSize
 
 # 4. Break it on purpose
 # 4a. Leave the library out
-StepMustFail clang++ out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
-# 4b. Library before the object that needs it
-StepMustFail clang++ -Lout-mingw-clang -lstation out-mingw-clang/main.o -o out-mingw-clang/broken.exe -lstdc++exp
+StepMustFail clang++ out-mingw-clang/main.o -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp
+# 4b. Library before the object that needs it. lld finds the library whatever the
+#     order, so we ask for GNU ld by name: the order rule belongs to GNU ld.
+#     No -lstdc++exp here (with ld it brings the duplicate-section errors back),
+#     so the output also has two std::__open_terminal / __write_to_terminal lines.
+StepMustFail clang++ -fuse-ld=ld -Lout-mingw-clang -lstation out-mingw-clang/main.o -o out-mingw-clang/broken.exe
 # 4c. Forget -L
-StepMustFail clang++ out-mingw-clang/main.o -lstation -o out-mingw-clang/broken.exe -lstdc++exp
+StepMustFail clang++ out-mingw-clang/main.o -lstation -o out-mingw-clang/broken.exe -fuse-ld=lld -lstdc++exp
 
 # 5. The finished program does not need the library any more
 Remove-Item out-mingw-clang/libstation.a

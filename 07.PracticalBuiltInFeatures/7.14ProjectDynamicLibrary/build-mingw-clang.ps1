@@ -23,8 +23,12 @@ function StepMustFail {
     Write-Host "(failed, as expected)"
 }
 
-# -lstdc++exp: std::println in the program needs this extra library. It goes
-# AFTER the objects that need it. The DLL itself does not use println.
+# Two link options for std::println in the program (the DLL itself does not use println):
+# -lstdc++exp: the libstdc++ that MinGW Clang uses needs this extra library. It
+#   goes AFTER the objects that need it.
+# -fuse-ld=lld: link with Clang's own linker. The default GNU ld refuses the
+#   mix of Clang-built objects and GCC-built libstdc++exp.a, with "duplicate
+#   section ... has different size" errors.
 
 New-Item -ItemType Directory -Force out-mingw-clang | Out-Null
 
@@ -40,7 +44,7 @@ objdump -p out-mingw-clang\station.dll | Select-String 'station'
 
 # 3. Link the program against the import library (-L<folder> -lstation finds
 #    libstation.dll.a), then ask what it needs.
-Step clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -lstdc++exp
+Step clang++ -std=c++23 -Wall -Wextra main.cpp -Lout-mingw-clang -lstation -o out-mingw-clang\weather.exe -fuse-ld=lld -lstdc++exp
 objdump -p out-mingw-clang\weather.exe | Select-String 'DLL Name: (station|libstdc)'
 
 # 4. Run it. Windows looks for station.dll next to the .exe first.
@@ -51,9 +55,9 @@ Step .\out-mingw-clang\weather.exe
 #     box and wait for a click. By hand: rename out-mingw-clang\station.dll to
 #     station.dll.away and run .\out-mingw-clang\weather.exe. It does not start.
 # 5b. Leave the library out of the link
-StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -lstdc++exp
+StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-clang\broken.exe -fuse-ld=lld -lstdc++exp
 # 5c. Name the library but not the folder
-StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -lstdc++exp
+StepMustFail clang++ -std=c++23 -Wall -Wextra main.cpp -lstation -o out-mingw-clang\broken.exe -fuse-ld=lld -lstdc++exp
 
 # 6. Replace the library without relinking the program: build a second version
 #    from stats.cpp + report_v2.cpp, copy it over the old DLL, run the SAME exe.
