@@ -23,7 +23,7 @@ function StepMustFail {
     Write-Host "(failed, as expected)"
 }
 
-# -lstdc++exp: GCC 14's std::println needs this extra library.
+# -lstdc++exp: MinGW GCC (16.2 too) keeps std::println support in this extra library.
 # It goes AFTER the objects that need it.
 
 New-Item -ItemType Directory -Force out-mingw-gcc | Out-Null

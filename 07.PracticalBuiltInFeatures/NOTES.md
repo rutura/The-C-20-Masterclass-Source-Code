@@ -3885,7 +3885,7 @@ That is MSVC done.
 **MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
 programs it makes are ordinary Windows programs. Ours is a UCRT build by
 Brecht Sanders: `g++ --version` says
-`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r3) 16.2.0`.
 
 
 The steps:
@@ -3917,7 +3917,7 @@ If you see a version banner, you are ready.
   it. But the linker errors you get come from `ld.exe`, and you will see
   its name in them.
 - **`-lstdc++exp`**: not a program but a library option (`-l` means
-  "link this library"). On our MinGW GCC 14, `std::println` needs this
+  "link this library"). On MinGW, `std::println` needs this
   extra library ("the experimental part of the C++ library").
 - **`nm`**: lists the **symbol table** of an object file: every name it
   defines or needs. We need it to see what the linker sees.
@@ -3978,8 +3978,9 @@ average: 70.9 F
 > (Long paths and symbol names shortened with `...`.) Notice that the
 > message is about **missing names**, not syntax: your code compiled
 > fine. This is a **linker** error, and it comes from `ld.exe`. The
-> library has to come **after** the objects that need it. Newer
-> compilers, like the GCC 16 in our Linux container, do not need it.
+> library has to come **after** the objects that need it. (The Linux
+> containers do not need it. On MinGW, even GCC 16.2 still keeps the
+> `std::println` support in this extra library.)
 
 #### 2. Read the object files and the binary
 
@@ -4078,7 +4079,7 @@ objdump -p out-mingw-gcc/single_two_step.exe | Select-String 'DLL Name'
 out-mingw-gcc/single_two_step.exe:     file format pei-x86-64
 architecture: i386:x86-64, flags 0x0000013b:
 HAS_RELOC, EXEC_P, HAS_DEBUG, HAS_SYMS, HAS_LOCALS, D_PAGED
-start address 0x0000000140001125
+start address 0x000000014000105f
 
 	DLL Name: libgcc_s_seh-1.dll
 	DLL Name: libstdc++-6.dll
@@ -4122,9 +4123,9 @@ average: 70.9 F
 
 Name                Length
 ----                ------
-single.o            706568
-single_two_step.exe 513682
-single_one_step.exe 513682
+single.o            699885
+single_two_step.exe 554883
+single_one_step.exe 554883
 ```
 
 Both programs have **exactly the same size**. That is the point: `g++`
@@ -4132,7 +4133,7 @@ is a driver, it runs the compiler and then the linker and passes your
 options along. The one-step form just does not keep the object file.
 
 Look at the sizes again: the object file (about 700 KB) is **bigger**
-than the program built from it (about 510 KB). Two lines of
+than the program built from it (about 550 KB). Two lines of
 `std::println` and `std::accumulate` pull in a lot of templates, and the
 object keeps a copy of every template instantiation the file used, plus
 the bookkeeping the linker needs. The linker then keeps only what the
@@ -4163,10 +4164,10 @@ g++ out-mingw-gcc/main.o out-mingw-gcc/report.o -o out-mingw-gcc/broken.exe -lst
 ```
 
 ```
-...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x35): undefined reference to `station::to_celsius(double)'
-...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x50): undefined reference to `station::to_celsius(double)'
-...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x6a): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x66): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x39): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x54): undefined reference to `station::to_celsius(double)'
+...ld.exe: out-mingw-gcc/report.o:report.cpp:(.text+0x6e): undefined reference to `station::to_celsius(double)'
 collect2.exe: error: ld returned 1 exit status
 ```
 
@@ -4608,7 +4609,7 @@ average: 70.9 F
 - The second command has no `.cpp` file at all: `g++` is being used as a
   **front end for the linker**.
 - There is no extra library to add here: GCC 16 has `std::println` built
-  in. (On the older MinGW GCC 14 you need `-lstdc++exp`.)
+  in. (On MinGW, even GCC 16.2 still needs `-lstdc++exp`, see 7.12.)
 
 #### 2. Read the object files and the binary
 
@@ -5500,7 +5501,7 @@ That is MSVC done.
 **MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
 programs it makes are ordinary Windows programs. Ours is a UCRT build by
 Brecht Sanders: `g++ --version` says
-`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r3) 16.2.0`.
 
 #### Open the shell
 
@@ -5527,7 +5528,7 @@ If you see a version banner, you are ready.
 - **`ld`**: the GNU linker. You will not usually type it: `g++` calls
   it, and the linker errors you get come from `ld.exe`.
 - **`-lstdc++exp`**: a library option (`-l` means "link this library").
-  On our MinGW GCC 14, `std::println` needs this extra library ("the
+  On MinGW, `std::println` needs this extra library ("the
   experimental part of the C++ library"). It goes **after** everything
   that needs it.
 
@@ -5562,8 +5563,8 @@ ar tv out-mingw-gcc/libstation.a
 ```
 stats.o
 report.o
-rw-rw-rw- 0/0  32438 Oct 14 18:03 2026 stats.o
-rw-rw-rw- 0/0 645393 Oct 14 18:03 2026 report.o
+rw-rw-rw- 0/0  21911 Oct 24 09:41 2026 stats.o
+rw-rw-rw- 0/0 673838 Oct 24 09:41 2026 report.o
 ```
 
 - The two `g++` commands only **compile**: `-c` means "do not link", and
@@ -5612,9 +5613,9 @@ Get-ChildItem out-mingw-gcc/stats.o, out-mingw-gcc/report.o, out-mingw-gcc/libst
 ```
 Name         Length
 ----         ------
-stats.o       32438
-report.o     645393
-libstation.a 732566
+stats.o       21911
+report.o     673838
+libstation.a 750196
 ```
 
 The library is **not smaller** than the objects it holds: nothing is
@@ -5658,8 +5659,8 @@ sensor-12: low 12.8 C, high 32.5 C, average 21.6 C
 
 Name        Length
 ----        ------
-main.o      694645
-weather.exe 547014
+main.o      701315
+weather.exe 605311
 ```
 
 Two options on that link line deserve an explanation:
@@ -5677,8 +5678,8 @@ the program. When `report.o` arrives, it needs `to_celsius`, and that
 name is found in the same archive. The names a member needs join the
 list of names still to find.
 
-The program (about 550 KB) is **smaller** than the library (about
-730 KB). The library is a stock of parts, and the program takes only
+The program (about 600 KB) is **smaller** than the library (about
+750 KB). The library is a stock of parts, and the program takes only
 what it needs from it.
 
 #### 4. Break it on purpose
@@ -5690,8 +5691,8 @@ g++ out-mingw-gcc/main.o -o out-mingw-gcc/broken.exe -lstdc++exp
 ```
 
 ```
-...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xab): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x66): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xac): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
 collect2.exe: error: ld returned 1 exit status
 ```
 
@@ -5709,8 +5710,8 @@ g++ -Lout-mingw-gcc -lstation out-mingw-gcc/main.o -o out-mingw-gcc/broken.exe -
 ```
 
 ```
-...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x68): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
-...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xab): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0x66): undefined reference to `station::summarize(std::vector<double, std::allocator<double> > const&)'
+...ld.exe: out-mingw-gcc/main.o:main.cpp:(.text+0xac): undefined reference to `station::format_report[abi:cxx11](std::basic_string_view<char, std::char_traits<char> >, station::Summary const&)'
 collect2.exe: error: ld returned 1 exit status
 ```
 
@@ -7095,7 +7096,7 @@ That is MSVC done.
 **MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
 programs it makes are ordinary Windows programs. Ours is a UCRT build by
 Brecht Sanders: `g++ --version` says
-`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r3) 16.2.0`.
 
 #### Open the shell
 
@@ -7122,7 +7123,7 @@ If you see a version banner, you are ready.
   executables. With `-p` it shows a DLL's **export table** and the
   **DLLs a program needs** (the `DLL Name` lines).
 - **`-lstdc++exp`**: a library option (`-l` means "link this library").
-  On our MinGW GCC 14, `std::println` needs this extra library ("the
+  On MinGW, `std::println` needs this extra library ("the
   experimental part of the C++ library"). It goes **after** everything
   that needs it. Only the program needs it: the library does not call
   `println`.
@@ -7156,7 +7157,7 @@ Get-ChildItem out-mingw-gcc | Format-Table Name, Length -AutoSize
 Name             Length
 ----             ------
 libstation.dll.a   3400
-station.dll      478558
+station.dll      500779
 ```
 
 - `-shared` makes a **DLL** instead of an executable.
@@ -7182,7 +7183,7 @@ objdump -p out-mingw-gcc\station.dll | Select-String 'station'
 
 ```
 out-mingw-gcc\station.dll:     file format pei-x86-64
-Name 				0000000000024046 station.dll
+Name 				000000000002a046 station.dll
 	[   0] +base[   1]  0000 _ZN7station10to_celsiusEd
 	[   1] +base[   2]  0001 _ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE
 	[   2] +base[   3]  0002 _ZN7station9summarizeERKSt6vectorIdSaIdEE
@@ -7305,8 +7306,8 @@ g++ -std=c++23 -Wall -Wextra main.cpp -o out-mingw-gcc\broken.exe -lstdc++exp
 ```
 
 ```
-...ld.exe: ...Temp\ccj4TosJ.o:main.cpp:(.text+0x6a): undefined reference to `__imp__ZN7station9summarizeERKSt6vectorIdSaIdEE'
-...ld.exe: ...Temp\ccj4TosJ.o:main.cpp:(.text+0xb1): undefined reference to `__imp__ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE'
+...ld.exe: ...Temp\ccTlK9Jh.o:main.cpp:(.text+0x68): undefined reference to `__imp__ZN7station9summarizeERKSt6vectorIdSaIdEE'
+...ld.exe: ...Temp\ccTlK9Jh.o:main.cpp:(.text+0xb2): undefined reference to `__imp__ZN7station13format_reportB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEERKNS_7SummaryE'
 collect2.exe: error: ld returned 1 exit status
 ```
 
@@ -8900,7 +8901,7 @@ That is MSVC done.
 **MinGW-w64** brings the GNU tool chain (GCC, binutils) to Windows. The
 programs it makes are ordinary Windows programs. Ours is a UCRT build by
 Brecht Sanders: `g++ --version` says
-`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0`.
+`g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r3) 16.2.0`.
 
 #### Open the shell
 
@@ -8917,10 +8918,10 @@ g++ --version
 ```
 
 ```
-cmake version 3.30.4
+cmake version 4.4.4
 ...
-1.12.1
-g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 14.2.0
+1.13.2
+g++.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r3) 16.2.0
 ...
 ```
 
@@ -8953,10 +8954,10 @@ cmake -S . -B out-mingw-gcc/static -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_C
 ```
 
 ```
--- The C compiler identification is GNU 14.2.0
--- The CXX compiler identification is GNU 14.2.0
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
 ...
--- Configuring done (1.2s)
+-- Configuring done (1.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: D:/.../7.15ProjectCMakeCommandLine/out-mingw-gcc/static
 ```
@@ -9172,7 +9173,7 @@ Get-ChildItem out-mingw-gcc\shared\*.dll, out-mingw-gcc\shared\*.a | Format-Tabl
 ```
 Name              Length
 ----              ------
-libstation.dll   477964
+libstation.dll   500779
 libstation.dll.a   3446
 
 sensor-12: low 12.8 C, high 32.5 C, average 21.6 C

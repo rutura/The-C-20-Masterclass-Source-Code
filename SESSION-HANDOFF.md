@@ -23,7 +23,21 @@ Changed:
 Verified: all four `build-mingw-clang.ps1` scripts exit 0; the 7.14 by-hand DLL steps match the notes.
 All four `build-mingw-gcc.ps1` scripts also still exit 0 with GCC 16.2.
 
-Still stale for GCC 16.2 (not edited, outside the "Clang only" request): "GCC 14" mentions and
-old pasted output (sizes, `GNU 14.2.0`) in the "Environment 2: Windows, MinGW GCC" sections of
-NOTES.md, and the `-lstdc++exp` comments in the `build-mingw-gcc.ps1` scripts ("GCC 14's
-std::println needs..."). `-lstdc++exp` is still needed with GCC 16.2 on MinGW (the scripts pass).
+### Follow-up: MinGW GCC sections refreshed for GCC 16.2.0
+
+Every command of the four "Environment 2: Windows, MinGW GCC" sections was run for real
+(scratch copies in `D:\Sandbox\_build\gcc-test`). Findings:
+- `-lstdc++exp` is still required with MinGW GCC 16.2 (without it: undefined `std::__open_terminal`
+  and `std::__write_to_terminal`). GNU ld has no duplicate-section problem with GCC objects, so GCC
+  needs no `-fuse-ld=lld`, and the "library after the objects" rule still holds for GNU ld.
+- The old claim "newer compilers like GCC 16 do not need it" was wrong for MinGW; reworded in 7.12 and in the
+  Linux GCC note.
+- Updated from the real runs: version banners (r3, 16.2.0; cmake 4.4.4, ninja 1.13.2), exe start address,
+  object/exe/DLL/archive sizes, `ar tv` sizes and date, DLL export RVA, `.text+0x..` offsets in the
+  undefined-reference lines, the "about N KB" prose, and the `build-mingw-gcc.ps1` comments (7.12, 7.13).
+- Unchanged because the real output matched: `nm`/`objdump -f` object output, mangled names, error message formats,
+  install layouts, CMake `--verbose` command shapes.
+
+Left alone on purpose: "GCC 14.2.0" in the Linux Docker part of 7.15 (Debian's `g++-14` in the image, not MinGW).
+
+All eight `build-mingw-{gcc,clang}.ps1` scripts exit 0, and every size they print appears in NOTES.md.
