@@ -4530,8 +4530,15 @@ That is MinGW Clang done.
 
 ### Environment 4: Linux, GCC (Docker)
 
-You get a real Linux with GCC from the Docker container of chapter 2.
-Our image carries GCC 16.2 and GNU binutils 2.44.
+We want to compile manually on the terminal by using the compiler that comes
+with the docker images we installed in chapter 2. We will use GCC in this section.
+
+The steps:
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
 
 #### Open the shell
 
@@ -4813,9 +4820,15 @@ That is Linux GCC done.
 
 ### Environment 5: Linux, Clang (Docker)
 
-You get a real Linux with Clang from the Docker container of chapter 2.
-Our image carries Clang 21.1.8 and GNU binutils 2.44, and uses GNU's
-libstdc++, the C++ library that comes with Linux.
+We want to compile manually on the terminal by using the compiler that comes
+with the docker images we installed in chapter 2. We will use Clang in this section.
+
+The steps:
+
+1. Build `single.cpp` in **two steps** (compile, then link).
+2. **Read** what is inside the object files and the finished binary.
+3. Build `single.cpp` in **one step**.
+4. Build the **multi-file** program, then break it on purpose.
 
 #### Open the shell
 
