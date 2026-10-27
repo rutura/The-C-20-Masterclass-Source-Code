@@ -92,44 +92,46 @@ int main() {
     */
     std::println("--- Exercise 1: sorting and searching ---");
     // TODO
-    // Part A: sort a copy once, then search it as often as we like.
-    std::vector<std::string> sorted_ids{ sensor_ids };
-    std::ranges::sort(sorted_ids);
+    {
+        // Part A: sort a copy once, then search it as often as we like.
+        std::vector<std::string> sorted_ids{ sensor_ids };
+        std::ranges::sort(sorted_ids);
 
-    std::print("sorted:");
-    for (const std::string& id : sorted_ids) {
-        std::print(" {}", id);
-    }
-    std::println("");
-
-    std::println("sensor-27 registered: {}", is_registered(sorted_ids, "sensor-27"));
-    std::println("sensor-99 registered: {}", is_registered(sorted_ids, "sensor-99"));
-
-
-    // Part B: its own copy. Sorting by length would break the alphabetical
-    // order that binary_search relies on in sorted_ids.
-    std::vector<std::string> ids_by_length{ sensor_ids };
-    std::ranges::sort(ids_by_length, [](const std::string& a, const std::string& b) {
-        if (a.size() != b.size()) {
-            return a.size() > b.size();
+        std::print("sorted:");
+        for (const std::string& id : sorted_ids) {
+            std::print(" {}", id);
         }
-        return a < b;
+        std::println("");
 
-     });
+        std::println("sensor-27 registered: {}", is_registered(sorted_ids, "sensor-27"));
+        std::println("sensor-99 registered: {}", is_registered(sorted_ids, "sensor-99"));
 
-    std::print("by length:");
-    for (const std::string& id : ids_by_length) {
-        std::print(" {}", id);
+
+        // Part B: its own copy. Sorting by length would break the alphabetical
+        // order that binary_search relies on in sorted_ids.
+        std::vector<std::string> ids_by_length{ sensor_ids };
+        std::ranges::sort(ids_by_length, [](const std::string& a, const std::string& b) {
+            if (a.size() != b.size()) {
+                return a.size() > b.size();
+            }
+            return a < b;
+
+            });
+
+        std::print("by length:");
+        for (const std::string& id : ids_by_length) {
+            std::print(" {}", id);
+        }
+        std::println("");
+
+
+        // Part C
+        std::print("top 3:");
+        for (int temperature : top_n(temperatures, 3)) {
+            std::print(" {}", temperature);
+        }
+        std::println("");
     }
-    std::println("");
-
-
-    // Part C
-    std::print("top 3:");
-    for (int temperature : top_n(temperatures, 3)) {
-        std::print(" {}", temperature);
-    }
-    std::println("");
 
     /*
         Exercise 2 - Functional style: views and accumulate
@@ -161,6 +163,28 @@ int main() {
     */
     std::println("\n--- Exercise 2: functional style ---");
     // TODO
+    {
+        auto  hot_days_celsius{
+            temperatures
+            | std::views::filter([](int f) { return f > 70; })
+            | std::views::transform([](int f) { return (f - 32) * 5.0 / 9.0; }) };
+
+        // Counting needs no algorithm: loop over the view, add one per element.
+        int hot_day_count{ 0 };
+        for (double celsius : hot_days_celsius) {
+            ++hot_day_count;
+        }
+
+        // 0.0, not 0: an int starting value would truncate every partial sum.
+        const double celsius_total{
+            std::accumulate(hot_days_celsius.cbegin(), hot_days_celsius.end(), 0.0) };
+
+        std::println("hot days: {}", hot_day_count);
+        std::println("average: {:.2f}", celsius_total / hot_day_count);
+
+    }
+
+
 
 
     /*
