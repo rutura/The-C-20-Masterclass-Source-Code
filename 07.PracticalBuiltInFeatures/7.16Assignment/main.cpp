@@ -241,13 +241,6 @@ int main() {
         with std::stoi, print each reading as "<sensor>: <temperature>",
         and keep track of the hottest one with a plain if.
 
-        Part C. Export the same readings as CSV with std::regex_replace:
-        one "number,temperature" line per reading, dropping everything
-        else. This takes a pattern with two capture groups, a replacement
-        using $1 and $2, and the std::regex_constants::format_no_copy
-        flag. Catch what regex_replace returns (the original is never
-        modified) and print it.
-
         Sample output:
             [sensor-7] -> true
             [sensor-1234] -> false
@@ -257,9 +250,6 @@ int main() {
             sensor-12: 88
             sensor-3: 71
             hottest: 91
-            7,91
-            12,88
-            3,71
     */
     std::println("\n--- Exercise 5: regex ---");
     // TODO

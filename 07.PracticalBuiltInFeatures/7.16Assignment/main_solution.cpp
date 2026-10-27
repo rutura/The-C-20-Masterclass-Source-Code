@@ -154,13 +154,6 @@ int main() {
     }
     std::println("hottest: {}", hottest);
 
-    // Part C: format_no_copy drops everything the pattern did not match, so
-    // only the replacement text ("7,91\n" ...) ends up in the result.
-    const std::string csv{std::regex_replace(
-        log_line, std::regex{R"(sensor-(\d+) temp=(\d+))"}, "$1,$2\n",
-        std::regex_constants::format_no_copy)};
-    std::print("{}", csv);
-
     return 0;
 }
 
