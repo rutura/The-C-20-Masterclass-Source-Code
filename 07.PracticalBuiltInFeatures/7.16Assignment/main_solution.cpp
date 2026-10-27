@@ -81,10 +81,11 @@ int main() {
         | std::views::filter([](int f) { return f > 70; })
         | std::views::transform([](int f) { return (f - 32) * 5.0 / 9.0; })};
 
-    // Counting is a fold too: ignore the element, add one.
-    const int hot_day_count{std::accumulate(
-        hot_days_celsius.begin(), hot_days_celsius.end(), 0,
-        [](int count, double) { return count + 1; })};
+    // Counting needs no algorithm: loop over the view, add one per element.
+    int hot_day_count{0};
+    for (double celsius : hot_days_celsius) {
+        ++hot_day_count;
+    }
 
     // 0.0, not 0: an int starting value would truncate every partial sum.
     const double celsius_total{
@@ -92,12 +93,6 @@ int main() {
 
     std::println("hot days: {}", hot_day_count);
     std::println("average: {:.2f}", celsius_total / hot_day_count);
-
-    // Part B: start from the first element, keep whichever is larger.
-    const int hottest_reading{std::accumulate(
-        temperatures.begin(), temperatures.end(), temperatures.front(),
-        [](int best, int current) { return current > best ? current : best; })};
-    std::println("hottest: {}", hottest_reading);
 
     // --- Exercise 3 ---------------------------------------------------------
     std::println("\n--- Exercise 3: strings and formatting ---");
