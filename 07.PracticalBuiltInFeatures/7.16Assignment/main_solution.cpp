@@ -35,124 +35,131 @@ int main() {
 
     // --- Exercise 1 ---------------------------------------------------------
     std::println("--- Exercise 1: sorting and searching ---");
+    {
+        // Part A: sort a copy once, then search it as often as we like.
+        std::vector<std::string> sorted_ids{sensor_ids};
+        std::ranges::sort(sorted_ids);
 
-    // Part A: sort a copy once, then search it as often as we like.
-    std::vector<std::string> sorted_ids{sensor_ids};
-    std::ranges::sort(sorted_ids);
-
-    std::print("sorted:");
-    for (const std::string& id : sorted_ids) {
-        std::print(" {}", id);
-    }
-    std::println("");
-
-    std::println("sensor-27 registered: {}", is_registered(sorted_ids, "sensor-27"));
-    std::println("sensor-99 registered: {}", is_registered(sorted_ids, "sensor-99"));
-
-    // Part B: its own copy. Sorting by length would break the alphabetical
-    // order that binary_search relies on in sorted_ids.
-    std::vector<std::string> ids_by_length{sensor_ids};
-    std::ranges::sort(ids_by_length, [](const std::string& a, const std::string& b) {
-        if (a.size() != b.size()) {
-            return a.size() > b.size();
+        std::print("sorted:");
+        for (const std::string& id : sorted_ids) {
+            std::print(" {}", id);
         }
-        return a < b;
-    });
+        std::println("");
 
-    std::print("by length:");
-    for (const std::string& id : ids_by_length) {
-        std::print(" {}", id);
-    }
-    std::println("");
+        std::println("sensor-27 registered: {}", is_registered(sorted_ids, "sensor-27"));
+        std::println("sensor-99 registered: {}", is_registered(sorted_ids, "sensor-99"));
 
-    // Part C
-    std::print("top 3:");
-    for (int temperature : top_n(temperatures, 3)) {
-        std::print(" {}", temperature);
+        // Part B: its own copy. Sorting by length would break the alphabetical
+        // order that binary_search relies on in sorted_ids.
+        std::vector<std::string> ids_by_length{sensor_ids};
+        std::ranges::sort(ids_by_length, [](const std::string& a, const std::string& b) {
+            if (a.size() != b.size()) {
+                return a.size() > b.size();
+            }
+            return a < b;
+        });
+
+        std::print("by length:");
+        for (const std::string& id : ids_by_length) {
+            std::print(" {}", id);
+        }
+        std::println("");
+
+        // Part C
+        std::print("top 3:");
+        for (int temperature : top_n(temperatures, 3)) {
+            std::print(" {}", temperature);
+        }
+        std::println("");
     }
-    std::println("");
 
     // --- Exercise 2 ---------------------------------------------------------
     std::println("\n--- Exercise 2: functional style ---");
+    {
+        // Part A: nothing runs yet, this is only a description of the pipeline.
+        auto hot_days_celsius{
+            temperatures
+            | std::views::filter([](int f) { return f > 70; })
+            | std::views::transform([](int f) { return (f - 32) * 5.0 / 9.0; })};
 
-    // Part A: nothing runs yet, this is only a description of the pipeline.
-    auto hot_days_celsius{
-        temperatures
-        | std::views::filter([](int f) { return f > 70; })
-        | std::views::transform([](int f) { return (f - 32) * 5.0 / 9.0; })};
+        // Counting needs no algorithm: loop over the view, add one per element.
+        int hot_day_count{0};
+        for (double celsius : hot_days_celsius) {
+            ++hot_day_count;
+        }
 
-    // Counting needs no algorithm: loop over the view, add one per element.
-    int hot_day_count{0};
-    for (double celsius : hot_days_celsius) {
-        ++hot_day_count;
+        // 0.0, not 0: an int starting value would truncate every partial sum.
+        const double celsius_total{
+            std::accumulate(hot_days_celsius.begin(), hot_days_celsius.end(), 0.0)};
+
+        std::println("hot days: {}", hot_day_count);
+        std::println("average: {:.2f}", celsius_total / hot_day_count);
     }
-
-    // 0.0, not 0: an int starting value would truncate every partial sum.
-    const double celsius_total{
-        std::accumulate(hot_days_celsius.begin(), hot_days_celsius.end(), 0.0)};
-
-    std::println("hot days: {}", hot_day_count);
-    std::println("average: {:.2f}", celsius_total / hot_day_count);
 
     // --- Exercise 3 ---------------------------------------------------------
     std::println("\n--- Exercise 3: strings and formatting ---");
-    std::println("{:>3} | {:^6} | {:>8}", "id", "status", "reading");
+    {
+        std::println("{:>3} | {:^6} | {:>8}", "id", "status", "reading");
 
-    for (const std::string& raw : raw_lines) {
-        std::string cleaned{raw};
-        if (std::size_t hash_pos{cleaned.find('#')}; hash_pos != std::string::npos) {
-            cleaned.erase(hash_pos);
+        for (const std::string& raw : raw_lines) {
+            std::string cleaned{raw};
+            if (std::size_t hash_pos{cleaned.find('#')}; hash_pos != std::string::npos) {
+                cleaned.erase(hash_pos);
+            }
+
+            std::istringstream fields{cleaned};
+            std::string name{};
+            double reading{};
+            std::string status{};
+            fields >> name >> reading >> status;
+
+            // name lives until the end of this iteration, so the view is safe.
+            std::println("{}", format_row(sensor_number(name), reading, status));
         }
-
-        std::istringstream fields{cleaned};
-        std::string name{};
-        double reading{};
-        std::string status{};
-        fields >> name >> reading >> status;
-
-        // name lives until the end of this iteration, so the view is safe.
-        std::println("{}", format_row(sensor_number(name), reading, status));
     }
 
     // --- Exercise 4 ---------------------------------------------------------
     std::println("\n--- Exercise 4: dates and durations ---");
-    const std::chrono::year_month_day target{std::chrono::year{2030} / 1 / 1};
-    std::println("{} days until {:%Y-%m-%d}", days_until(target), target);
+    {
+        const std::chrono::year_month_day target{std::chrono::year{2030} / 1 / 1};
+        std::println("{} days until {:%Y-%m-%d}", days_until(target), target);
 
-    // Different units mix freely; chrono picks the common one (seconds).
-    const auto on_duty{std::chrono::hours{4} + std::chrono::minutes{90} +
-                       std::chrono::seconds{45}};
-    std::println("total on duty: {}", on_duty);
+        // Different units mix freely; chrono picks the common one (seconds).
+        const auto on_duty{std::chrono::hours{4} + std::chrono::minutes{90} +
+                           std::chrono::seconds{45}};
+        std::println("total on duty: {}", on_duty);
 
-    const std::chrono::hh_mm_ss split{on_duty};
-    std::println("{}h {}m {}s", split.hours().count(), split.minutes().count(),
-                 split.seconds().count());
-    std::println("{} whole minutes",
-                 std::chrono::duration_cast<std::chrono::minutes>(on_duty).count());
+        const std::chrono::hh_mm_ss split{on_duty};
+        std::println("{}h {}m {}s", split.hours().count(), split.minutes().count(),
+                     split.seconds().count());
+        std::println("{} whole minutes",
+                     std::chrono::duration_cast<std::chrono::minutes>(on_duty).count());
+    }
 
     // --- Exercise 5 ---------------------------------------------------------
     std::println("\n--- Exercise 5: regex ---");
-
-    // Part A
-    const std::vector<std::string> candidates{
-        "sensor-7", "sensor-1234", "Sensor-7", "sensor-7 "};
-    for (const std::string& candidate : candidates) {
-        std::println("[{}] -> {}", candidate, is_valid_sensor_id(candidate));
-    }
-
-    // Part B: a named regex on purpose, sregex_iterator keeps a pointer to it.
-    const std::regex reading_pattern{R"((sensor-\d+) temp=(\d+))"};
-    const std::sregex_iterator end{};
-    int hottest{0};
-    for (auto it = std::sregex_iterator{log_line.cbegin(), log_line.cend(), reading_pattern};
-         it != end; ++it) {
-        const int temperature{std::stoi((*it)[2].str())};
-        std::println("{}: {}", (*it)[1].str(), temperature);
-        if (temperature > hottest) {
-            hottest = temperature;
+    {
+        // Part A
+        const std::vector<std::string> candidates{
+            "sensor-7", "sensor-1234", "Sensor-7", "sensor-7 "};
+        for (const std::string& candidate : candidates) {
+            std::println("[{}] -> {}", candidate, is_valid_sensor_id(candidate));
         }
+
+        // Part B: a named regex on purpose, sregex_iterator keeps a pointer to it.
+        const std::regex reading_pattern{R"((sensor-\d+) temp=(\d+))"};
+        const std::sregex_iterator end{};
+        int hottest{0};
+        for (auto it = std::sregex_iterator{log_line.cbegin(), log_line.cend(), reading_pattern};
+             it != end; ++it) {
+            const int temperature{std::stoi((*it)[2].str())};
+            std::println("{}: {}", (*it)[1].str(), temperature);
+            if (temperature > hottest) {
+                hottest = temperature;
+            }
+        }
+        std::println("hottest: {}", hottest);
     }
-    std::println("hottest: {}", hottest);
 
     return 0;
 }
