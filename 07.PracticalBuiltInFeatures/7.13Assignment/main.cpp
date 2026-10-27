@@ -34,6 +34,9 @@ std::string format_row(std::string_view number, double reading,
     
 long long days_until(std::chrono::year_month_day target);
 
+bool is_valid_sensor_id(const std::string& id);
+
+
 
 
 int main() {
@@ -364,6 +367,32 @@ int main() {
     */
     std::println("\n--- Exercise 5: regex ---");
     // TODO
+    {
+        // Part A
+        const std::vector<std::string> candidates{
+            "sensor-7", "sensor-1234", "Sensor-7", "sensor-7 " };
+        for (const std::string& candidate : candidates) {
+            std::println("[{}] -> {}", candidate, is_valid_sensor_id(candidate));
+        }
+
+        // Part B: a named regex on purpose, sregex_iterator keeps a pointer to it.
+        const std::regex reading_pattern{R"((sensor-\d+) temp=(\d+))"};
+        const std::sregex_iterator end{};
+        int hottest{ 0 };
+        for (auto it = std::sregex_iterator{ log_line.cbegin(), log_line.cend(), reading_pattern };
+            it != end; ++it) {
+
+            const int temperature{ std::stoi((*it)[2].str()) };
+            std::println("{}: {}", (*it)[1].str(), temperature);
+
+            if (temperature > hottest) {
+                hottest = temperature;
+            }
+
+        }
+        std::println("hottest: {}", hottest);
+
+    }
 
 
     return 0;
@@ -420,4 +449,12 @@ long long days_until(std::chrono::year_month_day target){
 
         return (target_days - today).count();
 }
+
+// regex_match needs the WHOLE id to fit, so the trailing-space and
+// four-digit candidates fail without any extra anchors in the pattern.
+bool is_valid_sensor_id(const std::string& id) {
+    const std::regex pattern(R"(sensor-\d{1,3})");
+    return std::regex_match(id, pattern);
+}
+
 
