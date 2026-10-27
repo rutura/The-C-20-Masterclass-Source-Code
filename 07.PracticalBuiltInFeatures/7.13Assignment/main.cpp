@@ -21,8 +21,12 @@
       - Brace-initialize every variable: int n{0};  double x{1.5};
       - Qualify everything with std:: - no `using namespace std;`.
       - Exercises that ask you to "write" a function: put the function
-        below main() and declare it above main(), like in chapter 6.
+        below main() and declare it above main().
 */
+
+std::vector<int> top_n(const std::vector<int>& data, std::size_t n);
+bool is_registered(const std::vector<std::string>& sorted_ids,
+    const std::string& id);
 
 int main() {
 
@@ -88,6 +92,45 @@ int main() {
     */
     std::println("--- Exercise 1: sorting and searching ---");
     // TODO
+    // Part A: sort a copy once, then search it as often as we like.
+    std::vector<std::string> sorted_ids{ sensor_ids };
+    std::ranges::sort(sorted_ids);
+
+    std::print("sorted:");
+    for (const std::string& id : sorted_ids) {
+        std::print(" {}", id);
+    }
+    std::println("");
+
+    std::println("sensor-27 registered: {}", is_registered(sorted_ids, "sensor-27"));
+    std::println("sensor-99 registered: {}", is_registered(sorted_ids, "sensor-99"));
+
+
+    // Part B: its own copy. Sorting by length would break the alphabetical
+    // order that binary_search relies on in sorted_ids.
+    std::vector<std::string> ids_by_length{ sensor_ids };
+    std::ranges::sort(ids_by_length, [](const std::string& a, const std::string& b) {
+        if (a.size() != b.size()) {
+            return a.size() > b.size();
+        }
+        return a < b;
+
+     });
+
+    std::print("by length:");
+    for (const std::string& id : ids_by_length) {
+        std::print(" {}", id);
+    }
+    std::println("");
+
+
+    // Part C
+    std::print("top 3:");
+    for (int temperature : top_n(temperatures, 3)) {
+        std::print(" {}", temperature);
+    }
+    std::println("");
+
 
 
     /*
@@ -272,4 +315,24 @@ int main() {
     // TODO
 
     return 0;
+}
+
+// Sorts a local copy so the caller's vector is never touched.
+std::vector<int> top_n(const std::vector<int>& data, std::size_t n) {
+    std::vector<int> sorted{ data };
+    std::ranges::sort(sorted, std::ranges::greater{});
+
+    std::vector<int> top{};
+    for (std::size_t i{ 0 }; i < n && i < sorted.size(); ++i) {
+        top.push_back(sorted[i]);
+    }
+    return top;
+}
+
+
+// O(log n) per lookup, but only because the caller promises ascending order.
+bool is_registered(const std::vector<std::string>& sorted_ids,
+    const std::string& id) {
+    return std::ranges::binary_search(sorted_ids, id);
+
 }
