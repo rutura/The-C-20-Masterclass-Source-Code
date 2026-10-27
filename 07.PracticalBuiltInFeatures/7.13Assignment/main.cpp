@@ -131,8 +131,6 @@ int main() {
     }
     std::println("");
 
-
-
     /*
         Exercise 2 - Functional style: views and accumulate
 
@@ -145,8 +143,10 @@ int main() {
           1. keeps only the "hot days", i.e. temperatures greater than 70
           2. converts each of those to Celsius: (f - 32) * 5.0 / 9.0
 
-        Then use std::accumulate over that view (its .begin()/.end()) to
-        get the number of hot days and their average Celsius temperature.
+        Then use a range-based for over that view to count the hot days,
+        and std::accumulate over the view (its .begin()/.end()) to total
+        their Celsius temperatures, so you can print the count and the
+        average.
 
         Hints:
           - The view is lazy: nothing is filtered or converted until
@@ -154,19 +154,10 @@ int main() {
           - Celsius values are fractional, so the starting value of the
             sum must be a double (0.0), not an int (0). Otherwise every
             partial sum is truncated back to an int.
-          - Counting is a fold too. Give accumulate a starting value of 0
-            and a lambda that ignores the element and returns the count
-            plus one.
-
-        Part B. Find the hottest reading in `temperatures` with
-        std::accumulate and a lambda: start from the first element, and
-        let the lambda keep whichever of "best so far" and "current
-        element" is larger. No loop, no variable updated by hand.
 
         Sample output:
             hot days: 4
             average: 26.67
-            hottest: 90
     */
     std::println("\n--- Exercise 2: functional style ---");
     // TODO
@@ -291,13 +282,6 @@ int main() {
         with std::stoi, print each reading as "<sensor>: <temperature>",
         and keep track of the hottest one with a plain if.
 
-        Part C. Export the same readings as CSV with std::regex_replace:
-        one "number,temperature" line per reading, dropping everything
-        else. This takes a pattern with two capture groups, a replacement
-        using $1 and $2, and the std::regex_constants::format_no_copy
-        flag. Catch what regex_replace returns (the original is never
-        modified) and print it.
-
         Sample output:
             [sensor-7] -> true
             [sensor-1234] -> false
@@ -307,12 +291,10 @@ int main() {
             sensor-12: 88
             sensor-3: 71
             hottest: 91
-            7,91
-            12,88
-            3,71
     */
     std::println("\n--- Exercise 5: regex ---");
     // TODO
+
 
     return 0;
 }
