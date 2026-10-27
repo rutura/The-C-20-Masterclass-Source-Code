@@ -28,6 +28,11 @@ std::vector<int> top_n(const std::vector<int>& data, std::size_t n);
 bool is_registered(const std::vector<std::string>& sorted_ids,
     const std::string& id);
 
+std::string_view sensor_number(std::string_view name);
+std::string format_row(std::string_view number, double reading,
+    const std::string& status);
+
+
 int main() {
 
     // Fixed datasets we will be working on. Temperatures are in Fahrenheit.
@@ -185,8 +190,6 @@ int main() {
     }
 
 
-
-
     /*
         Exercise 3 - Strings and formatting: a station table
 
@@ -239,6 +242,29 @@ int main() {
     */
     std::println("\n--- Exercise 3: strings and formatting ---");
     // TODO
+    {
+        std::println("{:>3} | {:^6} | {:>8}", "id", "status", "reading");
+
+        for (const std::string& raw : raw_lines) {
+            std::string cleaned{ raw };
+            if (std::size_t hash_pos{ cleaned.find('#') }; hash_pos != std::string::npos) {
+                cleaned.erase(hash_pos);
+            }
+
+            // Now we have a clearn string (free of #)
+            std::istringstream fields{ cleaned };
+            std::string name{};
+            double reading{};
+            std::string status{};
+            fields >> name >> reading >> status;
+
+            // name lives until the end of this iteration, so the view is safe.
+            std::println("{}", format_row(sensor_number(name), reading, status));
+
+        }
+
+
+    }
 
 
     /*
@@ -341,4 +367,23 @@ bool is_registered(const std::vector<std::string>& sorted_ids,
     const std::string& id) {
     return std::ranges::binary_search(sorted_ids, id);
 
+}
+
+
+// The view is taken by value (it is just a pointer and a length) and only
+// its window moves; the returned view points into the caller's own text.
+std::string_view sensor_number(std::string_view name) {
+    constexpr std::string_view prefix{ "sensor-" };
+    if (name.starts_with(prefix)) {
+        name.remove_prefix(prefix.size());
+    }
+    return name;
+}
+
+
+// Right-aligns the numbers into fixed-width columns using the {:...} spec
+// grammar, no manual padding. Returns a string, so it uses format, not print.
+std::string format_row(std::string_view number, double reading,
+    const std::string& status) {
+    return std::format("{:>3} | {:^6} | {:>8.2f}", number, status, reading);
 }
