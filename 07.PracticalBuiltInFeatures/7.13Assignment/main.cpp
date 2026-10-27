@@ -31,6 +31,9 @@ bool is_registered(const std::vector<std::string>& sorted_ids,
 std::string_view sensor_number(std::string_view name);
 std::string format_row(std::string_view number, double reading,
     const std::string& status);
+    
+long long days_until(std::chrono::year_month_day target);
+
 
 
 int main() {
@@ -307,6 +310,23 @@ int main() {
     */
     std::println("\n--- Exercise 4: dates and durations ---");
     // TODO
+    {
+        const std::chrono::year_month_day target{ std::chrono::year{2030} / 1 / 1 };
+        std::println("{} days until {:%Y-%m-%d}", days_until(target), target);
+
+
+        // Different units mix freely; chrono picks the common one (seconds).
+        const auto on_duty{ std::chrono::hours{4} + std::chrono::minutes{90} +
+                           std::chrono::seconds{45} };
+        std::println("total on duty: {}", on_duty);
+
+        const std::chrono::hh_mm_ss split{ on_duty };
+        std::println("{}h {}m {}s", split.hours().count(), split.minutes().count(),
+            split.seconds().count());
+
+        std::println("{} whole minutes",
+            std::chrono::duration_cast<std::chrono::minutes>(on_duty).count());
+    }
 
 
     /*
@@ -387,3 +407,17 @@ std::string format_row(std::string_view number, double reading,
     const std::string& status) {
     return std::format("{:>3} | {:^6} | {:>8.2f}", number, status, reading);
 }
+
+// floor<days> already yields a sys_days for "today"; target is converted to
+// the same shape (a count of days since the epoch) so the two can be
+// subtracted directly. year_month_day itself has no -.
+long long days_until(std::chrono::year_month_day target){
+
+    const auto today {
+        std::chrono::floor<std::chrono::days> (std::chrono::system_clock::now())};
+
+        const std::chrono::sys_days target_days{target};
+
+        return (target_days - today).count();
+}
+
