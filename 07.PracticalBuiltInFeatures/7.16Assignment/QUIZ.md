@@ -46,12 +46,23 @@ D. A function that takes another function as an argument (or returns one)
 
 ### 5. Why does a length-sorting comparator end with an extra `return a < b;` for names of the same length?
 
+```cpp
+std::array fruits{"mango"s, "kiwi"s, "fig"s, "date"s, "apple"s};
+
+std::ranges::sort(fruits, [](const std::string& a, const std::string& b) {
+    if (a.size() != b.size()) {
+        return a.size() < b.size();
+    }
+    return a < b;   // reached only when the lengths are equal
+});
+```
+
 A. Without it the code does not compile
 B. `std::ranges::sort` does not promise an order for tied elements, so the tie-break makes the final order definite
 C. It makes the sort run in `O(1)`
 D. It removes the duplicates
 
-**Answer: B** - `kiwi` and `date` are tied on length. A second rule inside the comparator decides between them, so the result is always the same, whatever the compiler.
+**Answer: B** - `kiwi` and `date` are tied on length. A second rule inside the comparator decides between them (`date` comes first alphabetically), so the result is always `fig date kiwi apple mango`, whatever the compiler.
 
 ### 6. What does `std::ranges::binary_search` require of the data?
 
@@ -62,7 +73,13 @@ D. The elements must be `int`
 
 **Answer: C** - discarding half the data at each look only makes sense if the order tells you which half to discard. It then needs only about 20 looks for 1,000,000 elements.
 
-### 7. `fruits` is `{apple, mango, date, kiwi, fig}`, sorted by length and not alphabetically. What can `std::ranges::binary_search(fruits, "fig"s)` do?
+### 7. `fruits` is sorted by length (longest first), not alphabetically. What can `std::ranges::binary_search(fruits, "fig"s)` do?
+
+```cpp
+std::array fruits{"apple"s, "mango"s, "date"s, "kiwi"s, "fig"s};
+
+bool found{std::ranges::binary_search(fruits, "fig"s)};
+```
 
 A. It is guaranteed to return `true`, `"fig"` is in the vector
 B. It does not compile
@@ -80,7 +97,16 @@ D. It grows by one
 
 **Answer: A** - `n x n` steps: 4 x 4 = 16 and 8 x 8 = 64. That is `O(n^2)`: twice the data, four times the work. Compare that with `O(n)`, which doubles, and `O(log n)`, which grows by one step.
 
-### 9. What does `std::accumulate(factors.begin(), factors.end(), 0, multiply)` return for `{1, 2, 3, 4, 5}`, where `multiply(x, y)` returns `x * y`?
+### 9. What does the `std::accumulate` call below return?
+
+```cpp
+int multiply(int x, int y) {
+    return x * y;
+}
+
+constexpr std::array factors{1, 2, 3, 4, 5};
+int result{std::accumulate(factors.begin(), factors.end(), 0, multiply)};
+```
 
 A. 120
 B. 15
@@ -91,6 +117,18 @@ D. 1
 
 ### 10. What does it mean that `std::views::filter` and `std::views::transform` are lazy?
 
+```cpp
+auto is_even{[](int x) { return x % 2 == 0; }};
+auto square{[](int x) { return x * x; }};
+
+auto squares{std::views::iota(1, 11) | std::views::filter(is_even)
+                                      | std::views::transform(square)};
+// ...nothing has been filtered or squared at this point
+for (int value : squares) {
+    std::print("{} ", value);
+}
+```
+
 A. They run on a background thread
 B. They are slower than a hand-written loop
 C. They only work on `std::array`
@@ -99,6 +137,11 @@ D. They build nothing up front: values are produced on demand when something ite
 **Answer: D** - a view is a thin wrapper around a range, not a copy. Nothing is filtered or transformed until a range-based `for`, `accumulate` or similar asks for values.
 
 ### 11. What does `log.find("xyz")` return when `"xyz"` is not in the string `log`?
+
+```cpp
+const std::string log{"noon is 12pm; midnight is not"};
+std::size_t missing{log.find("xyz")};
+```
 
 A. `std::string::npos`
 B. `-1`
@@ -134,7 +177,14 @@ D. Right-aligned, 8 digits after the decimal point
 
 **Answer: A** - the grammar is `{:fill align width.precision type}`: `>` right-aligns, `8` is the minimum width, `.2` the number of digits after the point, and `f` fixed-point. `std::format("{:>8.2f}", 4.5)` gives `"    4.50"`.
 
-### 15. `std::string color{"red"}; std::string_view color_view{color};` then `color.at(0) = 'R';`. What does `color_view` show?
+### 15. After the last line below runs, what does `color_view` show?
+
+```cpp
+std::string color{"red"};
+std::string_view color_view{color};
+
+color.at(0) = 'R';
+```
 
 A. `"red"`, views are snapshots
 B. `"Red"`, because a `string_view` is just a pointer and a length into `color`'s own characters
@@ -154,6 +204,14 @@ D. None of them
 
 ### 17. Which clock should you use to measure how long a block of code takes, and why?
 
+```cpp
+auto start{std::chrono::???_clock::now()};
+// ...the work being timed...
+auto end{std::chrono::???_clock::now()};
+
+auto elapsed{end - start};   // a duration
+```
+
 A. `system_clock`, because it has the best precision
 B. Either one, they behave identically
 C. `system_clock`, because it is synchronized with the network
@@ -163,6 +221,13 @@ D. `steady_clock`, because it never goes backward even if the system clock is ad
 
 ### 18. How does `std::regex_search` differ from `std::regex_match`?
 
+```cpp
+std::regex fun{"fun"};
+
+bool searched{std::regex_search("Debugging is fun", fun)};
+bool matched{std::regex_match("Debugging is fun", fun)};
+```
+
 A. `regex_search` looks for a match anywhere inside the string, `regex_match` requires the whole string to match
 B. They are the same function under two names
 C. `regex_search` requires the whole string to match, `regex_match` finds a match anywhere
@@ -170,7 +235,15 @@ D. `regex_search` only works on file streams
 
 **Answer: A** - `regex_search("Debugging is fun", std::regex{"fun"})` is `true`, while `regex_match` with the same pattern is `false` because the whole string is not just `"fun"`.
 
-### 19. After a successful `regex_match` into a `std::smatch m` with the pattern `(\d{4})/(\d{1,2})/(\d{1,2})` on `"2025/3/9"`, what are `m[0]` and `m[1]`?
+### 19. After the successful `regex_match` below, what are `m[0]` and `m[1]`?
+
+```cpp
+std::regex ship_date{R"((\d{4})/(\d{1,2})/(\d{1,2}))"};
+std::string input{"2025/3/9"};
+
+std::smatch m;
+std::regex_match(input, m, ship_date);   // succeeds
+```
 
 A. `"2025"` and `"3"`
 B. `"2025/3/9"` (the entire match) and `"2025"` (what the first `()` group captured)
@@ -179,7 +252,14 @@ D. `"3"` and `"9"`
 
 **Answer: B** - `m[0]` is always the entire match, and `m[1]`, `m[2]`, `m[3]` are the capture groups in order. `std::stoi(m[1])` then turns the captured text into a number.
 
-### 20. What does `std::regex_replace("cat-7, dog-42, bird", std::regex{R"((\w+)-(\d+))"}, "$2:$1")` return?
+### 20. What does the `std::regex_replace` call below return?
+
+```cpp
+std::string input{"cat-7, dog-42, bird"};
+std::regex re{R"((\w+)-(\d+))"};   // word, dash, number (two capture groups)
+
+std::string result{std::regex_replace(input, re, "$2:$1")};
+```
 
 A. `"cat-7, dog-42, bird"`
 B. `"7:cat42:dog"`
